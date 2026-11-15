@@ -68,7 +68,9 @@ test("NOTICE keeps Second Brain's MIT copyright line and the pinned commit", () 
   assert.match(notice, /used under the MIT License/);
   assert.match(notice, /Copyright \(c\) 2026 Rahil Pirani/);
   assert.match(notice, /read at commit 228cea49, version 4\.0\.1/);
-  assert.match(notice, /No Second Brain code or text is copied/);
+  assert.match(notice, /No Second Brain file is copied/);
+  // The passages that do follow upstream's wording are said to, and under which licence.
+  assert.match(notice, /follow Second Brain's own wording .* used under the MIT License above/);
 });
 
 test("the rule tells a credit from a path of Rhythm's own", () => {

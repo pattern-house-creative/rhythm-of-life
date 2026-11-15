@@ -303,6 +303,10 @@ export function GlucosePanel({
           reading.
         </p>
       )}
+      <p className="chart-note">
+        For your information only, not a medical device. Use your device’s own
+        display and your care team for treatment decisions.
+      </p>
       <Origin value={data.current.provenance} />
     </div>
   );

@@ -16,18 +16,18 @@ Controls are host-owned selections: tab/filter enumerations, integer week offset
 
 ## Client evidence
 
-The prior synthetic ChatGPT test observed incremental completed calls. It did not establish true token streaming. The personal Claude test failed to connect; compatibility remains unverified. Studio deliberately requires no client-specific streaming extensions. Runtime receipts must distinguish received, validated, shown and saved.
+The prior synthetic ChatGPT test observed incremental completed calls. It did not establish true token streaming. A test with Claude's hosted connector failed to connect; compatibility remains unverified. Studio deliberately requires no client-specific streaming extensions. Runtime receipts must distinguish received, validated, shown and saved.
 
 Studio has no setting of its own: the three harness tools (`studio_dashboard`, `discover_dashboard_controls`, `invoke_dashboard_action`) and the app's `app_studio` are always listed by an engine with migration 075.
 
 ## Verification — 10 November 2026
 
-Merged into `main` in `4afda144` with migration 075, and deployed. The checks below were run on the branch before the merge.
+Merged into `main` with migration 075. The checks below were run on the branch before the merge.
 
 - App: complete regression suite 1,258 passed, 39 skipped. Final focused Studio/facade/screen tests after the access-revocation fix: 50 passed. Production TypeScript/Vite/server build and isolated demo/live server smoke checks passed.
 - Engine: 92 focused Studio, dashboard, screen scope/binding and MCP compatibility tests passed against disposable PostgreSQL. An additional real-service test covered source normalization, scoped feed reads, app validation, idempotent publication and persisted controls; the four service/database tests passed. Typed control/schema contract checks passed.
 - Browser: actual sealed frames rendered received header then card snapshots; Watch code showed actual batches; an invalid candidate retained the good preview; reload recovered it; feedback queued; save opened version 1; typed week/tab/filter changes received real draw acknowledgements without another version; cancel rejected a late update and discard returned to the preserved view. The browser transport was synthetic and explicitly labelled DEMO; this is not a hosted-client or production-deployment claim.
-- MCP descriptors: existing descriptors remain unchanged; the pinned listing adds the three Studio tools. Streamable HTTP protocol compatibility tests passed. Personal Claude's hosted connector remains unverified after its earlier connection failure; true token streaming remains unestablished.
-- Existing lint limitation: the full lint run reported one error in unchanged `src/memoryFocus.ts` (rules-of-hooks, fixed since in `9c24f0ab`), plus warnings. No lint error is in Studio files. The source-path-dependent memory contract test passed when run with the expected output-directory structure.
+- MCP descriptors: existing descriptors remain unchanged; the pinned listing adds the three Studio tools. Streamable HTTP protocol compatibility tests passed. Claude's hosted connector remains unverified after that connection failure; true token streaming remains unestablished.
+- Existing lint limitation: the full lint run reported one error in unchanged `src/memoryFocus.ts` (rules-of-hooks, fixed since), plus warnings. No lint error is in Studio files. The source-path-dependent memory contract test passed when run with the expected output-directory structure.
 
-The synthetic browser fixture does not show the real phone-agent → named-screen flow, including personal Claude's connector: check that on the install itself, and do not infer it from the fixture.
+The synthetic browser fixture does not show the real phone-agent → named-screen flow, including Claude's hosted connector: check that on a real install, and do not infer it from the fixture.

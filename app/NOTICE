@@ -29,7 +29,9 @@ version 4.0.1), used under the MIT License:
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 
-No Second Brain code or text is copied; each piece is restated for Rhythm's own engine, database and tests:
+No Second Brain file is copied; each piece is restated for Rhythm's own engine, database and tests. A few short
+passages do follow Second Brain's own wording (some sentences in the tool descriptions, the patterns that find
+secrets and dates, and names such as tags, actions and tool arguments), and are used under the MIT License above:
 - Keyword search (engine/src/Core/LexicalSearch.cs): matching any content word instead of every word, leaving out the
   function words a question is made of unless nothing else is left, and weighting each word by how rare it is among
   the candidates, after Second Brain's keyword arm (src/recall/search.ts, src/recall/fts.ts, src/text/tokenize.ts).

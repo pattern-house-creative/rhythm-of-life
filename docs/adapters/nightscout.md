@@ -12,6 +12,9 @@ What you get:
 
 It runs inside the engine. There is no extra container.
 
+**Not a medical device.** Rhythm of Life shows these readings for your information only, and they can be late or
+missing. Never make treatment decisions from it: use your CGM's own display and your care team for those.
+
 ## Before you start
 
 You need a Nightscout site you can reach from the computer that runs Rhythm of Life, and, unless your site is readable

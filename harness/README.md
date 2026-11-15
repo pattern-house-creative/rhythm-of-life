@@ -1,8 +1,14 @@
 # harness
 
+Connecting the AI you already use. A connected client can read what the install holds, build
+dashboards from it, save a daily insight and change what an open screen shows. The
+[README](../README.md#what-you-can-ask-your-ai) has examples of what to ask.
+
 Your AI stays outside the stack. It connects to the engine's one MCP endpoint (`/mcp`) with a token
 of its own, made with `rhythm token create <name>`, and sees the harness tools in
 `contracts/README.md` section 2.1.
+
+Start with the page for your client, `chatgpt/` or `generic-mcp/`:
 
 - [`chatgpt/`](chatgpt/README.md): ChatGPT's two routes (the OpenAI tunnel or Cloudflare), its connector
   and the daily insight as a scheduled task ([`chatgpt/daily-insight.md`](chatgpt/daily-insight.md), a

@@ -1,6 +1,16 @@
 # docs
 
-Start with the repository's [README](../README.md): what Rhythm of Life is and the two commands that install it.
+Start with the repository's [README](../README.md): what Rhythm of Life is, what you can ask your AI to do with it, and
+the two commands that install it.
+
+## If you are new
+
+1. [operations.md](operations.md#a-first-walk-on-sample-data-only): a first walk on fictional sample data, from the
+   install to a backup and an upgrade. It needs Docker and no account anywhere.
+2. [../harness/README.md](../harness/README.md): connect ChatGPT, Claude or another MCP client, then set up the daily
+   insight.
+3. [known-limits.md](known-limits.md) and [security.md](security.md): read both before you put your own data in, or
+   reach the install from another device. This is an alpha with no outside security review.
 
 ## Running an install
 
