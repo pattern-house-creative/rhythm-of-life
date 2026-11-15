@@ -4,7 +4,7 @@ What changed in each version, newest first. Versions follow [Semantic Versioning
 while the project is in alpha, any version may change settings or need a step from the operator, and
 each entry says so under **Upgrading**.
 
-## 0.1.0-alpha.1 (not yet released)
+## 0.1.0-alpha.1 (15 November 2026)
 
 The first public version.
 
