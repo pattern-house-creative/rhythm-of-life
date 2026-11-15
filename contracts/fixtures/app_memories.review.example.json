@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "review": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000b003",
+      "scope": "shared",
+      "owner": "household",
+      "author": "sam",
+      "source": "mcp",
+      "status": "draft",
+      "reason": "burst",
+      "score": 1,
+      "signals": ["burst"],
+      "heldAt": "2026-11-02T09:20:00.250000+00:00",
+      "heldBy": "sam",
+      "channel": "mcp",
+      "client": "DEMO client",
+      "mayRelease": true,
+      "revision": 1
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000b002",
+      "scope": "shared",
+      "owner": "household",
+      "author": "alex",
+      "source": "mcp",
+      "status": "draft",
+      "reason": "instruction",
+      "score": 1.6,
+      "signals": ["ignore_previous", "ai_address"],
+      "heldAt": "2026-11-02T09:10:00+00:00",
+      "heldBy": "alex",
+      "channel": "mcp",
+      "client": "DEMO client",
+      "mayRelease": true,
+      "revision": 1
+    }
+  ],
+  "next": null,
+  "count": 2
+}

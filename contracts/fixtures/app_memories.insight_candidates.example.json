@@ -1,0 +1,39 @@
+{
+  "ok": true,
+  "candidates": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000b001",
+      "scope": "shared",
+      "owner": "household",
+      "score": 1.5,
+      "signals": [
+        "weighty"
+      ],
+      "similarity": 0.2,
+      "gapDays": 90,
+      "foundAt": "2026-11-02T09:30:00+00:00",
+      "older": {
+        "id": "6d3c2a10-0000-4000-8000-00000000a001",
+        "revision": 1,
+        "createdAt": "2026-08-04T09:30:00+00:00",
+        "importance": 4,
+        "preview": "DEMO: the Wendle ferry runs hourly.",
+        "truncated": false
+      },
+      "newer": {
+        "id": "6d3c2a10-0000-4000-8000-00000000a002",
+        "revision": 2,
+        "createdAt": "2026-11-02T08:00:00+00:00",
+        "importance": 4,
+        "preview": "DEMO: the Wendle ferry fares rose.",
+        "truncated": false
+      },
+      "status": "pending",
+      "decidedAt": null,
+      "note": null,
+      "insight": null
+    }
+  ],
+  "next": null,
+  "count": 1
+}

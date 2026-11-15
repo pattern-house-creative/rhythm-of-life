@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a002",
+  "revision": 3,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "on",
+  "project": {
+    "id": "6d3c2a10-0000-4000-8000-00000000e002",
+    "slug": "allotment",
+    "name": null,
+    "created": true
+  },
+  "changed": [
+    "scope",
+    "project"
+  ],
+  "unchanged": false,
+  "replayed": false,
+  "dropped_tags": [],
+  "held": null,
+  "message": "Shared into Family: every member reads it now, with its author, from this change on; its history before the share stays its author's. Only its author or a Family admin can take it back (share with workspace private). Made the project allotment there for it, as its project. The map shows it where it is now after its next rebuild."
+}

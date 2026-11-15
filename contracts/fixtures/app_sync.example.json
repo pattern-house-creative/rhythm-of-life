@@ -1,0 +1,40 @@
+{
+  "adapters": [
+    {
+      "adapter": "csv",
+      "kind": "measurements",
+      "interval": 60,
+      "limit": 60,
+      "running": false,
+      "pendingSince": null,
+      "nextAllowedAt": null,
+      "lastAskedAt": null,
+      "lastFinishedAt": null,
+      "outcome": null
+    },
+    {
+      "adapter": "documents",
+      "kind": "imports",
+      "interval": 60,
+      "limit": 60,
+      "running": true,
+      "pendingSince": null,
+      "nextAllowedAt": null,
+      "lastAskedAt": "2026-11-01T11:58:40.0000000+00:00",
+      "lastFinishedAt": null,
+      "outcome": null
+    },
+    {
+      "adapter": "nightscout",
+      "kind": "measurements",
+      "interval": 300,
+      "limit": 300,
+      "running": false,
+      "pendingSince": null,
+      "nextAllowedAt": "2026-11-01T12:05:00.0000000+00:00",
+      "lastAskedAt": "2026-11-01T12:00:00.0000000+00:00",
+      "lastFinishedAt": "2026-11-01T12:00:02.4000000+00:00",
+      "outcome": "failed"
+    }
+  ]
+}

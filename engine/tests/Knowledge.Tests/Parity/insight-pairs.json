@@ -1,0 +1,35 @@
+{
+  "schema": "rhythm-parity-pairs.v1",
+  "label": "DEMO: more labelled pairs over corpus.json, for insight candidates (SB-P5-05). Every text is invented.",
+  "labels": {
+    "insight": "an older and a newer stored memory, written 30 or more days apart in one scope, whose combination says something neither says alone (a consequence, a risk, a pattern); `why` says what.",
+    "related": "different facts about the same thing, project, event or people, that a reader would want shown together or linked, whether or not the corpus links them, and that together say nothing new.",
+    "unrelated": "no shared subject: a link would be wrong. `hard` marks pairs that share a word, a tag or a topic and so tempt a signal."
+  },
+  "rules": [
+    "Each pair has exactly one label, by pairs.json's order: when two could apply, the first of insight, related, unrelated wins.",
+    "Every pair is two native memories of one scope, both current (not replaced, not deprecated, not a planted instruction), the newer written 30 or more days after the older: the pairs the nightly insight candidate pass compares.",
+    "a is the earlier memory and b the later, by when each was created.",
+    "No pair is in pairs.json already: together the two files' pairs of this kind are the labelled set for insight candidates. Five related pairs first labelled here (three hard) are in pairs.json since run 19, with the same labels, and were taken out of this file.",
+    "Unrelated pairs have no link in the corpus.",
+    "hard marks a pair a signal is likely to get wrong: a shared word, tag or topic with no shared subject, or an insight between two memories that share nothing on the surface."
+  ],
+  "incoming": [],
+  "pairs": [
+    { "id": "pi-ins-decision-bills", "a": "mem-alex-heatpump-decision", "b": "mem-family-energy-bills", "label": "insight", "why": "the decision to replace the boiler with a heat pump shows in the bills: April to September fell from 984 to 612 GBP" },
+    { "id": "pi-ins-car-bills", "a": "mem-family-car-new", "b": "mem-family-energy-bills", "label": "insight", "hard": true, "why": "the bills fell even though the new car has charged at home since June, so the heating saves more than the bills show" },
+    { "id": "pi-ins-diet-leeds", "a": "mem-family-pepper-food-new", "b": "mem-family-leeds", "label": "insight", "why": "Sam feeds Pepper while Alex is in Leeds, and Pepper is on the renal diet now: 40 g a day in two meals and no chicken treats" },
+    { "id": "pi-ins-job-sabbatical", "a": "mem-alex-job-new", "b": "mem-alex-sabbatical", "label": "insight", "hard": true, "why": "the spring 2027 sabbatical would start about 18 months into the job Alex began in September 2025, early for a long leave" },
+    { "id": "pi-ins-sabbatical-knee", "a": "mem-alex-sabbatical", "b": "mem-alex-knee", "label": "insight", "hard": true, "why": "a three-month walk of the whole coast path next spring rests on a knee that is strained now" },
+    { "id": "pi-rel-kitchen-fitter", "a": "mem-family-kitchen", "b": "mem-family-kitchen-fitter", "label": "related", "why": "the fitter is booked for the kitchen refit that was chosen" },
+    { "id": "pi-rel-choir-bakesale", "a": "mem-sam-choir-new", "b": "mem-sam-bakesale", "label": "related", "why": "the bake sale is the choir's" },
+    { "id": "pi-unrel-wifi-alarms", "a": "mem-family-wifi", "b": "mem-family-smoke-alarms", "label": "unrelated", "hard": true, "why": "both name the hallway, nothing else" },
+    { "id": "pi-unrel-piano-chimney", "a": "mem-family-piano", "b": "mem-family-chimney", "label": "unrelated", "hard": true, "why": "two jobs about the house, each to book again in a year" },
+    { "id": "pi-unrel-milk-meter", "a": "mem-family-milk", "b": "mem-family-water-meter", "label": "unrelated", "why": "a milk round and a meter reading" },
+    { "id": "pi-unrel-plumber-fitter", "a": "mem-family-plumber", "b": "mem-family-kitchen-fitter", "label": "unrelated", "hard": true, "why": "two firms of tradespeople, for different rooms" },
+    { "id": "pi-unrel-tax-bills", "a": "mem-family-council-tax", "b": "mem-family-energy-bills", "label": "unrelated", "hard": true, "why": "both are household bills, with no subject in common" },
+    { "id": "pi-unrel-walk-cafe", "a": "mem-alex-wanderung", "b": "mem-alex-cafe", "label": "unrelated", "hard": true, "why": "a favourite walk and a favourite café, both tagged places" },
+    { "id": "pi-unrel-bike-gym", "a": "mem-sam-bike", "b": "mem-sam-gym", "label": "unrelated", "hard": true, "why": "a bike service and a gym membership, both money" },
+    { "id": "pi-unrel-books-catalogue", "a": "mem-sam-reading-group", "b": "mem-sam-library-migration", "label": "unrelated", "hard": true, "why": "a reading group in a bookshop and a library's catalogue move" }
+  ]
+}

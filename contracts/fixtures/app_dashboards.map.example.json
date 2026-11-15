@@ -1,0 +1,39 @@
+{
+  "map": {
+    "part": "map",
+    "focus": { "near": { "star": "notes:notes:walks.md", "depth": 1 } },
+    "matched": 2,
+    "nodes": [
+      {
+        "id": "notes:notes:walks.md",
+        "title": "Morning walks",
+        "type": "note",
+        "overview": "A fictional note: a short walk before breakfast, and how the morning glucose looked afterwards.",
+        "provenance": { "sourceId": "notes", "recordId": "walks.md", "observedAt": "2026-10-27T08:00:00+00:00", "demo": false },
+        "resource": {
+          "identity": { "provider": "notes", "account": "notes", "externalId": "walks.md" },
+          "canonicalUrl": null,
+          "sourceUrl": null,
+          "sourceModifiedAt": "2026-10-27T08:00:00+00:00",
+          "retrievedAt": "2026-10-28T11:45:00.5+00:00",
+          "revision": "sha256-example-1",
+          "owner": "alex",
+          "access": { "scope": "private", "canRead": true, "canOpen": false },
+          "availability": "available",
+          "content": null,
+          "representation": "index"
+        },
+        "groups": [{ "id": "notes:walking", "label": "Walking" }]
+      }
+    ],
+    "edges": [],
+    "nextCursor": "o:1",
+    "completeness": "partial",
+    "issues": [
+      {
+        "provider": "rhythm",
+        "reason": "Scheduled-refresh snapshot, each record confirmed within the last 35 minutes. Showing 1 of 2 records matching the focus (40 on the map in all)."
+      }
+    ]
+  }
+}

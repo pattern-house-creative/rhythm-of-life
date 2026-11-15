@@ -1,0 +1,741 @@
+/* The Memories view (MemoryView.tsx, SB-P3-13): where the reader opens, beside the panel on a wide screen and over the
+   sky on a phone (the reader's own rules in Explorer.css place it). */
+.memory-view .reader-bar {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.memory-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid #93b4c326;
+  border-radius: 18px;
+  /* The sections take their own row under the title, and scroll across on a phone rather than wrap. */
+  grid-column: 1 / -1;
+  justify-self: start;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.memory-tabs button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  color: #a8bfca;
+}
+.memory-tabs button[aria-pressed="true"] {
+  color: #e3f3f5;
+  background: #accde41f;
+}
+/* How many wait in a review queue, beside its name on the strip. */
+.memory-waits {
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  color: #e3f3f5;
+  background: #accde433;
+}
+/* The brief's lists (MemoryPlans.tsx): a list's filter under the section's strip, a part's heading with its count, and calibration. */
+.memory-plan-strip {
+  flex: none;
+  align-self: flex-start;
+}
+.memory-plan-part {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #a8bfca;
+}
+.memory-plan-part span {
+  color: #e3f3f5;
+}
+.memory-plan-late {
+  color: #c1a66d;
+}
+.memory-plan-calibration {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid #93b4c31f;
+}
+.memory-plan-bands {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #a8bfca;
+}
+.memory-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 24px;
+}
+.memory-body > * {
+  width: 100%;
+  max-width: 70ch;
+  margin-inline: auto;
+}
+.memory-capture,
+.memory-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.memory-capture label,
+.memory-edit label {
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  color: #9fb4bf;
+}
+.memory-capture textarea,
+.memory-edit textarea {
+  width: 100%;
+  min-height: 84px;
+  padding: 10px 12px;
+  resize: vertical;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #e1ecef;
+  background: #0a1217cc;
+  border: 1px solid #93b4c333;
+  border-radius: 12px;
+}
+.memory-capture textarea:focus-visible,
+.memory-edit textarea:focus-visible {
+  outline: 2px solid #a6dccd88;
+  outline-offset: 1px;
+}
+.memory-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.memory-row .memory-hint {
+  margin-right: auto;
+}
+.memory-row button:not(.primary-action) {
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 19px;
+  color: #a8cddc;
+}
+.memory-hint,
+.memory-meta {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #8fa5b2;
+}
+.memory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+.memory-list > li > button,
+.memory-trashed,
+.memory-held-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid #93b4c31f;
+  border-radius: 12px;
+  background: #93b4c30a;
+}
+.memory-list > li > button:hover {
+  background: #93b4c317;
+}
+.memory-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #d2dee3;
+  white-space: pre-line;
+}
+.memory-actions,
+.memory-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.memory-actions button,
+.memory-confirm button,
+.memory-held button,
+.memory-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 18px;
+  font-size: 12px;
+  color: #c9e2ea;
+  background: #accde414;
+}
+.memory-actions button:hover,
+.memory-confirm button:hover,
+.memory-held button:hover {
+  background: #accde426;
+}
+.memory-confirm > span {
+  flex-basis: 100%;
+  font-size: 13px;
+  color: #e6d6c8;
+}
+.memory-confirm .memory-danger {
+  color: #1a0f0b;
+  background: #e8b48f;
+}
+.memory-confirm .memory-danger:hover {
+  background: #f1c8a8;
+}
+.memory-status-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 4px 0 12px;
+  border-radius: 18px;
+  font-size: 12px;
+  color: #9fb4bf;
+  background: #accde414;
+}
+.memory-status-pick select {
+  min-height: 30px;
+  padding: 0 6px;
+  border-radius: 14px;
+  color: #e1ecef;
+  background: #0a1217;
+  border: 1px solid #93b4c333;
+}
+.memory-open {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.memory-view .memory-text.source-content {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.memory-held {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e0a07a55;
+  border-radius: 12px;
+  background: #e0a07a14;
+  color: #f0dccd;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.memory-held p {
+  margin: 0;
+}
+/* A memory no longer true, or flagged for a check (SB-P4-11): a quieter note than a hold, with its way on. */
+.memory-truth {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #93b4c340;
+  border-radius: 12px;
+  background: #93b4c30d;
+  color: #d6e4ea;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.memory-truth.memory-flagged {
+  border-color: #e0c47a55;
+  background: #e0c47a12;
+}
+.memory-truth p {
+  margin: 0;
+}
+.memory-truth button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 18px;
+  font-size: 12px;
+  color: #c9e2ea;
+  background: #accde414;
+}
+.memory-truth button:hover {
+  background: #accde426;
+}
+.memory-version {
+  padding: 10px 12px;
+  border: 1px solid #93b4c326;
+  border-radius: 12px;
+  background: #93b4c30d;
+}
+.memory-version .memory-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.memory-version .memory-meta button {
+  display: inline-grid;
+  place-items: center;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 16px;
+  color: #9daeb7;
+}
+.memory-history {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.memory-history > li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0 8px 12px;
+  border-left: 2px solid #93b4c333;
+}
+.memory-empty {
+  margin: 12px auto;
+  font-size: 13px;
+  color: #8fa5b2;
+}
+.memory-more {
+  align-self: center;
+  width: auto;
+}
+/* What was just done, under the list in the view's own flow rather than over it, so it never covers the last row or the bar under a choice,
+   and a long one scrolls rather than taking the screen. The notices' box draws nothing, and is there before anything is said in it. */
+.memory-notices {
+  display: contents;
+}
+.memory-view .memory-notice {
+  position: static;
+  flex: none;
+  align-self: center;
+  width: auto;
+  max-width: min(460px, 100%);
+  max-height: 40vh;
+  max-height: 40svh;
+  overflow-y: auto;
+  transform: none;
+}
+.dock-memories[aria-pressed="true"] {
+  color: #e3f3f5;
+  background: #accde41f;
+}
+/* The review queue (SB-P3-22): a held memory read here shows its words whole, and only then can be chosen. */
+.memory-held-item {
+  border-color: #e0b25c33;
+}
+.memory-held-item .memory-text.source-content {
+  margin: 4px 0 0;
+  max-height: min(16em, 40vh);
+  max-height: min(16em, 40svh);
+  overflow: auto;
+}
+.memory-choose {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #d2dee3;
+}
+.memory-choose input {
+  width: 18px;
+  height: 18px;
+}
+/* A line of words directly in the body keeps to its column, as everything else there does. */
+.memory-body > .memory-hint {
+  margin-inline: auto;
+}
+/* The list's filters, each a pick in the status style; a row's own box, and the bar under what is chosen. */
+.memory-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.memory-filters select {
+  max-width: 11em;
+}
+.memory-filter-clear {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 18px;
+  font-size: 12px;
+  color: #a8cddc;
+}
+.memory-list > .memory-listed {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+.memory-pick {
+  width: 18px;
+  height: 18px;
+  margin: 0 2px;
+}
+.memory-listed-held > button {
+  border-color: #e0b25c33;
+}
+.memory-bulk {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #93b4c340;
+  border-radius: 12px;
+  background: #0d171ef2;
+}
+.memory-bulk-count {
+  font-size: 13px;
+  color: #d2dee3;
+}
+.memory-bulk .memory-hint {
+  flex-basis: 100%;
+}
+.memory-input {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 15px;
+  color: #e1ecef;
+  background: #0a1217cc;
+  border: 1px solid #93b4c333;
+  border-radius: 12px;
+}
+.memory-input:focus-visible {
+  outline: 2px solid #a6dccd88;
+  outline-offset: 1px;
+}
+/* Projects: a row that opens in place, with its capsule's status under it. */
+.memory-list > .memory-project,
+.memory-list > .memory-change-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.memory-project-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid #93b4c31f;
+  border-radius: 12px;
+  background: #93b4c30a;
+}
+.memory-project-head:hover {
+  background: #93b4c317;
+}
+.memory-project-open {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 4px 6px 12px;
+  border-left: 2px solid #93b4c333;
+}
+.memory-subhead {
+  margin: 6px auto 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.4px;
+  color: #9fb4bf;
+}
+.memory-capsule {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid #93b4c326;
+  border-radius: 12px;
+  background: #93b4c30d;
+}
+.memory-capsule p {
+  margin: 0;
+}
+.memory-capsule-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.memory-capsule-slots > li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.memory-capsule-slots strong {
+  font-weight: 500;
+  color: #d2dee3;
+}
+.memory-waiting {
+  padding-left: 10px;
+}
+/* AI changes: each burst a card, its memories one line each. */
+.memory-change-group {
+  padding: 10px 12px;
+  border: 1px solid #93b4c31f;
+  border-radius: 12px;
+  background: #93b4c30a;
+}
+.memory-change-what {
+  font-size: 13px;
+  color: #d6e4ea;
+}
+.memory-change-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.memory-change-items button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 6px 8px;
+  text-align: left;
+  border-radius: 8px;
+}
+.memory-change-items button:hover {
+  background: #93b4c317;
+}
+.memory-change-items .memory-preview {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  font-size: 13px;
+}
+/* A memory's history as a timeline: the day above the first change it holds, an AI client's changes marked apart. */
+.memory-day {
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  color: #9fb4bf;
+}
+.memory-history > .memory-by-ai {
+  border-left-color: #e0c47a66;
+}
+.memory-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+.memory-setting dt {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: #d2dee3;
+}
+/* A person's review queues: two memories side by side, stacked on a phone, and a person's words beside a step. */
+.memory-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.memory-copies {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.memory-side,
+.memory-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.memory-side {
+  padding: 8px 10px;
+  border: 1px solid #93b4c31f;
+  border-radius: 10px;
+}
+.memory-note {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.memory-note input {
+  min-height: 36px;
+  padding: 0 10px;
+  font-size: 14px;
+  color: #d2dee3;
+  border: 1px solid #93b4c326;
+  border-radius: 10px;
+  background: #93b4c30a;
+}
+/* The list's words to look for (run 22): the box and its Find on one line, under its label. */
+.memory-find {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.memory-find label {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: #9fb4bf;
+}
+.memory-find .memory-input {
+  flex: 1 1 12em;
+  width: auto;
+}
+.memory-find button {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 18px;
+}
+/* A pick in a question (run 22: the insight a pair became), in the note's style. */
+.memory-note select {
+  min-height: 36px;
+  max-width: 100%;
+  padding: 0 10px;
+  font-size: 14px;
+  color: #d2dee3;
+  border: 1px solid #93b4c326;
+  border-radius: 10px;
+  background: #0a1217;
+}
+.memory-filters button[aria-pressed="true"] {
+  color: #e3f3f5;
+  background: #accde41f;
+}
+.memory-setting-value {
+  flex: none;
+  color: #a6dccd;
+}
+.memory-setting dd {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #8fa5b2;
+}
+/* A focus ring that shows whole: the view's lists and strips scroll, which cuts off what stands outside them. */
+.memory-view
+  :is(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid #95d2d9;
+  outline-offset: 1px;
+}
+.memory-tabs button:focus-visible,
+.memory-list > li > button:focus-visible,
+.memory-project-head:focus-visible,
+.memory-change-items button:focus-visible,
+.memory-view .memory-notice button:focus-visible,
+.memory-view textarea:focus-visible,
+.memory-view .memory-input:focus-visible,
+.memory-note input:focus-visible,
+.memory-note select:focus-visible,
+.memory-edit select:focus-visible {
+  outline-offset: -2px;
+}
+@media (max-width: 1000px) {
+  .explorer-dock.searching .dock-memories {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .memory-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* A finger's room and no zoom on any phone, upright or sideways: 40px for whatever is tapped, as the rest of the app gives, and 16px in a
+   field, under which a phone's browser zooms the page when it takes focus. */
+@media (max-width: 760px), (max-height: 500px) {
+  .memory-tabs button,
+  .memory-view .reader-bar .back-link,
+  .memory-actions button,
+  .memory-confirm button,
+  .memory-held button,
+  .memory-truth button,
+  .memory-view .memory-more,
+  .memory-row button:not(.primary-action),
+  .memory-version .memory-meta button,
+  .memory-change-items button,
+  .memory-choose,
+  .memory-filter-clear,
+  .memory-status-pick,
+  .memory-status-pick select,
+  .memory-note input,
+  .memory-note select,
+  .memory-find button,
+  .memory-edit select,
+  .memory-view .upload-status button {
+    min-height: 40px;
+  }
+  .memory-version .memory-meta button,
+  .memory-view .upload-status button[aria-label="Dismiss"] {
+    min-width: 40px;
+  }
+  .memory-capture textarea,
+  .memory-edit textarea,
+  .memory-edit select,
+  .memory-input,
+  .memory-status-pick select,
+  .memory-note input,
+  .memory-note select {
+    font-size: 16px;
+  }
+  .memory-pick,
+  .memory-choose input {
+    width: 24px;
+    height: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .memory-view {
+    animation: none;
+  }
+}

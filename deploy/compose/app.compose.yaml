@@ -1,0 +1,55 @@
+# The app: the built PWA plus its server facade on Node (app/Dockerfile). Owned by app/.
+# Included from compose.yaml, which defines the networks, the app_token secret and the rhythm config.
+#
+# With no engine configured (engine.url empty, or no secrets/app_token yet) it runs in demo mode
+# with fictional data labelled DEMO, so `docker compose up app` works on its own.
+# Health: GET /api/health (no engine call). Settings: docs/configuration.md.
+
+services:
+  app:
+    image: rhythm-app:${RHYTHM_VERSION:-dev}
+    build:
+      context: ../../app
+    environment:
+      RHYTHM_CONFIG: /etc/rhythm/rhythm.yaml
+      # rhythm.yaml's checksum from the rhythm wrappers, so `up` recreates the app after a settings change.
+      RHYTHM_SETTINGS_HASH: ${RHYTHM_SETTINGS_HASH:-}
+      # Overrides engine.url from rhythm.yaml when set and not empty.
+      RHYTHM_ENGINE_URL: ${RHYTHM_ENGINE_URL:-}
+      # The provider id of the engine's own stars: the engine's RHYTHM_CATALOG_PROVIDER, empty for its
+      # default `rhythm`. Only an install that kept an older engine's ids sets it, for both
+      # (docs/dev/migration-compat.md).
+      RHYTHM_CATALOG_PROVIDER: ${RHYTHM_CATALOG_PROVIDER:-}
+      RHYTHM_APP_TOKEN_FILE: /run/secrets/app_token
+      HOST: 0.0.0.0
+      PORT: "8080"
+    configs:
+      - source: rhythm
+        target: /etc/rhythm/rhythm.yaml
+    secrets:
+      - app_token
+    ports:
+      # This computer only by default; RHYTHM_BIND=0.0.0.0 for the home network.
+      - "${RHYTHM_BIND:-127.0.0.1}:${RHYTHM_APP_PORT:-8080}:8080"
+    networks:
+      # internal reaches the engine; egress only carries the published port.
+      - internal
+      - egress
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8080/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped

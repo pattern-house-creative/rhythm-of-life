@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "op": "restore_all",
+  "results": [
+    { "id": "6d3c2a10-0000-4000-8000-00000000b001", "result": "restored", "revision": 2, "held": null },
+    { "id": "6d3c2a10-0000-4000-8000-00000000b002", "result": "restored", "revision": 1, "held": { "reason": "instruction", "signals": [] } },
+    { "id": "6d3c2a10-0000-4000-8000-00000000b003", "result": "unknown", "revision": null, "held": null }
+  ]
+}

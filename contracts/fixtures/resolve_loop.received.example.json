@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a031",
+  "revision": 2,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "action": "received",
+  "direction": "in",
+  "counterparty": "Sam",
+  "changed": ["tags"],
+  "unchanged": false,
+  "message": "Marked as received from Sam: it leaves what is owed to the person. Its tags before are kept as a version (revision 2 now), history records it (resolved), and undo(id) opens it again."
+}

@@ -1,0 +1,201 @@
+{
+  "ok": true,
+  "project": "pellow-fair",
+  "unknownProject": false,
+  "zone": "Europe/London",
+  "says": "2 due, 1 decision to review, 1 you owe, 1 owed to you, 2 may be out of date, 2 pending insights, 2 possible contradictions, 2 possible copies, 1 held for your review, 1 standing instruction for this project, 1 group of AI changes.",
+  "due": {
+    "count": 2,
+    "overdue": 1,
+    "upcoming": 1,
+    "items": [
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a042",
+        "revision": 1,
+        "scope": "private",
+        "owner": "alex",
+        "preview": "DEMO: Alex will return the Pellow library books by 2026-11-03.",
+        "truncated": false,
+        "window": "overdue",
+        "at": "2026-11-03T00:00:00+00:00",
+        "local": "2026-11-03 00:00"
+      },
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a043",
+        "revision": 2,
+        "scope": "private",
+        "owner": "alex",
+        "preview": "DEMO: ask Sam whether the Pellow allotment shed key is back.",
+        "truncated": false,
+        "window": "upcoming",
+        "at": "2026-11-05T09:30:00+00:00",
+        "local": "2026-11-05 09:30"
+      }
+    ]
+  },
+  "decisions": {
+    "count": 1,
+    "overdue": 1,
+    "upcoming": 0,
+    "items": [
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a041",
+        "revision": 2,
+        "scope": "shared",
+        "owner": "household",
+        "preview": "DEMO: Alex chose the Pellow allotment over the gym.\n\n[Update 2026-09-01]: DEMO: the gym was full anyway.",
+        "truncated": false,
+        "window": "overdue",
+        "at": "2026-11-01T09:00:00+00:00"
+      }
+    ]
+  },
+  "youOwe": {
+    "count": 1,
+    "items": [
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a030",
+        "revision": 2,
+        "scope": "shared",
+        "owner": "household",
+        "preview": "DEMO: Alex will bake two trays of tarts for the Pellow choir's bake sale.",
+        "truncated": false,
+        "counterparty": "Pellow Choir"
+      }
+    ]
+  },
+  "owedToYou": {
+    "count": 1,
+    "items": [
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a031",
+        "revision": 1,
+        "scope": "shared",
+        "owner": "household",
+        "preview": "DEMO: Sam promised to bring the Pellow ladder back by Saturday.",
+        "truncated": false,
+        "counterparty": "Sam"
+      }
+    ]
+  },
+  "stale": {
+    "count": 2,
+    "items": [
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a011",
+        "revision": 2,
+        "scope": "shared",
+        "owner": "household",
+        "preview": "DEMO: the Pellow choir rehearses on Wednesday evenings.",
+        "truncated": false,
+        "reason": "not_confirmed"
+      },
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a012",
+        "revision": 1,
+        "scope": "private",
+        "owner": "alex",
+        "preview": "DEMO: the canal path is closed past the second lock while the towpath is resurfaced.",
+        "truncated": false,
+        "reason": "not_confirmed"
+      }
+    ]
+  },
+  "insights": {
+    "count": 2,
+    "items": [
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000c001",
+        "scope": "private",
+        "owner": "alex",
+        "title": "The allotment rota changes next week"
+      }
+    ]
+  },
+  "contradictions": {
+    "count": 2,
+    "items": [
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a062",
+        "revision": 1,
+        "scope": "shared",
+        "owner": "household",
+        "preview": "DEMO: the Wendle bins go out on Wednesdays from 3 November.",
+        "truncated": false,
+        "conflict": {
+          "id": "6d3c2a10-0000-4000-8000-00000000a061",
+          "preview": "DEMO: the Wendle bins go out on Tuesdays from 3 November.",
+          "truncated": false
+        }
+      },
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a063",
+        "revision": 1,
+        "scope": "shared",
+        "owner": "household",
+        "preview": "DEMO: the recycling goes out on Thursdays.",
+        "truncated": false,
+        "conflict": {
+          "id": "6d3c2a10-0000-4000-8000-00000000a061",
+          "preview": "DEMO: the Wendle bins go out on Tuesdays from 3 November.",
+          "truncated": false
+        }
+      }
+    ]
+  },
+  "duplicates": {
+    "count": 2,
+    "items": [
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a062",
+        "revision": 1,
+        "scope": "shared",
+        "owner": "household",
+        "preview": "DEMO: the Wendle bins go out on Wednesdays from 3 November.",
+        "truncated": false
+      },
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a060",
+        "revision": 1,
+        "scope": "shared",
+        "owner": "household",
+        "preview": "DEMO: the Wendle bins go out on Tuesdays from 3 November; recycling stays fortnightly.",
+        "truncated": false
+      }
+    ]
+  },
+  "held": 1,
+  "standing": {
+    "count": 1,
+    "items": [
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a070",
+        "revision": 1,
+        "scope": "private",
+        "owner": "alex",
+        "preview": "DEMO: When packing for the coast walk, put the blister kit at the top of the bag.",
+        "truncated": false
+      }
+    ]
+  },
+  "calibration": {
+    "ready": false,
+    "n": 3,
+    "line": null
+  },
+  "changes": {
+    "count": 1,
+    "changes": 3,
+    "truncated": false,
+    "groups": [
+      {
+        "group": "djEuNmQzYzJhMTAwMDAwNDAwMDgwMDAwMDAwMDAwMGEwNDEuMi42ZDNjMmExMDAwMDA0MDAwODAwMDAwMDAwMDAwYTA0Mi4z",
+        "family": "edit",
+        "client": "DEMO client",
+        "changes": 3,
+        "memories": 2,
+        "until": "2026-11-07T08:06:00+00:00"
+      }
+    ]
+  }
+}

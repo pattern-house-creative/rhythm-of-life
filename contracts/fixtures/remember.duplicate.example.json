@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a060",
+  "revision": 1,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "changed": [],
+  "unchanged": false,
+  "replayed": false,
+  "dropped_tags": [],
+  "held": null,
+  "message": "Stored as a draft, a household memory, visible to everyone in the household (per-person scopes are off). set_status canonical confirms it once the person agrees it is right. It is close to memory 6d3c2a10-0000-4000-8000-00000000a061 (0.91) in its scope, so it is saved and flagged as a possible copy for the person's review (list_duplicates). Ask the person: if it repeats that memory, forget this one; if it adds to it, append there instead and forget this one; if both stand, keep both with update clear duplicate_of.",
+  "duplicates": [
+    { "id": "6d3c2a10-0000-4000-8000-00000000a061", "score": 0.91 }
+  ]
+}

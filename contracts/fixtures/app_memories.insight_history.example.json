@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000c001",
+  "review": "confirmed",
+  "count": 2,
+  "events": [
+    {
+      "event": "confirmed",
+      "value": null,
+      "until": null,
+      "note": "DEMO: Alex says this holds.",
+      "person": null,
+      "channel": "app",
+      "client": null,
+      "at": "2026-11-02T09:30:00+00:00"
+    },
+    {
+      "event": "feedback",
+      "value": "interesting",
+      "until": null,
+      "note": null,
+      "person": null,
+      "channel": null,
+      "client": null,
+      "at": "2026-11-01T09:30:00+00:00"
+    }
+  ]
+}

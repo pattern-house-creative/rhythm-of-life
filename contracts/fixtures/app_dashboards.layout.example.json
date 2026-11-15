@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "layout": {
+    "parts": [
+      { "id": "map", "kind": "map", "x": 5, "y": 0, "w": 7, "h": 12, "focus": { "providers": ["nightscout"] } },
+      { "id": "page", "kind": "page", "x": 0, "y": 0, "w": 5, "h": 8 },
+      { "id": "glucose", "kind": "glucose", "x": 0, "y": 8, "w": 5, "h": 4 }
+    ]
+  },
+  "layoutRevision": 3
+}

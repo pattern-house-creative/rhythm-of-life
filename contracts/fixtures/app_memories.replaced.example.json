@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "memory": {
+    "id": "6d3c2a10-0000-4000-8000-00000000c001",
+    "scope": "shared",
+    "owner": "household",
+    "author": "alex",
+    "source": "mcp",
+    "kind": "semantic",
+    "importance": null,
+    "volatility": null,
+    "status": "canonical",
+    "tags": ["choir"],
+    "project": null,
+    "content": "DEMO: the Pellow choir rehearses on Tuesday evenings.",
+    "truncated": false,
+    "held": null,
+    "validFrom": null,
+    "unknownStart": false,
+    "validUntil": "2026-11-02T18:00:00+00:00",
+    "revision": 2,
+    "createdAt": "2026-10-20T19:00:00+00:00",
+    "updatedAt": "2026-11-02T18:05:00+00:00",
+    "capsule": null,
+    "state": "replaced",
+    "replacedBy": "6d3c2a10-0000-4000-8000-00000000c002",
+    "retractedSources": []
+  }
+}

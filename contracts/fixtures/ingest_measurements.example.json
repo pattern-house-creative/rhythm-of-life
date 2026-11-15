@@ -1,0 +1,20 @@
+{
+  "provider": "carelink",
+  "subject": "alex",
+  "idempotencyKey": "carelink:alex:2026-10-28T12:00Z",
+  "source": {
+    "externalId": "cgm-2026-10-28",
+    "kind": "glucose-readings",
+    "title": "CGM readings, 28 October 2026",
+    "fetchedAt": "2026-10-28T12:00:05Z",
+    "sourceUpdatedAt": "2026-10-28T11:56:00Z",
+    "revision": "r-1042",
+    "timezone": "Europe/London",
+    "device": { "id": "demo-sensor-01", "model": "Demo CGM" }
+  },
+  "measurements": [
+    { "metric": "glucose", "value": 112, "unit": "mg/dL", "observedAt": "2026-10-28T11:45:00Z", "key": "2026-10-28T11:45:00Z", "quality": "ok" },
+    { "metric": "glucose", "value": 118, "unit": "mg/dL", "observedAt": "2026-10-28T11:50:00Z", "key": "2026-10-28T11:50:00Z", "quality": "ok" },
+    { "metric": "glucose", "value": 121, "unit": "mg/dL", "observedAt": "2026-10-28T11:55:00Z", "key": "2026-10-28T11:55:00Z", "quality": "estimated" }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/record_outcome.output.schema.json",
+  "title": "record_outcome answer",
+  "description": "The memory tool record_outcome's answer (SB-P5-11, migration 060): how a decision turned out, recorded as a change of its state, not its words. result right, wrong or mixed: it is asked about no more (review_at null, rearms 0); unknown: too early to tell, it comes up for review again 90 days on (rearms 1 or 2), and a third unknown stops the asking (reviews_done true, review_at null). previous is the outcome before (null: none yet). changed is [\"outcome\"]: the state before is kept as a version, the revision moved, history records it (outcome) and undo takes it back; or empty with unchanged true when it had that outcome already (or unknown had stopped the asking), and nothing was written. A write's fields otherwise: no memory's words, a project by id and slug only. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body (held: a memory held for review; retracted: one marked wrong; invalid: a memory that is no decision).",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "id", "revision", "scope", "owner", "status", "scopes", "project", "result", "previous", "rearms", "review_at", "reviews_done",
+        "changed", "unchanged", "message"],
+      "properties": {
+        "ok": { "const": true },
+        "id": { "$ref": "memory.defs.schema.json#/$defs/uuid" },
+        "revision": { "$ref": "memory.defs.schema.json#/$defs/revision" },
+        "scope": { "$ref": "memory.defs.schema.json#/$defs/scope" },
+        "owner": { "$ref": "memory.defs.schema.json#/$defs/subject" },
+        "status": { "enum": ["canonical", "draft"] },
+        "scopes": { "$ref": "memory.defs.schema.json#/$defs/scopes" },
+        "project": { "$ref": "memory.defs.schema.json#/$defs/writtenProject" },
+        "result": { "enum": ["right", "wrong", "mixed", "unknown"] },
+        "previous": { "enum": [null, "right", "wrong", "mixed", "unknown"] },
+        "rearms": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "review_at": { "$ref": "memory.defs.schema.json#/$defs/maybeInstant" },
+        "reviews_done": { "type": "boolean", "description": "unknown stopped the asking: it is asked about no more." },
+        "changed": { "type": "array", "maxItems": 1, "items": { "const": "outcome" } },
+        "unchanged": { "type": "boolean" },
+        "message": { "type": "string", "minLength": 1, "maxLength": 2000 }
+      },
+      "allOf": [
+        {
+          "anyOf": [
+            { "properties": { "unchanged": { "const": false }, "changed": { "minItems": 1 } } },
+            { "properties": { "unchanged": { "const": true }, "changed": { "maxItems": 0 } } }
+          ]
+        },
+        {
+          "anyOf": [
+            { "properties": { "result": { "enum": ["right", "wrong", "mixed"] }, "rearms": { "const": 0 }, "review_at": { "type": "null" }, "reviews_done": { "const": false } } },
+            { "properties": { "result": { "const": "unknown" }, "rearms": { "minimum": 1 }, "review_at": { "type": "string" }, "reviews_done": { "const": false } } },
+            { "properties": { "result": { "const": "unknown" }, "rearms": { "const": 2 }, "review_at": { "type": "null" }, "reviews_done": { "const": true } } }
+          ]
+        }
+      ]
+    },
+    { "$ref": "memory.defs.schema.json#/$defs/refusal" }
+  ]
+}

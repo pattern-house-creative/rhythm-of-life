@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_upload_document.output.schema.json",
+  "title": "app_upload_document structuredContent",
+  "description": "A document someone added in the app: saved under provider documents as the catalog's star (shown after the map rebuild the engine queues), or refused with a code and a reason fit to show. A refused file is ok false, not an error. Listed only while adapters.documents is on. See contracts/README.md section 2.2.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "document"],
+      "properties": {
+        "ok": { "const": true },
+        "document": { "$ref": "#/$defs/document" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "code", "reason"],
+      "properties": {
+        "ok": { "const": false },
+        "code": { "enum": ["unsupported_type", "too_large", "empty", "not_text", "not_pdf", "pdf_unreadable", "too_many_pages", "invalid_name"] },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 300 }
+      }
+    }
+  ],
+  "$defs": {
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["graphId", "resourceId", "title", "format", "pages", "characters", "status"],
+      "properties": {
+        "graphId": { "type": "string", "minLength": 1, "maxLength": 1000, "description": "The star it becomes, once the map is rebuilt." },
+        "resourceId": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "format": { "enum": ["pdf", "text", "markdown"] },
+        "pages": { "type": "integer", "minimum": 0 },
+        "characters": { "type": "integer", "minimum": 0 },
+        "status": { "enum": ["created", "updated", "unchanged"], "description": "unchanged: the same file was added before." },
+        "scope": { "enum": ["private", "shared"], "description": "Only while the engine's app.viewers is on: who reads the document. private: one person's readers (a viewer session's own person, or the person adapters.documents.owner names for the household view); shared: everyone in the household (Family's, and every upload while memory.scopes is off). Absent otherwise." }
+      }
+    }
+  }
+}

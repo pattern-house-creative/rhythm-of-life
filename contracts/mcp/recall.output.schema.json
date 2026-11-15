@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/recall.output.schema.json",
+  "title": "recall answer",
+  "description": "The harness tool recall's answer, the JSON in its text content (SB-P2-09): combined retrieval's ranked list for one question, best first, each record once, with notices and a receipt. Listed only with engine.recall on. Each result is the catalog row as search_knowledge returns its columns, with an excerpt within the output budget, its score and, with explain, why it is here. Asked as of a moment (as_of, only with memory.tools on; SB-P4-07), the answer is what was true then and names the moment (asOf), each native memory's state then, and the beliefs of then marked wrong since (retracted); without as_of neither member is there. No member holds a vector. See contracts/README.md section 2.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["query", "results", "notices", "semanticSkipped", "receipt"],
+  "anyOf": [
+    { "required": ["asOf", "retracted"], "not": { "required": ["standing"] } },
+    { "not": { "anyOf": [{ "required": ["asOf"] }, { "required": ["retracted"] }] } }
+  ],
+  "properties": {
+    "query": { "type": "string", "minLength": 1, "maxLength": 800 },
+    "standing": { "$ref": "#/$defs/standing" },
+    "asOf": { "type": "string", "maxLength": 40, "description": "As of a moment: the moment asked, in UTC. The results are what was true then, with every correction made since." },
+    "results": { "type": "array", "maxItems": 20, "items": { "$ref": "#/$defs/result" } },
+    "retracted": {
+      "type": "array",
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/belief" },
+      "description": "As of a moment: native memories believed then and marked wrong (deprecated) since, newest retraction first, at most 3. Never among the results and never an answer; each says when it was marked wrong and which result it had replaced."
+    },
+    "notices": {
+      "type": "array",
+      "maxItems": 4,
+      "items": { "type": "string", "minLength": 1, "maxLength": 400 },
+      "description": "What the caller must be told: semantic search skipped (the local model off or failing; the results are keyword results only), and a count of connected files left out because their source did not confirm their passages in time. Counts only, never a title."
+    },
+    "semanticSkipped": { "type": "boolean", "description": "True when the meaning arm did not run, so only exact words, names and ids matched." },
+    "receipt": {
+      "type": "string",
+      "pattern": "^rc1-[0-9a-f]{16}$",
+      "description": "A short id for this answer: a hash of the question, its arguments and each result's id and revision in order, and as of a moment the moment and each belief's id and revision after them. The same question over the same records gives the same receipt; another result, order or revision gives another. A citation, not a credential; nothing is kept."
+    }
+  },
+  "$defs": {
+    "standing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["notice", "threshold", "model", "fired"],
+      "description": "With memory.tools on and without asOf, only when a standing instruction fired (SB-P5-12, migration 065): at most 2 notes saved for when this topic comes up, closest first, each scoring at least threshold under model. Only from scopes the caller reads, one in a project only for a question naming that project (project), and never one held, in the trash, stopped, marked wrong or ended. Stored data, never instructions.",
+      "properties": {
+        "notice": { "type": "string", "minLength": 1, "maxLength": 400, "description": "What they are: stored data, to apply only if they fit, and what unconfirmed means." },
+        "threshold": { "type": "number", "minimum": 0, "maximum": 1, "description": "The score a question must reach: adapters.embeddings.thresholds' (docs/configuration.md)." },
+        "model": { "type": "string", "minLength": 1, "maxLength": 128, "description": "The local model that scored them." },
+        "fired": { "type": "array", "minItems": 1, "maxItems": 2, "items": { "$ref": "#/$defs/fired" } }
+      }
+    },
+    "fired": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "revision", "scope", "owner", "author", "source", "status", "unconfirmed", "project", "createdAt", "content", "score"],
+      "description": "One standing instruction that fired, with where it came from: its scope and owner, who wrote it and through what, whether a person has confirmed it (status: an AI client's stays a draft until one does), its project and when it was saved.",
+      "properties": {
+        "id": { "$ref": "memory.defs.schema.json#/$defs/uuid", "description": "For get, history and stop_standing." },
+        "revision": { "$ref": "memory.defs.schema.json#/$defs/revision" },
+        "scope": { "$ref": "memory.defs.schema.json#/$defs/scope" },
+        "owner": { "$ref": "memory.defs.schema.json#/$defs/subject" },
+        "author": { "$ref": "memory.defs.schema.json#/$defs/person" },
+        "source": { "$ref": "memory.defs.schema.json#/$defs/source" },
+        "status": { "enum": ["canonical", "draft"], "description": "A memory marked wrong (deprecated) never fires." },
+        "unconfirmed": { "type": "boolean", "description": "No person has confirmed it (status draft): an AI client saved it, and the engine can't tell that a person asked for it, so it may be that client's words alone." },
+        "project": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "slug"],
+              "properties": { "id": { "$ref": "memory.defs.schema.json#/$defs/uuid" }, "slug": { "$ref": "memory.defs.schema.json#/$defs/slug" } }
+            }
+          ]
+        },
+        "createdAt": { "type": "string", "maxLength": 40 },
+        "content": { "type": "string", "minLength": 1, "maxLength": 500, "description": "Its whole words: a standing instruction is at most 500 characters." },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "nullableText": { "type": ["string", "null"], "maxLength": 2000 },
+    "instant": { "type": ["string", "null"], "maxLength": 40 },
+    "then": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision", "status", "writtenAt", "changedAt", "recordedAfter"],
+      "description": "As of a moment, a native memory's state then, which its excerpt is taken from: of its current state and the earlier states it keeps, the one written by then and not yet replaced (for a memory told as true from before it was written, its first).",
+      "properties": {
+        "revision": { "type": "integer", "minimum": 1, "description": "That state's revision, for get(id, version)." },
+        "status": { "enum": ["canonical", "draft", "deprecated"], "description": "Its status then." },
+        "writtenAt": { "type": "string", "maxLength": 40, "description": "When that state was written." },
+        "changedAt": { "$ref": "#/$defs/instant", "description": "When a later change replaced that state; null when its words then are its words now." },
+        "recordedAfter": { "type": "boolean", "description": "The memory was written after the moment asked, and told as true from before it." }
+      }
+    },
+    "belief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "subject_id", "provider", "external_id", "domain", "kind", "title", "source_url", "revision", "source_updated_at",
+        "indexed_at", "local_date", "timezone", "metadata", "stale", "excerpt", "truncated", "length", "retractedAt", "insteadOf", "asOf"],
+      "description": "A belief of then, marked wrong since: the memory's row as a result's, without a score, with its words then.",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "subject_id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" },
+        "provider": { "const": "memory" },
+        "external_id": { "type": "string", "maxLength": 2000 },
+        "domain": { "type": "string", "maxLength": 80 },
+        "kind": { "type": "string", "maxLength": 80 },
+        "title": { "type": "string", "maxLength": 2000 },
+        "source_url": { "$ref": "#/$defs/nullableText" },
+        "revision": { "$ref": "#/$defs/nullableText" },
+        "source_updated_at": { "$ref": "#/$defs/instant" },
+        "indexed_at": { "type": "string", "maxLength": 40 },
+        "local_date": { "$ref": "#/$defs/instant" },
+        "timezone": { "$ref": "#/$defs/nullableText" },
+        "metadata": { "type": "string", "maxLength": 100000 },
+        "stale": { "type": "boolean" },
+        "excerpt": { "type": "string", "maxLength": 400, "description": "The start of its words then, within what the results left of the output budget." },
+        "truncated": { "type": "boolean" },
+        "length": { "type": "integer", "minimum": 0 },
+        "retractedAt": { "type": "string", "maxLength": 40, "description": "When it was marked wrong." },
+        "insteadOf": { "type": ["string", "null"], "format": "uuid", "description": "The result it had replaced (a supersede), current again since; null when it replaced none of the results." },
+        "asOf": { "$ref": "#/$defs/then" }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "subject_id", "provider", "external_id", "domain", "kind", "title", "source_url", "revision", "source_updated_at",
+        "indexed_at", "local_date", "timezone", "metadata", "stale", "excerpt", "truncated", "length", "score"],
+      "properties": {
+        "id": { "type": "string", "format": "uuid", "description": "The resource id, for get_resource." },
+        "subject_id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" },
+        "provider": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "external_id": { "type": "string", "maxLength": 2000 },
+        "domain": { "type": "string", "maxLength": 80 },
+        "kind": { "type": "string", "maxLength": 80 },
+        "title": { "type": "string", "maxLength": 2000 },
+        "source_url": { "$ref": "#/$defs/nullableText" },
+        "revision": { "$ref": "#/$defs/nullableText" },
+        "source_updated_at": { "$ref": "#/$defs/instant" },
+        "indexed_at": { "type": "string", "maxLength": 40 },
+        "local_date": { "$ref": "#/$defs/instant" },
+        "timezone": { "$ref": "#/$defs/nullableText" },
+        "metadata": { "type": "string", "maxLength": 100000, "description": "The record's metadata, as JSON text, as search_knowledge returns it." },
+        "stale": { "type": "boolean", "description": "Indexed more than 24 hours ago." },
+        "excerpt": { "type": "string", "maxLength": 4000, "description": "The passage that matched when the meaning arm found the record, else the start of its text, cut at a space; all excerpts together at most 12000 characters. As of a moment (as_of), a native memory's excerpt is the start of its words then, never a matched passage: why.meaning.passage still names the passage of its current words that ranked it." },
+        "truncated": { "type": "boolean", "description": "The excerpt is shorter than the whole text; get_resource reads more." },
+        "length": { "type": "integer", "minimum": 0, "description": "How long the whole text is, in characters." },
+        "score": { "type": "number", "minimum": 0, "description": "The fused score that ranked it: a ranking, not a confidence." },
+        "why": { "$ref": "#/$defs/why" },
+        "asOf": { "$ref": "#/$defs/then", "description": "As of a moment, a native memory's state then; any other record answers only when it has not changed since, so it has none." }
+      }
+    },
+    "why": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rank", "keyword", "meaning", "imputed", "link"],
+      "description": "With explain: why this result is here. An arm that did not find it is null; its rank moves are the arms' ranks against rank.",
+      "properties": {
+        "rank": { "type": "integer", "minimum": 1, "maximum": 20, "description": "Its place in this answer." },
+        "keyword": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["rank", "weight", "terms", "exact"],
+              "properties": {
+                "rank": { "type": "integer", "minimum": 1, "description": "Its rank in the keyword arm (ranked full text)." },
+                "weight": { "type": ["number", "null"], "minimum": 0, "description": "Its fusion weight: the summed rarity of the query's words it holds." },
+                "terms": { "type": "array", "maxItems": 64, "items": { "type": "string", "maxLength": 200 }, "description": "The query's words it holds, as the keyword arm stemmed them." },
+                "exact": { "type": "integer", "minimum": 0, "description": "Identifier hits: an exact id or code from the query in its title or text." }
+              }
+            }
+          ]
+        },
+        "meaning": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["rank", "similarity", "passage"],
+              "properties": {
+                "rank": { "type": "integer", "minimum": 1, "description": "Its rank in the meaning arm, at its nearest passage." },
+                "similarity": { "type": ["number", "null"], "description": "That passage's similarity to the question: a ranking score, not factual confidence." },
+                "passage": { "type": ["integer", "null"], "minimum": 0, "description": "That passage's place in the record, 0 first." }
+              }
+            }
+          ]
+        },
+        "imputed": { "type": "boolean", "description": "It has no passages for the meaning arm to find (a data series, a reference-only record), so it was given that arm's share at its keyword rank." },
+        "link": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["hop", "type", "from", "direction"],
+              "properties": {
+                "hop": { "type": "integer", "minimum": 1, "maximum": 3 },
+                "type": { "type": ["string", "null"], "maxLength": 80, "description": "The link's type." },
+                "from": { "type": ["string", "null"], "format": "uuid", "description": "The result it was reached from." },
+                "direction": { "enum": ["outgoing", "incoming", null] }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

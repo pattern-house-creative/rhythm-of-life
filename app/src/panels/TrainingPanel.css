@@ -1,0 +1,628 @@
+/* Training: the week's intensity ring, two weeks of load as a calendar of
+   dots, swim/bike/run lanes and workout cards. */
+
+.training-panel {
+  --swim: #7bdcbb;
+  --bike: #c1a66d;
+  --run: #d0b6e7;
+  --other: #8fa9b7;
+  --unknown: #a9bfc7;
+}
+.training-panel .sport-swim {
+  --sport: var(--swim);
+}
+.training-panel .sport-bike {
+  --sport: var(--bike);
+}
+.training-panel .sport-run {
+  --sport: var(--run);
+}
+.training-panel .sport-other {
+  --sport: var(--other);
+}
+.training-panel .sport-unknown {
+  --sport: var(--unknown);
+}
+.tri-mark {
+  display: flex;
+  gap: 10px;
+  color: #8ec4ba;
+}
+.tri-mark svg:nth-child(2) {
+  color: #c1a66d;
+}
+.tri-mark svg:nth-child(3) {
+  color: #d0b6e7;
+}
+
+/* This week. */
+.training-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: center;
+  gap: 44px;
+  padding: 30px 0 34px;
+  border-top: 1px solid #93b4c321;
+  border-bottom: 1px solid #93b4c321;
+}
+.training-hero::before {
+  content: "";
+  position: absolute;
+  left: -60px;
+  top: 50%;
+  width: 340px;
+  height: 340px;
+  transform: translateY(-50%);
+  background: radial-gradient(circle, #75d8b91a 0, #75d8b900 62%);
+  pointer-events: none;
+}
+.intensity-ring {
+  position: relative;
+  width: 220px;
+  aspect-ratio: 1;
+}
+.intensity-ring svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.intensity-track {
+  fill: none;
+  stroke: #93b4c314;
+  stroke-width: 14;
+}
+.intensity-tick {
+  fill: #93b4c347;
+}
+.intensity-moderate {
+  stroke: #4f9e8a;
+}
+.intensity-extra {
+  stroke: #c8f2e2;
+  filter: drop-shadow(0 0 5px #7bdcbb);
+}
+.intensity-centre {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-align: center;
+}
+.intensity-centre strong {
+  font: 300 58px/1 "Manrope Variable";
+  letter-spacing: -2.6px;
+  color: #e3eef0;
+}
+.intensity-centre span {
+  font-size: 11px;
+  color: #8fa9b7;
+}
+.intensity-centre small {
+  margin-top: 6px;
+  font-size: 8px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #88bba9;
+}
+.intensity-centre em {
+  font-style: normal;
+  font-size: 9px;
+  color: #718993;
+  margin-top: 2px;
+}
+.training-week {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+.week-numbers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.week-numbers strong {
+  display: block;
+  font: 300 36px/1 "Manrope Variable";
+  letter-spacing: -1.4px;
+  color: #d7e5e9;
+  white-space: nowrap;
+}
+.week-numbers span {
+  display: block;
+  margin-top: 8px;
+  font-size: 10px;
+  color: #8fa9b7;
+}
+.week-dots {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.week-dots li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+.week-dots li > span {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #93b4c324;
+}
+.week-dots li > span::after {
+  content: "";
+  width: calc(26px * var(--fill));
+  height: calc(26px * var(--fill));
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #c8f2e2, #4f9e8a);
+}
+.week-dots li.future > span {
+  border-style: dashed;
+  opacity: 0.5;
+}
+.week-dots li.today > span {
+  border-color: #7bdcbb80;
+}
+.week-dots small {
+  font-size: 9px;
+  color: #718993;
+}
+.week-dots li.today small {
+  color: #d7e5e9;
+}
+.streak {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #8fa9b7;
+}
+.streak svg {
+  color: #c1a66d;
+  filter: drop-shadow(0 0 6px #c1a66d80);
+}
+.streak b {
+  font-weight: 500;
+  color: #e6d3a8;
+}
+
+/* Two weeks of load. */
+.load-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.load-head,
+.load-row {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  align-items: center;
+}
+.load-head {
+  grid-template-columns: 74px repeat(7, minmax(0, 1fr));
+}
+.load-head small {
+  text-align: center;
+  font-size: 9px;
+  color: #718993;
+}
+.load-label {
+  font-size: 10px;
+  color: #8fa9b7;
+}
+.load-row ol {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.load-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+}
+.load-day::before {
+  /* An empty day: a faint ring. */
+  content: "";
+  position: absolute;
+  top: 6px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid #93b4c31c;
+}
+.load-day.future::before {
+  border-style: dashed;
+  opacity: 0.6;
+}
+.load-day.today::before {
+  border-color: #d7e5e966;
+}
+.load-day.joined::after {
+  /* The chain between days trained in a row. */
+  content: "";
+  position: absolute;
+  top: 27px;
+  right: 50%;
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: #93b4c324;
+  z-index: 0;
+}
+.load-day.streaking::after {
+  background: linear-gradient(90deg, #c1a66d55, #c1a66d99);
+  box-shadow: 0 0 10px #c1a66d40;
+}
+.load-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: calc(46px * var(--size));
+  height: calc(46px * var(--size));
+  margin: calc(23px * (1 - var(--size))) 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in srgb, var(--sport) 70%, white),
+    var(--sport) 55%,
+    color-mix(in srgb, var(--sport) 60%, #0e171e)
+  );
+  box-shadow: 0 0 18px color-mix(in srgb, var(--sport) 35%, transparent);
+}
+.load-day:not(.active) .load-dot {
+  width: 0;
+  height: 0;
+  margin: 23px 0;
+}
+.load-dot b {
+  font: 600 10px "Manrope Variable";
+  color: #0e171e;
+}
+.load-day small {
+  font-size: 9px;
+  color: #718993;
+}
+.load-day.today small {
+  color: #d7e5e9;
+}
+.load-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 10px 0 0 74px;
+  font-size: 10px;
+  color: #8fa9b7;
+}
+.load-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.load-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sport);
+}
+.load-legend .legend-size {
+  margin-left: auto;
+  color: #718993;
+}
+
+/* Swim, bike, run. */
+.sport-lanes {
+  display: grid;
+  gap: 12px;
+}
+.sport-lane {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px 14px 14px;
+  border-radius: 16px;
+  border: 1px solid #93b4c31a;
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--sport) 9%, transparent),
+    #61879703 60%
+  );
+}
+.sport-lane.empty {
+  background: none;
+}
+.sport-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--sport);
+  background: color-mix(in srgb, var(--sport) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sport) 32%, transparent);
+}
+.sport-lane.empty .sport-icon {
+  opacity: 0.55;
+}
+.sport-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.sport-line {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.sport-line b {
+  font-size: 13px;
+  font-weight: 500;
+  color: #d7e5e9;
+}
+.sport-line span {
+  font-size: 11px;
+  color: #8fa9b7;
+}
+.sport-line strong {
+  margin-left: auto;
+  font: 350 20px "Manrope Variable";
+  letter-spacing: -0.5px;
+  color: #d7e5e9;
+  white-space: nowrap;
+}
+.sport-track {
+  height: 5px;
+  border-radius: 5px;
+  background: #93b4c314;
+  overflow: hidden;
+}
+.sport-track span {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--sport) 55%, transparent),
+    var(--sport)
+  );
+}
+.sport-main small {
+  font-size: 10px;
+  color: #718993;
+}
+.quiet-note {
+  margin-top: 12px;
+  font-size: 11px;
+  color: #8fa9b7;
+}
+
+/* Workouts. */
+.workout-cards {
+  display: grid;
+  gap: 12px;
+}
+.workout-card {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 16px;
+  padding: 18px 20px 18px 16px;
+  border-radius: 18px;
+  border: 1px solid #93b4c31f;
+  background: linear-gradient(160deg, #61879712, #61879703);
+  border-left: 2px solid color-mix(in srgb, var(--sport) 60%, transparent);
+}
+.workout-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.workout-main header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.workout-main header b {
+  font-size: 14px;
+  font-weight: 500;
+  color: #d7e5e9;
+}
+.workout-main header em {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 11px;
+  color: #8fa9b7;
+}
+.workout-main header small {
+  font-size: 10px;
+  color: #8fa9b7;
+}
+.workout-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  font-size: 11px;
+  color: #8fa9b7;
+}
+.workout-stats span {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.workout-stats svg {
+  align-self: center;
+  color: #e08a97;
+}
+.workout-stats strong {
+  font: 350 20px "Manrope Variable";
+  letter-spacing: -0.5px;
+  color: #d7e5e9;
+}
+.effects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 22px;
+}
+.effect {
+  display: grid;
+  grid-template-columns: 66px auto 26px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #8fa9b7;
+}
+.effect-bars {
+  display: flex;
+  gap: 3px;
+}
+.effect-bars i {
+  width: 14px;
+  height: 5px;
+  border-radius: 3px;
+  background: #93b4c31c;
+  overflow: hidden;
+}
+.effect-bars b {
+  display: block;
+  height: 100%;
+  background: #7bdcbb;
+}
+.effect + .effect .effect-bars b {
+  background: #c1a66d;
+}
+.effect > b {
+  font: 400 12px "Manrope Variable";
+  color: #d7e5e9;
+  text-align: right;
+}
+.effect small {
+  font-size: 10px;
+  color: #a4b9c4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.workout-glucose {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #0b131980;
+}
+.workout-glucose p {
+  margin-top: 6px;
+  font-size: 10px;
+  color: #8fa9b7;
+}
+.workout-glucose b {
+  font: 400 13px "Manrope Variable";
+  color: #d7e5e9;
+}
+.low-words {
+  color: #eaa3ad;
+}
+.show-more {
+  margin-top: 14px;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  color: #88bba9;
+  border: 1px solid #88bba933;
+  border-radius: 20px;
+  padding: 7px 13px;
+}
+
+@container body-panel (max-width: 560px) {
+  .training-hero {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 28px;
+    padding-top: 22px;
+  }
+  .training-hero::before {
+    left: 50%;
+    top: 132px;
+    transform: translate(-50%, -50%);
+  }
+  .intensity-ring {
+    width: 210px;
+  }
+  .training-week {
+    width: 100%;
+  }
+  .week-numbers strong {
+    font-size: 30px;
+  }
+  /* Narrow panels name each week above its row. */
+  .load-row {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2px;
+  }
+  .load-head {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .load-head > span {
+    display: none;
+  }
+  .load-label {
+    font-size: 9px;
+    letter-spacing: 0.4px;
+    color: #718993;
+  }
+  .load-legend {
+    margin-left: 0;
+  }
+  .load-legend .legend-size {
+    margin-left: 0;
+  }
+  .load-day::before {
+    width: 40px;
+    height: 40px;
+  }
+  .load-dot {
+    width: calc(40px * var(--size));
+    height: calc(40px * var(--size));
+    margin: calc(20px * (1 - var(--size))) 0;
+  }
+  .load-day:not(.active) .load-dot {
+    margin: 20px 0;
+  }
+  .load-day.joined::after {
+    top: 24px;
+  }
+  .effects {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workout-card {
+    padding: 16px 16px 16px 14px;
+    gap: 14px;
+  }
+  .sport-line {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .load-dot {
+    transition: none;
+  }
+}

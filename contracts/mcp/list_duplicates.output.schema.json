@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_duplicates.output.schema.json",
+  "title": "list_duplicates answer",
+  "description": "The memory tool list_duplicates's answer (SB-P5-02, migration 063): the duplicate review, the memories the caller reads and may change that were flagged when saved as possible copies of another memory of their own scope, newest first, and total, the whole review's length for this caller, read in the same statement as the page (one predicate, 063's memory_duplicate_listed, so the count is the length of the list). duplicate_of names the copies that stand now (both memories live: in the catalog, not in the trash, not held for review, not marked wrong, their window open), at most 3, closest first; a memory leaves the review when that no longer holds for any, or once a person keeps both (update clear duplicate_of). A held memory is never in it. content is a preview of up to 500 characters, truncated when longer. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "total",
+        "duplicates",
+        "next",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicates": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/duplicateItem"
+          }
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z0-9_-]{1,200}$",
+          "description": "Pass as cursor for the next page; null at the end."
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ],
+  "$defs": {
+    "duplicateItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "author",
+        "status",
+        "created_at",
+        "content",
+        "truncated",
+        "duplicate_of"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "author": {
+          "$ref": "memory.defs.schema.json#/$defs/person"
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ]
+        },
+        "created_at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant",
+          "description": "When it was saved, and flagged."
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "content is a preview: get reads the whole text."
+        },
+        "duplicate_of": {
+          "$ref": "memory.defs.schema.json#/$defs/copies"
+        }
+      }
+    }
+  }
+}

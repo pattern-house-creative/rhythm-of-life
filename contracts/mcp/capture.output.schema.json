@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "POST /capture, the answer",
+  "description": "What became of this write and nothing else: a capture token reads nothing, so no words, project or other memory is named. A refusal has the door's body instead (contracts/README.md 1.4).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "revision",
+    "status",
+    "scope",
+    "scopes",
+    "held",
+    "mirror",
+    "unchanged",
+    "replayed",
+    "droppedTags",
+    "message"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "status": {
+      "const": "draft",
+      "description": "Always a draft: a capture is never canonical before a person reviews it."
+    },
+    "scope": {
+      "enum": [
+        "private",
+        "shared"
+      ]
+    },
+    "scopes": {
+      "enum": [
+        "off",
+        "on"
+      ],
+      "description": "off: everyone in the household reads it (D-048)."
+    },
+    "held": {
+      "type": "boolean",
+      "description": "It waits for a person's review, and only a person releases it."
+    },
+    "mirror": {
+      "type": "boolean"
+    },
+    "unchanged": {
+      "type": "boolean",
+      "description": "A mirror with nothing new: nothing was written."
+    },
+    "replayed": {
+      "type": "boolean",
+      "description": "The answer to an earlier request with the same key."
+    },
+    "droppedTags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "message": {
+      "type": "string"
+    }
+  }
+}

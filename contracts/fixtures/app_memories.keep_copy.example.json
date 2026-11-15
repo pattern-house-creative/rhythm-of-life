@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "op": "keep_copy",
+  "id": "6d3c2a10-0000-4000-8000-00000000e060",
+  "revision": 1,
+  "to": null,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "changed": [
+    "duplicate_of"
+  ],
+  "unchanged": false,
+  "replayed": false,
+  "droppedTags": [],
+  "held": null
+}

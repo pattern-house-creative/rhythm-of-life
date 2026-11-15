@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "loops": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a030",
+      "revision": 2,
+      "scope": "shared",
+      "owner": "household",
+      "author": "alex",
+      "status": "draft",
+      "direction": "out",
+      "counterparty": "Pellow Choir",
+      "tags": [
+        "task",
+        "pellow"
+      ],
+      "project": null,
+      "createdAt": "2026-10-20T09:30:00+00:00",
+      "preview": "DEMO: Alex will bake two trays of tarts for the Pellow choir's bake sale.",
+      "truncated": false
+    }
+  ],
+  "next": null,
+  "count": 1,
+  "youOwe": 1,
+  "owedToYou": 1
+}

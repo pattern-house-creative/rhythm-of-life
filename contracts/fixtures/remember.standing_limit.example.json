@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "limit",
+  "error": "This scope has 50 standing instructions already, the most it takes: nothing was saved. list_standing lists them; ask the person which to stop (stop_standing)"
+}

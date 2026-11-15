@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "op": "stop_standing",
+  "id": "6d3c2a10-0000-4000-8000-00000000d201",
+  "revision": 2,
+  "to": null,
+  "scope": "shared",
+  "owner": "household",
+  "status": "canonical",
+  "scopes": "off",
+  "project": null,
+  "changed": ["standing"],
+  "unchanged": false,
+  "replayed": false,
+  "droppedTags": [],
+  "held": null
+}

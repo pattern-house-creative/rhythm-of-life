@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "version": {
+    "id": "6d3c2a10-0000-4000-8000-00000000b001",
+    "revision": 1,
+    "current": false,
+    "scope": "shared",
+    "owner": "household",
+    "status": "draft",
+    "kind": "semantic",
+    "importance": 3,
+    "volatility": null,
+    "tags": ["wendle"],
+    "project": { "id": "6d3c2a10-0000-4000-8000-00000000b101", "slug": "wendle-plot", "name": "wendle-plot" },
+    "content": "DEMO: the Wendle allotment gate code changes on Mondays. #wendle",
+    "held": null,
+    "validFrom": null,
+    "unknownStart": false,
+    "validUntil": null,
+    "writtenAt": "2026-11-02T09:30:00.123456+00:00",
+    "retiredAt": "2026-11-02T09:41:12+00:00",
+    "person": null,
+    "channel": "app",
+    "client": null
+  }
+}

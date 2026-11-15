@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_contradictions.output.schema.json",
+  "title": "list_contradictions answer",
+  "description": "The memory tool list_contradictions's answer (SB-P5-03, migration 068): the contradiction review, the pairs of memories of one scope the caller reads and may change (either one) whose words came close enough that they may conflict, newest first, and total, the whole list's length from the same read, so a count is the length of its list. A pair also flagged as a possible copy is listed by list_duplicates until somebody names it a contradiction. Only a person settles one, so may_settle is false here.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "total",
+        "contradictions",
+        "next",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "contradictions": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/contradiction"
+          }
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z0-9_-]{1,200}$",
+          "description": "Pass as cursor for the next page; null at the end."
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ],
+  "$defs": {
+    "side": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "author",
+        "status",
+        "content",
+        "truncated"
+      ],
+      "description": "One memory of the pair, live (never held, marked wrong, ended or in the trash), with a preview of its words.",
+      "properties": {
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "author": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ]
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "contradiction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "owner",
+        "score",
+        "offered_at",
+        "memory",
+        "conflict",
+        "proposed",
+        "may_settle"
+      ],
+      "properties": {
+        "scope": {
+          "enum": [
+            "private",
+            "shared"
+          ]
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "offered_at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant"
+        },
+        "memory": {
+          "$ref": "#/$defs/side"
+        },
+        "conflict": {
+          "$ref": "#/$defs/side"
+        },
+        "proposed": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/proposal"
+            }
+          ],
+          "description": "Who named it a contradiction and why; null while nobody has."
+        },
+        "may_settle": {
+          "const": false,
+          "description": "Only a person settles one, from the app or the terminal, never an AI client."
+        }
+      }
+    },
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "at",
+        "person",
+        "client",
+        "reason"
+      ],
+      "properties": {
+        "at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant"
+        },
+        "person": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "client": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        }
+      }
+    }
+  }
+}

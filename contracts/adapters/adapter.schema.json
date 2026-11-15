@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/adapters/adapter.schema.json",
+  "title": "Adapter descriptor",
+  "description": "What `rhythm connect <name>` asks and writes for one adapter, and what `rhythm doctor` checks. One file per adapter: contracts/adapters/<name>.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "title", "kinds", "summary", "docs", "settings", "secrets"],
+  "properties": {
+    "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,30}$", "description": "Matches adapters.<name> in rhythm.yaml and IAdapter.Name." },
+    "title": { "type": "string", "maxLength": 60 },
+    "kinds": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": { "enum": ["MeasurementSource", "DocumentSource", "MemorySource", "Writer", "TitleModel", "Exposure"] }
+    },
+    "summary": { "type": "string", "maxLength": 200, "description": "One line shown by `rhythm connect` with no arguments." },
+    "unofficial": { "type": "boolean", "default": false, "description": "True when it relies on an undocumented vendor interface." },
+    "defaultEnabled": { "type": "boolean", "default": false },
+    "profile": { "type": ["string", "null"], "default": null, "description": "Compose profile of its own container(s), if any; `rhythm connect` adds it to COMPOSE_PROFILES." },
+    "docs": { "type": "string", "pattern": "^docs/", "description": "Repo path of its user doc: accounts and keys to set up outside Rhythm first." },
+    "settings": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["key", "prompt", "type"],
+        "properties": {
+          "key": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]{0,40}$", "not": { "pattern": "([Tt]oken|[Pp]assword|[Ss]ecret|[Aa]pi[Kk]ey)$" } },
+          "prompt": { "type": "string" },
+          "type": { "enum": ["string", "int", "bool", "list", "person", "path", "url"] },
+          "default": {},
+          "required": { "type": "boolean", "default": false },
+          "help": { "type": "string" },
+          "pattern": { "type": "string", "description": "A regular expression (anchored with ^ and $) an answer must match; for a list, each item. `rhythm doctor` does not take a value of this form for a leaked secret." }
+        }
+      }
+    },
+    "secrets": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["purpose", "prompt", "source"],
+        "properties": {
+          "purpose": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,40}$", "description": "File secrets/adapters/<name>_<purpose>; the engine reads it through AdapterSettings.SecretFile(purpose)." },
+          "prompt": { "type": "string" },
+          "source": { "enum": ["paste", "generate", "connect"], "description": "paste: hidden prompt; generate: random 32 bytes base64url; connect: written by the adapter's IAdapterConnect flow." },
+          "required": { "type": "boolean", "default": true },
+          "help": { "type": "string" }
+        }
+      }
+    },
+    "connect": { "type": "boolean", "default": false, "description": "True when the adapter implements IAdapterConnect for steps beyond these prompts (for example a browser consent)." },
+    "harnessToken": { "type": "boolean", "default": false, "description": "True when its container calls /mcp with a harness token of its own, secrets/harness_<name>_token (`rhythm token create <name>`): `rhythm connect` wants the token first, `rhythm doctor` checks it." }
+  }
+}

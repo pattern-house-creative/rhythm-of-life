@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_viewer.output.schema.json",
+  "title": "app_viewer structuredContent",
+  "description": "Viewer sessions in the app, listed only while app.viewers is on (refused by this version until the owner approves them). enrol and whoami answer {person}: the person a new session's credential speaks for (null: the code was not accepted), or the calling credential's (null: the app's own token, the household view). end answers {ended}. See contracts/README.md section 2.2.",
+  "type": "object",
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "required": ["person"],
+      "properties": { "person": { "type": ["string", "null"], "pattern": "^[a-z][a-z0-9-]{0,31}$" } }
+    },
+    {
+      "additionalProperties": false,
+      "required": ["ended"],
+      "properties": { "ended": { "type": "boolean" } }
+    }
+  ]
+}

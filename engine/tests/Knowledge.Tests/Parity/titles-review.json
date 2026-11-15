@@ -1,0 +1,1358 @@
+{
+  "label": "DEMO: reviewer judgements of titles generated from the fictional titles set (titles-set.json)",
+  "note": "Read after the final run: every title of every candidate. A word the support check flagged is accepted for its item when it is an inflection, a spelling, a synonym or a translation of the text's own words, or a neutral summary of what the text says; it stays unsupported when it adds a claim (a meeting, a person, a number, a judgement). Rejected words are listed too, so every decision is visible. A title judgement corrects the check for one exact title. Each judgement applies to every candidate that produced the word or the title.",
+  "judgements": [
+    {
+      "item": "t01",
+      "word": "house",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the key safe is the house's"
+    },
+    {
+      "item": "t01",
+      "word": "instructions",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the engineer asked for the cupboard to be cleared"
+    },
+    {
+      "item": "t02",
+      "word": "avoid",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "cancel if the hours clash"
+    },
+    {
+      "item": "t03",
+      "word": "choice",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "book a forward-facing window seat"
+    },
+    {
+      "item": "t04",
+      "word": "rescheduled",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the collection moves"
+    },
+    {
+      "item": "t04",
+      "word": "shifts",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the collection moves"
+    },
+    {
+      "item": "t04",
+      "word": "remains",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "recycling stays fortnightly"
+    },
+    {
+      "item": "t04",
+      "word": "day",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the collection day"
+    },
+    {
+      "item": "t04",
+      "word": "4",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "a date the text does not give"
+    },
+    {
+      "item": "t05",
+      "word": "visit",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "booked in at the vets"
+    },
+    {
+      "item": "t07",
+      "word": "project",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the refit is a project"
+    },
+    {
+      "item": "t08",
+      "word": "date",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the return has a deadline"
+    },
+    {
+      "item": "t08",
+      "word": "clock",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "invents a time from the house number"
+    },
+    {
+      "item": "t08",
+      "word": "neighbors",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "another spelling of neighbours"
+    },
+    {
+      "item": "t08",
+      "word": "plan",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the promise to return them"
+    },
+    {
+      "item": "t09",
+      "word": "joins",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "started a new job"
+    },
+    {
+      "item": "t10",
+      "word": "warning",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "the text reports a quote for the brakes, not a warning"
+    },
+    {
+      "item": "t11",
+      "word": "relocated",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the allotment moved"
+    },
+    {
+      "item": "t12",
+      "word": "issue",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the crash"
+    },
+    {
+      "item": "t12",
+      "word": "release",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "no release in the text; it misreads the fix"
+    },
+    {
+      "item": "t13",
+      "word": "shows",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the reading"
+    },
+    {
+      "item": "t13",
+      "word": "4217",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the same reading without its leading zero"
+    },
+    {
+      "item": "t13",
+      "word": "prepare",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "nobody prepares a bill in the text"
+    },
+    {
+      "item": "t14",
+      "word": "plan",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "Sam is planning it"
+    },
+    {
+      "item": "t14",
+      "word": "plans",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "Sam is planning it"
+    },
+    {
+      "item": "t15",
+      "word": "favorite",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "another spelling of favourite"
+    },
+    {
+      "item": "t15",
+      "word": "tip",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "what to ask for and when"
+    },
+    {
+      "item": "t16",
+      "word": "essential",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "a judgement the text does not make"
+    },
+    {
+      "item": "t16",
+      "word": "installation",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the installer and the outdoor unit"
+    },
+    {
+      "item": "t16",
+      "word": "prepare",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the list prepares for the install"
+    },
+    {
+      "item": "t17",
+      "word": "schedule",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the planting plan"
+    },
+    {
+      "item": "t18",
+      "word": "apple",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates pommes"
+    },
+    {
+      "item": "t18",
+      "word": "recipe",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates recette"
+    },
+    {
+      "item": "t18",
+      "word": "half",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates demi-sel"
+    },
+    {
+      "item": "t18",
+      "word": "salted",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates demi-sel"
+    },
+    {
+      "item": "t18",
+      "word": "butter",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates beurre"
+    },
+    {
+      "item": "t18",
+      "word": "traditionnelle",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "the text says grand-mère, not traditional"
+    },
+    {
+      "item": "t19",
+      "word": "review",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t19",
+      "word": "meeting",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "there is no meeting"
+    },
+    {
+      "item": "t19",
+      "word": "important",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t19",
+      "word": "personal",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t19",
+      "word": "stay",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t19",
+      "word": "organized",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t19",
+      "word": "focused",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t19",
+      "word": "location",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "where the key is, without saying where"
+    },
+    {
+      "item": "t20",
+      "word": "meeting",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "there is no meeting"
+    },
+    {
+      "item": "t20",
+      "word": "event",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "there is no event"
+    },
+    {
+      "item": "t20",
+      "word": "pickup",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the collection"
+    },
+    {
+      "item": "t20",
+      "word": "changes",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the collection moved"
+    },
+    {
+      "item": "t21",
+      "word": "important",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t21",
+      "word": "keep",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "things to remember"
+    },
+    {
+      "item": "t21",
+      "word": "mind",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "things to remember"
+    },
+    {
+      "item": "t21",
+      "word": "key",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t21",
+      "word": "daily",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t21",
+      "word": "life",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t21",
+      "word": "next",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the next treatment due"
+    },
+    {
+      "item": "t22",
+      "word": "important",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t22",
+      "word": "meeting",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "it was a call, and nothing is to come"
+    },
+    {
+      "item": "t22",
+      "word": "date",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the renewal moves to January"
+    },
+    {
+      "item": "t22",
+      "word": "shifts",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the renewal moves"
+    },
+    {
+      "item": "t22",
+      "word": "remains",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the day rate stays"
+    },
+    {
+      "item": "t23",
+      "word": "plan",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t23",
+      "word": "next",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t23",
+      "word": "steps",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t23",
+      "word": "getting",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t23",
+      "word": "started",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t24",
+      "word": "new",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t24",
+      "word": "marketing",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "there is no marketing"
+    },
+    {
+      "item": "t24",
+      "word": "strategy",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t24",
+      "word": "sparked",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "restates the excerpt's idea"
+    },
+    {
+      "item": "t24",
+      "word": "spark",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "restates the excerpt's idea"
+    },
+    {
+      "item": "t24",
+      "word": "inspiration",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "restates the excerpt's idea"
+    },
+    {
+      "item": "t24",
+      "word": "transform",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "turn the box room into"
+    },
+    {
+      "item": "t24",
+      "word": "setup",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "turn the box room into a workshop"
+    },
+    {
+      "item": "t25",
+      "word": "meeting",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "there is no meeting"
+    },
+    {
+      "item": "t25",
+      "word": "john",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "an invented person"
+    },
+    {
+      "item": "t25",
+      "word": "smith",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "an invented person"
+    },
+    {
+      "item": "t25",
+      "word": "day",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "Monday is a day"
+    },
+    {
+      "item": "t25",
+      "word": "week",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "Monday is a day of the week"
+    },
+    {
+      "item": "t25",
+      "word": "1",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "a number the text does not give"
+    },
+    {
+      "item": "t25",
+      "word": "morning",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t25",
+      "word": "reflections",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t25",
+      "word": "needed",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "bring the referral letter"
+    },
+    {
+      "item": "t26",
+      "word": "complete",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "what a to-do list is for"
+    },
+    {
+      "item": "t26",
+      "word": "action",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "restates TODO"
+    },
+    {
+      "item": "t26",
+      "word": "items",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "restates TODO"
+    },
+    {
+      "item": "t26",
+      "word": "project",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "there is no project"
+    },
+    {
+      "item": "t26",
+      "word": "report",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "there is no report"
+    },
+    {
+      "item": "t26",
+      "word": "inquire",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "ask about adding the bikes"
+    },
+    {
+      "item": "t27",
+      "word": "conversation",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "what we talked about"
+    },
+    {
+      "item": "t27",
+      "word": "follow",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "a note following a talk"
+    },
+    {
+      "item": "t27",
+      "word": "meeting",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "a talk, not a meeting"
+    },
+    {
+      "item": "t27",
+      "word": "plan",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "Sam will cover the walks"
+    },
+    {
+      "item": "t27",
+      "word": "take",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "Sam will cover"
+    },
+    {
+      "item": "t27",
+      "word": "over",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "Sam will cover"
+    },
+    {
+      "item": "t28",
+      "word": "spontaneous",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "restates random thought"
+    },
+    {
+      "item": "t28",
+      "word": "strikes",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "restates random thought"
+    },
+    {
+      "item": "t28",
+      "word": "journey",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the coast path stage"
+    },
+    {
+      "item": "t28",
+      "word": "plan",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "take the train down the night before"
+    },
+    {
+      "item": "t29",
+      "word": "quick",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates kurze"
+    },
+    {
+      "item": "t29",
+      "word": "short",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates kurze"
+    },
+    {
+      "item": "t29",
+      "word": "ablauf",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "Ablauf (expiry, procedure) is not what the text says"
+    },
+    {
+      "item": "t29",
+      "word": "termin",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the reading has a date and time"
+    },
+    {
+      "item": "t29",
+      "word": "11",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "14.11 is 14 November"
+    },
+    {
+      "item": "t30",
+      "word": "memories",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t30",
+      "word": "love",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t30",
+      "word": "remember",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates no olvidar"
+    },
+    {
+      "item": "t30",
+      "word": "keep",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "nobody keeps notes in the text"
+    },
+    {
+      "item": "t30",
+      "word": "don",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates no olvidar"
+    },
+    {
+      "item": "t30",
+      "word": "forget",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates no olvidar"
+    },
+    {
+      "item": "t30",
+      "word": "dinner",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates cena"
+    },
+    {
+      "item": "t30",
+      "word": "friday",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates viernes"
+    },
+    {
+      "item": "t30",
+      "word": "requisito",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "hay que reservar"
+    },
+    {
+      "item": "t31",
+      "word": "consumption",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t31",
+      "word": "tips",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t31",
+      "word": "dairy",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "the text is a shopping list, not about dairy"
+    },
+    {
+      "item": "t31",
+      "word": "product",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t31",
+      "word": "prepare",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t31",
+      "word": "breakfast",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "there is no breakfast"
+    },
+    {
+      "item": "t31",
+      "word": "facts",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t31",
+      "word": "uses",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t32",
+      "word": "personal",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "the text does not call it a best"
+    },
+    {
+      "item": "t32",
+      "word": "best",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "the text does not call it a best"
+    },
+    {
+      "item": "t32",
+      "word": "seconds",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "52:30 is 52 minutes 30 seconds"
+    },
+    {
+      "item": "t32",
+      "word": "5",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "the run was 10k"
+    },
+    {
+      "item": "t33",
+      "word": "meeting",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "there is no meeting"
+    },
+    {
+      "item": "t33",
+      "word": "day",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "Tuesday is a day"
+    },
+    {
+      "item": "t33",
+      "word": "week",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "Tuesday is a day of the week"
+    },
+    {
+      "item": "t33",
+      "word": "reflections",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t33",
+      "word": "purchase",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the frames were 145 GBP"
+    },
+    {
+      "item": "t33",
+      "word": "done",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "picked up"
+    },
+    {
+      "item": "t34",
+      "word": "cost",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "45 GBP each"
+    },
+    {
+      "item": "t34",
+      "word": "hour",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "2h"
+    },
+    {
+      "item": "t34",
+      "word": "three",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "3"
+    },
+    {
+      "item": "t34",
+      "word": "commence",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "start on 6 January"
+    },
+    {
+      "item": "t34",
+      "word": "schedule",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the sessions and their start"
+    },
+    {
+      "item": "t35",
+      "word": "rent",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "1,150 GBP a month"
+    },
+    {
+      "item": "t35",
+      "word": "2",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "two bedrooms"
+    },
+    {
+      "item": "t35",
+      "word": "listing",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the link is a listing"
+    },
+    {
+      "item": "t35",
+      "word": "issue",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the damp patch"
+    },
+    {
+      "item": "t36",
+      "word": "chapters",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "the text says pages"
+    },
+    {
+      "item": "t36",
+      "word": "meeting",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "the book club meets on 4 December"
+    },
+    {
+      "item": "t37",
+      "word": "analysis",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t37",
+      "word": "personal",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t37",
+      "word": "reflection",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t37",
+      "word": "bill",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "it is a reading, not a bill"
+    },
+    {
+      "item": "t38",
+      "word": "quick",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t38",
+      "word": "decision",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "adds a claim the text does not make"
+    },
+    {
+      "item": "t38",
+      "word": "commitment",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "Alex agreed to give the speech"
+    },
+    {
+      "item": "t39",
+      "word": "shopping",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "a list of jobs, not shopping"
+    },
+    {
+      "item": "t39",
+      "word": "appointment",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "call the plumber, not an appointment"
+    },
+    {
+      "item": "t39",
+      "word": "refill",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "racheter du joint silicone"
+    },
+    {
+      "item": "t39",
+      "word": "call",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates appeler"
+    },
+    {
+      "item": "t39",
+      "word": "plumber",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates plombier"
+    },
+    {
+      "item": "t39",
+      "word": "sink",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates évier"
+    },
+    {
+      "item": "t39",
+      "word": "leak",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates fuite"
+    },
+    {
+      "item": "t39",
+      "word": "buy",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates racheter"
+    },
+    {
+      "item": "t39",
+      "word": "sealant",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates joint silicone"
+    },
+    {
+      "item": "t39",
+      "word": "taches",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "restates à faire"
+    },
+    {
+      "item": "t40",
+      "word": "meeting",
+      "title": null,
+      "criterion": "accurate",
+      "pass": false,
+      "reason": "a flea market stall, not a meeting"
+    },
+    {
+      "item": "t40",
+      "word": "booth",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates Stand"
+    },
+    {
+      "item": "t40",
+      "word": "stall",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "translates Stand"
+    },
+    {
+      "item": "t40",
+      "word": "saturday",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "Sa. is Samstag"
+    },
+    {
+      "item": "t40",
+      "word": "reservierung",
+      "title": null,
+      "criterion": "accurate",
+      "pass": true,
+      "reason": "reserviert"
+    },
+    {
+      "item": "t01",
+      "word": null,
+      "title": "Service booked for Tarnhill Heating on 13 November",
+      "criterion": "specific",
+      "pass": true,
+      "reason": "names the heating service by who does it and when"
+    },
+    {
+      "item": "t07",
+      "word": null,
+      "title": "Sage Green Cabinets and Oak Worktops Refit",
+      "criterion": "specific",
+      "pass": true,
+      "reason": "names the refit by what was chosen"
+    },
+    {
+      "item": "t07",
+      "word": null,
+      "title": "Sage Green Cabinets & Oak Worktops Refit Budget",
+      "criterion": "specific",
+      "pass": true,
+      "reason": "names the refit by what was chosen"
+    },
+    {
+      "item": "t07",
+      "word": null,
+      "title": "Chose sage green cabinets, oak worktops",
+      "criterion": "specific",
+      "pass": true,
+      "reason": "names the refit by what was chosen"
+    },
+    {
+      "item": "t07",
+      "word": null,
+      "title": "Sage Green Cabinets, Oak Worktops",
+      "criterion": "specific",
+      "pass": true,
+      "reason": "names the refit by what was chosen"
+    }
+  ]
+}

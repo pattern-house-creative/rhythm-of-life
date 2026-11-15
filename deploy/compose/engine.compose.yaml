@@ -1,0 +1,307 @@
+# Postgres, the migrate step, the engine, adapter workers, backups and the operator commands. Owned by engine/.
+# Included from compose.yaml, which defines the networks, the app_token secret and the rhythm config.
+#
+# Start order: postgres (healthy) -> migrate (runs once, exits 0) -> engine (healthy at GET /health).
+# Secrets are files under secrets/ passed as *_FILE variables; nothing secret is an environment value.
+#   postgres_password   the database owner's password (Postgres and the migrate step)
+#   engine_db           the engine's own login, a connection string such as
+#                       Host=postgres;Database=rhythm;Username=rhythm_engine;Password=<generated>
+#                       (migrate creates that login, or updates its password, with data rights only)
+#   app_token           the app's one token (compose.yaml); the engine keeps only its hash
+#   backup_password     the restic repository password, for the backup profile only
+
+services:
+  postgres:
+    image: ${RHYTHM_POSTGRES_IMAGE:-pgvector/pgvector:0.8.7-pg17-bookworm}
+    # One clear line instead of a confusing failure when `rhythm init` has not written the secrets yet (Docker then
+    # mounts an empty folder in place of the missing file, open question Q-017).
+    entrypoint:
+      - sh
+      - -c
+      - '[ -f /run/secrets/postgres_password ] || { echo "secrets/postgres_password is missing: run ./rhythm init first (deploy/compose/README.md)" >&2; exit 1; }; exec docker-entrypoint.sh "$$@"'
+      - rhythm-postgres
+    command: ["postgres"]
+    environment:
+      POSTGRES_DB: ${RHYTHM_DB_NAME:-rhythm}
+      POSTGRES_USER: ${RHYTHM_DB_ADMIN_USER:-rhythm_admin}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${RHYTHM_DB_ADMIN_USER:-rhythm_admin} -d ${RHYTHM_DB_NAME:-rhythm}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  # One-shot: applies migrations (checksummed; a changed applied migration stops it) and sets up the engine's login.
+  migrate:
+    image: rhythm-engine:${RHYTHM_VERSION:-dev}
+    build:
+      context: ../..
+      dockerfile: engine/Dockerfile
+    command: ["migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      RHYTHM_CONFIG: /etc/rhythm/rhythm.yaml
+      RHYTHM_DB_HOST: postgres
+      RHYTHM_DB_NAME: ${RHYTHM_DB_NAME:-rhythm}
+      RHYTHM_DB_ADMIN_USER: ${RHYTHM_DB_ADMIN_USER:-rhythm_admin}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      RHYTHM_DB_FILE: /run/secrets/engine_db
+    configs:
+      - source: rhythm
+        target: /etc/rhythm/rhythm.yaml
+    secrets:
+      - postgres_password
+      - engine_db
+    networks:
+      - internal
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+
+  engine:
+    image: rhythm-engine:${RHYTHM_VERSION:-dev}
+    build:
+      context: ../..
+      dockerfile: engine/Dockerfile
+    command: ["serve"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      RHYTHM_CONFIG: /etc/rhythm/rhythm.yaml
+      # rhythm.yaml's checksum from the rhythm wrappers, so `up` recreates the engine after a settings change.
+      RHYTHM_SETTINGS_HASH: ${RHYTHM_SETTINGS_HASH:-}
+      RHYTHM_DB_FILE: /run/secrets/engine_db
+      RHYTHM_APP_TOKEN_FILE: /run/secrets/app_token
+      RHYTHM_DATA: /var/lib/rhythm
+    configs:
+      - source: rhythm
+        target: /etc/rhythm/rhythm.yaml
+    secrets:
+      - engine_db
+      - app_token
+    volumes:
+      # Archive copies, refresh state and the downloaded (checksummed) local model.
+      - engine-data:/var/lib/rhythm
+      - ${RHYTHM_NOTES_DIR:-./data/notes}:/data/notes:ro
+      - ${RHYTHM_IMPORT_DIR:-./data/import}:/data/import:ro
+      # Adapter secrets, one file each: secrets/adapters/<adapter>_<purpose>, written by `rhythm connect`.
+      - ./secrets/adapters:/run/secrets/adapters:ro
+    ports:
+      # MCP for clients on this computer; exposure recipes reach it differently (open question Q-012).
+      - "${RHYTHM_BIND:-127.0.0.1}:${RHYTHM_MCP_PORT:-8181}:8080"
+    networks:
+      - internal
+      - egress
+    healthcheck:
+      test: ["CMD", "rhythm-engine", "healthcheck"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  # Adapter containers follow the profile convention (contracts/README.md 3.2): a service with profiles: ["<adapter>"],
+  # on internal, and on egress only when it talks to a vendor. Adapters that only call out (Garmin, Drive) run inside
+  # the engine on its scheduler and need no container.
+
+  # The titles adapter's model server (docs/adapters/titles.md): Ollama on the internal network only, no published
+  # port, no internet. Turn it on with adapters.titles (enabled, model) in rhythm.yaml and --profile titles.
+  titles:
+    profiles: ["titles"]
+    image: ${RHYTHM_OLLAMA_IMAGE:-ollama/ollama:0.40.13}
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_MODELS: /models
+      OLLAMA_KEEP_ALIVE: 5m
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_NOPRUNE: "1"
+    volumes:
+      - titles-models:/models
+    networks:
+      - internal
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /root/.ollama
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: ${RHYTHM_TITLES_MEMORY:-4g}
+    restart: unless-stopped
+
+  # The one step that downloads a model, into the volume the server reads. It reaches the internet; the server never
+  # does. Run it once per model (no download happens at `up`):
+  #   docker compose -f deploy/compose/compose.yaml run --rm titles-pull <model>
+  titles-pull:
+    profiles: ["titles-pull"]
+    image: ${RHYTHM_OLLAMA_IMAGE:-ollama/ollama:0.40.13}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >-
+        case "$$0" in sh|/bin/sh) echo "Name the model: run --rm titles-pull <model>" >&2; exit 2;; esac;
+        ollama serve >/dev/null 2>&1 & until ollama list >/dev/null 2>&1; do sleep 1; done; ollama pull "$$0"
+    environment:
+      OLLAMA_HOST: 127.0.0.1:11434
+      OLLAMA_MODELS: /models
+    volumes:
+      - titles-models:/models
+    networks:
+      - egress
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /root/.ollama
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+
+  # Encrypted backups (pg_dump plus the archive, into a restic repository), on demand (./rhythm backup):
+  #   docker compose -f deploy/compose/compose.yaml --profile backup run --rm backup backup /var/lib/rhythm/archive /staging/<new-folder>
+  backup:
+    profiles: ["backup"]
+    image: rhythm-backup:${RHYTHM_VERSION:-dev}
+    build:
+      context: ../../engine/backup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGDATABASE: ${RHYTHM_DB_NAME:-rhythm}
+      PGUSER: ${RHYTHM_DB_ADMIN_USER:-rhythm_admin}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      RESTIC_REPOSITORY: /backups/restic
+      RESTIC_PASSWORD_FILE: /run/secrets/backup_password
+    secrets:
+      - postgres_password
+      - backup_password
+    volumes:
+      - engine-data:/var/lib/rhythm:ro
+      - ${RHYTHM_BACKUP_DIR:-./data/backups}:/backups
+      - ${RHYTHM_BACKUP_STAGING_DIR:-./data/backup-staging}:/staging
+    networks:
+      - internal
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  # Restoring a backup into this install (./rhythm restore; engine/backup/README.md): the backup image with the
+  # engine's data volume writable. It runs as root with only the capabilities it needs: reading the backup
+  # container's private files, and giving restored files their owners and times back.
+  restore:
+    profiles: ["restore"]
+    image: rhythm-backup:${RHYTHM_VERSION:-dev}
+    build:
+      context: ../../engine/backup
+    user: "0:0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGDATABASE: ${RHYTHM_DB_NAME:-rhythm}
+      PGUSER: ${RHYTHM_DB_ADMIN_USER:-rhythm_admin}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      RESTIC_REPOSITORY: /backups/restic
+      RESTIC_PASSWORD_FILE: /run/secrets/backup_password
+      RHYTHM_ARCHIVE: /var/lib/rhythm/archive
+      RHYTHM_ARCHIVE_OWNER: "1654:1654"
+    secrets:
+      - postgres_password
+      - backup_password
+    volumes:
+      - engine-data:/var/lib/rhythm
+      - ${RHYTHM_BACKUP_DIR:-./data/backups}:/backups
+      - ${RHYTHM_BACKUP_STAGING_DIR:-./data/backup-staging}:/staging
+    networks:
+      - internal
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+    security_opt:
+      - no-new-privileges:true
+
+  # The rhythm command inside the engine image (cli/README.md): init, connect, disconnect, doctor, token, and the
+  # steps around `rhythm up`. The host wrappers (rhythm, rhythm.ps1 at the repository root) run it as
+  #   docker compose -f deploy/compose/compose.yaml --profile cli run --rm cli <command>
+  # It works in this folder (/work) and runs as root so it can give each file it writes the owner of the service
+  # that reads it (docs/configuration.md, open question Q-050). It reads secrets straight from /work/secrets, so it
+  # runs before they exist without Docker making folders in their place.
+  cli:
+    profiles: ["cli"]
+    image: rhythm-engine:${RHYTHM_VERSION:-dev}
+    build:
+      context: ../..
+      dockerfile: engine/Dockerfile
+    entrypoint: ["rhythm-engine"]
+    user: "0:0"
+    working_dir: /work
+    environment:
+      RHYTHM_CONFIG: /etc/rhythm/rhythm.yaml
+      RHYTHM_DB_FILE: /work/secrets/engine_db
+      RHYTHM_CLI_DATA: /data
+      # The project and image tag this command runs under, which init records in .env.
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME:-rhythm}
+      RHYTHM_VERSION: ${RHYTHM_VERSION:-dev}
+    configs:
+      - source: rhythm
+        target: /etc/rhythm/rhythm.yaml
+    volumes:
+      - .:/work
+      # The install's data folders, so `rhythm up` can give empty ones the right owner before the services use them.
+      - ${RHYTHM_NOTES_DIR:-./data/notes}:/data/notes
+      - ${RHYTHM_IMPORT_DIR:-./data/import}:/data/import
+      - ${RHYTHM_BACKUP_DIR:-./data/backups}:/data/backups
+      - ${RHYTHM_BACKUP_STAGING_DIR:-./data/backup-staging}:/data/backup-staging
+    networks:
+      - internal
+    security_opt:
+      - no-new-privileges:true
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password
+  engine_db:
+    file: ./secrets/engine_db
+  backup_password:
+    file: ./secrets/backup_password
+
+volumes:
+  pgdata: {}
+  engine-data: {}
+  titles-models: {}

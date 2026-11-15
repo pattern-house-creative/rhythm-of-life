@@ -1,0 +1,42 @@
+{
+  "name": "second-brain",
+  "title": "Second Brain",
+  "kinds": ["MemorySource"],
+  "summary": "Memories, their projects and links from a Second Brain memory service, read by reference.",
+  "unofficial": false,
+  "defaultEnabled": false,
+  "profile": null,
+  "docs": "docs/adapters/second-brain.md",
+  "settings": [
+    {
+      "key": "url",
+      "prompt": "The memory service's address",
+      "type": "url",
+      "required": true,
+      "help": "Its https origin with a trailing slash, such as https://brain.example.invalid/. There is no default."
+    },
+    {
+      "key": "teams",
+      "prompt": "Team workspace IDs to show as well (none for only your personal memories)",
+      "type": "list",
+      "pattern": "^[A-Za-z0-9_-]{1,100}$",
+      "default": []
+    },
+    {
+      "key": "owner",
+      "prompt": "Whose memories are these?",
+      "type": "person",
+      "default": "household"
+    }
+  ],
+  "secrets": [
+    {
+      "purpose": "token",
+      "prompt": "Paste the memory service's bearer token",
+      "source": "paste",
+      "required": true,
+      "help": "A member token from the service's own settings. It only needs to read."
+    }
+  ],
+  "connect": false
+}

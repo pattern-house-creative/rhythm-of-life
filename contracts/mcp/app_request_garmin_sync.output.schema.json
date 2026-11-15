@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_request_garmin_sync.output.schema.json",
+  "title": "app_request_garmin_sync structuredContent",
+  "description": "Whether a Garmin sync of yesterday and today now was accepted (at most one request every 15 minutes, none while a Garmin job is unfinished), and what is already under way. Listed only while adapters.garmin is on. See contracts/README.md section 2.2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["accepted", "pendingSince", "nextAllowedAt", "lastSyncedAt"],
+  "properties": {
+    "accepted": { "type": "boolean" },
+    "pendingSince": { "anyOf": [{ "$ref": "#/$defs/instant" }, { "type": "null" }], "description": "When the unfinished Garmin job was asked for; null when none waits." },
+    "nextAllowedAt": { "$ref": "#/$defs/instant", "description": "The earliest time a next request can be accepted (now, when one can be already)." },
+    "lastSyncedAt": { "anyOf": [{ "$ref": "#/$defs/instant" }, { "type": "null" }], "description": "The newest finished Garmin job." }
+  },
+  "$defs": {
+    "instant": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    }
+  }
+}

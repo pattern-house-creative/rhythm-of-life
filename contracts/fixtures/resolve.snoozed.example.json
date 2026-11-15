@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "queue": "due",
+  "action": "snooze",
+  "id": "6d3c2a10-0000-4000-8000-00000000a031",
+  "unchanged": false,
+  "still_counted": true,
+  "newly_counted": false,
+  "revision": 3,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "changed": [
+    "due"
+  ],
+  "due": {
+    "at": "2026-11-08T12:00:00Z",
+    "local": "2026-11-08 12:00",
+    "zone": "Europe/London",
+    "kind": "due",
+    "source": "explicit"
+  },
+  "before": {
+    "at": "2026-11-06T09:00:00Z",
+    "local": "2026-11-06 09:00",
+    "zone": "Europe/London",
+    "kind": "due",
+    "source": "explicit"
+  },
+  "result": null,
+  "previous": null,
+  "review_at": null,
+  "review": null,
+  "view": null,
+  "decision": null,
+  "note": null,
+  "insight_id": null,
+  "message": "Snoozed: due 2026-11-08 12:00 (Europe/London). Its date before is kept as a version (revision 3 now), history records it (due_changed), and undo(id) puts it back. That is within 48 hours, so the brief still counts it, as upcoming, until then.",
+  "notice": null
+}

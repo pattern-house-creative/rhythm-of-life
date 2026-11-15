@@ -1,0 +1,5 @@
+# Build output of the app and its server (the repo root ignores node_modules and dist too)
+build/
+.vercel/
+test-results/
+*.local

@@ -1,0 +1,58 @@
+# The titles-model evaluation's own Ollama (engine/titles-eval.sh, SB-P2-14, D-027). The same image and server
+# settings as the stack's `titles` and `titles-pull` services (deploy/compose/engine.compose.yaml), in a compose project
+# of its own with a port on this computer's loopback, so the evaluation reaches it from outside a container. Never part
+# of an install. The image is the one engine.compose.yaml pins; the script reads it from there.
+services:
+  server:
+    image: ${RHYTHM_TITLES_EVAL_IMAGE:?run this through engine/titles-eval.sh}
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_MODELS: /models
+      OLLAMA_KEEP_ALIVE: 5m
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_NOPRUNE: "1"
+    volumes:
+      - models:/models
+    # A published port needs a network that is not internal, so unlike the stack's server this one could reach the
+    # internet; the evaluation never asks it to.
+    ports:
+      - "127.0.0.1:${RHYTHM_TITLES_EVAL_PORT:-11534}:11434"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /root/.ollama
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: ${RHYTHM_TITLES_MEMORY:-4g}
+    restart: "no"
+
+  # The one step that downloads a model, as the stack's titles-pull does.
+  pull:
+    profiles: ["pull"]
+    image: ${RHYTHM_TITLES_EVAL_IMAGE:?run this through engine/titles-eval.sh}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >-
+        case "$$0" in sh|/bin/sh) echo "Name the model: run --rm pull <model>" >&2; exit 2;; esac;
+        ollama serve >/dev/null 2>&1 & until ollama list >/dev/null 2>&1; do sleep 1; done; ollama pull "$$0"
+    environment:
+      OLLAMA_HOST: 127.0.0.1:11434
+      OLLAMA_MODELS: /models
+    volumes:
+      - models:/models
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /root/.ollama
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+
+volumes:
+  models:

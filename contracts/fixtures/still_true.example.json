@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a011",
+  "revision": 2,
+  "scope": "shared",
+  "owner": "household",
+  "status": "canonical",
+  "scopes": "off",
+  "project": null,
+  "changed": ["checked"],
+  "unchanged": false,
+  "checked_at": "2026-11-03T09:00:00+00:00",
+  "was": "not_confirmed",
+  "retracted": [],
+  "message": "Confirmed as still true at 2026-11-03 09:00 UTC: nothing in it changed (revision 2, every version kept), and history records the confirmation. It leaves the stale queue, and its volatility's time starts again from now."
+}

@@ -1,0 +1,41 @@
+# Cloudflare exposure: a Cloudflare Tunnel (cloudflared) that carries two public host names to the stack, with
+# nothing published on the host. Cloudflare Access in front of the app is the household's login; the MCP host name
+# reaches only the engine's /mcp, where each AI client's bearer token is the gate.
+#
+# Included from deploy/compose/compose.yaml. The service starts only with the profile:
+#   COMPOSE_PROFILES=cloudflare in .env, or --profile cloudflare
+# Steps (tunnel, host names, Access policies), what it exposes and how to undo it: deploy/exposure/cloudflare/README.md.
+#
+# Secret: the tunnel token from the Cloudflare dashboard, one line, in
+#   deploy/compose/secrets/adapters/cloudflare_tunnel_token
+# read through TUNNEL_TOKEN_FILE (cloudflared 2025.4.0 or later), never an environment value or an argument.
+
+services:
+  cloudflared:
+    profiles: ["cloudflare"]
+    # Cloudflare supports a cloudflared release for one year, so this pin is bumped by hand (deploy/image-pins.txt).
+    image: ${RHYTHM_CLOUDFLARED_IMAGE:-cloudflare/cloudflared:2026.10.6}
+    # The image's entrypoint is "cloudflared". A remotely managed tunnel: its public host names and their services
+    # (http://app:8080, http://engine:8080) are set in the Cloudflare dashboard.
+    command: ["tunnel", "run"]
+    environment:
+      TUNNEL_TOKEN_FILE: /run/secrets/cloudflare_tunnel_token
+      # A container never replaces its own binary; a new version comes with a new image. The image sets this too.
+      NO_AUTOUPDATE: "true"
+    secrets:
+      - cloudflare_tunnel_token
+    networks:
+      # internal reaches app:8080 and engine:8080; egress reaches Cloudflare (outbound only).
+      - internal
+      - egress
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+secrets:
+  # Relative to this file. Same folder rhythm connect writes adapter secrets to.
+  cloudflare_tunnel_token:
+    file: ../../compose/secrets/adapters/cloudflare_tunnel_token

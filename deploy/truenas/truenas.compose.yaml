@@ -1,0 +1,20 @@
+# TrueNAS: keep the database and the engine's data on your own (encrypted) dataset instead of in Docker's volume
+# storage, which TrueNAS keeps on its apps pool. Merged after deploy/compose/compose.yaml; see deploy/truenas/README.md.
+#
+# Set in deploy/compose/.env (absolute paths of folders that exist, owned as the README says):
+#   RHYTHM_PGDATA_DIR        Postgres's data              owner 999:999,   mode 0700
+#   RHYTHM_ENGINE_DATA_DIR   the engine's archive, state   owner 1654:1654, mode 0750
+
+volumes:
+  pgdata:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${RHYTHM_PGDATA_DIR:?set RHYTHM_PGDATA_DIR in deploy/compose/.env}
+  engine-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${RHYTHM_ENGINE_DATA_DIR:?set RHYTHM_ENGINE_DATA_DIR in deploy/compose/.env}

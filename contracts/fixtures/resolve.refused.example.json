@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "needs_person",
+  "error": "Only a person does this, from the app or the terminal, never an AI client: tell the person, and leave it as it is."
+}

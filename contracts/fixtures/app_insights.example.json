@@ -1,0 +1,34 @@
+{
+  "insights": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-0000000e0002",
+      "kind": "discovery",
+      "title": "Steadier mornings after walks",
+      "summary": "In this fictional example, mornings that start with a walk stay in range a little longer.",
+      "whyItMatters": "A small habit that is easy to keep.",
+      "nextStep": "Note the walks for another week.",
+      "points": [
+        { "text": "Five of seven walking mornings stayed in range until noon.", "type": "observed", "source": 0 },
+        { "text": "The pattern may only reflect earlier breakfasts.", "type": "hypothesis" }
+      ],
+      "evidenceLevel": "weak",
+      "limitations": "One fictional week.",
+      "stars": [{ "graphId": "rhythm:data%3Anightscout:alex%3Aglucose", "title": "Glucose" }],
+      "sources": [{ "kind": "graph", "title": "Glucose data star", "locator": "rhythm:data%3Anightscout:alex%3Aglucose", "retrievedAt": "2026-10-28T07:00:00+00:00" }],
+      "generatedBy": "harness-daily",
+      "generatedAt": "2026-10-28T07:00:00+00:00",
+      "sourcesAsOf": "2026-10-28T06:55:00+00:00",
+      "supersedes": null,
+      "status": "saved",
+      "feedback": { "value": "interesting", "at": "2026-10-28T08:12:00.25+00:00", "until": null, "note": "Worth watching" },
+      "createdAt": "2026-10-28T07:00:01.5+00:00",
+      "updatedAt": "2026-10-28T08:12:00.25+00:00"
+    }
+  ],
+  "runs": [
+    { "id": "6d3c2a10-0000-4000-8000-0000000f0002", "generatedBy": "harness-daily", "outcome": "saved", "note": null,
+      "insightId": "6d3c2a10-0000-4000-8000-0000000e0002", "at": "2026-10-28T07:00:02+00:00" },
+    { "id": "6d3c2a10-0000-4000-8000-0000000f0001", "generatedBy": "harness-daily", "outcome": "quiet", "note": "Nothing new.",
+      "insightId": null, "at": "2026-10-27T07:00:02+00:00" }
+  ]
+}

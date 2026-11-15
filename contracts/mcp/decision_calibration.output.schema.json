@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/decision_calibration.output.schema.json",
+  "title": "decision_calibration answer",
+  "description": "The memory tool decision_calibration's answer (SB-P5-11, migration 060): how sure the person was against how their decisions turned out, over the caller's own scored decisions (an outcome right, wrong or mixed and a confidence: list_decisions state scored lists exactly these, so n is that list's length). A confidence below 50% is folded onto the other outcome; mixed counts half. Every figure says what it rests on and none is shown below its minimum (minimums: 10 decisions in all, 5 in a band, 5 for a topic): until n reaches minimums.decisions, ready is false and brier, gap, direction, headline, topic, topic_line, stated and hit are null and no band is shown; a band (50-59 to 90-95 percent, by folded confidence) always gives its counts, and its mean_confidence, hit_rate and 80% Wilson interval only when shown (ready, with at least minimums.band decisions in it). brier is the mean squared gap between each confidence and its outcome; gap the mean folded confidence less the folded hit rate; direction over (more sure than right), under, or in_line (inside the interval). kind says which line: not_ready, in_line, rate (the headline band's own rate: stated and hit are the percentages line names) or no_range (no band shown). source is the confidence source asked (all, stated or inferred). Reading it writes nothing. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "ready", "source", "n", "n_stated", "n_inferred", "minimums", "brier", "gap", "direction", "bands", "headline", "topic", "kind",
+        "line", "topic_line", "stated", "hit", "notice"],
+      "properties": {
+        "ok": { "const": true },
+        "ready": { "type": "boolean" },
+        "source": { "enum": ["all", "stated", "inferred"] },
+        "n": { "type": "integer", "minimum": 0, "description": "How many scored decisions it rests on." },
+        "n_stated": { "type": "integer", "minimum": 0 },
+        "n_inferred": { "type": "integer", "minimum": 0 },
+        "minimums": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["decisions", "band", "topic"],
+          "properties": {
+            "decisions": { "const": 10 },
+            "band": { "const": 5 },
+            "topic": { "const": 5 }
+          }
+        },
+        "brier": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "gap": { "type": ["number", "null"], "minimum": -0.5, "maximum": 0.95 },
+        "direction": { "enum": [null, "over", "under", "in_line"] },
+        "bands": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            { "$ref": "#/$defs/band", "properties": { "band": { "const": "50-59" } } },
+            { "$ref": "#/$defs/band", "properties": { "band": { "const": "60-69" } } },
+            { "$ref": "#/$defs/band", "properties": { "band": { "const": "70-79" } } },
+            { "$ref": "#/$defs/band", "properties": { "band": { "const": "80-89" } } },
+            { "$ref": "#/$defs/band", "properties": { "band": { "const": "90-95" } } }
+          ],
+          "items": false
+        },
+        "headline": { "enum": [null, "50-59", "60-69", "70-79", "80-89", "90-95"] },
+        "topic": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "n", "gap", "direction"],
+              "properties": {
+                "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+                "n": { "type": "integer", "minimum": 5 },
+                "gap": { "type": "number", "minimum": -1, "maximum": 1 },
+                "direction": { "enum": ["over", "under"] }
+              }
+            }
+          ]
+        },
+        "kind": { "enum": ["not_ready", "in_line", "rate", "no_range"] },
+        "line": { "type": "string", "minLength": 1, "maxLength": 400 },
+        "topic_line": { "type": ["string", "null"], "minLength": 1, "maxLength": 400 },
+        "stated": { "type": ["integer", "null"], "minimum": 50, "maximum": 95 },
+        "hit": { "type": ["integer", "null"], "minimum": 0, "maximum": 100 },
+        "notice": { "$ref": "memory.defs.schema.json#/$defs/notice" }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "ready": { "const": false },
+            "n": { "maximum": 9 },
+            "brier": { "type": "null" },
+            "gap": { "type": "null" },
+            "direction": { "const": null },
+            "headline": { "const": null },
+            "topic": { "type": "null" },
+            "kind": { "const": "not_ready" },
+            "topic_line": { "type": "null" },
+            "stated": { "type": "null" },
+            "hit": { "type": "null" },
+            "bands": { "items": { "properties": { "shown": { "const": false } } } }
+          }
+        },
+        {
+          "properties": {
+            "ready": { "const": true },
+            "n": { "minimum": 10 },
+            "brier": { "type": "number" },
+            "gap": { "type": "number" },
+            "direction": { "enum": ["over", "under", "in_line"] },
+            "kind": { "enum": ["in_line", "rate", "no_range"] }
+          },
+          "allOf": [
+            {
+              "anyOf": [
+                { "properties": { "kind": { "const": "rate" }, "headline": { "type": "string" }, "stated": { "type": "integer" }, "hit": { "type": "integer" } } },
+                { "properties": { "kind": { "enum": ["in_line", "no_range"] }, "stated": { "type": "null" }, "hit": { "type": "null" } } }
+              ]
+            },
+            {
+              "anyOf": [
+                { "properties": { "kind": { "const": "no_range" }, "headline": { "const": null } } },
+                { "properties": { "kind": { "enum": ["in_line", "rate"] } } }
+              ]
+            },
+            {
+              "anyOf": [
+                { "properties": { "topic": { "type": "null" }, "topic_line": { "type": "null" } } },
+                { "properties": { "topic": { "type": "object" }, "topic_line": { "type": "string" } } }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    { "$ref": "memory.defs.schema.json#/$defs/refusal" }
+  ],
+  "$defs": {
+    "band": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["band", "n", "n_stated", "n_inferred", "shown", "mean_confidence", "hit_rate", "interval"],
+      "properties": {
+        "band": { "enum": ["50-59", "60-69", "70-79", "80-89", "90-95"] },
+        "n": { "type": "integer", "minimum": 0 },
+        "n_stated": { "type": "integer", "minimum": 0 },
+        "n_inferred": { "type": "integer", "minimum": 0 },
+        "shown": { "type": "boolean", "description": "Its figures are given: calibration is ready and the band holds at least minimums.band decisions." },
+        "mean_confidence": { "type": ["number", "null"], "minimum": 0.5, "maximum": 0.95 },
+        "hit_rate": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "interval": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 } }
+          ],
+          "description": "The 80% Wilson interval around hit_rate: low and high."
+        }
+      },
+      "anyOf": [
+        { "properties": { "shown": { "const": false }, "mean_confidence": { "type": "null" }, "hit_rate": { "type": "null" }, "interval": { "type": "null" } } },
+        { "properties": { "shown": { "const": true }, "n": { "minimum": 5 }, "mean_confidence": { "type": "number" }, "hit_rate": { "type": "number" }, "interval": { "type": "array" } } }
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "command": {
+    "id": "6d3c2a10-0000-4000-8000-00000000c002",
+    "action": "open_star",
+    "args": { "star": "rhythm:data%3Acgm:alex%3Abody" },
+    "sender": { "kind": "screen", "screen": "fictional-hallway-screen2", "name": "Hallway PC" },
+    "sentAt": "2026-10-28T12:01:00+00:00",
+    "deliveredAt": "2026-10-28T12:01:00.04+00:00",
+    "doneAt": "2026-10-28T12:01:00.41+00:00",
+    "result": "shown",
+    "detail": { "summary": "Opened Alex · Body" },
+    "ms": { "deliver": 40, "show": 410 }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_sync.output.schema.json",
+  "title": "app_sync structuredContent",
+  "description": "Sync now from the Sources view. With no arguments, {adapters}: each enabled adapter on the engine's clock that the caller may ask. With adapter, {accepted, refused, adapter}: whether one batch now was accepted, why not (running, pending or too-soon), and that adapter's state. States and times only: never a row, a count or an error's words. See contracts/README.md section 2.2.",
+  "type": "object",
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "required": ["adapters"],
+      "properties": {
+        "adapters": { "type": "array", "maxItems": 64, "items": { "$ref": "#/$defs/adapter" } }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": ["accepted", "refused", "adapter"],
+      "properties": {
+        "accepted": { "type": "boolean" },
+        "refused": { "type": ["string", "null"], "enum": ["running", "pending", "too-soon", null] },
+        "adapter": { "$ref": "#/$defs/adapter" }
+      }
+    }
+  ],
+  "$defs": {
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter", "kind", "interval", "limit", "running", "pendingSince", "nextAllowedAt", "lastAskedAt", "lastFinishedAt", "outcome"],
+      "properties": {
+        "adapter": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,30}$" },
+        "kind": { "enum": ["measurements", "imports"] },
+        "interval": { "type": "integer", "minimum": 1 },
+        "limit": { "type": "integer", "minimum": 60 },
+        "running": { "type": "boolean" },
+        "pendingSince": { "$ref": "#/$defs/maybeInstant" },
+        "nextAllowedAt": { "$ref": "#/$defs/maybeInstant" },
+        "lastAskedAt": { "$ref": "#/$defs/maybeInstant" },
+        "lastFinishedAt": { "$ref": "#/$defs/maybeInstant" },
+        "outcome": { "type": ["string", "null"], "enum": ["complete", "failed", "timed-out", null] }
+      }
+    },
+    "maybeInstant": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "accepted": false,
+  "refused": "too-soon",
+  "adapter": {
+    "adapter": "garmin",
+    "kind": "measurements",
+    "interval": 60,
+    "limit": 900,
+    "running": false,
+    "pendingSince": null,
+    "nextAllowedAt": "2026-11-01T12:15:00.0000000+00:00",
+    "lastAskedAt": "2026-11-01T12:00:00.0000000+00:00",
+    "lastFinishedAt": "2026-11-01T12:00:31.0000000+00:00",
+    "outcome": "complete"
+  }
+}

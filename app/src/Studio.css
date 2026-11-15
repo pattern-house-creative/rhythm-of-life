@@ -1,0 +1,179 @@
+.studio-shell {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  padding: 0;
+  z-index: 900;
+  background: #0b141c;
+  color: #e4eef0;
+  display: flex;
+  flex-direction: column;
+  font: 14px var(--font-body, system-ui);
+  isolation: isolate;
+}
+.studio-shell header,
+.studio-shell footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #8fa9b72e;
+  flex-wrap: wrap;
+}
+.studio-shell header > div {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+.studio-shell nav {
+  display: flex;
+  gap: 8px;
+}
+.studio-shell button,
+.studio-shell input,
+.dashboard-controls button,
+.dashboard-controls select,
+.dashboard-controls input {
+  border: 1px solid #8fa9b744;
+  background: #14232b;
+  color: inherit;
+  padding: 7px 12px;
+  border-radius: 7px;
+  font: inherit;
+}
+.studio-shell button:disabled {
+  opacity: 0.4;
+}
+.studio-shell button:focus-visible,
+.studio-shell input:focus-visible {
+  outline: 2px solid #75d8b9;
+  outline-offset: 3px;
+}
+.studio-progress {
+  padding: 8px 20px;
+  color: #8fa9b7;
+}
+.studio-error {
+  padding: 8px 20px;
+  color: #e08a97;
+  margin: 0;
+}
+.studio-shell main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.studio-preview {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: auto;
+}
+.studio-layer {
+  position: absolute;
+  inset: 0;
+  min-height: 300px;
+}
+.studio-layer > .parts {
+  height: 100%;
+}
+.studio-layer.validating {
+  visibility: hidden;
+  pointer-events: none;
+}
+.studio-layer.visible {
+  visibility: visible;
+}
+.studio-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: #8fa9b7;
+}
+.studio-code {
+  width: 38%;
+  min-width: 280px;
+  padding: 16px;
+  border-left: 1px solid #8fa9b72e;
+  overflow: auto;
+  background: #0e1a22;
+}
+.studio-code h2 {
+  font-size: 14px;
+}
+.studio-code p,
+.studio-code ol {
+  color: #8fa9b7;
+  font-size: 12px;
+}
+.studio-code pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.studio-shell footer {
+  border-top: 1px solid #8fa9b72e;
+  border-bottom: 0;
+}
+.studio-shell form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+}
+.studio-shell input {
+  min-width: 120px;
+  flex: 1;
+  max-width: 480px;
+}
+.dashboard-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+.dashboard-controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dashboard-controls output {
+  padding: 8px;
+}
+.dashboard-controls > span {
+  color: #8fa9b7;
+  font-size: 12px;
+}
+@media (max-width: 700px) {
+  .studio-shell main {
+    flex-direction: column;
+  }
+  .studio-code {
+    width: 100%;
+    min-width: 0;
+    max-height: 40%;
+    border-left: 0;
+    border-top: 1px solid #8fa9b72e;
+  }
+  .studio-shell form {
+    flex-wrap: wrap;
+  }
+  .studio-shell header,
+  .studio-shell footer {
+    padding: 10px;
+  }
+  .studio-shell header > div {
+    gap: 10px;
+  }
+  .studio-shell nav {
+    gap: 5px;
+  }
+}

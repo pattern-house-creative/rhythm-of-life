@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0",
+  "schema": 26,
+  "models": [
+    {
+      "job": "embeddings",
+      "role": "live",
+      "name": "minilm",
+      "id": "minilm-l6-v2-quantized-afdb6f1a-mean-l2-v1",
+      "state": "on",
+      "index": { "passages": 1204, "indexing": true, "pending": 3, "pausedUntil": null },
+      "failure": null
+    },
+    {
+      "job": "titles",
+      "role": "live",
+      "name": "fictional-model:1b",
+      "id": null,
+      "state": "failing",
+      "index": null,
+      "failure": { "kind": "timeout", "at": "2026-10-28T07:00:00.0000000+00:00" }
+    }
+  ]
+}

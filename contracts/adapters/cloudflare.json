@@ -1,0 +1,17 @@
+{
+  "name": "cloudflare",
+  "title": "Cloudflare Tunnel and Access",
+  "kinds": ["Exposure"],
+  "summary": "The app behind Cloudflare Access and /mcp on its own host name, from the internet through a tunnel; one route for ChatGPT.",
+  "defaultEnabled": false,
+  "profile": "cloudflare",
+  "docs": "docs/adapters/cloudflare.md",
+  "settings": [
+    { "key": "hostname", "prompt": "Public host name of the app (put Cloudflare Access in front of it)", "type": "string", "required": true, "help": "For example rhythm.example.invalid: one level below your domain." },
+    { "key": "mcpHostname", "prompt": "Public host name for /mcp only", "type": "string", "required": true, "help": "For example rhythm-mcp.example.invalid. Also add it to engine.allowedHosts." }
+  ],
+  "secrets": [
+    { "purpose": "tunnel_token", "prompt": "Tunnel token (the part after --token in the dashboard's install command)", "source": "paste" }
+  ],
+  "connect": false
+}

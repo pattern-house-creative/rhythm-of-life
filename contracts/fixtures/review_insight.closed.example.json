@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000c001",
+  "action": "reopen",
+  "review": "proposed",
+  "view": "closed",
+  "unchanged": false,
+  "reviewed_at": null,
+  "message": "Reopened, but it stays closed because it was marked not useful or handled; new feedback brings it back. Who reviewed it and when is kept: insight_history."
+}

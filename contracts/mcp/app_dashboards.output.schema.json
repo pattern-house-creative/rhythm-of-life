@@ -1,0 +1,318 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_dashboards.output.schema.json",
+  "title": "app_dashboards structuredContent",
+  "description": "One shape per argument shape (contracts/README.md section 2.2): {} the list; {id, version?} one version with its page and feeds; {id, version?, data: true} what its feeds hold now; {id, version, layout, base, note} a screen's arrangement of the newest version (docs/dev/screens.md 10.7); {id, version?, map, cursor?} a map part's focused sky (10.4); {id, version, write} or {undo} a write's answer; {id, version, allowEdits} the new setting; {history: true} the newest writes; {cards: true} or {corner, dashboard} the corner cards; {pins: true} or {pin, pinned} the pinned stars. Feed payloads pass to the page as they come, so only their envelope is pinned here.",
+  "oneOf": [
+    {
+      "type": "object", "additionalProperties": false, "required": ["dashboards"],
+      "properties": { "dashboards": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/summary" } } }
+    },
+    {
+      "type": "object", "additionalProperties": false, "required": ["dashboard"],
+      "properties": { "dashboard": { "$ref": "#/$defs/version" } }
+    },
+    { "$ref": "#/$defs/data" },
+    {
+      "description": "A screen's arrangement, saved as the newest version's next layout revision.",
+      "type": "object", "additionalProperties": false, "required": ["ok", "layout", "layoutRevision"],
+      "properties": {
+        "ok": { "const": true }, "layout": { "$ref": "#/$defs/layout" },
+        "layoutRevision": { "type": "integer", "minimum": 1, "maximum": 1000000 }
+      }
+    },
+    {
+      "description": "A screen's arrangement not saved because the layout changed since its base: the layout as it stands, to apply the change to once more.",
+      "type": "object", "additionalProperties": false, "required": ["ok", "reason", "layout", "layoutRevision"],
+      "properties": {
+        "ok": { "const": false }, "reason": { "type": "string", "minLength": 1, "maxLength": 400 }, "layout": { "$ref": "#/$defs/layout" },
+        "layoutRevision": { "$ref": "#/$defs/layout-revision" }
+      }
+    },
+    {
+      "description": "A map part's focused sky: the stars of the whole readable map that meet its focus, as app_graph pages them (graph.nodeLimit a page, cursor o:N), ranked as its overview, and matched, the count of every match.",
+      "type": "object", "additionalProperties": false, "required": ["map"],
+      "properties": {
+        "map": {
+          "type": "object", "additionalProperties": false,
+          "required": ["part", "focus", "matched", "nodes", "edges", "nextCursor", "completeness", "issues"],
+          "properties": {
+            "part": { "$ref": "#/$defs/part-id" },
+            "focus": { "$ref": "#/$defs/focus" },
+            "matched": { "type": "integer", "minimum": 0 },
+            "nodes": { "$ref": "app_graph.output.schema.json#/properties/nodes" },
+            "edges": { "$ref": "app_graph.output.schema.json#/properties/edges" },
+            "nextCursor": { "$ref": "app_graph.output.schema.json#/properties/nextCursor" },
+            "completeness": { "$ref": "app_graph.output.schema.json#/properties/completeness" },
+            "issues": { "$ref": "app_graph.output.schema.json#/properties/issues" }
+          }
+        }
+      }
+    },
+    {
+      "type": "object", "additionalProperties": false, "required": ["ok", "write"],
+      "properties": { "ok": { "const": true }, "write": { "$ref": "#/$defs/written" } }
+    },
+    {
+      "type": "object", "additionalProperties": false, "required": ["ok", "reason"],
+      "properties": { "ok": { "const": false }, "reason": { "type": "string", "minLength": 1, "maxLength": 400 } }
+    },
+    {
+      "type": "object", "additionalProperties": false, "required": ["id", "version", "editsAllowed"],
+      "properties": { "id": { "$ref": "#/$defs/uuid" }, "version": { "$ref": "#/$defs/version-number" }, "editsAllowed": { "type": "boolean" } }
+    },
+    {
+      "type": "object", "additionalProperties": false, "required": ["writes"],
+      "properties": { "writes": { "type": "array", "maxItems": 50, "items": { "$ref": "#/$defs/written" } } }
+    },
+    {
+      "type": "object", "additionalProperties": false, "required": ["cards"],
+      "properties": {
+        "cards": {
+          "type": "object", "additionalProperties": false,
+          "description": "Each corner showing a dashboard's card, with that dashboard's id; a corner left out shows its own tile while its source is connected, else nothing (main: a short hint).",
+          "properties": {
+            "main": { "$ref": "#/$defs/uuid" }, "recovery": { "$ref": "#/$defs/uuid" },
+            "training": { "$ref": "#/$defs/uuid" }, "changed": { "$ref": "#/$defs/uuid" },
+            "own": {
+              "type": "array", "maxItems": 4, "uniqueItems": true, "items": { "$ref": "#/$defs/corner" },
+              "description": "Only for a reader bound to a person, with memory.scopes on (a viewer session, migration 032): the corners that are its person's own choice, the stat card included, sorted by name (changed, main, recovery, training), not in the screen's corner order; every other corner shows the household's. Left out for every other reader, whose corners are all its own."
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object", "additionalProperties": false, "required": ["pins"],
+      "properties": { "pins": { "type": "array", "maxItems": 24, "items": { "type": "string", "minLength": 1, "maxLength": 1000 } } }
+    }
+  ],
+  "$defs": {
+    "summary": {
+      "description": "A version as the list shows it: no page and no feeds.",
+      "allOf": [{ "$ref": "#/$defs/fields" }],
+      "additionalProperties": false,
+      "properties": {
+        "id": true, "version": true, "latest": true, "title": true, "description": true, "stars": true, "note": true, "restoredFrom": true,
+        "savedAt": true, "createdAt": true, "updatedAt": true, "writes": true, "editsAllowed": true, "corners": true, "versions": true,
+        "layout": true, "layoutRevision": true, "layoutNote": true, "layoutSavedAt": true
+      }
+    },
+    "version": {
+      "description": "A version with its page (html) and feeds.",
+      "allOf": [{ "$ref": "#/$defs/fields" }],
+      "additionalProperties": false,
+      "required": ["feeds", "html"],
+      "properties": {
+        "id": true, "version": true, "latest": true, "title": true, "description": true, "stars": true, "note": true, "restoredFrom": true,
+        "savedAt": true, "createdAt": true, "updatedAt": true, "writes": true, "editsAllowed": true, "corners": true, "versions": true,
+        "layout": true, "layoutRevision": true, "layoutNote": true, "layoutSavedAt": true,
+        "feeds": { "type": "array", "minItems": 1, "maxItems": 12, "items": { "$ref": "#/$defs/feed" } },
+        "html": { "type": "string", "minLength": 1, "maxLength": 300000 }
+      }
+    },
+    "fields": {
+      "type": "object",
+      "required": ["id", "version", "latest", "title", "description", "stars", "note", "restoredFrom", "savedAt", "createdAt", "updatedAt",
+        "writes", "editsAllowed", "corners", "versions", "layout", "layoutRevision", "layoutNote", "layoutSavedAt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "version": { "$ref": "#/$defs/version-number" },
+        "latest": { "$ref": "#/$defs/version-number" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "description": { "type": "string", "maxLength": 600 },
+        "stars": {
+          "type": "array", "minItems": 1, "maxItems": 12,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["graphId", "title"],
+            "properties": { "graphId": { "type": "string", "minLength": 1, "maxLength": 1000 }, "title": { "type": "string", "maxLength": 1000 } }
+          }
+        },
+        "note": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "restoredFrom": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/version-number" }] },
+        "savedAt": { "$ref": "#/$defs/instant" },
+        "createdAt": { "$ref": "#/$defs/instant" },
+        "updatedAt": { "$ref": "#/$defs/instant" },
+        "writes": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/declared" } },
+        "editsAllowed": { "type": "boolean" },
+        "corners": { "type": "array", "maxItems": 4, "items": { "$ref": "#/$defs/corner" } },
+        "layout": { "$ref": "#/$defs/maybeLayout" },
+        "layoutRevision": { "$ref": "#/$defs/layout-revision" },
+        "layoutNote": { "$ref": "#/$defs/layout-note" },
+        "layoutSavedAt": { "$ref": "#/$defs/maybeInstant" },
+        "versions": {
+          "type": "array", "maxItems": 100,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["version", "note", "restoredFrom", "savedAt"],
+            "properties": {
+              "version": { "$ref": "#/$defs/version-number" },
+              "note": { "type": "string", "minLength": 1, "maxLength": 500 },
+              "restoredFrom": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/version-number" }] },
+              "savedAt": { "$ref": "#/$defs/instant" }
+            }
+          }
+        }
+      }
+    },
+    "feed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind"],
+      "properties": {
+        "name": { "$ref": "#/$defs/name" },
+        "kind": { "enum": ["data", "contents", "links", "log"] },
+        "star": { "type": "string", "maxLength": 1000 },
+        "days": { "type": "integer", "minimum": 1, "maximum": 3650 },
+        "by": { "enum": ["reading", "day"] },
+        "metrics": { "type": "array", "maxItems": 40, "items": { "type": "string", "minLength": 1, "maxLength": 100 } },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 60 },
+        "log": { "$ref": "#/$defs/log" },
+        "subject": { "$ref": "#/$defs/subject" }
+      }
+    },
+    "declared": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind"],
+      "properties": {
+        "name": { "$ref": "#/$defs/name" },
+        "kind": { "enum": ["log", "sheet", "doc"] },
+        "log": { "$ref": "#/$defs/log" },
+        "subject": { "$ref": "#/$defs/subject" },
+        "star": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "range": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "appendTo": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "section": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "table": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "append": { "type": "boolean" }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asOf", "feeds", "dashboard"],
+      "properties": {
+        "asOf": { "$ref": "#/$defs/instant" },
+        "feeds": {
+          "type": "object",
+          "maxProperties": 12,
+          "propertyNames": { "$ref": "#/$defs/name" },
+          "additionalProperties": {
+            "type": "object",
+            "required": ["kind", "status", "asOf"],
+            "properties": {
+              "kind": { "enum": ["data", "contents", "links", "log"] },
+              "status": { "enum": ["ok", "unavailable"] },
+              "asOf": { "$ref": "#/$defs/instant" },
+              "reason": { "type": "string", "maxLength": 300 },
+              "star": {
+                "type": "object", "required": ["graphId", "title"],
+                "properties": { "graphId": { "type": "string", "minLength": 1, "maxLength": 1000 }, "title": { "type": ["string", "null"], "maxLength": 1000 } }
+              },
+              "log": { "$ref": "#/$defs/log" }
+            }
+          }
+        },
+        "dashboard": {
+          "description": "The version whose feeds these are, with its layout as it stands, so a screen sees another screen's arrangement at its next read.",
+          "type": "object", "additionalProperties": false, "required": ["id", "version", "layout", "layoutRevision", "layoutNote", "layoutSavedAt"],
+          "properties": {
+            "id": { "$ref": "#/$defs/uuid" }, "version": { "$ref": "#/$defs/version-number" },
+            "layout": { "$ref": "#/$defs/maybeLayout" }, "layoutRevision": { "$ref": "#/$defs/layout-revision" },
+            "layoutNote": { "$ref": "#/$defs/layout-note" }, "layoutSavedAt": { "$ref": "#/$defs/maybeInstant" }
+          }
+        }
+      }
+    },
+    "written": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "dashboard", "version", "name", "kind", "target", "summary", "before", "after", "writtenAt", "undoneAt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "dashboard": { "$ref": "#/$defs/uuid" },
+        "version": { "$ref": "#/$defs/version-number" },
+        "name": { "$ref": "#/$defs/name" },
+        "kind": { "enum": ["log", "sheet", "doc"] },
+        "target": { "type": "object" },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "before": true,
+        "after": true,
+        "writtenAt": { "$ref": "#/$defs/instant" },
+        "undoneAt": { "$ref": "#/$defs/maybeInstant" }
+      }
+    },
+    "maybeLayout": {
+      "description": "A version's layout as it stands: its last arrangement, else the layout it was saved with; null when it was saved without one, which is its page alone.",
+      "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/layout" }]
+    },
+    "layout": {
+      "description": "A dashboard's grid (docs/dev/screens.md 10.2-10.4): 1-12 parts on 12 columns by 12 rows of cells. The engine also checks what this schema can't: exactly one page part, at most 2 maps, 4 cards and one of each other kind, no two parts overlapping, each kind's smallest size (page 3 x 3, map 4 x 4, insights 3 x 2, the others 2 x 2), a focus only on a map, a dashboard on every card and nowhere else, and at most 8,000 characters as stored.",
+      "type": "object", "additionalProperties": false, "required": ["parts"],
+      "properties": { "parts": { "type": "array", "minItems": 1, "maxItems": 12, "items": { "$ref": "#/$defs/part" } } }
+    },
+    "part": {
+      "description": "One part: x and y its top left cell, w and h its size in cells, inside the grid.",
+      "type": "object", "additionalProperties": false, "required": ["id", "kind", "x", "y", "w", "h"],
+      "properties": {
+        "id": { "$ref": "#/$defs/part-id" },
+        "kind": { "enum": ["page", "map", "glucose", "recovery", "training", "changed", "insights", "card"] },
+        "x": { "type": "integer", "minimum": 0, "maximum": 11 },
+        "y": { "type": "integer", "minimum": 0, "maximum": 11 },
+        "w": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "h": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "focus": { "$ref": "#/$defs/focus" },
+        "dashboard": {
+          "description": "A card's dashboard. With memory.scopes on, a card of a dashboard this reader can't read, or one deleted since, answers null, with unavailable true: no id and no title (docs/dev/memory.md section 8).",
+          "oneOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }]
+        },
+        "unavailable": { "const": true }
+      }
+    },
+    "part-id": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$" },
+    "focus": {
+      "description": "A map part's focus (docs/dev/screens.md 10.4), as stored: trimmed, lists without repeats, near's depth written out; at most 1,500 characters.",
+      "type": "object", "additionalProperties": false, "minProperties": 1,
+      "properties": {
+        "query": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "near": {
+          "type": "object", "additionalProperties": false, "required": ["star", "depth"],
+          "properties": { "star": { "type": "string", "minLength": 1, "maxLength": 1000 }, "depth": { "enum": [1, 2] } }
+        },
+        "types": {
+          "type": "array", "minItems": 1, "maxItems": 7, "uniqueItems": true,
+          "items": { "enum": ["theme", "project", "note", "record", "document", "memory", "decision"] }
+        },
+        "providers": { "type": "array", "minItems": 1, "maxItems": 20, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,40}$" } },
+        "groups": { "type": "array", "minItems": 1, "maxItems": 20, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 300 } },
+        "owners": { "type": "array", "minItems": 1, "maxItems": 10, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" } },
+        "links": {
+          "type": "array", "minItems": 1, "maxItems": 4, "uniqueItems": true,
+          "items": { "enum": ["verified", "suggested", "inferred", "unverified"] }
+        }
+      }
+    },
+    "layout-revision": {
+      "description": "How often the version was arranged since it was saved; 0 for the layout it was saved with.",
+      "type": "integer", "minimum": 0, "maximum": 1000000
+    },
+    "layout-note": {
+      "description": "The last arrangement's note, in plain words; null for the layout the version was saved with.",
+      "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1, "maxLength": 500 }]
+    },
+    "corner": { "enum": ["main", "recovery", "training", "changed"] },
+    "name": { "type": "string", "pattern": "^[a-z][A-Za-z0-9_]{0,39}$" },
+    "log": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,39}$" },
+    "subject": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" },
+    "version-number": { "type": "integer", "minimum": 1, "maximum": 10000 },
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "instant": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "maybeInstant": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    }
+  }
+}

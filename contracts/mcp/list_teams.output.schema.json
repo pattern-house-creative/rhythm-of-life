@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_teams.output.schema.json",
+  "title": "list_teams answer",
+  "description": "The memory tool list_teams's answer (SB-P3-09): the shared scopes the caller reads and writes. Rhythm has one, Family, the household's, read by its members and the household view with memory.scopes on and by everyone with it off; empty for a person outside Family. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "teams",
+        "scopes",
+        "message"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "teams": {
+          "type": "array",
+          "maxItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "workspace",
+              "owner",
+              "members",
+              "primary"
+            ],
+            "properties": {
+              "id": {
+                "const": "family"
+              },
+              "name": {
+                "const": "Family"
+              },
+              "workspace": {
+                "const": "shared"
+              },
+              "owner": {
+                "const": "household"
+              },
+              "members": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "primary": {
+                "const": true
+              }
+            }
+          }
+        },
+        "scopes": {
+          "$ref": "memory.defs.schema.json#/$defs/scopes"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

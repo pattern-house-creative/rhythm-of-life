@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "op": "undo_group",
+  "group": "djEuNmQzYzJhMTAwMDAwNDAwMDgwMDAwMDAwMDAwMGIwMDEuMi42ZDNjMmExMDAwMDA0MDAwODAwMDAwMDAwMDAwYjAwMi4z",
+  "total": 2,
+  "remaining": 0,
+  "done": true,
+  "capped": false,
+  "results": [
+    { "id": "6d3c2a10-0000-4000-8000-00000000b001", "result": "undone" },
+    { "id": "6d3c2a10-0000-4000-8000-00000000b002", "result": "changed_since" }
+  ],
+  "redo": "djEuNmQzYzJhMTAwMDAwNDAwMDgwMDAwMDAwMDAwMGIwMDEuMy42ZDNjMmExMDAwMDA0MDAwODAwMDAwMDAwMDAwYjAwMS4z"
+}

@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/resolve_insight_candidate.output.schema.json",
+  "title": "resolve_insight_candidate answer",
+  "description": "The memory tool resolve_insight_candidate's answer (SB-P5-05, migration 064): one insight candidate used (action use: an insight was written from the pair) or rejected (action reject: the pair says nothing worth saying). Either way it leaves list_insight_candidates and the nightly pass never offers the pair again; the decision is the candidate's, so neither memory changes (no revision, version or history row of a memory), and who decided, when and through which channel and client is kept with the candidate. unchanged true: it was so decided already, and nothing was written; decided_at is when it was. Anyone who reads the pair's scope may decide it. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body (unknown: no listed candidate the caller reads by that id, also one whose memories since left its scope, were held, marked wrong, ended or trashed; invalid: the other decision on a decided candidate). Since SB-P5-06 (migration 066) it takes note and insight_id, and answers both, with a notice that the note is stored data; a repeat answers what it was first told, insight_id only when the caller reads that insight's scope (null otherwise).",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "action",
+        "status",
+        "unchanged",
+        "decided_at",
+        "note",
+        "insight_id",
+        "message",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "action": {
+          "enum": [
+            "use",
+            "reject"
+          ]
+        },
+        "status": {
+          "enum": [
+            "used",
+            "rejected"
+          ]
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "decided_at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant"
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Why it was declined or used, in the deciding client's words: stored data."
+        },
+        "insight_id": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/uuid"
+            }
+          ],
+          "description": "The insight written from the pair: one the caller read when it was named, citing both memories and no wider than the pair. On a repeat the one kept, when the caller reads that insight's scope; else null."
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "action": {
+              "const": "use"
+            },
+            "status": {
+              "const": "used"
+            }
+          }
+        },
+        {
+          "properties": {
+            "action": {
+              "const": "reject"
+            },
+            "status": {
+              "const": "rejected"
+            },
+            "insight_id": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

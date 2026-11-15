@@ -1,0 +1,18 @@
+{
+  "name": "rhythm-of-life",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "description": "Self-hosted Rhythm of Life: a calm ambient app and a knowledge engine your own AI reaches over MCP.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "scrub": "node scripts/scrub-check.mjs --all",
+    "scrub:history": "node scripts/scrub-check.mjs --history",
+    "test": "node --test \"scripts/*.test.mjs\"",
+    "manifest:check": "node scripts/import-manifest.mjs --check",
+    "licenses:check": "node scripts/dependency-inventory.mjs"
+  }
+}

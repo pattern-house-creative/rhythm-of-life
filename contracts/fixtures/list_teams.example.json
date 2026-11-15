@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "scopes": "on",
+  "teams": [
+    {
+      "id": "family",
+      "name": "Family",
+      "workspace": "shared",
+      "owner": "household",
+      "members": 2,
+      "primary": true
+    }
+  ],
+  "message": "One shared scope, Family: pass workspace shared on remember to save a memory there for every member to see."
+}

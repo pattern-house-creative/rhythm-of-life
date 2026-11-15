@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a001",
+  "revision": 1,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": {
+    "id": "6d3c2a10-0000-4000-8000-00000000e001",
+    "slug": "allotment",
+    "name": null,
+    "created": true
+  },
+  "changed": [],
+  "unchanged": false,
+  "replayed": false,
+  "dropped_tags": [
+    "status:canonical"
+  ],
+  "held": null,
+  "message": "Stored as a draft, a household memory, visible to everyone in the household (per-person scopes are off). set_status canonical confirms it once the person agrees it is right. Made the project allotment. Left off tags the engine sets itself: status:canonical."
+}

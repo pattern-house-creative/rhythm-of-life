@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "POST /capture, a capture by its fields",
+  "description": "A webhook, CI job or shortcut saves one memory with a capture token (contracts/README.md section 6). A body with text and only these fields is a capture by them; any other JSON object is kept whole (capture_webhook.input.schema.json).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "text"
+  ],
+  "properties": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The memory's text: not blank, at most 131072 bytes of UTF-8. Text that reads like instructions, holds hidden characters or runs past 32 KiB is held for a person's review."
+    },
+    "tags": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "maxItems": 64,
+      "items": {
+        "type": "string"
+      },
+      "description": "Words to find it by. A tag in a namespace the engine sets itself is left off and named in the answer."
+    },
+    "scope": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The token's one scope, if the caller wants that checked: private (personal) or shared (Family, company). Any other scope is refused (403)."
+    },
+    "project": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z0-9][a-z0-9-]{0,63}$",
+      "description": "A project in the token's scope, made when new, as a write names one."
+    },
+    "source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z][a-z0-9_.-]{0,63}$",
+      "not": {
+        "enum": [
+          "app",
+          "cli",
+          "system"
+        ]
+      },
+      "description": "Where it came from, such as ci or shortcut; capture when absent. Never one of the engine's own channels."
+    },
+    "mirror": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Za-z0-9._:/#-]{1,200}$",
+      "description": "The outside item's id: this memory mirrors it. The same token capturing the same id again changes that memory, and nothing else may change it while the connection stands."
+    },
+    "idempotencyKey": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Za-z0-9._:-]{8,200}$",
+      "description": "The same key and request apply once. May come in the Idempotency-Key header instead."
+    }
+  }
+}

@@ -1,0 +1,18 @@
+# Every third-party image the stack runs or builds from, and how it moves (deploy/README.md, "Pinned images").
+#
+#   <image>  <the day the pin was set or last checked against upstream's releases, or "floating">  <where it is set>
+#
+# A dated pin moves only when someone bumps it: where it is set, everywhere the docs name it, and here, with the day.
+# ./rhythm upgrade names each pin last checked over 90 days ago. A floating tag gets upstream's patch releases whenever
+# its image is built with --pull, as ./rhythm upgrade does. `npm test` checks this list against the files.
+
+pgvector/pgvector:0.8.7-pg17-bookworm         2026-10-30  deploy/compose/engine.compose.yaml (RHYTHM_POSTGRES_IMAGE)
+ollama/ollama:0.40.13                         2026-10-30  deploy/compose/engine.compose.yaml (RHYTHM_OLLAMA_IMAGE)
+cloudflare/cloudflared:2026.10.6              2026-10-30  deploy/exposure/cloudflare/compose.yaml (RHYTHM_CLOUDFLARED_IMAGE)
+ghcr.io/openai/tunnel-client:v0.0.18          2026-10-30  deploy/exposure/openai-tunnel/compose.yaml (RHYTHM_OPENAI_TUNNEL_IMAGE)
+tailscale/tailscale:v1.88.3                   2026-10-29  deploy/exposure/tailscale/compose.yaml (RHYTHM_TAILSCALE_IMAGE)
+caddy:2.10.2-alpine                           2026-10-29  deploy/exposure/reverse-proxy/compose.yaml (RHYTHM_CADDY_IMAGE)
+mcr.microsoft.com/dotnet/sdk:10.0.403         2026-10-30  engine/Dockerfile (engine/global.json accepts it)
+mcr.microsoft.com/dotnet/aspnet:10.0-noble    floating    engine/Dockerfile
+postgres:17-alpine                            floating    engine/backup/Dockerfile
+node:24-alpine                                floating    app/Dockerfile

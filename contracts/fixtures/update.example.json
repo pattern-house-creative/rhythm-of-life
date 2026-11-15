@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a001",
+  "revision": 3,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": {
+    "id": "6d3c2a10-0000-4000-8000-00000000e001",
+    "slug": "allotment",
+    "name": null,
+    "created": false
+  },
+  "changed": [
+    "content",
+    "tags"
+  ],
+  "unchanged": false,
+  "replayed": false,
+  "dropped_tags": [],
+  "held": null,
+  "message": "Changed content, tags; the state before is kept as a version, which undo puts back."
+}

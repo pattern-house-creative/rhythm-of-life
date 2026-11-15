@@ -1,0 +1,56 @@
+{
+  "name": "drive",
+  "title": "Google Drive",
+  "kinds": ["DocumentSource", "Writer"],
+  "summary": "Docs, Sheets and other files in chosen Drive folders as stars; dashboards can write to Sheets and Docs.",
+  "unofficial": false,
+  "defaultEnabled": false,
+  "profile": null,
+  "docs": "docs/adapters/drive.md",
+  "settings": [
+    {
+      "key": "roots",
+      "prompt": "Drive folder IDs to show (the part after /folders/ in a folder's address)",
+      "type": "list",
+      "pattern": "^[A-Za-z0-9_-]{1,200}$",
+      "default": [],
+      "required": true,
+      "help": "Only files under these folders become stars. Up to 20; a single file's ID also works."
+    },
+    {
+      "key": "edits",
+      "prompt": "Let dashboards write to Sheets and Docs?",
+      "type": "bool",
+      "default": false,
+      "help": "Asks Google for a second, edit grant. Each dashboard still needs Allow edits in the app."
+    },
+    {
+      "key": "owner",
+      "prompt": "Whose files are these?",
+      "type": "person",
+      "default": "household"
+    }
+  ],
+  "secrets": [
+    {
+      "purpose": "oauth_client",
+      "prompt": "Paste the OAuth client JSON your Google Cloud project gives for a Desktop app",
+      "source": "paste",
+      "required": true,
+      "help": "Google Cloud console, APIs & Services, Credentials, Create credentials, OAuth client ID, Desktop app, then Download JSON."
+    },
+    {
+      "purpose": "read_token",
+      "prompt": "Read access to Drive (Google's consent page)",
+      "source": "connect",
+      "required": true
+    },
+    {
+      "purpose": "edit_token",
+      "prompt": "Edit access to Sheets and Docs (Google's consent page, only when edits is on)",
+      "source": "connect",
+      "required": false
+    }
+  ],
+  "connect": true
+}

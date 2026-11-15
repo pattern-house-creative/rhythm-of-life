@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/history.output.schema.json",
+  "title": "history answer",
+  "description": "The memory tool history's answer (SB-P3-09): a memory's changes newest first, from the change that brought it into a scope the caller reads; next continues with older revisions. A state held for review has no preview. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "revision",
+        "changes",
+        "next",
+        "cut",
+        "earlier_by",
+        "kept",
+        "oldest_kept",
+        "pruned",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "changes": {
+          "type": "array",
+          "maxItems": 400,
+          "items": {
+            "$ref": "memory.defs.schema.json#/$defs/change"
+          }
+        },
+        "next": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "Pass as before for older revisions; null at the end."
+        },
+        "cut": {
+          "type": "boolean",
+          "description": "Earlier history lies in a scope the caller does not read."
+        },
+        "earlier_by": {
+          "$ref": "memory.defs.schema.json#/$defs/person"
+        },
+        "kept": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "oldest_kept": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "pruned": {
+          "type": "boolean"
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

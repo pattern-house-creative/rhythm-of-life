@@ -1,0 +1,86 @@
+/* The bookmark's offer in the Memories view (PageBookmark.tsx, SB-P7-03), under quick capture. */
+.page-bookmark {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: #c9dbe1;
+}
+.page-bookmark summary {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #a8cddc;
+  cursor: pointer;
+}
+.page-bookmark[open] > :not(summary) {
+  margin-top: 6px;
+}
+.page-bookmark-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 16px;
+  color: #0b1418;
+  background: #a6dccd;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: grab;
+}
+.page-bookmark-hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #8fa5b2;
+}
+.page-bookmark-row {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+/* The box for what is said draws nothing, and is there before anything is said in it. */
+.page-bookmark-said {
+  display: contents;
+}
+.page-bookmark summary:focus-visible,
+.page-bookmark-code:focus-visible {
+  outline: 2px solid #95d2d9;
+  outline-offset: 1px;
+}
+.page-bookmark-row button {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 18px;
+  font-size: 12px;
+  color: #c9e2ea;
+  background: #accde414;
+}
+.page-bookmark-row button:hover {
+  background: #accde426;
+}
+.page-bookmark-code {
+  width: 100%;
+  padding: 8px 10px;
+  font:
+    12px/1.4 ui-monospace,
+    monospace;
+  color: #c9dbe1;
+  background: #0a1217cc;
+  border: 1px solid #93b4c333;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+  resize: none;
+}
+/* A finger's room and no zoom on any phone, as the Memories view gives. */
+@media (max-width: 760px), (max-height: 500px) {
+  .page-bookmark summary,
+  .page-bookmark-link,
+  .page-bookmark-row button {
+    min-height: 40px;
+  }
+  .page-bookmark-code {
+    font-size: 16px;
+  }
+}

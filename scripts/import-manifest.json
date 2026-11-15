@@ -1,0 +1,2621 @@
+{
+  "about": "Every file brought into this repo from a private source, one entry per file, sorted by target. See docs/dev/importing.md. Labels only: never a local path, host or private repository name.",
+  "sources": {
+    "private-app": {
+      "description": "the private app repository: PWA, facade handlers, tests",
+      "pinned": "5feddc8"
+    },
+    "private-engine": {
+      "description": "the private engine repository: .NET knowledge engine, migrations, tests",
+      "pinned": "27ab85d"
+    },
+    "platform": {
+      "description": "the original platform folder, not under git: Dockerfiles, compose, scripts",
+      "pinned": "snapshot-2026-10-29"
+    },
+    "carelink-reader": {
+      "description": "the CareLink reader: a third-party MIT project plus local changes; for the separate plugin repo only",
+      "pinned": "d88ca6c"
+    },
+    "private-harness": {
+      "description": "the private AI-harness notes, not under git: the scheduled daily-insight task text; pinned as a dated snapshot",
+      "pinned": "snapshot-2026-10-29"
+    }
+  },
+  "entries": [
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": ".oxlintrc.json",
+      "targetPath": "app/.oxlintrc.json",
+      "reason": "the app's build, type-check, test or lint configuration",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": ".prettierignore",
+      "targetPath": "app/.prettierignore",
+      "reason": "the app's build, type-check, test or lint configuration",
+      "changes": [
+        "ignores build/ (the server build) instead of private folders"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "api/dashboards.ts",
+      "targetPath": "app/api/dashboards.ts",
+      "reason": "hosted front-end functions around the shared handlers (deploy/vercel/)",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "api/garmin-sync.ts",
+      "targetPath": "app/api/garmin-sync.ts",
+      "reason": "hosted front-end functions around the shared handlers (deploy/vercel/)",
+      "changes": [
+        "now a thin wrapper around handleGarminSync in server/routes.ts",
+        "comment no longer names the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "api/graph-refresh.ts",
+      "targetPath": "app/api/graph-refresh.ts",
+      "reason": "hosted front-end functions around the shared handlers (deploy/vercel/)",
+      "changes": [
+        "now a thin wrapper around handleGraphRefresh in server/routes.ts",
+        "comment no longer names the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "api/graph.ts",
+      "targetPath": "app/api/graph.ts",
+      "reason": "hosted front-end functions around the shared handlers (deploy/vercel/)",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "api/insights.ts",
+      "targetPath": "app/api/insights.ts",
+      "reason": "hosted front-end functions around the shared handlers (deploy/vercel/)",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "api/observatory.ts",
+      "targetPath": "app/api/observatory.ts",
+      "reason": "hosted front-end functions around the shared handlers (deploy/vercel/)",
+      "changes": [
+        "now a thin wrapper around handleObservatory in server/routes.ts",
+        "the hosted-deployment health mode switch removed"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "index.html",
+      "targetPath": "app/index.html",
+      "reason": "the PWA's entry page",
+      "changes": [
+        "title is the product name without a version",
+        "description no longer says the sky is a fictional demo only"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "package-lock.json",
+      "targetPath": "app/package-lock.json",
+      "reason": "the app's dependencies, pinned by the lock file",
+      "changes": [
+        "package renamed rhythm-of-life-app, version 0.0.0",
+        "yaml added as the one runtime dependency; the other packages are build-time (dev) dependencies"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "package.json",
+      "targetPath": "app/package.json",
+      "reason": "the app's dependencies, pinned by the lock file",
+      "changes": [
+        "renamed rhythm-of-life-app, version 0.0.0, licence Apache-2.0",
+        "scripts: build also compiles the server, a smoke check replaces the private API check, start runs the Node server",
+        "yaml is the one runtime dependency; the other packages moved to devDependencies"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "public/favicon.svg",
+      "targetPath": "app/public/favicon.svg",
+      "reason": "the app's icons for the browser and the installed PWA",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "public/icon-192.png",
+      "targetPath": "app/public/icon-192.png",
+      "reason": "the app's icons for the browser and the installed PWA",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "public/icon-512.png",
+      "targetPath": "app/public/icon-512.png",
+      "reason": "the app's icons for the browser and the installed PWA",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "server/additionalHealth.ts",
+      "targetPath": "app/server/additionalHealth.ts",
+      "reason": "the app's server facade: web-standard handlers the Node server, Vite and a hosted front end all run",
+      "changes": [
+        "reads through the one engine client (app_recent_glucose, app_garmin_summary, app_request_garmin_sync) instead of per-feature tokens, leases and deployment gating",
+        "subjects come from people in rhythm.yaml; nobody is hardcoded",
+        "the home time zone replaced by the install's time zone for chart hours and by each Garmin row's own time zone",
+        "glucose stretch kinds generalized to archive and live (older provider-named kinds still read), time basis device-local",
+        "provenance names the row's own provider",
+        "an adapter that is off leaves its tile Not connected; other failures say unavailable with the reason"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "server/dashboards.ts",
+      "targetPath": "app/server/dashboards.ts",
+      "reason": "the app's server facade: web-standard handlers the Node server, Vite and a hosted front end all run",
+      "changes": [
+        "calls app_dashboards through the one engine client instead of a private reader token and lease",
+        "demo mode replaces the hosted-deployment gate",
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "server/devApi.ts",
+      "targetPath": "app/server/devApi.ts",
+      "reason": "the app's server facade: web-standard handlers the Node server, Vite and a hosted front end all run",
+      "changes": [
+        "rewritten around the shared route table in server/routes.ts",
+        "pilot, connectivity and device-exit routes removed"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "server/sourceFetch.ts",
+      "targetPath": "app/server/engineFetch.ts",
+      "reason": "the app's server facade: a bounded engine request with one retry for reads, so a slow or briefly unreachable engine cannot hang a request",
+      "changes": [
+        "renamed engineFetch and used by the one engine client for every engine request (tools/call, tools/list, a document's file) instead of by each reader",
+        "which calls may be retried is decided in engine.ts from the app's tool and its arguments",
+        "the connection options are named engineConnection; their values are unchanged",
+        "the log label and call names are the app's own; more allowlisted codes (an unreachable host, TLS certificate failures), and the log names the kind of failure each code is (timeout, refused, reset, dns, unreachable, tls)"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "server/glucose.ts",
+      "targetPath": "app/server/glucose.ts",
+      "reason": "the app's server facade: web-standard handlers the Node server, Vite and a hosted front end all run",
+      "changes": [
+        "accepts any provider id, the ingest contract's metric name glucose and any live source kind; archive kinds refused",
+        "provenance names the row's provider"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "server/graph.ts",
+      "targetPath": "app/server/graph.ts",
+      "reason": "the app's server facade: web-standard handlers the Node server, Vite and a hosted front end all run",
+      "changes": [
+        "live mode decided by the engine client (engine configured) instead of private environment variables"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "server/graphRefresh.ts",
+      "targetPath": "app/server/graphRefresh.ts",
+      "reason": "the app's server facade: web-standard handlers the Node server, Vite and a hosted front end all run",
+      "changes": [
+        "calls app_request_refresh through the one engine client instead of a private reader token and lease",
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "server/health.ts",
+      "targetPath": "app/server/health.ts",
+      "reason": "the app's server facade: web-standard handlers the Node server, Vite and a hosted front end all run",
+      "changes": [
+        "rewritten: demo mode without an engine, else app_latest_glucose through the one engine client",
+        "subject must be a person in rhythm.yaml; the hardcoded subject, deployment gating and lease removed",
+        "failures keep the tile honest: Not connected, or unavailable with a reason"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "server/healthState.ts",
+      "targetPath": "app/server/healthState.ts",
+      "reason": "the app's server facade: web-standard handlers the Node server, Vite and a hosted front end all run",
+      "changes": [
+        "the private host's source renamed Rhythm engine with provider id rhythm"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "server/http.ts",
+      "targetPath": "app/server/http.ts",
+      "reason": "the app's server facade: web-standard handlers the Node server, Vite and a hosted front end all run",
+      "changes": [
+        "comment explains there is no login in the app instead of naming the hosting provider's"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "server/insights.ts",
+      "targetPath": "app/server/insights.ts",
+      "reason": "the app's server facade: web-standard handlers the Node server, Vite and a hosted front end all run",
+      "changes": [
+        "calls app_insights and app_insight_feedback through the one engine client instead of a private reader token and lease",
+        "comments name no one"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "server/relationshipGraph.ts",
+      "targetPath": "app/server/relationshipGraph.ts",
+      "reason": "the app's server facade: web-standard handlers the Node server, Vite and a hosted front end all run",
+      "changes": [
+        "calls app_graph through the one engine client; one star is read with operation get",
+        "the engine's own provider id renamed rhythm",
+        "issue texts no longer name the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/App.css",
+      "targetPath": "app/src/App.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "device-exit and version-badge styles removed"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/App.tsx",
+      "targetPath": "app/src/App.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "the hosted-platform device exit removed",
+        "brand, home label and loading text show the install's name from /api/instance; no version badge",
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/ChangedLately.tsx",
+      "targetPath": "app/src/ChangedLately.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/Constellation.tsx",
+      "targetPath": "app/src/Constellation.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "source names looked up through sourceName() so any provider id shows"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/DashboardCard.css",
+      "targetPath": "app/src/DashboardCard.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/DashboardCard.tsx",
+      "targetPath": "app/src/DashboardCard.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/DashboardView.css",
+      "targetPath": "app/src/DashboardView.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/DashboardView.tsx",
+      "targetPath": "app/src/DashboardView.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "a log write names its person from the install's people instead of hiding one hardcoded person",
+        "copy says your AI and the engine instead of one AI product and the private host",
+        "comments name no one"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/DataView.css",
+      "targetPath": "app/src/DataView.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/DataView.tsx",
+      "targetPath": "app/src/DataView.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/DayChart.tsx",
+      "targetPath": "app/src/DayChart.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/Details.tsx",
+      "targetPath": "app/src/Details.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "the hosted-platform device exit removed",
+        "copy says your AI instead of one AI product"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/Explorer.css",
+      "targetPath": "app/src/Explorer.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/Explorer.tsx",
+      "targetPath": "app/src/Explorer.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "copy says the Rhythm engine instead of the private host",
+        "source names looked up through sourceName()"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/FeatureBoundary.tsx",
+      "targetPath": "app/src/FeatureBoundary.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/GlucoseSummary.css",
+      "targetPath": "app/src/GlucoseSummary.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/GlucoseSummary.tsx",
+      "targetPath": "app/src/GlucoseSummary.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/HealthChart.tsx",
+      "targetPath": "app/src/HealthChart.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/InsightCard.css",
+      "targetPath": "app/src/InsightCard.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/InsightCard.tsx",
+      "targetPath": "app/src/InsightCard.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/RhythmMark.tsx",
+      "targetPath": "app/src/RhythmMark.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/Sparkline.tsx",
+      "targetPath": "app/src/Sparkline.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/StarSummary.tsx",
+      "targetPath": "app/src/StarSummary.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/TrendArrows.tsx",
+      "targetPath": "app/src/TrendArrows.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/activity.ts",
+      "targetPath": "app/src/activity.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "src/apiClient.ts",
+      "targetPath": "app/src/apiClient.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "comments and copy say the engine instead of the private host",
+        "the engine's own provider id renamed rhythm"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/appUpdates.ts",
+      "targetPath": "app/src/appUpdates.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/changes.ts",
+      "targetPath": "app/src/changes.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/chartModel.ts",
+      "targetPath": "app/src/chartModel.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/dashboardCache.ts",
+      "targetPath": "app/src/dashboardCache.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/dashboardFrame.ts",
+      "targetPath": "app/src/dashboardFrame.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "comment no longer cites a section of the private product spec"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/dashboards.ts",
+      "targetPath": "app/src/dashboards.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "log subjects are any well-formed person id or household instead of a hardcoded list",
+        "the engine's own provider id renamed rhythm",
+        "comments name no one and no single AI product"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/demo.ts",
+      "targetPath": "app/src/demo.ts",
+      "reason": "the fictional demo dataset, always labelled DEMO",
+      "changes": [
+        "fixed local offsets replaced by UTC; the demo day is a UTC day",
+        "the sample project is called Rhythm of Life",
+        "the engine's own provider id renamed rhythm",
+        "the fictional CGM is the neutral provider demo (as in the engine's seed), not a vendor's"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/demoDashboards.ts",
+      "targetPath": "app/src/demoDashboards.ts",
+      "reason": "the fictional demo dataset, always labelled DEMO",
+      "changes": [
+        "log subject is the fictional alex",
+        "comment names no single AI product"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/demoInsights.ts",
+      "targetPath": "app/src/demoInsights.ts",
+      "reason": "the fictional demo dataset, always labelled DEMO",
+      "changes": [
+        "generatedBy labels are harness-daily and harness-weekly"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/demoReadings.ts",
+      "targetPath": "app/src/demoReadings.ts",
+      "reason": "the fictional demo dataset, always labelled DEMO",
+      "changes": [
+        "the fictional CGM's readings are under the neutral provider demo; a pump's insulin readings, which nothing in the demo showed, are left out"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/gestures.ts",
+      "targetPath": "app/src/gestures.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/glucose.ts",
+      "targetPath": "app/src/glucose.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "the hardcoded home time zone replaced by the install's time zone (src/instance.ts)",
+        "comment names no one"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/glucoseView.ts",
+      "targetPath": "app/src/glucoseView.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "glucose archive kind is archive"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/graph.ts",
+      "targetPath": "app/src/graph.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/graphView.ts",
+      "targetPath": "app/src/graphView.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "sourceNames covers the open adapters and plugins; sourceName() falls back to the id",
+        "the engine's own provider id renamed rhythm"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/health.ts",
+      "targetPath": "app/src/health.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/index.css",
+      "targetPath": "app/src/index.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/insights.ts",
+      "targetPath": "app/src/insights.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "generatedBy is any short label",
+        "insight sources of kind rhythm read, the older nas kept",
+        "comments name no one"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/knowledge.ts",
+      "targetPath": "app/src/knowledge.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "health panels open for the health subject from the install's settings instead of a hardcoded person",
+        "the engine's own provider id renamed rhythm"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/liveGraph.ts",
+      "targetPath": "app/src/liveGraph.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "comments name no one and say the engine"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/main.tsx",
+      "targetPath": "app/src/main.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "loads the install's name, people and time zone (/api/instance) before rendering"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/mockSources.ts",
+      "targetPath": "app/src/mockSources.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "fictional clock in UTC instead of a fixed local offset"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/model.ts",
+      "targetPath": "app/src/model.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "SourceId is a provider id string (contracts/README.md section 5)",
+        "glucose source kinds generalized to archive, live and combined; time basis device-local",
+        "comments name no device vendor's clock or home time zone"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/ChangedPanel.css",
+      "targetPath": "app/src/panels/ChangedPanel.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/ChangedPanel.tsx",
+      "targetPath": "app/src/panels/ChangedPanel.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "source names looked up through sourceName()"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/GlucosePanel.css",
+      "targetPath": "app/src/panels/GlucosePanel.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/GlucosePanel.tsx",
+      "targetPath": "app/src/panels/GlucosePanel.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "overnight note names the install's time zone instead of a city",
+        "copy no longer names one glucose vendor's archive",
+        "the sample run time in UTC, as the demo data has it"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/InsightPanel.css",
+      "targetPath": "app/src/panels/InsightPanel.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/InsightPanel.tsx",
+      "targetPath": "app/src/panels/InsightPanel.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "source kind rhythm shown as Rhythm engine (nas kept)",
+        "generatedBy labels mapped by a function with a fallback; your AI by default",
+        "comments name no one"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/Origin.tsx",
+      "targetPath": "app/src/panels/Origin.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/RecoveryPanel.css",
+      "targetPath": "app/src/panels/RecoveryPanel.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/RecoveryPanel.tsx",
+      "targetPath": "app/src/panels/RecoveryPanel.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/TrainingPanel.css",
+      "targetPath": "app/src/panels/TrainingPanel.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/TrainingPanel.tsx",
+      "targetPath": "app/src/panels/TrainingPanel.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/arcs.ts",
+      "targetPath": "app/src/panels/arcs.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/bodyViz.css",
+      "targetPath": "app/src/panels/bodyViz.css",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/bodyViz.tsx",
+      "targetPath": "app/src/panels/bodyViz.tsx",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/garmin.ts",
+      "targetPath": "app/src/panels/garmin.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "overnight window uses the install's time zone"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/panels/readings.ts",
+      "targetPath": "app/src/panels/readings.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "data star subject defaults to the health subject from the install's settings",
+        "the engine's own provider id renamed rhythm"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/readingsModel.ts",
+      "targetPath": "app/src/readingsModel.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/scrub.ts",
+      "targetPath": "app/src/scrub.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/trend.ts",
+      "targetPath": "app/src/trend.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "comment no longer names a pump model"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "src/useDashboards.ts",
+      "targetPath": "app/src/useDashboards.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "src/useHealthRefresh.ts",
+      "targetPath": "app/src/useHealthRefresh.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "src/useInsights.ts",
+      "targetPath": "app/src/useInsights.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "src/useKnowledge.ts",
+      "targetPath": "app/src/useKnowledge.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/useMapRebuild.ts",
+      "targetPath": "app/src/useMapRebuild.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "src/validation.ts",
+      "targetPath": "app/src/validation.ts",
+      "reason": "the app itself (React PWA), reused as is or generalized",
+      "changes": [
+        "provider is any provider id",
+        "glucose kinds archive, live and combined; time basis device-local",
+        "insight source kind rhythm accepted; generatedBy any short label",
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/activity.test.ts",
+      "targetPath": "app/tests/activity.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "time zone Europe/London"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/additional-health.test.tsx",
+      "targetPath": "app/tests/additional-health.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "personal names replaced with the fictional people alex and sam",
+        "time zone Europe/London",
+        "archive kinds",
+        "gate checks rewritten as demo mode and an expired credential"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/ambient-navigation.test.tsx",
+      "targetPath": "app/tests/ambient-navigation.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/api.test.ts",
+      "targetPath": "app/tests/api.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/app-updates.test.ts",
+      "targetPath": "app/tests/app-updates.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/body-panels.test.tsx",
+      "targetPath": "app/tests/body-panels.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "local times in the install's time zone (UTC in tests) instead of a fixed city offset"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/browser-session.test.tsx",
+      "targetPath": "app/tests/browser-session.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/browser.html",
+      "targetPath": "app/tests/browser.html",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/browser.tsx",
+      "targetPath": "app/tests/browser.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/changed-lately.test.tsx",
+      "targetPath": "app/tests/changed-lately.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/changed-panel.test.tsx",
+      "targetPath": "app/tests/changed-panel.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "tests/dashboard-api.test.ts",
+      "targetPath": "app/tests/dashboard-api.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "rewritten for the engine client: demo mode, expiry, Not connected, unavailable, unknown subject"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/dashboard-browser.html",
+      "targetPath": "app/tests/dashboard-browser.html",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/dashboard-browser.tsx",
+      "targetPath": "app/tests/dashboard-browser.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "personal names replaced with the fictional people alex and sam",
+        "time zone Europe/London",
+        "the engine's own provider id renamed rhythm"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/dashboard-flow.test.tsx",
+      "targetPath": "app/tests/dashboard-flow.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/dashboard-panel.test.tsx",
+      "targetPath": "app/tests/dashboard-panel.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "tests/dashboard-refresh.test.tsx",
+      "targetPath": "app/tests/dashboard-refresh.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "device-exit test removed"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/dashboard-writes.test.tsx",
+      "targetPath": "app/tests/dashboard-writes.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "personal names replaced with the fictional people alex and sam",
+        "configured through tests/engine.ts instead of private environment variables",
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/dashboards-route.test.ts",
+      "targetPath": "app/tests/dashboards-route.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "configured through tests/engine.ts; tool app_dashboards; fictional hosts"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/dashboards.test.ts",
+      "targetPath": "app/tests/dashboards.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/dynamic-graph.test.tsx",
+      "targetPath": "app/tests/dynamic-graph.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "the engine's own provider id renamed rhythm"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "tests/source-connection.test.ts",
+      "targetPath": "app/tests/engine-connection.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "tests engineConnection from server/engineFetch.ts",
+        "the fictional host is engine.example.invalid"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "tests/source-fetch.test.ts",
+      "targetPath": "app/tests/engine-fetch.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "tests engineFetch and the engine client's callTool and documentFile instead of the private readers",
+        "the private host and per-feature credentials removed: a fictional example.invalid engine, the secret built at runtime",
+        "added: the kind of failure named from codes, the tools/list check counted against a call's total, a document's file read once more"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/explorer-panel.test.tsx",
+      "targetPath": "app/tests/explorer-panel.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "personal names replaced with the fictional people alex and sam",
+        "the engine's own provider id renamed rhythm"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/federated-readers.test.ts",
+      "targetPath": "app/tests/federated-readers.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "configured through tests/engine.ts; gate checks rewritten as demo mode, expiry and an unusable engine URL",
+        "personal names replaced with the fictional people alex and sam",
+        "the engine's own provider id renamed rhythm"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/garmin-sync.test.tsx",
+      "targetPath": "app/tests/garmin-sync.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "configured through tests/engine.ts; tool app_request_garmin_sync; Garmin off means no call"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/gestures.test.ts",
+      "targetPath": "app/tests/gestures.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/glucose-history.test.ts",
+      "targetPath": "app/tests/glucose-history.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "archive and live kinds, plus a test that older provider-named kinds still map",
+        "chart hours in the install's time zone",
+        "configured through tests/engine.ts",
+        "personal names replaced with the fictional people alex and sam"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/glucose-metrics.test.ts",
+      "targetPath": "app/tests/glucose-metrics.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "fixtures start at a UTC midnight instead of a city's"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/glucose-panel.test.tsx",
+      "targetPath": "app/tests/glucose-panel.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/glucose.test.ts",
+      "targetPath": "app/tests/glucose.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/graph-edge-geometry.test.ts",
+      "targetPath": "app/tests/graph-edge-geometry.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/graph-groups.test.ts",
+      "targetPath": "app/tests/graph-groups.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/graph-known-ids.test.ts",
+      "targetPath": "app/tests/graph-known-ids.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "configured through tests/engine.ts; tool app_graph; fictional hosts"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/graph-labels.test.ts",
+      "targetPath": "app/tests/graph-labels.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "tests/graph-refresh.test.tsx",
+      "targetPath": "app/tests/graph-refresh.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/graph-scale.test.ts",
+      "targetPath": "app/tests/graph-scale.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/graph-structure.test.ts",
+      "targetPath": "app/tests/graph-structure.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/health-browser.html",
+      "targetPath": "app/tests/health-browser.html",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/health-browser.tsx",
+      "targetPath": "app/tests/health-browser.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/health-contract.test.tsx",
+      "targetPath": "app/tests/health-contract.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "probe tests removed with the connectivity probe",
+        "live-mode checks through tests/engine.ts"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/insight-flow.test.tsx",
+      "targetPath": "app/tests/insight-flow.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/insights-route.test.ts",
+      "targetPath": "app/tests/insights-route.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "configured through tests/engine.ts; tools app_insights and app_insight_feedback; gate checks rewritten as demo mode and expiry",
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/insights.test.tsx",
+      "targetPath": "app/tests/insights.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "generatedBy labels harness-daily and harness-weekly",
+        "the engine's own provider id renamed rhythm",
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/knowledge.test.tsx",
+      "targetPath": "app/tests/knowledge.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "the engine's own provider id renamed rhythm",
+        "sample project named Rhythm of Life",
+        "fixed local offsets replaced by UTC"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/glucose-reader.test.ts",
+      "targetPath": "app/tests/latest-glucose.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "renamed from the glucose reader test and rewritten for loadHealth through the engine client",
+        "fictional subject alex; any provider; archive kinds refused"
+      ],
+      "notes": "The reader it tested was private and is not imported; its cases were kept against the engine client."
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/layout-choice.test.tsx",
+      "targetPath": "app/tests/layout-choice.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "fixed local offset replaced by UTC"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/map-rebuild.test.tsx",
+      "targetPath": "app/tests/map-rebuild.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "configured through tests/engine.ts; tool app_request_refresh; gate checks rewritten as demo mode and expiry"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/observatory.test.tsx",
+      "targetPath": "app/tests/observatory.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "fixed local offsets replaced by UTC"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/pins.test.tsx",
+      "targetPath": "app/tests/pins.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "configured through tests/engine.ts; tool app_dashboards",
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/readings.test.tsx",
+      "targetPath": "app/tests/readings.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/real-graph-ui.test.tsx",
+      "targetPath": "app/tests/real-graph-ui.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "personal names replaced with the fictional people alex and sam",
+        "the engine's own provider id renamed rhythm",
+        "comments and copy say the engine instead of the private host"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "05fc736",
+      "sourcePath": "tests/refresh-coalescing.test.tsx",
+      "targetPath": "app/tests/refresh-coalescing.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/scene-navigation.test.tsx",
+      "targetPath": "app/tests/scene-navigation.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "product name without a version"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/setup.ts",
+      "targetPath": "app/tests/setup.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "clears RHYTHM_* settings and caches before each test instead of private variables; routes through server/routes.ts"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/synthetic.ts",
+      "targetPath": "app/tests/synthetic.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "the engine's own provider id renamed rhythm"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/touch-tap.test.tsx",
+      "targetPath": "app/tests/touch-tap.test.tsx",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tests/trend.test.ts",
+      "targetPath": "app/tests/trend.test.ts",
+      "reason": "tests of the app with fictional data only",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tsconfig.api.json",
+      "targetPath": "app/tsconfig.api.json",
+      "reason": "the app's build, type-check, test or lint configuration",
+      "changes": [
+        "emits the server build to build/; excludes the Vite-only dev plugin"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tsconfig.app.json",
+      "targetPath": "app/tsconfig.app.json",
+      "reason": "the app's build, type-check, test or lint configuration",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tsconfig.json",
+      "targetPath": "app/tsconfig.json",
+      "reason": "the app's build, type-check, test or lint configuration",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "tsconfig.node.json",
+      "targetPath": "app/tsconfig.node.json",
+      "reason": "the app's build, type-check, test or lint configuration",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "vercel.json",
+      "targetPath": "app/vercel.json",
+      "reason": "the optional hosted front-end recipe's build and header settings (deploy/vercel/)",
+      "changes": [
+        "none: copied as is"
+      ],
+      "notes": "Used only when the app is hosted on Vercel; the compose install ignores it."
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "vite.config.ts",
+      "targetPath": "app/vite.config.ts",
+      "reason": "the app's build, type-check, test or lint configuration",
+      "changes": [
+        "the pilot page entry and its cache exclusions removed",
+        "manifest name without a version; credentials comment names no hosting provider"
+      ]
+    },
+    {
+      "source": "private-app",
+      "commit": "5feddc8",
+      "sourcePath": "vitest.config.ts",
+      "targetPath": "app/vitest.config.ts",
+      "reason": "the app's build, type-check, test or lint configuration",
+      "changes": [
+        "tests run in UTC; the hosted-builder timeout keys off CI"
+      ]
+    },
+    {
+      "source": "platform",
+      "commit": "snapshot-2026-10-29",
+      "sourcePath": "compose.yaml",
+      "targetPath": "deploy/compose/engine.compose.yaml",
+      "reason": "the engine's services: postgres, migrate, engine, backup, cli",
+      "changes": [
+        "filled the repo's stub with the platform's patterns: one-shot migrate, secrets as files, internal network, hardening",
+        "names, paths and vendor workers removed",
+        "the titles service and its pull helper follow how the private engine ran its title server (internal network only, no published port, read-only, one loaded model); the Garmin worker is gone"
+      ]
+    },
+    {
+      "source": "platform",
+      "commit": "snapshot-2026-10-29",
+      "sourcePath": "compose.tunnel.example.yaml",
+      "targetPath": "deploy/exposure/openai-tunnel/compose.yaml",
+      "reason": "the OpenAI Secure MCP Tunnel exposure recipe: the tunnel client as a hardened, outbound-only container",
+      "changes": [
+        "only the pattern is kept: a pinned client image, secret files, the internal and egress networks, read-only, no capabilities, tmpfs /tmp, small memory and CPU limits, no published port",
+        "the service, profile, settings and secret names are this repo's (profile openai-tunnel, the tunnel ID from rhythm.yaml, secrets under deploy/compose/secrets/)",
+        "the image has a pinned public default instead of a required variable; runs as 65532 instead of the engine's user; adds a liveness health check",
+        "no tunnel ID, organization, other service or host-specific path"
+      ]
+    },
+    {
+      "source": "platform",
+      "commit": "snapshot-2026-10-29",
+      "sourcePath": "scripts/start-tunnel.sh",
+      "targetPath": "deploy/exposure/openai-tunnel/start.sh",
+      "reason": "the tunnel container's entry point: the bearer header and the runtime key from files, never arguments or environment values",
+      "changes": [
+        "checks each secret file and the tunnel ID with a line that says how to fix it",
+        "the token is this repo's harness token (base64url, 32-512 characters) instead of a fixed-length hex reader token",
+        "the tunnel ID comes from adapters.openai-tunnel.tunnelId in rhythm.yaml instead of an environment value",
+        "the key is copied without line endings to the tmpfs; the MCP target is engine:8080; the health listener keeps its default port"
+      ]
+    },
+    {
+      "source": "platform",
+      "commit": "snapshot-2026-10-29",
+      "sourcePath": "Dockerfile",
+      "targetPath": "engine/Dockerfile",
+      "reason": "the engine image",
+      "changes": [
+        "builds from the repository root with the demo seed",
+        "base images by version tag",
+        "adds time zone data and a shell entry point with a health check"
+      ]
+    },
+    {
+      "source": "platform",
+      "commit": "snapshot-2026-10-29",
+      "sourcePath": "scripts/backup.py",
+      "targetPath": "engine/backup/backup.py",
+      "reason": "encrypted backups: pg_dump plus the archive into restic",
+      "changes": [
+        "the restore note names this repository's quarantine script"
+      ]
+    },
+    {
+      "source": "platform",
+      "commit": "snapshot-2026-10-29",
+      "sourcePath": "scripts/restore-quarantine.sql",
+      "targetPath": "engine/backup/restore-quarantine.sql",
+      "reason": "quarantine a restored database before exposing it",
+      "changes": [
+        "disables every non-system token, revokes PUBLIC execute on all functions, revokes the map's snapshot rows",
+        "no provider of one household named"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "global.json",
+      "targetPath": "engine/global.json",
+      "reason": "pins the .NET SDK the engine builds with",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/001_foundation.sql",
+      "targetPath": "engine/migrations/001_foundation.sql",
+      "reason": "the catalog: subjects, principals, grants, resources, relationships, measurements, sync jobs",
+      "changes": [
+        "the subjects it inserts are only household and the synthetic fixture; people come from rhythm.yaml at start"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/002_retry.sql",
+      "targetPath": "engine/migrations/002_retry.sql",
+      "reason": "sync job retry time",
+      "changes": [
+        "none: copied as is (byte-identical, so an existing install's recorded checksum still matches)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/003_resource_boundaries.sql",
+      "targetPath": "engine/migrations/003_resource_boundaries.sql",
+      "reason": "resource domains and archive lineage",
+      "changes": [
+        "none: copied as is (byte-identical, so an existing install's recorded checksum still matches)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/004_remove_resource_restrictions.sql",
+      "targetPath": "engine/migrations/004_remove_resource_restrictions.sql",
+      "reason": "removes the per-document audience layer (the household shares everything)",
+      "changes": [
+        "none: copied as is (byte-identical, so an existing install's recorded checksum still matches)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/005_semantic_index.sql",
+      "targetPath": "engine/migrations/005_semantic_index.sql",
+      "reason": "pgvector chunks for local semantic search",
+      "changes": [
+        "none: copied as is (byte-identical, so an existing install's recorded checksum still matches)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/006_household_chat_setup.sql",
+      "targetPath": "engine/migrations/006_household_chat_setup.sql",
+      "reason": "the bounded document save that save_document generalizes",
+      "changes": [
+        "none: copied as is (byte-identical, so an existing install's recorded checksum still matches)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/007_health_evidence.sql",
+      "targetPath": "engine/migrations/007_health_evidence.sql",
+      "reason": "revision-bound source projections for read_health_source",
+      "changes": [
+        "none: copied as is (byte-identical, so an existing install's recorded checksum still matches)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/008_carelink_csv_jobs.sql",
+      "targetPath": "engine/migrations/008_carelink_csv_jobs.sql",
+      "reason": "adds sync_jobs.metadata, which later migrations use",
+      "changes": [
+        "kept the column; the plugin-specific resync queue function left with the CareLink plugin (Q-007, Q-015)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/009_relationship_engine.sql",
+      "targetPath": "engine/migrations/009_relationship_engine.sql",
+      "reason": "the relationship engine's snapshot and lifecycle columns",
+      "changes": [
+        "none: copied as is (byte-identical, so an existing install's recorded checksum still matches)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/010_garmin_sync_requests.sql",
+      "targetPath": "engine/migrations/010_garmin_sync_requests.sql",
+      "reason": "the Garmin sync-now request, kept for the Garmin adapter",
+      "changes": [
+        "the gating principal name and fixed time zone replaced by neutral values",
+        "comments that named people or hosting rewritten neutrally",
+        "schema unchanged; migration 017 replaces the affected functions (docs/dev/migration-compat.md)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/011_insights.sql",
+      "targetPath": "engine/migrations/011_insights.sql",
+      "reason": "insights store and feedback",
+      "changes": [
+        "principal names in the gate checks replaced by neutral role names",
+        "comments that named people or hosting rewritten neutrally",
+        "schema unchanged; migration 017 replaces the affected functions (docs/dev/migration-compat.md)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/012_insight_pilot.sql",
+      "targetPath": "engine/migrations/012_insight_pilot.sql",
+      "reason": "insight runs and richer feedback",
+      "changes": [
+        "principal names in the gate checks replaced by neutral role names",
+        "comments that named people or hosting rewritten neutrally",
+        "schema unchanged; migration 017 replaces the affected functions (docs/dev/migration-compat.md)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/013_dashboards.sql",
+      "targetPath": "engine/migrations/013_dashboards.sql",
+      "reason": "dashboards and their versions",
+      "changes": [
+        "principal names in the gate checks replaced by neutral role names",
+        "comments that named people or hosting rewritten neutrally",
+        "schema unchanged; migration 017 replaces the affected functions (docs/dev/migration-compat.md)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/014_relationship_refresh_requests.sql",
+      "targetPath": "engine/migrations/014_relationship_refresh_requests.sql",
+      "reason": "on-demand map rebuild requests",
+      "changes": [
+        "principal names in the gate checks replaced by neutral role names",
+        "comments that named people or hosting rewritten neutrally",
+        "schema unchanged; migration 017 replaces the affected functions (docs/dev/migration-compat.md)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/015_dashboard_writes.sql",
+      "targetPath": "engine/migrations/015_dashboard_writes.sql",
+      "reason": "declared writes, history and Undo, corner cards",
+      "changes": [
+        "principal names replaced by neutral role names; the fixed time zone by UTC",
+        "comments that named people or hosting rewritten neutrally",
+        "schema unchanged; migration 017 replaces the affected functions (docs/dev/migration-compat.md)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Migrations/016_dashboard_delete_and_pins.sql",
+      "targetPath": "engine/migrations/016_dashboard_delete_and_pins.sql",
+      "reason": "dashboard deletion and sky pins",
+      "changes": [
+        "principal names in the gate checks replaced by neutral role names",
+        "comments that named people or hosting rewritten neutrally",
+        "schema unchanged; migration 017 replaces the affected functions (docs/dev/migration-compat.md)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipScopes.cs",
+      "targetPath": "engine/src/Adapters/Drive/DriveAdapter.cs",
+      "reason": "the Drive DocumentSource: files under chosen folders as stars, their folders and the links inside them, and live contents for dashboards",
+      "changes": [
+        "only the Drive part of the scoped source, as an IDocumentSource adapter configured from adapters.drive (roots, owner)",
+        "walks the configured roots breadth first instead of listing the whole Drive and filtering; no roots lists nothing",
+        "media files and documents outside the roots are not listed",
+        "the account part of a star's id is the provider, not a per-install account identifier",
+        "dashboard contents (Sheet tabs as rows, Doc as Markdown, with the revision) and the live-copy check moved in here",
+        "outbound calls go through AdapterHttp; messages name the user's own Google Cloud project, not a host"
+      ],
+      "notes": "Contents adapts the Drive and Sheet readers of src/Knowledge/DashboardFeeds.cs; Current adapts src/Knowledge/SourceValidation.cs and the files.get checks of src/Knowledge/Drive.cs."
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "scripts/Connect-RelationshipGoogle.py",
+      "targetPath": "engine/src/Adapters/Drive/DriveConnect.cs",
+      "reason": "rhythm connect drive: the consent flow that gives the install its own Google grants",
+      "changes": [
+        "rewritten in C# as IAdapterConnect.Connect, run by the CLI",
+        "no local listener: the person pastes the redirected address back, so any computer's browser works",
+        "writes a plain refresh token as secrets/adapters/drive_<grant> (mode 0600) instead of a protected local file",
+        "read grant is drive.readonly; the edit grant (Sheets, Docs, Drive metadata) only when adapters.drive.edits is on",
+        "checks state, PKCE, the granted scopes and that the edit grant is the read grant's account"
+      ],
+      "notes": "The companion script that sent a grant to a server over ssh is not imported."
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/DashboardWrites.cs",
+      "targetPath": "engine/src/Adapters/Drive/DriveWrites.cs",
+      "reason": "the Writer half of the Drive adapter: declared Sheet and Doc writes with revision checks and Undo",
+      "changes": [
+        "only the sheet and doc paths, as IDashboardWriter.Write and Undo; the core keeps log writes and history",
+        "write kinds exist only while adapters.drive.edits is on",
+        "network failures become a refusal the page can show",
+        "messages name the user's own Google Cloud project and rhythm connect, not a host"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipConnections.cs",
+      "targetPath": "engine/src/Adapters/Drive/GoogleApi.cs",
+      "reason": "access tokens from the install's own OAuth client and refresh tokens, and bounded calls to Google",
+      "changes": [
+        "only the Google credential, generalized to two grants (read, edit) read from adapter secret files",
+        "the OAuth client is its own secret file; the grant is no longer pinned to an account identifier",
+        "says why a grant failed (missing, expired after seven days in testing, revoked)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/GarminSync.cs",
+      "targetPath": "engine/src/Adapters/Garmin/GarminAdapter.cs",
+      "reason": "the Garmin adapter: sync jobs, day checkpoints and the regular poll",
+      "changes": [
+        "a MeasurementSource on the engine's scheduler instead of a worker container for one fixed person; the worker loop from Program.cs folded in",
+        "owner, poll, history days and device time zone from adapters.garmin; no person or time zone in code",
+        "writes through the ingest rules (MeasurementSink) instead of its own upserts; unchanged sources are skipped",
+        "a time budget per tick; a paused job resumes; failed jobs are given up after five failures",
+        "only the five day streams and activity list that yield metrics; no activity details, workouts, originals or FIT downloads",
+        "without a key, sync-now requests are answered by the export folder scan",
+        "re-normalizing from archived raw payloads and the operator commands removed"
+      ],
+      "notes": "The worker loop and its settings came from src/Knowledge/Program.cs at the same commit."
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/GarminClient.cs",
+      "targetPath": "engine/src/Adapters/Garmin/GarminClient.cs",
+      "reason": "Garmin's Personal API: key exchange, spacing and retries",
+      "changes": [
+        "exception renamed GarminException; a missing key is its own code",
+        "network failures become a code instead of an exception type",
+        "payload limit lowered to 16 MiB (no activity downloads)",
+        "a dated verification comment generalized"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Normalize.cs",
+      "targetPath": "engine/src/Adapters/Garmin/GarminNormalize.cs",
+      "reason": "Garmin JSON to metrics, field by field",
+      "changes": [
+        "heart rates in bpm, the ingest contract's unit",
+        "a sample keeps a null instant for daily totals; the adapter dates them",
+        "the descriptor-indexed series shared by heart rate and body battery",
+        "activity descriptors (type key, pool unit, multisport role) moved here from the reader's SQL",
+        "the export's text sleep start is read too"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/ObservatoryHealth.cs",
+      "targetPath": "engine/src/Adapters/Garmin/GarminTiles.cs",
+      "reason": "the app's Garmin tiles: summary and sync now",
+      "changes": [
+        "app_garmin_summary and app_request_garmin_sync, registered only while the adapter is on (AppTool)",
+        "subject is the adapter's owner, today in its device time zone; no fixed principal, lease, grant or time zone",
+        "activity descriptors from the source's metadata.details instead of the archived payload",
+        "lastSyncedAt also counts accepted writes, so exported files show when they arrived",
+        "the glucose readers stayed in engine/src/Core/Mcp/AppHealth.cs"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/SecondBrainRelationshipReader.cs",
+      "targetPath": "engine/src/Adapters/SecondBrain/SecondBrainAdapter.cs",
+      "reason": "the optional Second Brain MemorySource: memories, projects and links on each map refresh, text when a star opens",
+      "changes": [
+        "one IMemorySource adapter configured from adapters.second-brain (url, teams, owner), bearer token from its secret file",
+        "the listing, projects and links of the private scoped source moved in here",
+        "no identity binding to one account; workspaces are the personal one plus optional teams",
+        "titles from a title model are left to the core's TitleModel pass",
+        "the account part of a star's id is the provider; a listing capped by graph.maxMemories is incomplete"
+      ],
+      "notes": "The listing, project and link code adapts the Second Brain part of src/Knowledge/RelationshipScopes.cs."
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipTitles.cs",
+      "targetPath": "engine/src/Adapters/Titles/TitlesAdapter.cs",
+      "reason": "the local title model as a TitleModel adapter",
+      "changes": [
+        "configured from adapters.titles (provider, model, url) instead of the map's settings file; no default model",
+        "the answer is bounded and read without the Garmin client",
+        "a missing response field is no title instead of an exception"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/DashboardFeeds.cs",
+      "targetPath": "engine/src/Core/DashboardFeeds.cs",
+      "reason": "what a dashboard's feeds hold now",
+      "changes": [
+        "document contents come from the DocumentSource adapter that owns the star",
+        "removed one vendor's merge rules from the data feed",
+        "today is computed in the install's time zone"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/DashboardWrites.cs",
+      "targetPath": "engine/src/Core/DashboardWrites.cs",
+      "reason": "declared dashboard writes with history and Undo",
+      "changes": [
+        "source writes (sheet, doc) go to the Writer adapter that names the kind; the vendor-specific code left for a Drive adapter",
+        "log dates use the install's time zone"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Dashboards.cs",
+      "targetPath": "engine/src/Core/Dashboards.cs",
+      "reason": "dashboard feeds, declared writes and the dashboard store",
+      "changes": [
+        "log subjects and the default subject come from rhythm.yaml",
+        "comments name no client, person or host"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Database.cs",
+      "targetPath": "engine/src/Core/Database.cs",
+      "reason": "migrations runner, catalog upserts and the shared visibility predicate",
+      "changes": [
+        "visibility is role-based (harness, app and system read everything; legacy principals keep their grants)",
+        "migrate accepts an overlay's extra checksums and reports what it applied",
+        "authenticate returns the caller's role and plugin"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/HouseholdSetup.cs",
+      "targetPath": "engine/src/Core/Documents.cs",
+      "reason": "the bounded document save behind save_document",
+      "changes": [
+        "any subject, any https URL or none, provider documents",
+        "embedding is optional (off when the local model is)"
+      ]
+    },
+    {
+      "source": "platform",
+      "commit": "snapshot-2026-10-29",
+      "sourcePath": "scripts/Get-EmbeddingModel.ps1",
+      "targetPath": "engine/src/Core/Embeddings.cs",
+      "reason": "the pinned, checksummed local model download",
+      "changes": [
+        "ported to the engine: downloads at start into its data folder; off if the download or a checksum fails"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/HealthAnalysis.cs",
+      "targetPath": "engine/src/Core/HealthAnalysis.cs",
+      "reason": "deterministic health analysis",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/HealthInvestigation.cs",
+      "targetPath": "engine/src/Core/HealthInvestigation.cs",
+      "reason": "health discovery, investigation and hypothesis tools",
+      "changes": [
+        "the vendor-specific source switch became an optional provider filter"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/HealthSemantics.cs",
+      "targetPath": "engine/src/Core/HealthSemantics.cs",
+      "reason": "metric meanings and sample preparation",
+      "changes": [
+        "the metric registry lists common names instead of one vendor's fields",
+        "a sample key identifies a sample within its source (Q-031)",
+        "bpm and min units recognized"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Insights.cs",
+      "targetPath": "engine/src/Core/Insights.cs",
+      "reason": "insight drafts and the insight store",
+      "changes": [
+        "generatedBy is any short label (default harness-daily)",
+        "source kinds generalized",
+        "comments name no client or person"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Knowledge.csproj",
+      "targetPath": "engine/src/Core/Knowledge.csproj",
+      "reason": "the engine project",
+      "changes": [
+        "moved to src/Core; adapters under src/Adapters compile into it",
+        "migrations embedded from engine/migrations with their recorded resource names",
+        "demo seed embedded from demo/engine",
+        "dropped the Windows-only data-protection package; added YamlDotNet for rhythm.yaml"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/LocalEmbeddings.cs",
+      "targetPath": "engine/src/Core/LocalEmbeddings.cs",
+      "reason": "local MiniLM embeddings via ONNX",
+      "changes": [
+        "model checksums exposed as constants for the download step"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipGraphEndpoint.cs",
+      "targetPath": "engine/src/Core/Mcp/AppEndpoint.cs",
+      "reason": "the app role's MCP endpoint",
+      "changes": [
+        "tools renamed app_*, old names kept as aliases",
+        "role-based instead of one named principal",
+        "glucose tools added, gated on glucose data",
+        "errors carry the contract's codes"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/ObservatoryHealth.cs",
+      "targetPath": "engine/src/Core/Mcp/AppHealth.cs",
+      "reason": "the app's glucose reads",
+      "changes": [
+        "generalized to any source writing metric glucose",
+        "subject from rhythm.yaml, range thresholds from health.glucose",
+        "removed the lease, the fixed principal and the fixed time zone"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Retrieval.cs",
+      "targetPath": "engine/src/Core/Mcp/HarnessTools.cs",
+      "reason": "the harness role's MCP tools",
+      "changes": [
+        "descriptions are templates filled from rhythm.yaml (Mcp/ToolText.cs)",
+        "save_household_document is an alias of save_document",
+        "health tools take an optional provider; the old argument is still accepted",
+        "the CareLink resync tool left with the plugin",
+        "tools are built at start, gated and filtered for the role"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Retrieval.cs",
+      "targetPath": "engine/src/Core/Mcp/ToolText.cs",
+      "reason": "the harness tools' descriptions",
+      "changes": [
+        "every person, household detail and hosting provider removed; people and subjects filled from rhythm.yaml",
+        "the dashboard design guidance moved to the resource and prompt rhythm://guides/dashboards"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Models.cs",
+      "targetPath": "engine/src/Core/Models.cs",
+      "reason": "resource and measurement records, hashing, the immutable archive",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Program.cs",
+      "targetPath": "engine/src/Core/Principals.cs",
+      "reason": "principals and hashed tokens",
+      "changes": [
+        "from the credential-create command: roles, one app token synced from its file, system principals, subjects from rhythm.yaml"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Program.cs",
+      "targetPath": "engine/src/Core/Program.cs",
+      "reason": "the engine's entry point and operator commands",
+      "changes": [
+        "rewritten around rhythm.yaml, roles and the scheduler",
+        "commands: serve, migrate, token, refresh, check-config",
+        "vendor workers and pilot commands removed"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/ProviderPolicies.cs",
+      "targetPath": "engine/src/Core/ProviderPolicies.cs",
+      "reason": "provider policies: archive, live, reference",
+      "changes": [
+        "only the core's own providers are built in; adapters and plugins register theirs",
+        "removed providers of one household's private tools"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RefreshRequests.cs",
+      "targetPath": "engine/src/Core/RefreshRequests.cs",
+      "reason": "on-demand map rebuild requests",
+      "changes": [
+        "added claim and finish for the engine's scheduler (replacing host cron)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipCatalog.cs",
+      "targetPath": "engine/src/Core/RelationshipCatalog.cs",
+      "reason": "catalog-driven data and document stars",
+      "changes": [
+        "default groups for common metrics of any provider",
+        "subjects from rhythm.yaml; titles use display names",
+        "the provider id is configurable (default rhythm)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipContent.cs",
+      "targetPath": "engine/src/Core/RelationshipContent.cs",
+      "reason": "text extraction from PDF and Office files",
+      "changes": [
+        "none: copied as is"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipDiscovery.cs",
+      "targetPath": "engine/src/Core/RelationshipDiscovery.cs",
+      "reason": "link discovery between records",
+      "changes": [
+        "one comment generalized"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipEngine.cs",
+      "targetPath": "engine/src/Core/RelationshipEngine.cs",
+      "reason": "the relationship engine: snapshots, links, reads",
+      "changes": [
+        "grant checks use the role-aware predicate",
+        "notes rank with memories; no provider named in ranking",
+        "the catalog provider id is configurable"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipExplorer.cs",
+      "targetPath": "engine/src/Core/RelationshipExplorer.cs",
+      "reason": "explore_graph and graph_changes views",
+      "changes": [
+        "what opens a star is externalId, url or resourceId, not vendor-specific fields"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipGraph.cs",
+      "targetPath": "engine/src/Core/RelationshipGraph.cs",
+      "reason": "the GraphPage projection the app reads",
+      "changes": [
+        "the providers shown are the catalog's and enabled adapters'",
+        "demo flag from the synthetic subject"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipHost.cs",
+      "targetPath": "engine/src/Core/RelationshipHost.cs",
+      "reason": "the map host: snapshot reads, explore, refresh",
+      "changes": [
+        "configuration comes from rhythm.yaml's graph section",
+        "graph sources are the catalog plus enabled Memory- and DocumentSource adapters (CatalogRelationshipSource, adapted from the private scoped source)",
+        "every harness and app principal reads the snapshot"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/RelationshipSimilarity.cs",
+      "targetPath": "engine/src/Core/RelationshipSimilarity.cs",
+      "reason": "local similarity links",
+      "changes": [
+        "one comment generalized"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/Retrieval.cs",
+      "targetPath": "engine/src/Core/Retrieval.cs",
+      "reason": "retrieval and health metric reads",
+      "changes": [
+        "the vendor-specific source switch became an optional provider filter",
+        "sync status adds each plugin's latest accepted ingest",
+        "the tool class moved to Mcp/HarnessTools.cs",
+        "live-source checks go to the owning DocumentSource adapter"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/SecretFiles.cs",
+      "targetPath": "engine/src/Core/SecretFiles.cs",
+      "reason": "secrets read from files",
+      "changes": [
+        "removed the Windows-only protected-secret format",
+        "added TryRead: a missing, empty or directory file means not configured"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/SemanticSearch.cs",
+      "targetPath": "engine/src/Core/SemanticSearch.cs",
+      "reason": "semantic search over indexed documents",
+      "changes": [
+        "any document saved with a semantic index, not one provider"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "src/Knowledge/SourceProjection.cs",
+      "targetPath": "engine/src/Core/SourceProjection.cs",
+      "reason": "browsable projections of archived originals",
+      "changes": [
+        "generic json and csv formats instead of vendor formats",
+        "removed the operator backfill tied to one install's providers"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "tests/Knowledge.Tests/DashboardWritesTests.cs",
+      "targetPath": "engine/tests/Knowledge.Tests/AdapterFakes.cs",
+      "reason": "in-process fakes of Google and a memory service for the adapter tests",
+      "changes": [
+        "the Sheet and Doc fakes of the private write test, extended to OAuth, the consent code exchange (with PKCE) and Drive folders",
+        "a Second Brain fake in the shape of the private scope test's",
+        "all data fictional; secret-shaped values built at runtime"
+      ],
+      "notes": "The Second Brain fake follows tests/Knowledge.Tests/RelationshipScopeTests.cs."
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "tests/Knowledge.Tests/DashboardWritesTests.cs",
+      "targetPath": "engine/tests/Knowledge.Tests/DriveAdapterTests.cs",
+      "reason": "the Drive adapter's tests: listing, contents, writes with Undo, and the connect flow",
+      "changes": [
+        "the Sheet and Doc write checks call the adapter directly instead of the private writer",
+        "new tests for the folder walk, contents, live check and rhythm connect drive",
+        "fictional files and titles"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "tests/Knowledge.Tests/GarminSyncNowTests.cs",
+      "targetPath": "engine/tests/Knowledge.Tests/GarminTests.cs",
+      "reason": "tests for the Garmin adapter, its tiles and sync now",
+      "changes": [
+        "rewritten for the adapter, the app role and AppTool; fictional people and London time",
+        "a new in-process fake Personal API that makes up each day's answers",
+        "tests for the export files, settings and client added",
+        "re-normalizing tests removed with the feature"
+      ],
+      "notes": "The fake API follows the fake client in tests/Knowledge.Tests/IntegrationTests.cs; its fixtures are regenerated, not copied."
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "tests/Knowledge.Tests/InvestigationTests.cs",
+      "targetPath": "engine/tests/Knowledge.Tests/InvestigationTests.cs",
+      "reason": "health analysis tests on synthetic samples",
+      "changes": [
+        "neutral provider names and Europe/London",
+        "a sample key identifies a sample within its source",
+        "database tests tied to the removed importer left out"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "tests/Knowledge.Tests/Knowledge.Tests.csproj",
+      "targetPath": "engine/tests/Knowledge.Tests/Knowledge.Tests.csproj",
+      "reason": "the test project",
+      "changes": [
+        "references the contract fixtures, the demo seed and the example settings instead of vendor fixtures"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "tests/Knowledge.Tests/RelationshipTests.cs",
+      "targetPath": "engine/tests/Knowledge.Tests/RelationshipDiscoveryTests.cs",
+      "reason": "relationship discovery tests on fictional records",
+      "changes": [
+        "neutral provider names",
+        "the database tests left out (covered by DatabaseTests.cs)"
+      ]
+    },
+    {
+      "source": "private-engine",
+      "commit": "27ab85d",
+      "sourcePath": "tests/Knowledge.Tests/RelationshipPhase2Tests.cs",
+      "targetPath": "engine/tests/Knowledge.Tests/TitlesTests.cs",
+      "reason": "tests for the title model",
+      "changes": [
+        "only the title model's cases and fake server kept",
+        "a test through the core's retitling of excerpt-titled stars added"
+      ]
+    },
+    {
+      "source": "private-harness",
+      "commit": "snapshot-2026-10-29",
+      "sourcePath": "chatgpt-daily-insight-task.md",
+      "targetPath": "harness/chatgpt/daily-insight.md",
+      "reason": "the daily insight run as a scheduled-task template: its steps (notes first, learning from feedback, look, choose one, save, always log the run)",
+      "changes": [
+        "rewritten neutrally: placeholders for the instance, people, subjects, time zone and run label; no names or household details",
+        "the feedback memory and handled-note steps use the assistant's own memory, if it has one, instead of one hosted memory service",
+        "tool names and arguments as the engine has them now (list_insights since, save_insight generatedAt and sources, log_insight_run generatedBy); originals open through get_resource or the source's own connector",
+        "health step names the generic health tools and subjects, adds get_sync_status and discover_health_sources, and never suggests changing a medication or treatment setting",
+        "adds a fill-in table and a line that tool results are data, not instructions"
+      ]
+    }
+  ]
+}

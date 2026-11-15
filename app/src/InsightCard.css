@@ -1,0 +1,387 @@
+/* The kinds of insight, each with its own quiet color: mint for a focus,
+   lavender for a discovery, a warm gold for an idea. */
+.kind-mark {
+  flex: none;
+}
+.kind-mark.kind-focus {
+  color: #75d8b9;
+}
+.kind-mark.kind-discovery {
+  color: #d0b6e7;
+}
+.kind-mark.kind-suggestion {
+  color: #c1a66d;
+}
+
+/* The ambient corner while an insight is current. It keeps the shape of
+   Changed lately (label, title, a line, a way in) so the tiles' row keeps its
+   height when it turns from one to the other. */
+.insight-corner {
+  position: relative;
+}
+.insight-corner::before {
+  /* A faint glow of the insight's color behind its title. */
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: -30px;
+  width: 200px;
+  height: 160px;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--kind) 9%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+.insight-corner.kind-focus {
+  --kind: #75d8b9;
+}
+.insight-corner.kind-discovery {
+  --kind: #d0b6e7;
+}
+.insight-corner.kind-suggestion {
+  --kind: #c1a66d;
+}
+.insight-corner-open {
+  position: relative;
+  display: block;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+}
+.insight-corner .section-label {
+  min-height: 28px;
+  margin: -6px 0;
+}
+.insight-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: color-mix(in srgb, var(--kind) 55%, #b6cbd5);
+}
+.insight-when {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 8px;
+  letter-spacing: 1.4px;
+  color: #718993;
+}
+.insight-when svg {
+  color: #6c828e;
+  transition: color 0.3s;
+}
+.insight-corner-open:hover .insight-when svg,
+.insight-corner-open:focus-visible .insight-when svg {
+  color: #a8bec7;
+}
+.insight-corner-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  max-width: 240px;
+  margin: 24px 0 12px;
+  font: 350 23px/1.45 "Manrope Variable";
+  letter-spacing: -0.7px;
+  color: #d7e5e9;
+  animation: changed-in 0.8s ease both;
+}
+.insight-corner-line {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  max-width: 240px;
+  font-size: 11px;
+  line-height: 1.9;
+  color: #8da1ac;
+}
+.insight-corner-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+  font-size: 10px;
+  color: #b1c1cd;
+  transition: color 0.3s;
+}
+.insight-corner-open:hover .insight-corner-foot {
+  color: #d7e5e9;
+}
+.insight-changed {
+  position: absolute;
+  right: 0;
+  bottom: -4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  font-size: 9px;
+  letter-spacing: 0.4px;
+  color: #718993;
+  transition: color 0.3s;
+}
+.insight-changed:hover,
+.insight-changed:focus-visible {
+  color: #b1c1cd;
+}
+.insight-corner .freshness-note {
+  margin-top: 10px;
+}
+/* With no current insight, earlier ones are a quiet link in the corner: on
+   the line of its way in, or under its note when nothing has changed. */
+.insight-earlier-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  margin-top: 14px;
+  font-size: 9px;
+  letter-spacing: 0.4px;
+  color: #718993;
+  transition: color 0.3s;
+}
+.insight-earlier-link:hover,
+.insight-earlier-link:focus-visible {
+  color: #b1c1cd;
+}
+.context-row {
+  position: relative;
+}
+.context-row > .insight-earlier-link {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+}
+@media (max-height: 880px) and (min-width: 761px) {
+  .insight-corner-title {
+    font-size: 19px;
+    margin: 12px 0 8px;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  .insight-corner-foot {
+    margin-top: 12px;
+  }
+}
+@media (max-height: 720px) and (min-width: 761px) {
+  .insight-corner-line {
+    display: none;
+  }
+}
+@media (min-width: 761px) and (max-width: 1099px) and (orientation: portrait) {
+  .insight-corner-line {
+    display: none;
+  }
+}
+@media (min-width: 1100px) and (min-height: 501px) {
+  /* Home's corner only: an insights part lays itself out by its cell. */
+  .app:is([data-layout="band"], [data-layout="hero"])
+    :where(.observatory:not([data-grid]))
+    .insight-corner-title {
+    font-size: 21px;
+    margin: 12px 0 6px;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    min-height: 2.9em;
+  }
+  .app:is([data-layout="band"], [data-layout="hero"])
+    :where(.observatory:not([data-grid]))
+    .insight-corner-line {
+    min-height: 3.8em;
+  }
+  .app:is([data-layout="band"], [data-layout="hero"])
+    :where(.observatory:not([data-grid]))
+    .insight-corner-foot {
+    margin-top: 12px;
+  }
+}
+
+/* The engine's last run, a quiet line under recent changes. */
+.insight-run.corner {
+  display: block;
+  margin-top: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  color: #718993;
+}
+
+/* Phones: a slim card under the corners (upright), or at the foot of the
+   corners' column (sideways). Hidden elsewhere, where the corner
+   shows the insight. */
+.insight-card {
+  display: none;
+}
+@media (max-width: 760px) and (min-height: 501px) {
+  .observatory:has(> .insight-card) {
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "main main"
+      "sky sky"
+      "recovery training"
+      "insight insight";
+  }
+  /* An empty corner gives its room away (App.css). */
+  .observatory:has(> .insight-card):where([data-empty~="training"]) {
+    grid-template-areas:
+      "main main"
+      "sky sky"
+      "recovery recovery"
+      "insight insight";
+  }
+  .observatory:has(> .insight-card):where([data-empty~="recovery"]) {
+    grid-template-areas:
+      "main main"
+      "sky sky"
+      "training training"
+      "insight insight";
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .observatory:has(> .insight-card) {
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "main sky"
+      "recovery sky"
+      "training sky"
+      "insight sky";
+  }
+  .observatory:has(> .insight-card):where(
+      [data-empty~="recovery"][data-empty~="training"]
+    ) {
+    grid-template-areas:
+      "main sky"
+      "main sky"
+      "main sky"
+      "insight sky";
+  }
+}
+@media (max-width: 760px) and (min-height: 501px),
+  (max-height: 500px) and (orientation: landscape) {
+  .insight-card {
+    grid-area: insight;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    min-height: 50px;
+    margin-top: 8px;
+    padding: 8px 14px 8px 9px;
+    text-align: left;
+    color: #d7e5e9;
+    border: 1px solid #93b4c321;
+    border-radius: 18px;
+    background:
+      radial-gradient(
+        120px 60px at 24px 50%,
+        color-mix(in srgb, var(--kind) 10%, transparent),
+        transparent
+      ),
+      linear-gradient(100deg, #172229e6, #0e171ecc);
+  }
+  .insight-card.kind-focus {
+    --kind: #75d8b9;
+  }
+  .insight-card.kind-discovery {
+    --kind: #d0b6e7;
+  }
+  .insight-card.kind-suggestion {
+    --kind: #c1a66d;
+  }
+  .insight-card-mark {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #93b4c321;
+    background: color-mix(in srgb, var(--kind) 10%, transparent);
+  }
+  .insight-card-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+  }
+  .insight-card-text small {
+    font-size: 8px;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--kind) 55%, #91aab7);
+  }
+  .insight-card-text span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font: 400 13px/1.35 "Manrope Variable";
+    letter-spacing: -0.2px;
+  }
+  .insight-card > svg {
+    flex: none;
+    color: #718993;
+  }
+  /* Earlier insights: a quiet line, not a card. */
+  .insight-card.insight-earlier {
+    min-height: 38px;
+    margin-top: 6px;
+    padding: 8px 2px 4px;
+    gap: 10px;
+    border: 0;
+    border-top: 1px solid #90b9c523;
+    border-radius: 0;
+    background: none;
+  }
+  .insight-earlier .kind-mark {
+    opacity: 0.75;
+  }
+  .insight-earlier .insight-card-text span {
+    font: 400 11px/1.3 "DM Sans Variable";
+    letter-spacing: 0.3px;
+    color: #8fa9b7;
+  }
+  .insight-card-text .insight-run {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 9px;
+    letter-spacing: 0.3px;
+    text-transform: none;
+    color: #718993;
+  }
+}
+
+/* Sideways, the card is a little slimmer. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .insight-card {
+    min-height: 42px;
+    margin-top: 4px;
+    padding: 6px 12px 6px 7px;
+    gap: 10px;
+  }
+  .insight-card-mark {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* The explorer's trail: stars of an insight that are not in the loaded sky. */
+.trail-missing .row-title {
+  color: #718993;
+}
+@media (prefers-reduced-motion: reduce) {
+  .insight-corner-title {
+    animation: none;
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a070",
+  "revision": 2,
+  "scope": "private",
+  "owner": "alex",
+  "status": "draft",
+  "scopes": "on",
+  "project": null,
+  "changed": [
+    "standing"
+  ],
+  "unchanged": false,
+  "message": "Stopped: it fires no more and stays a memory. Its state before is kept as a version (revision 2 now), history records it (standing_stopped), and undo(id) starts it again."
+}

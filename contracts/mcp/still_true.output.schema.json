@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/still_true.output.schema.json",
+  "title": "still_true answer",
+  "description": "The memory tool still_true's answer (SB-P4-09, migration 053): the memory stands as it is, on the person's word. Nothing in it changed: its revision is the one it had, and every version is kept. checked_at is its new checked time (or, unchanged, the earlier one at this revision within the last day); changed is [\"checked\"], or empty when unchanged. was: why it was in the stale queue (not_confirmed, retracted_source) or null when it was not; retracted: the retracted sources whose flags came off. A write's fields otherwise: no memory's words, a project by id and slug only. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body (held: a memory held for review; retracted: one marked wrong; invalid: one whose time has ended).",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "project",
+        "changed",
+        "unchanged",
+        "checked_at",
+        "was",
+        "retracted",
+        "message"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ]
+        },
+        "scopes": {
+          "$ref": "memory.defs.schema.json#/$defs/scopes"
+        },
+        "project": {
+          "$ref": "memory.defs.schema.json#/$defs/writtenProject"
+        },
+        "changed": {
+          "type": "array",
+          "maxItems": 1,
+          "items": {
+            "const": "checked"
+          }
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "checked_at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant"
+        },
+        "was": {
+          "enum": [
+            null,
+            "not_confirmed",
+            "retracted_source"
+          ]
+        },
+        "retracted": {
+          "type": "array",
+          "maxItems": 200,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "memory.defs.schema.json#/$defs/uuid"
+          }
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "unchanged": {
+              "const": false
+            },
+            "changed": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "unchanged": {
+              "const": true
+            },
+            "changed": {
+              "maxItems": 0
+            },
+            "was": {
+              "type": "null"
+            },
+            "retracted": {
+              "maxItems": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

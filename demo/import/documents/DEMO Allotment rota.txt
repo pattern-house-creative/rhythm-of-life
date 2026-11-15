@@ -1,0 +1,7 @@
+DEMO - Allotment watering rota (fictional sample)
+
+Week 1: Alex waters on Monday and Thursday.
+Week 2: Sam waters on Tuesday and Friday.
+Week 3: the neighbours cover while we are away.
+
+Tomatoes need water every evening in a heatwave. Leave the shed key under the blue pot.

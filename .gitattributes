@@ -1,0 +1,22 @@
+# Everything text is stored and checked out with LF line endings, on every OS.
+* text=auto eol=lf
+
+# Binary files: never normalized, never diffed as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.onnx binary
+
+# Preserve original vendor legal documents byte for byte, including their line
+# endings, so the source hashes in docs/licenses/nuget.json survive a checkout.
+docs/licenses/nuget/** -text -whitespace

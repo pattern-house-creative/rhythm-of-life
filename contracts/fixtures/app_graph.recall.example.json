@@ -1,0 +1,189 @@
+{
+  "nodes": [
+    {
+      "id": "notes:notes:walks.md",
+      "title": "Morning walks",
+      "type": "note",
+      "overview": "A fictional note: a short walk before breakfast, and how the morning glucose looked afterwards.",
+      "provenance": {
+        "sourceId": "notes",
+        "recordId": "walks.md",
+        "observedAt": "2026-10-27T08:00:00+00:00",
+        "demo": false
+      },
+      "resource": {
+        "identity": {
+          "provider": "notes",
+          "account": "notes",
+          "externalId": "walks.md"
+        },
+        "canonicalUrl": null,
+        "sourceUrl": null,
+        "sourceModifiedAt": "2026-10-27T08:00:00+00:00",
+        "retrievedAt": "2026-10-28T11:45:00.5+00:00",
+        "revision": "sha256-example-1",
+        "owner": "alex",
+        "access": {
+          "scope": "private",
+          "canRead": true,
+          "canOpen": false
+        },
+        "availability": "available",
+        "content": null,
+        "representation": "index"
+      },
+      "groups": [
+        {
+          "id": "notes:walking",
+          "label": "Walking"
+        }
+      ]
+    },
+    {
+      "id": "rhythm:data%3Anightscout:alex%3Aglucose",
+      "title": "Glucose",
+      "type": "record",
+      "overview": "Nightscout · Glucose · 14 Oct 2026 to 28 Oct 2026",
+      "provenance": {
+        "sourceId": "rhythm",
+        "recordId": "alex:glucose",
+        "observedAt": "2026-10-28T11:55:00+00:00",
+        "demo": false
+      },
+      "resource": {
+        "identity": {
+          "provider": "rhythm",
+          "account": "data:nightscout",
+          "externalId": "alex:glucose"
+        },
+        "canonicalUrl": null,
+        "sourceUrl": null,
+        "sourceModifiedAt": "2026-10-28T11:55:00+00:00",
+        "retrievedAt": "2026-10-28T11:45:00.5+00:00",
+        "revision": "data-2026-10-28",
+        "owner": "alex",
+        "access": {
+          "scope": "private",
+          "canRead": true,
+          "canOpen": false
+        },
+        "availability": "available",
+        "content": null,
+        "representation": "index"
+      },
+      "groups": [
+        {
+          "id": "rhythm:alex:nightscout",
+          "label": "Nightscout"
+        }
+      ],
+      "measurements": [
+        {
+          "metric": "glucose",
+          "label": "Glucose",
+          "unit": "mg/dL",
+          "latest": {
+            "value": 112,
+            "observedAt": "2026-10-28T11:55:00+00:00",
+            "date": "2026-10-28"
+          },
+          "days": [
+            {
+              "date": "2026-10-27",
+              "min": 78,
+              "mean": 121.4,
+              "max": 186,
+              "count": 288
+            },
+            {
+              "date": "2026-10-28",
+              "min": 90,
+              "mean": 116.2,
+              "max": 160,
+              "count": 143
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "link-walks-glucose",
+      "source": "notes:notes:walks.md",
+      "target": "rhythm:data%3Anightscout:alex%3Aglucose",
+      "relationship": "about",
+      "strength": 1,
+      "type": "about",
+      "origin": {
+        "provider": "rhythm",
+        "account": "notes",
+        "externalId": "link-walks-glucose"
+      },
+      "directed": true,
+      "verification": "verified",
+      "evidence": [
+        {
+          "resourceId": "notes:notes:walks.md",
+          "excerpt": "how the morning glucose looked",
+          "locator": "topic:glucose",
+          "retrievedAt": "2026-10-28T11:45:00.5+00:00"
+        }
+      ],
+      "sourceModifiedAt": null,
+      "retrievedAt": "2026-10-28T11:45:00.5+00:00"
+    }
+  ],
+  "nextCursor": null,
+  "completeness": "partial",
+  "issues": [],
+  "recall": {
+    "query": "how did my glucose look after walking?",
+    "results": [
+      {
+        "id": "notes:notes:walks.md",
+        "score": 0.032522,
+        "excerpt": "A fictional note: a short walk before breakfast, and how the morning glucose looked afterwards.",
+        "truncated": false,
+        "why": {
+          "rank": 1,
+          "words": {
+            "rank": 1,
+            "terms": [
+              "glucos",
+              "walk"
+            ],
+            "exact": 0
+          },
+          "meaning": {
+            "rank": 1,
+            "similarity": 0.612345
+          },
+          "imputed": false
+        }
+      },
+      {
+        "id": "rhythm:data%3Anightscout:alex%3Aglucose",
+        "score": 0.031746,
+        "excerpt": "DEMO readings",
+        "truncated": false,
+        "why": {
+          "rank": 2,
+          "words": {
+            "rank": 2,
+            "terms": [
+              "glucos"
+            ],
+            "exact": 0
+          },
+          "meaning": null,
+          "imputed": true
+        }
+      }
+    ],
+    "notices": [],
+    "semanticSkipped": false,
+    "offMap": 1,
+    "receipt": "rc1-5b0e9d3a71c2f468"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/propose_contradiction.output.schema.json",
+  "title": "propose_contradiction answer",
+  "description": "The memory tool propose_contradiction's answer (SB-P5-03, migration 068): the pair is named a contradiction and queued for the person; neither memory changed and nothing is settled. Unchanged: it was named already, and the first reason stays. A memory it was not offered for that one is refused (not_offered), whatever that id names; a pair a person settled is refused (settled).",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "conflicting_id",
+        "score",
+        "revision",
+        "scope",
+        "owner",
+        "status",
+        "reason",
+        "unchanged",
+        "message"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "conflicting_id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "scope": {
+          "enum": [
+            "private",
+            "shared"
+          ]
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

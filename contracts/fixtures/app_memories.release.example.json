@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "op": "release",
+  "id": "6d3c2a10-0000-4000-8000-00000000b002",
+  "revision": 2,
+  "to": null,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "changed": [],
+  "unchanged": false,
+  "replayed": false,
+  "droppedTags": [],
+  "held": null
+}

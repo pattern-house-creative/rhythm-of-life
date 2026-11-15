@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "op": "forget",
+  "id": "6d3c2a10-0000-4000-8000-00000000b003",
+  "revision": 2,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "replayed": false,
+  "trash": {
+    "nonce": "6d3c2a10-0000-4000-8000-00000000c003",
+    "trashedAt": "2026-11-02T10:00:00+00:00",
+    "purgeAfter": "2026-11-16T10:00:00+00:00",
+    "days": 14,
+    "links": 0
+  }
+}

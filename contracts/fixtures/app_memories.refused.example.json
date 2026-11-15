@@ -1,0 +1,6 @@
+{
+  "ok": false,
+  "code": "conflict",
+  "reason": "The memory changed since revision 1: it is at revision 2 now; read it again and retry",
+  "revision": 2
+}

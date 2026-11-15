@@ -1,0 +1,71 @@
+time,metric,value,unit,subject,source
+2026-10-15T07:05:00+01:00,weight,71.6,kg,alex,DEMO bathroom scale
+2026-10-15T06:50,resting_heart_rate,56,bpm,alex,DEMO watch
+2026-10-15,steps,8155,count,alex,DEMO watch
+2026-10-15,steps,6565,count,sam,DEMO phone
+2026-10-15,water_glasses,8,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-16T07:05:00+01:00,weight,71.8,kg,alex,DEMO bathroom scale
+2026-10-16T06:50,resting_heart_rate,59,bpm,alex,DEMO watch
+2026-10-16,steps,9092,count,alex,DEMO watch
+2026-10-16,steps,7176,count,sam,DEMO phone
+2026-10-16,water_glasses,5,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-17T07:05:00+01:00,weight,71.9,kg,alex,DEMO bathroom scale
+2026-10-17T06:50,resting_heart_rate,57,bpm,alex,DEMO watch
+2026-10-17,steps,10029,count,alex,DEMO watch
+2026-10-17,steps,7787,count,sam,DEMO phone
+2026-10-17,water_glasses,6,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-18T07:05:00+01:00,weight,71.5,kg,alex,DEMO bathroom scale
+2026-10-18T06:50,resting_heart_rate,60,bpm,alex,DEMO watch
+2026-10-18,steps,6866,count,alex,DEMO watch
+2026-10-18,steps,8398,count,sam,DEMO phone
+2026-10-18,water_glasses,7,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-19T07:05:00+01:00,weight,71.7,kg,alex,DEMO bathroom scale
+2026-10-19T06:50,resting_heart_rate,58,bpm,alex,DEMO watch
+2026-10-19,steps,7803,count,alex,DEMO watch
+2026-10-19,steps,9009,count,sam,DEMO phone
+2026-10-19,water_glasses,8,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-20T07:05:00+01:00,weight,71.3,kg,alex,DEMO bathroom scale
+2026-10-20T06:50,resting_heart_rate,56,bpm,alex,DEMO watch
+2026-10-20,steps,8740,count,alex,DEMO watch
+2026-10-20,steps,5720,count,sam,DEMO phone
+2026-10-20,water_glasses,5,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-21T07:05:00+01:00,weight,71.5,kg,alex,DEMO bathroom scale
+2026-10-21T06:50,resting_heart_rate,59,bpm,alex,DEMO watch
+2026-10-21,steps,9677,count,alex,DEMO watch
+2026-10-21,steps,6331,count,sam,DEMO phone
+2026-10-21,water_glasses,6,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-22T07:05:00+01:00,weight,71.7,kg,alex,DEMO bathroom scale
+2026-10-22T06:50,resting_heart_rate,57,bpm,alex,DEMO watch
+2026-10-22,steps,6514,count,alex,DEMO watch
+2026-10-22,steps,6942,count,sam,DEMO phone
+2026-10-22,water_glasses,7,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-23T07:05:00+01:00,weight,71.3,kg,alex,DEMO bathroom scale
+2026-10-23T06:50,resting_heart_rate,60,bpm,alex,DEMO watch
+2026-10-23,steps,7451,count,alex,DEMO watch
+2026-10-23,steps,7553,count,sam,DEMO phone
+2026-10-23,water_glasses,8,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-24T07:05:00+01:00,weight,71.4,kg,alex,DEMO bathroom scale
+2026-10-24T06:50,resting_heart_rate,58,bpm,alex,DEMO watch
+2026-10-24,steps,8388,count,alex,DEMO watch
+2026-10-24,steps,8164,count,sam,DEMO phone
+2026-10-24,water_glasses,5,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-25T07:05:00+01:00,weight,71.1,kg,alex,DEMO bathroom scale
+2026-10-25T06:50,resting_heart_rate,56,bpm,alex,DEMO watch
+2026-10-25,steps,9325,count,alex,DEMO watch
+2026-10-25,steps,8775,count,sam,DEMO phone
+2026-10-25,water_glasses,6,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-26T07:05:00+01:00,weight,71.3,kg,alex,DEMO bathroom scale
+2026-10-26T06:50,resting_heart_rate,59,bpm,alex,DEMO watch
+2026-10-26,steps,10262,count,alex,DEMO watch
+2026-10-26,steps,5486,count,sam,DEMO phone
+2026-10-26,water_glasses,7,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-27T07:05:00+01:00,weight,71.4,kg,alex,DEMO bathroom scale
+2026-10-27T06:50,resting_heart_rate,57,bpm,alex,DEMO watch
+2026-10-27,steps,7099,count,alex,DEMO watch
+2026-10-27,steps,6097,count,sam,DEMO phone
+2026-10-27,water_glasses,8,count,sam,"DEMO kitchen tally, by the kettle"
+2026-10-28T07:05:00+01:00,weight,71.0,kg,alex,DEMO bathroom scale
+2026-10-28T06:50,resting_heart_rate,60,bpm,alex,DEMO watch
+2026-10-28,steps,8036,count,alex,DEMO watch
+2026-10-28,steps,6708,count,sam,DEMO phone
+2026-10-28,water_glasses,5,count,sam,"DEMO kitchen tally, by the kettle"

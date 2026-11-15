@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a030",
+  "revision": 3,
+  "scope": "shared",
+  "owner": "household",
+  "status": "canonical",
+  "scopes": "off",
+  "project": null,
+  "action": "done",
+  "direction": "out",
+  "counterparty": null,
+  "changed": [],
+  "unchanged": true,
+  "message": "Nothing changed: it is marked done already (task:done), so it is no open loop."
+}

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/resolve_loop.output.schema.json",
+  "title": "resolve_loop answer",
+  "description": "The memory tool resolve_loop's answer (SB-P5-09, migration 058): an open loop closed, as a change of its tags. action done: task:done joined its tags (its task tag stays); received: the same, for a loop owed to the person only (direction in); not_a_task: its task tag came off. changed is [\"tags\"]: the tags before are kept as a version, the revision moved, history records it (resolved) and undo puts it back; or empty with unchanged true when it was resolved already (or, for not_a_task, had no task tag), and nothing was written. direction and counterparty are the loop's (counterparty: words made from the other person's name, or null). A write's fields otherwise: no memory's words, a project by id and slug only. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body (held: a memory held for review; retracted: one marked wrong; invalid: one whose time has ended, done or received for a memory with no task tag, received for a loop the person owes).",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "project",
+        "action",
+        "direction",
+        "counterparty",
+        "changed",
+        "unchanged",
+        "message"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ]
+        },
+        "scopes": {
+          "$ref": "memory.defs.schema.json#/$defs/scopes"
+        },
+        "project": {
+          "$ref": "memory.defs.schema.json#/$defs/writtenProject"
+        },
+        "action": {
+          "enum": [
+            "done",
+            "received",
+            "not_a_task"
+          ]
+        },
+        "direction": {
+          "$ref": "memory.defs.schema.json#/$defs/loopDirection"
+        },
+        "counterparty": {
+          "$ref": "memory.defs.schema.json#/$defs/counterparty"
+        },
+        "changed": {
+          "type": "array",
+          "maxItems": 1,
+          "items": {
+            "const": "tags"
+          }
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "allOf": [
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "unchanged": {
+                  "const": false
+                },
+                "changed": {
+                  "minItems": 1
+                }
+              }
+            },
+            {
+              "properties": {
+                "unchanged": {
+                  "const": true
+                },
+                "changed": {
+                  "maxItems": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "action": {
+                  "enum": [
+                    "done",
+                    "not_a_task"
+                  ]
+                }
+              }
+            },
+            {
+              "properties": {
+                "action": {
+                  "const": "received"
+                },
+                "direction": {
+                  "const": "in"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/digest_sources.output.schema.json",
+  "title": "digest_sources answer",
+  "description": "The memory tool digest_sources's answer (SB-P5-13, migration 054): the memories a digest of one project or one topic tag in one scope would be drawn from, by the engine's one rule (054's memory_digest_eligible), newest first. Eligible: live memories of that scope in the project (or tagged with one of its aliases) or carrying the tag, not held for review, marked wrong, ended, in the trash or in a capsule slot, of importance under 4 or none, recalled never or fewer than twice and written over 60 days ago, not flagged by a source marked wrong, not a digest and not drawn into a live one. eligible counts every one; sources holds the 50 newest, each a preview of up to 500 characters, truncated when longer. basis hashes the scope, the key and each source's id and revision in this order: save_digest takes it back and saves only while the list still hashes to it. due: at least minimum eligible and no live digest of the key in the scope written in the last day; waiting says which is missing (cooldown, with next_at; too_few). latest and latest_at: the newest live digest of the key in the scope, null while it is held for review. The key is the one a digest was saved for, never its tags or project as an update left them. The same store gives the same answer to every reader of the scope. Reading it writes nothing. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "scope",
+        "owner",
+        "scopes",
+        "project",
+        "tag",
+        "eligible",
+        "minimum",
+        "maximum",
+        "due",
+        "waiting",
+        "latest",
+        "latest_at",
+        "next_at",
+        "basis",
+        "sources",
+        "message",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "scopes": {
+          "$ref": "memory.defs.schema.json#/$defs/scopes"
+        },
+        "project": {
+          "$ref": "memory.defs.schema.json#/$defs/writtenProject",
+          "description": "The project the digest is of, by id and slug only; null for a tag's."
+        },
+        "tag": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[^A-Z]+$"
+            }
+          ],
+          "description": "The topic tag the digest is of, as a memory stores it (lower case); null for a project's."
+        },
+        "eligible": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many memories are eligible, every one."
+        },
+        "minimum": {
+          "const": 10,
+          "description": "The fewest memories a digest draws from."
+        },
+        "maximum": {
+          "const": 50,
+          "description": "The most a digest draws from: the newest."
+        },
+        "due": {
+          "type": "boolean"
+        },
+        "waiting": {
+          "enum": [
+            "cooldown",
+            "too_few",
+            null
+          ],
+          "description": "Why no digest is due: one of the key in the scope was written within the day (cooldown), or fewer than minimum are eligible (too_few); null when due."
+        },
+        "latest": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/uuid"
+            }
+          ],
+          "description": "The newest live digest of the key in the scope, or null; null too while that digest is held for review (a key never names a held memory), though its day still counts toward waiting."
+        },
+        "latest_at": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant"
+        },
+        "next_at": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant",
+          "description": "When the next digest is due, while waiting is cooldown; else null."
+        },
+        "basis": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "sources": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      },
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "project": {
+                  "type": "null"
+                },
+                "tag": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "properties": {
+                "project": {
+                  "type": "object"
+                },
+                "tag": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "due": {
+                  "const": true
+                },
+                "waiting": {
+                  "type": "null"
+                },
+                "next_at": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "due": {
+                  "const": false
+                },
+                "waiting": {
+                  "const": "too_few"
+                },
+                "next_at": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "due": {
+                  "const": false
+                },
+                "waiting": {
+                  "const": "cooldown"
+                },
+                "latest": {
+                  "$ref": "memory.defs.schema.json#/$defs/uuid"
+                },
+                "latest_at": {
+                  "$ref": "memory.defs.schema.json#/$defs/instant"
+                },
+                "next_at": {
+                  "$ref": "memory.defs.schema.json#/$defs/instant"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ],
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "kind",
+        "importance",
+        "status",
+        "created_at",
+        "content",
+        "truncated"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "kind": {
+          "$ref": "memory.defs.schema.json#/$defs/kind"
+        },
+        "importance": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 3,
+          "description": "Under 4, or none: a memory of importance 4 or more is never eligible."
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ],
+          "description": "Never deprecated: a memory marked wrong is never eligible."
+        },
+        "created_at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant"
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "content is a preview: get reads the whole text."
+        }
+      }
+    }
+  }
+}

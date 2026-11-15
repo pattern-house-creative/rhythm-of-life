@@ -1,0 +1,34 @@
+{
+  "ok": true,
+  "action": "group",
+  "id": null,
+  "revision": null,
+  "to": null,
+  "scope": null,
+  "owner": null,
+  "status": null,
+  "scopes": null,
+  "changed": [],
+  "unchanged": false,
+  "held": null,
+  "restored": null,
+  "group": {
+    "key": "djEuNmQzYzJhMTAwMDAwNDAwMDgwMDAwMDAwMDAwMGEwMDEuMi42ZDNjMmExMDAwMDA0MDAwODAwMDAwMDAwMDAwYTAwMi4x",
+    "total": 2,
+    "remaining": 0,
+    "done": true,
+    "capped": false,
+    "results": [
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a001",
+        "result": "undone"
+      },
+      {
+        "id": "6d3c2a10-0000-4000-8000-00000000a002",
+        "result": "forbidden"
+      }
+    ],
+    "redo": "djEuNmQzYzJhMTAwMDAwNDAwMDgwMDAwMDAwMDAwMGEwMDEuNi42ZDNjMmExMDAwMDA0MDAwODAwMDAwMDAwMDAwYTAwMS42"
+  },
+  "message": "Undid 1 memory of the group's 2; the group is done. redo undoes these undos as a group."
+}

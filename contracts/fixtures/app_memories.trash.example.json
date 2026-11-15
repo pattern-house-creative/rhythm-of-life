@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "trash": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000b003",
+      "scope": "shared",
+      "owner": "household",
+      "author": null,
+      "source": "app",
+      "status": "draft",
+      "preview": "DEMO: the old Wendle shed key lives under the blue pot.",
+      "truncated": false,
+      "held": null,
+      "reason": "forget",
+      "channel": "app",
+      "trashedBy": null,
+      "trashedAt": "2026-11-02T10:00:00+00:00",
+      "purgeAfter": "2026-11-16T10:00:00+00:00",
+      "daysLeft": 14,
+      "nonce": "6d3c2a10-0000-4000-8000-00000000c003",
+      "mayDeleteForever": true,
+      "revision": 2
+    }
+  ],
+  "next": null
+}

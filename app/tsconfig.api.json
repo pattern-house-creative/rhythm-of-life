@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "rootDir": ".",
+    "outDir": "build",
+    "noEmit": false
+  },
+  "include": ["api/**/*.ts", "server/**/*.ts"],
+  "exclude": ["server/devApi.ts"]
+}

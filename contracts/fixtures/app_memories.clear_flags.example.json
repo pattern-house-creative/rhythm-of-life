@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "op": "clear_flags",
+  "id": "6d3c2a10-0000-4000-8000-00000000e012",
+  "revision": 1,
+  "to": null,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "changed": [
+    "retracted_sources"
+  ],
+  "unchanged": false,
+  "replayed": false,
+  "droppedTags": [],
+  "held": null
+}

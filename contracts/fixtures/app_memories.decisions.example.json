@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "decisions": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a041",
+      "revision": 2,
+      "scope": "shared",
+      "owner": "household",
+      "author": "alex",
+      "status": "canonical",
+      "confidence": 0.7,
+      "confidenceSource": "stated",
+      "outcome": null,
+      "rearms": 0,
+      "reviewAt": "2026-11-01T09:00:00+00:00",
+      "window": "overdue",
+      "current": true,
+      "edited": true,
+      "tags": [
+        "pellow"
+      ],
+      "project": null,
+      "createdAt": "2026-10-20T09:30:00+00:00",
+      "preview": "DEMO: Alex chose the Pellow allotment over the gym.\n\n[Update 2026-09-01]: DEMO: the gym was full anyway.",
+      "truncated": false
+    }
+  ],
+  "next": null,
+  "count": 1,
+  "open": 2,
+  "dueNow": 1,
+  "upcoming": 0,
+  "resolved": 3,
+  "scored": 3
+}

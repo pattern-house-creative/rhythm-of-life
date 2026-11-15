@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/forget.output.schema.json",
+  "title": "forget answer",
+  "description": "The memory tool forget's answer (SB-P3-09): the memory moved to the trash with its links, deleted for good after its days unless undo brings it back. Nothing is deleted through an AI client. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "trash",
+        "replayed",
+        "message"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "status": {
+          "$ref": "memory.defs.schema.json#/$defs/status"
+        },
+        "scopes": {
+          "$ref": "memory.defs.schema.json#/$defs/scopes"
+        },
+        "trash": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "nonce",
+            "trashed_at",
+            "purge_after",
+            "days",
+            "links"
+          ],
+          "properties": {
+            "nonce": {
+              "$ref": "memory.defs.schema.json#/$defs/uuid"
+            },
+            "trashed_at": {
+              "$ref": "memory.defs.schema.json#/$defs/instant"
+            },
+            "purge_after": {
+              "$ref": "memory.defs.schema.json#/$defs/instant"
+            },
+            "days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365
+            },
+            "links": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "replayed": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

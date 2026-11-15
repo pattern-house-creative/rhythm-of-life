@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "write_limit",
+  "error": "This token has made 300 writes in the last 10 minutes, its limit (engine.writeLimit), so this write changed nothing. It can write again in 412 seconds; reads still answer."
+}

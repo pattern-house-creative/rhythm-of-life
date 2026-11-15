@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "op": "forget_all",
+  "results": [
+    { "id": "6d3c2a10-0000-4000-8000-00000000b001", "result": "forgotten", "revision": 2, "nonce": "6d3c2a10-0000-4000-8000-00000000c001", "days": 14 },
+    { "id": "6d3c2a10-0000-4000-8000-00000000b002", "result": "conflict", "revision": 3, "nonce": null, "days": null },
+    { "id": "6d3c2a10-0000-4000-8000-00000000b003", "result": "forbidden", "revision": null, "nonce": null, "days": null }
+  ]
+}

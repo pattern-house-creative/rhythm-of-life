@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/update.output.schema.json",
+  "title": "update answer",
+  "description": "The memory tool update's answer (SB-P3-09): a memory's text, tags or fields replaced, the state before kept as a version; capsule tags are refused. No memory's words, only where it is and what changed. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "$ref": "memory.defs.schema.json#/$defs/written"
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

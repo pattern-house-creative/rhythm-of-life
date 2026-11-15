@@ -1,0 +1,36 @@
+{
+  "screens": [
+    {
+      "id": "fictional-hallway-screen2",
+      "name": "Hallway PC",
+      "open": true,
+      "seenAt": "2026-10-28T12:01:05.5+00:00",
+      "showing": { "view": "home", "layout": "corners", "tiles": { "main": "main", "recovery": "recovery", "training": "training", "changed": "changed" }, "narrow": false,
+        "home": null, "activeAt": "2026-10-28T11:58:40.25+00:00",
+        "parts": [{ "id": "main", "kind": "corner", "x": 0, "y": 0, "w": 2, "h": 8 }, { "id": "map", "kind": "map", "x": 2, "y": 0, "w": 8, "h": 12 },
+          { "id": "recovery", "kind": "corner", "x": 10, "y": 0, "w": 2, "h": 8 }, { "id": "training", "kind": "corner", "x": 0, "y": 8, "w": 2, "h": 4 },
+          { "id": "changed", "kind": "corner", "x": 10, "y": 8, "w": 2, "h": 4 }] },
+      "self": true
+    },
+    {
+      "id": "fictional-kitchen-screen1",
+      "name": "Kitchen iPad",
+      "open": true,
+      "seenAt": "2026-10-28T12:01:02+00:00",
+      "showing": { "view": "full_screen", "dashboard": { "id": "6d3c2a10-0000-4000-8000-00000000d001", "title": "DEMO · Training plan" }, "layout": "hero",
+        "tiles": { "main": "main", "recovery": "recovery", "training": "training", "changed": "changed" }, "narrow": false,
+        "home": { "dashboard": { "id": "6d3c2a10-0000-4000-8000-00000000d001", "title": "DEMO · Training plan" } }, "activeAt": "2026-10-28T09:12:03+00:00",
+        "parts": [{ "id": "page", "kind": "page", "x": 0, "y": 0, "w": 5, "h": 8 }, { "id": "map", "kind": "map", "x": 5, "y": 0, "w": 7, "h": 12, "focus": "near DEMO · Training plan" },
+          { "id": "glucose", "kind": "glucose", "x": 0, "y": 8, "w": 5, "h": 4 }] },
+      "self": false
+    },
+    {
+      "id": "fictional-phone-screen3x",
+      "name": "Sam's phone",
+      "open": false,
+      "seenAt": "2026-10-28T08:15:40+00:00",
+      "showing": { "view": "home", "layout": "corners", "tiles": { "main": "main", "recovery": "recovery", "training": "training", "changed": "changed" }, "narrow": true },
+      "self": false
+    }
+  ]
+}

@@ -1,0 +1,652 @@
+/* An insight, read in full. The panel sits on the right, beside the corner it
+   grows out of, over a scrim that leaves the sky in view. */
+.detail-backdrop.detail-insight {
+  justify-content: flex-end;
+  background: linear-gradient(
+    270deg,
+    #070c11e6 0,
+    #070c11b3 50%,
+    #070c1166 100%
+  );
+}
+.detail-insight .detail-panel {
+  width: min(640px, 100%);
+}
+.app.view-insight .graph-zone {
+  opacity: 0.45;
+  filter: saturate(0.75);
+}
+
+.insight-panel {
+  --kind: #d0b6e7;
+  padding-bottom: 6px;
+}
+.insight-panel.kind-focus {
+  --kind: #75d8b9;
+}
+.insight-panel.kind-suggestion {
+  --kind: #c1a66d;
+}
+
+/* Kind, title and the insight itself. */
+.insight-head {
+  position: relative;
+  padding: 26px 0 30px;
+}
+.insight-head::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  left: -80px;
+  width: 360px;
+  height: 260px;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--kind) 9%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+.insight-eyebrow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: color-mix(in srgb, var(--kind) 60%, #b6cbd5);
+}
+.insight-eyebrow > span {
+  letter-spacing: 1.6px;
+  color: #718993;
+}
+.insight-eyebrow .insight-sample {
+  margin-left: auto;
+  padding: 3px 7px;
+  border: 1px solid #93b4c333;
+  border-radius: 4px;
+  font-size: 7px;
+  letter-spacing: 1.4px;
+  color: #91aab7;
+}
+.insight-head h2 {
+  position: relative;
+  max-width: 520px;
+  margin: 16px 0;
+  font: 350 34px/1.25 "Manrope Variable";
+  letter-spacing: -1.1px;
+  color: #e3eef0;
+  outline: none;
+}
+.insight-summary {
+  position: relative;
+  max-width: 540px;
+  margin: 0;
+  font: 350 16px/1.7 "Manrope Variable";
+  letter-spacing: -0.1px;
+  color: #b9cad2;
+}
+.insight-evidence {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0 0;
+  font-size: 10px;
+  color: #8fa9b7;
+}
+.insight-evidence > span:last-child {
+  color: #718993;
+}
+.evidence-dots {
+  display: flex;
+  gap: 4px;
+}
+.evidence-dots i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--kind) 55%, transparent);
+}
+.evidence-dots i.on {
+  background: var(--kind);
+  border-color: var(--kind);
+}
+
+.insight-panel h3 {
+  margin: 0 0 12px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #88bba9;
+}
+.insight-why,
+.insight-points,
+.insight-sources,
+.insight-limits,
+.insight-feedback {
+  padding: 24px 0;
+  border-top: 1px solid #93b4c321;
+}
+.insight-why p,
+.insight-limits p {
+  max-width: 540px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.85;
+  color: #a9bcc5;
+}
+
+/* The next step, held a little apart: what to do with it. */
+.insight-next {
+  margin: 4px 0 0;
+  padding: 20px 22px 22px;
+  border: 1px solid #93b4c321;
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      260px 120px at 0 0,
+      color-mix(in srgb, var(--kind) 8%, transparent),
+      transparent
+    ),
+    #0e171e80;
+}
+.insight-next p {
+  margin: 0;
+  font: 350 15px/1.75 "Manrope Variable";
+  color: #d7e5e9;
+}
+
+/* Into the sky: the trail. */
+.insight-sky {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  padding: 22px 0 28px;
+}
+.insight-sky > span {
+  font-size: 10px;
+  color: #8fa9b7;
+}
+.insight-sky-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 22px 0 16px;
+  border: 1px solid color-mix(in srgb, var(--kind) 38%, #93b4c321);
+  border-radius: 23px;
+  background: radial-gradient(
+    80px 40px at 26px 50%,
+    color-mix(in srgb, var(--kind) 16%, transparent),
+    #14202980
+  );
+  font-size: 12px;
+  color: #e3eef0;
+  transition:
+    border-color 0.3s,
+    background 0.3s;
+}
+.insight-sky-button:hover,
+.insight-sky-button:focus-visible {
+  border-color: color-mix(in srgb, var(--kind) 65%, transparent);
+}
+.insight-sky-button:disabled {
+  opacity: 0.5;
+}
+.sky-glyph {
+  position: relative;
+  width: 22px;
+  height: 16px;
+}
+.sky-glyph::before {
+  /* Faint lines between the three stars. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+        28deg,
+        transparent 46%,
+        color-mix(in srgb, var(--kind) 50%, transparent) 48% 52%,
+        transparent 54%
+      )
+      0 0 / 60% 100% no-repeat,
+    linear-gradient(
+        -40deg,
+        transparent 46%,
+        color-mix(in srgb, var(--kind) 50%, transparent) 48% 52%,
+        transparent 54%
+      )
+      100% 0 / 50% 100% no-repeat;
+}
+.sky-glyph i {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--kind);
+  box-shadow: 0 0 6px var(--kind);
+}
+.sky-glyph i:nth-child(1) {
+  left: 0;
+  bottom: 1px;
+}
+.sky-glyph i:nth-child(2) {
+  left: 10px;
+  top: 0;
+}
+.sky-glyph i:nth-child(3) {
+  right: 0;
+  bottom: 4px;
+}
+
+/* What it rests on: facts, outside claims, inferences and hypotheses, each
+   with its own mark, in that order. */
+.insight-points ol,
+.insight-sources ol,
+.insight-history ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.insight-point {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  column-gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #93b4c312;
+}
+.insight-point:last-child {
+  border-bottom: 0;
+}
+.point-type {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 22px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.point-type i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.insight-point.observed .point-type {
+  color: #82d0b8;
+}
+.insight-point.observed .point-type i {
+  background: #75d8b9;
+}
+.insight-point.sourced .point-type {
+  color: #88bba9;
+}
+.insight-point.sourced .point-type i {
+  border: 1.5px solid #88bba9;
+}
+.insight-point.inferred .point-type {
+  color: #b6a6cc;
+}
+.insight-point.inferred .point-type i {
+  border: 1px solid #b6a6cc;
+  background: linear-gradient(90deg, #b6a6cc 50%, transparent 50%);
+}
+.insight-point.hypothesis .point-type {
+  color: #c1a66d;
+}
+.insight-point.hypothesis .point-type i {
+  border: 1px dashed #c1a66d;
+}
+.insight-point p {
+  grid-column: 2;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.75;
+  color: #c3d3da;
+}
+.insight-point:is(.inferred, .hypothesis) p {
+  color: #a9bcc5;
+}
+.insight-point.hypothesis p {
+  font-style: italic;
+}
+.point-source {
+  grid-column: 2;
+  margin-top: 4px;
+  font-size: 10px;
+}
+.point-source :is(a, button, span) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  color: #8fa9b7;
+  text-align: left;
+  transition: color 0.2s;
+}
+.point-source :is(a, button):hover,
+.point-source :is(a, button):focus-visible {
+  color: #d7e5e9;
+}
+.point-source b {
+  font-weight: 500;
+  color: #88bba9;
+}
+
+/* Sources, numbered as the points cite them. */
+.insight-sources li {
+  display: grid;
+  grid-template-columns: 14px 16px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 10px 0;
+}
+.source-number {
+  font: 350 13px/1.5 "Manrope Variable";
+  color: #718993;
+}
+.source-icon {
+  margin-top: 2px;
+  color: #88bba9;
+}
+.source-title :is(a, button, span) {
+  display: inline;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #d7e5e9;
+  text-align: left;
+  transition: color 0.2s;
+}
+.source-title :is(a, button) svg {
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: -1px;
+  color: #8fa9b7;
+}
+.source-title :is(a, button):hover,
+.source-title :is(a, button):focus-visible {
+  color: #a6dccd;
+}
+.insight-sources small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  color: #718993;
+}
+
+/* Feedback: four quiet choices, and "later" opens two more in place. */
+.feedback-buttons,
+.feedback-later {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.feedback-buttons button,
+.feedback-later button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 15px;
+  border: 1px solid #93b4c333;
+  border-radius: 19px;
+  font-size: 11px;
+  color: #b1c1cd;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+.feedback-buttons button:hover:not(:disabled),
+.feedback-buttons button:focus-visible,
+.feedback-later button:hover:not(:disabled),
+.feedback-later button:focus-visible {
+  background: #89bace14;
+  border-color: #93b4c35c;
+  color: #d7e5e9;
+}
+.feedback-buttons button[aria-pressed="true"] {
+  background: #75d8b91a;
+  border-color: #75d8b966;
+  color: #e3eef0;
+}
+.feedback-buttons button[aria-pressed="true"] svg {
+  color: #75d8b9;
+}
+.feedback-buttons button[aria-expanded="true"] {
+  border-color: #93b4c35c;
+  color: #d7e5e9;
+}
+.feedback-buttons button:disabled:not(.saving) {
+  opacity: 0.55;
+}
+.feedback-buttons button.saving {
+  animation: feedback-saving 1.4s ease-in-out infinite;
+}
+@keyframes feedback-saving {
+  50% {
+    border-color: #75d8b966;
+  }
+}
+.feedback-later {
+  margin-top: 10px;
+  padding-left: 14px;
+  border-left: 1px solid #93b4c321;
+  animation: feedback-later-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes feedback-later-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+/* "Already handled" asks what happened; any choice can take a note. */
+.feedback-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 12px;
+}
+.feedback-note input {
+  flex: 1 1 240px;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #93b4c333;
+  border-radius: 19px;
+  background: #0e171e99;
+  font-size: 12px;
+  color: #e3eef0;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.feedback-note input::placeholder {
+  color: #718993;
+}
+.feedback-note input:focus-visible {
+  border-color: #75d8b966;
+}
+.feedback-note button[type="submit"] {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid #75d8b966;
+  border-radius: 19px;
+  background: #75d8b91a;
+  font-size: 11px;
+  color: #e3eef0;
+  transition: opacity 0.2s;
+}
+.feedback-note button[type="submit"]:disabled {
+  opacity: 0.45;
+}
+.feedback-note.optional {
+  margin-top: 8px;
+}
+.note-toggle {
+  min-height: 28px;
+  font-size: 10px;
+  color: #718993;
+  transition: color 0.2s;
+}
+.note-toggle:hover,
+.note-toggle:focus-visible {
+  color: #b1c1cd;
+}
+.feedback-saved-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.7;
+  color: #a9bcc5;
+}
+/* The engine's last run, quietly under the insight's own provenance. */
+.insight-made .insight-run {
+  color: #8ca7b4;
+}
+.insight-panel > .insight-run {
+  margin: -8px 0 20px;
+  font-size: 10px;
+  color: #8ca7b4;
+}
+.feedback-status {
+  margin: 14px 0 0;
+  font-size: 11px;
+  color: #8fa9b7;
+}
+.feedback-status:empty {
+  margin: 0;
+}
+
+.insight-made {
+  margin: 0;
+  padding: 18px 0 0;
+  border-top: 1px solid #93b4c321;
+  font-size: 10px;
+  line-height: 1.7;
+  color: #718993;
+}
+
+/* Earlier insights, quietly at the foot. */
+.insight-history {
+  margin-top: 30px;
+}
+.insight-history button {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "mark title status"
+    ". meta status";
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 2px;
+  width: 100%;
+  padding: 12px 0;
+  border-bottom: 1px solid #93b4c312;
+  text-align: left;
+}
+.insight-history li:last-child button {
+  border-bottom: 0;
+}
+.insight-history .kind-mark {
+  grid-area: mark;
+}
+.history-title {
+  grid-area: title;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: 350 14px/1.45 "Manrope Variable";
+  letter-spacing: -0.2px;
+  color: #c3d3da;
+  transition: color 0.2s;
+}
+.insight-history button:hover .history-title,
+.insight-history button:focus-visible .history-title {
+  color: #e3eef0;
+}
+.insight-history small {
+  grid-area: meta;
+  font-size: 9px;
+  color: #718993;
+}
+.history-status {
+  grid-area: status;
+  padding: 3px 8px;
+  border: 1px solid #93b4c321;
+  border-radius: 10px;
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #8fa9b7;
+}
+.history-status.new {
+  color: #82d0b8;
+}
+.history-status.saved {
+  color: #88bba9;
+}
+.history-status.explored {
+  color: #b6a6cc;
+}
+.history-status:is(.dismissed, .superseded, .handled) {
+  color: #718993;
+}
+
+/* Phones: a sheet that rises from the card under the health readings. */
+@media (max-width: 760px) and (min-height: 501px) {
+  .detail-backdrop.detail-insight {
+    align-items: flex-end;
+    padding: env(safe-area-inset-top) 0 0;
+    background: #070c11cc;
+  }
+  .detail-insight .detail-panel {
+    width: 100%;
+    height: auto;
+    max-height: 92%;
+    border: 1px solid #789eaf2e;
+    border-bottom: 0;
+    border-radius: 24px 24px 0 0;
+  }
+  .insight-head {
+    padding: 18px 0 26px;
+  }
+  .insight-head h2 {
+    font-size: 27px;
+    letter-spacing: -0.9px;
+  }
+  .insight-summary {
+    font-size: 14px;
+  }
+  .insight-next {
+    padding: 16px 18px 18px;
+  }
+  .insight-next p {
+    font-size: 14px;
+  }
+  .insight-point {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .insight-point :is(p, .point-source) {
+    grid-column: 1;
+  }
+  .point-type {
+    height: auto;
+    margin-bottom: 6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .feedback-buttons button.saving,
+  .feedback-later {
+    animation: none;
+  }
+}

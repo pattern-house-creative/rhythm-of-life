@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_garmin_summary.output.schema.json",
+  "title": "app_garmin_summary structuredContent",
+  "description": "The Garmin adapter's owner's last 14 days for the recovery and training tiles, in the private reader's shape: daily metrics and recorded activities, each row with its source record, calendar day and time zone. Listed only while adapters.garmin is on. See contracts/README.md section 2.2 and docs/dev/engine.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["subject", "selection", "complete", "rows", "today", "startDate", "endDate", "start", "end", "coverageComplete",
+    "activityCount", "lastSyncedAt", "summary"],
+  "properties": {
+    "subject": { "$ref": "#/$defs/subject", "description": "The adapter's owner (adapters.garmin.owner)." },
+    "selection": { "const": "garmin" },
+    "complete": { "type": "boolean", "description": "False when more than 2000 rows matched and only the newest 2000 are given." },
+    "rows": { "type": "array", "maxItems": 2000, "items": { "$ref": "#/$defs/row" } },
+    "today": { "$ref": "#/$defs/date", "description": "Today in adapters.garmin.deviceTimezone." },
+    "startDate": { "$ref": "#/$defs/date", "description": "The first of the 14 days." },
+    "endDate": { "$ref": "#/$defs/date", "description": "The day after today: the window is startDate up to, not including, endDate." },
+    "start": { "$ref": "#/$defs/second", "description": "24 hours before end." },
+    "end": { "$ref": "#/$defs/second", "description": "When this was answered." },
+    "coverageComplete": { "type": "boolean", "description": "A Garmin job covered this week through today." },
+    "activityCount": { "type": "integer", "minimum": 0, "description": "Recorded activities in the 14 days." },
+    "lastSyncedAt": { "anyOf": [{ "$ref": "#/$defs/second" }, { "type": "null" }], "description": "The newest finished Garmin job or accepted write." },
+    "summary": { "type": "null" }
+  },
+  "$defs": {
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource_id", "subject_id", "provider", "source_kind", "timezone", "source_updated_at", "metric", "sample_key",
+        "observed_at", "local_date", "value", "unit", "quality", "activity_type", "pool_unit", "multisport"],
+      "properties": {
+        "resource_id": { "$ref": "#/$defs/uuid" },
+        "subject_id": { "$ref": "#/$defs/subject" },
+        "provider": { "const": "garmin" },
+        "source_kind": { "enum": ["metric", "activity"] },
+        "timezone": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "source_updated_at": { "$ref": "#/$defs/maybeInstant" },
+        "metric": { "enum": ["steps", "sleep_duration", "resting_heart_rate", "hrv_overnight", "intensity_moderate", "intensity_vigorous",
+          "activity_duration", "activity_distance", "activity_training_load", "training_effect_aerobic", "training_effect_anaerobic",
+          "activity_heart_rate"] },
+        "sample_key": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "observed_at": { "$ref": "#/$defs/maybeInstant", "description": "Null for a daily total that belongs only to its calendar day." },
+        "local_date": { "$ref": "#/$defs/date" },
+        "value": { "type": "number", "minimum": 0 },
+        "unit": { "enum": ["count", "s", "beats/min", "ms", "min", "m", "score"], "description": "Each metric's one unit: heart rates in beats/min, durations in s (intensity minutes in min), distance in m." },
+        "quality": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "activity_type": { "type": ["string", "null"], "pattern": "^[a-z0-9_]{1,40}$", "description": "An activity's type, such as running; null for a daily metric." },
+        "pool_unit": { "enum": ["meter", "yard", null] },
+        "multisport": { "enum": ["parent", "leg", null] }
+      }
+    },
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "subject": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" },
+    "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "second": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+    "maybeInstant": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    }
+  }
+}

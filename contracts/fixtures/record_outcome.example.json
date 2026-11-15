@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a041",
+  "revision": 3,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "result": "right",
+  "previous": null,
+  "rearms": 0,
+  "review_at": null,
+  "reviews_done": false,
+  "changed": ["outcome"],
+  "unchanged": false,
+  "message": "Recorded: it went right. It is asked about no more, and it counts in calibration when it has a confidence. The state before is kept as a version (revision 3 now), history records it (outcome), and undo(id) takes it back."
+}

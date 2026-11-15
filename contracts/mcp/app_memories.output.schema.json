@@ -1,0 +1,6422 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_memories.output.schema.json",
+  "title": "app_memories structuredContent",
+  "description": "Native memories for the app's Memories view, read and written as the app (channel app), listed and taken only while memory.tools is on. One answer per op: a list, the trash, one memory or one revision, a history, the projects, the review queue, the duplicate review, the contradiction review, or what a write did (a release of several answered one by one), the suggestions dismissed on the caller's map, or what a dismissal or taking one back did, a memory's connections, the memories that may be out of date, or what a person's link, unlink or still true did, or the brief for the Home card, or the lists behind it, calibration and what a person's word on one did, or what waits in a person's review queues, the insight candidates, the insight stream and an insight's history, or what a review or a resolve did; or a refusal with the store's code and a reason fit to show. A held memory comes whole only from get, with its hold, for a person to review; a list, the trash, history and a version leave a held state's words out. See contracts/README.md section 2.2. Since run 22 (SB-P6-01): a list and its tags narrowed by the words its memories hold (query), the standing instructions (op standing) and a person's stop of one (op stop_standing, a write), and one of a review queue's one-word steps for several items (op resolve_all), each answered on its own.",
+  "type": "object",
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "memories",
+        "next"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "memories": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/listed"
+          }
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "trash",
+        "next"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "trash": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/trashed"
+          }
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "memory"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "memory": {
+          "$ref": "#/$defs/memory"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "version"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "revision",
+        "changes",
+        "next",
+        "cut",
+        "earlierBy",
+        "kept",
+        "oldestKept",
+        "pruned"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "changes": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/change"
+          }
+        },
+        "next": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "The revision to pass as before for the next, older page."
+        },
+        "cut": {
+          "type": "boolean",
+          "description": "Earlier history lies in a scope this reader does not read."
+        },
+        "earlierBy": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kept": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "oldestKept": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pruned": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "projects"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "projects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/project"
+          }
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "review",
+        "next",
+        "count"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "review": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/reviewed"
+          }
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many held memories the whole queue holds by the same filters, the cursor aside."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "revision",
+        "to",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "project",
+        "changed",
+        "unchanged",
+        "replayed",
+        "droppedTags",
+        "held"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "enum": [
+            "capture",
+            "append",
+            "update",
+            "status",
+            "release",
+            "undo",
+            "capsule",
+            "share",
+            "clear_flags",
+            "keep_copy",
+            "settle_contradiction",
+            "stop_standing"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "to": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "The revision an undo went back to; null for every other write."
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        },
+        "project": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "slug",
+                "created"
+              ],
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "slug": {
+                  "$ref": "#/$defs/slug"
+                },
+                "created": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "replayed": {
+          "type": "boolean",
+          "description": "The answer to an earlier request with the same idempotency key."
+        },
+        "droppedTags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "held": {
+          "$ref": "#/$defs/held"
+        },
+        "capsule": {
+          "$ref": "#/$defs/capsule"
+        },
+        "projectLeft": {
+          "type": "boolean",
+          "description": "share: the memory had a project that did not come with it, so it is in no project where it landed."
+        },
+        "cascade": {
+          "$ref": "#/$defs/cascade"
+        },
+        "duplicates": {
+          "$ref": "#/$defs/copies",
+          "description": "capture, append, update, undo, release and release's kin: the memory's words were close to these memories of its own scope, so it was kept and flagged as a possible copy for its person's review, closest first; never for a held memory. Nothing was refused or merged."
+        },
+        "contradictionCandidates": {
+          "$ref": "#/$defs/candidates",
+          "description": "A write's words were close enough to these memories of its own scope that they may conflict (SB-P5-03, migration 068): queued for its person's review, closest first; never for a held memory. Nothing was refused or merged, and neither memory changed."
+        },
+        "target": {
+          "$ref": "#/$defs/uuid",
+          "description": "settle_contradiction: the other memory."
+        },
+        "decision": {
+          "enum": [
+            "keep_both",
+            "replaced"
+          ],
+          "description": "settle_contradiction: both stand, or id replaced target."
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "held": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "duplicates": false,
+            "contradictionCandidates": false
+          }
+        }
+      ]
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "revision",
+        "to",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "project",
+        "changed",
+        "unchanged",
+        "replayed",
+        "droppedTags",
+        "held",
+        "action",
+        "direction",
+        "counterparty"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "resolve_loop"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "to": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "The revision an undo went back to; null for every other write."
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        },
+        "project": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "slug",
+                "created"
+              ],
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "slug": {
+                  "$ref": "#/$defs/slug"
+                },
+                "created": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "replayed": {
+          "type": "boolean",
+          "description": "The answer to an earlier request with the same idempotency key."
+        },
+        "droppedTags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "held": {
+          "$ref": "#/$defs/held"
+        },
+        "action": {
+          "enum": [
+            "done",
+            "received",
+            "not_a_task"
+          ],
+          "description": "What was asked."
+        },
+        "direction": {
+          "enum": [
+            "out",
+            "in"
+          ],
+          "description": "Which way the loop runs."
+        },
+        "counterparty": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200,
+          "description": "The other person's name in words, or none."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "revision",
+        "to",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "project",
+        "changed",
+        "unchanged",
+        "replayed",
+        "droppedTags",
+        "held",
+        "action",
+        "due",
+        "before"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "resolve_due"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "to": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "The revision an undo went back to; null for every other write."
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        },
+        "project": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "slug",
+                "created"
+              ],
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "slug": {
+                  "$ref": "#/$defs/slug"
+                },
+                "created": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "replayed": {
+          "type": "boolean",
+          "description": "The answer to an earlier request with the same idempotency key."
+        },
+        "droppedTags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "held": {
+          "$ref": "#/$defs/held"
+        },
+        "action": {
+          "enum": [
+            "snooze",
+            "clear_date"
+          ],
+          "description": "What was asked."
+        },
+        "due": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/dueDate"
+            }
+          ],
+          "description": "The date after it, none after a clear."
+        },
+        "before": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/dueDate"
+            }
+          ],
+          "description": "The date before it."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "revision",
+        "to",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "project",
+        "changed",
+        "unchanged",
+        "replayed",
+        "droppedTags",
+        "held",
+        "result",
+        "previous",
+        "rearms",
+        "reviewAt",
+        "reviewsDone"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "record_outcome"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "to": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "The revision an undo went back to; null for every other write."
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        },
+        "project": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "slug",
+                "created"
+              ],
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "slug": {
+                  "$ref": "#/$defs/slug"
+                },
+                "created": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "replayed": {
+          "type": "boolean",
+          "description": "The answer to an earlier request with the same idempotency key."
+        },
+        "droppedTags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "held": {
+          "$ref": "#/$defs/held"
+        },
+        "result": {
+          "enum": [
+            "right",
+            "wrong",
+            "mixed",
+            "unknown"
+          ],
+          "description": "What was asked."
+        },
+        "previous": {
+          "enum": [
+            "right",
+            "wrong",
+            "mixed",
+            "unknown",
+            null
+          ],
+          "description": "The outcome before it."
+        },
+        "rearms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "How often unknown has asked again."
+        },
+        "reviewAt": {
+          "$ref": "#/$defs/maybeInstant",
+          "description": "The next review date, none once nothing is left to ask."
+        },
+        "reviewsDone": {
+          "type": "boolean",
+          "description": "An unknown stopped the asking."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "results"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "release_all"
+        },
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "result",
+              "revision"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/uuid"
+              },
+              "result": {
+                "enum": [
+                  "released",
+                  "unchanged",
+                  "unknown",
+                  "forbidden",
+                  "conflict"
+                ],
+                "description": "released; unchanged: it was not held; unknown: none the caller reads; forbidden: the author lock; conflict: it changed since the revision given and stays held."
+              },
+              "revision": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "description": "The revision it is at, when the caller reads it."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "replayed",
+        "trash"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "forget"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        },
+        "replayed": {
+          "type": "boolean"
+        },
+        "trash": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "nonce",
+            "trashedAt",
+            "purgeAfter",
+            "days",
+            "links"
+          ],
+          "properties": {
+            "nonce": {
+              "$ref": "#/$defs/uuid"
+            },
+            "trashedAt": {
+              "$ref": "#/$defs/instant"
+            },
+            "purgeAfter": {
+              "$ref": "#/$defs/instant"
+            },
+            "days": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "links": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "cascade": {
+          "$ref": "#/$defs/cascade"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "replayed",
+        "held",
+        "links",
+        "linksGone",
+        "trashedAt"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "restore"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        },
+        "replayed": {
+          "type": "boolean"
+        },
+        "held": {
+          "$ref": "#/$defs/held"
+        },
+        "links": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "linksGone": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "trashedAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "cascade": {
+          "$ref": "#/$defs/cascade"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "owner",
+        "links",
+        "versions",
+        "scopes"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "delete"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "links": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "versions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "dismissals",
+        "truncated"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "dismissals": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/dismissal"
+          }
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "There were more than the limit."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "link",
+        "dismissal",
+        "removed",
+        "unchanged",
+        "scopes"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "dismiss"
+        },
+        "link": {
+          "$ref": "#/$defs/link"
+        },
+        "dismissal": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/dismissalId"
+            }
+          ],
+          "description": "The dismissal now kept; null when a link a person or an AI client stated was removed and nothing is kept."
+        },
+        "removed": {
+          "type": "boolean",
+          "description": "A link a person or an AI client made was removed (unlinked), rather than a suggestion of the map's dismissed."
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "dismissal",
+        "unchanged",
+        "back",
+        "scopes"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "undismiss"
+        },
+        "dismissal": {
+          "$ref": "#/$defs/dismissalId"
+        },
+        "unchanged": {
+          "type": "boolean",
+          "description": "There was no such dismissal to take back."
+        },
+        "back": {
+          "type": "boolean",
+          "description": "Whether the map finds a suggestion of its type between the two stars now, so it is on the map again from the next read. False for a dismissal kept when a person removed a suggested made link: the link was removed, and taking the dismissal back only lets one of its type be suggested again."
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "connections",
+        "truncated"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "connections": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/connection"
+          },
+          "description": "The made links first, newest first, then the map's suggestions between this memory and another, strongest first."
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "There were more than limit."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "stale",
+        "next",
+        "count"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "stale": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/staleMemory"
+          },
+          "description": "Longest unchecked first."
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many the whole queue holds by the same filter, the cursor aside: the length of the list."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "duplicates",
+        "next",
+        "count"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "duplicates": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/duplicateMemory"
+          },
+          "description": "Newest first."
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many the whole review holds by the same filter, the cursor aside: the length of the list."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "contradictions",
+        "next",
+        "count"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "contradictions": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/contradiction"
+          },
+          "description": "Newest first."
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many the whole review holds by the same filter, the cursor aside: the length of the list."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "link",
+        "id",
+        "target",
+        "from",
+        "to",
+        "type",
+        "directed",
+        "verification",
+        "created",
+        "unchanged",
+        "scope",
+        "owner",
+        "scopes"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "link"
+        },
+        "link": {
+          "$ref": "#/$defs/uuid"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "target": {
+          "$ref": "#/$defs/uuid"
+        },
+        "from": {
+          "$ref": "#/$defs/uuid"
+        },
+        "to": {
+          "$ref": "#/$defs/uuid"
+        },
+        "type": {
+          "$ref": "#/$defs/linkType"
+        },
+        "directed": {
+          "type": "boolean"
+        },
+        "verification": {
+          "enum": [
+            "verified",
+            "inferred",
+            "suggested"
+          ],
+          "description": "verified: the app's is a person's link, so it is confirmed."
+        },
+        "created": {
+          "type": "boolean",
+          "description": "This call made it, or made it anew."
+        },
+        "unchanged": {
+          "type": "boolean",
+          "description": "It was there already as it is; neither created nor unchanged: this call confirmed an AI client's or a suggested one."
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        }
+      },
+      "description": "A person's link (op link, run 17): link is the link's own id; id and target the two memories as named, from and to as stored (relates_to has no direction and is stored with the smaller id first). verification verified: the app's is a person's link. created: this call made it, or made it anew; unchanged: it was there already as it is; neither: this call confirmed an AI client's or a suggested one."
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "target",
+        "removed",
+        "kept",
+        "dismissed",
+        "already",
+        "unchanged",
+        "scope",
+        "owner",
+        "scopes"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "unlink"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "target": {
+          "$ref": "#/$defs/uuid"
+        },
+        "removed": {
+          "$ref": "#/$defs/linkRefs"
+        },
+        "kept": {
+          "$ref": "#/$defs/linkRefs"
+        },
+        "dismissed": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/linkType"
+          },
+          "description": "Types of the map's suggestions between the two dismissed by this call."
+        },
+        "already": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many of those were dismissed before."
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        }
+      },
+      "description": "An unlink (op unlink, run 17): removed, the made links a person or an AI client stated; kept, automatic made links removed and kept as dismissals of their type; dismissed, the types of the map's suggestions between the two this call dismissed; already, how many of those were dismissed before."
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "unchanged",
+        "checkedAt",
+        "was",
+        "retracted"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "still_true"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        },
+        "unchanged": {
+          "type": "boolean",
+          "description": "It was confirmed at this revision in the last day and is not in the queue, so nothing was written."
+        },
+        "checkedAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "was": {
+          "enum": [
+            "not_confirmed",
+            "retracted_source",
+            null
+          ],
+          "description": "Why it was in the stale queue, or null."
+        },
+        "retracted": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          },
+          "description": "The retracted sources whose flags came off."
+        }
+      },
+      "description": "Still true (op still_true, run 17): the memory as a write answers it, its revision unchanged (still true moves none), its new checked time, why it was in the stale queue (was) and the retracted sources whose flags came off."
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "project",
+        "unknownProject",
+        "zone",
+        "says",
+        "due",
+        "decisions",
+        "youOwe",
+        "owedToYou",
+        "stale",
+        "insights",
+        "contradictions",
+        "duplicates",
+        "held",
+        "standing",
+        "calibration",
+        "changes"
+      ],
+      "description": "op brief (SB-P5-08): each section's count, the whole length of the list its MCP tool walks, and its head, item for item what the MCP brief shows.",
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "project": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "unknownProject": {
+          "type": "boolean"
+        },
+        "zone": {
+          "type": "string",
+          "pattern": "^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+){1,2})$"
+        },
+        "says": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "held": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many memories this reader reads wait in op review's queue: a count with no words, read by that queue's own predicates."
+        },
+        "due": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "overdue",
+            "upcoming",
+            "items"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "overdue": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "upcoming": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "$ref": "#/$defs/briefDated"
+              }
+            }
+          }
+        },
+        "decisions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "overdue",
+            "upcoming",
+            "items"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "overdue": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "upcoming": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "$ref": "#/$defs/briefDated"
+              }
+            }
+          }
+        },
+        "youOwe": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "items"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "$ref": "#/$defs/briefLoop"
+              }
+            }
+          }
+        },
+        "owedToYou": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "items"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "$ref": "#/$defs/briefLoop"
+              }
+            }
+          }
+        },
+        "stale": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "items"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items": {
+              "type": "array",
+              "maxItems": 2,
+              "items": {
+                "$ref": "#/$defs/briefStale"
+              }
+            }
+          }
+        },
+        "insights": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "items"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items": {
+              "type": "array",
+              "maxItems": 1,
+              "items": {
+                "$ref": "#/$defs/briefInsight"
+              }
+            }
+          }
+        },
+        "contradictions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "items"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "$ref": "#/$defs/briefContradiction"
+              }
+            }
+          }
+        },
+        "duplicates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "items"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "$ref": "#/$defs/briefItem"
+              }
+            }
+          }
+        },
+        "standing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "items"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "$ref": "#/$defs/briefItem"
+              }
+            }
+          }
+        },
+        "calibration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ready",
+            "n",
+            "line"
+          ],
+          "properties": {
+            "ready": {
+              "type": "boolean"
+            },
+            "n": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "line": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 400
+            }
+          }
+        },
+        "changes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "changes",
+            "truncated",
+            "groups"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "changes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "truncated": {
+              "type": "boolean"
+            },
+            "groups": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "$ref": "#/$defs/briefGroup"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Op resurface (SB-P5-17, migration 070): the install's day and this reader's old memory of that day, the same one all day, or null when none is eligible.",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "day",
+        "pick"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "day": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "pick": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/resurfaced"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "Op resurface_dismiss (SB-P5-17, migration 070): this reader has retired the memory from the card for good, in the trash or held too; one by the household view, or with scopes off by anyone, holds for every reader; unchanged when it had already.",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "unchanged"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "resurface_dismiss"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "unchanged": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "tags",
+        "truncated",
+        "count"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tag",
+              "count"
+            ],
+            "properties": {
+              "tag": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          },
+          "description": "Each tag on the memories a list with these filters holds, most carried first, then by name; a held memory's tags are none of them."
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole length of a list with these filters, the cursor aside."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "groups",
+        "truncated",
+        "since"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "groups": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/changeGroup"
+          },
+          "description": "An AI client's changes this caller reads, newest group first."
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "since": {
+          "$ref": "#/$defs/instant"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many groups the read found, of which the newest 50 are shown; read with notHeld, what the brief's section counts."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "kind",
+        "project",
+        "scope",
+        "complete",
+        "populated",
+        "hash",
+        "chars",
+        "maxChars",
+        "served",
+        "slots"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "kind": {
+          "enum": [
+            "core",
+            "project"
+          ]
+        },
+        "project": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The project's slug, for a project capsule."
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "complete": {
+          "type": "boolean"
+        },
+        "populated": {
+          "type": "boolean"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "chars": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxChars": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "served": {
+          "type": "boolean",
+          "description": "Whether AI clients are offered capsules (memory.capsules); a person reads this either way."
+        },
+        "slots": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/capsuleSlot"
+          }
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "scopes",
+        "person",
+        "share",
+        "capsules",
+        "capture",
+        "secondBrainImport",
+        "recall",
+        "recallLog",
+        "nightSummary",
+        "trashDays",
+        "versionsKept",
+        "maxBytes"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        },
+        "person": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/owner"
+            }
+          ],
+          "description": "The person this login speaks for; none for the household view."
+        },
+        "share": {
+          "type": "boolean"
+        },
+        "capsules": {
+          "type": "boolean"
+        },
+        "capture": {
+          "type": "boolean"
+        },
+        "secondBrainImport": {
+          "type": "boolean"
+        },
+        "recall": {
+          "type": "boolean"
+        },
+        "recallLog": {
+          "type": "boolean"
+        },
+        "nightSummary": {
+          "type": "boolean"
+        },
+        "trashDays": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "versionsKept": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxBytes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "group",
+        "total",
+        "remaining",
+        "done",
+        "capped",
+        "results",
+        "redo"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "undo_group"
+        },
+        "group": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,200}$"
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "remaining": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "done": {
+          "type": "boolean"
+        },
+        "capped": {
+          "type": "boolean"
+        },
+        "results": {
+          "type": "array",
+          "maxItems": 50,
+          "description": "Each memory this call reached: undone, unchanged, changed_since (it changed after the group, and stays as it is), or the undo's refusal.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "result"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/uuid"
+              },
+              "result": {
+                "type": "string",
+                "pattern": "^[a-z_]{1,40}$"
+              }
+            }
+          }
+        },
+        "redo": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z0-9_-]{1,200}$",
+          "description": "The key that undoes these undos; none when this call undid nothing."
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "results"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "forget_all"
+        },
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "description": "Each memory on its own: conflict stays where it is, changed since the revision given.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "result",
+              "revision",
+              "nonce",
+              "days"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/uuid"
+              },
+              "result": {
+                "enum": [
+                  "forgotten",
+                  "unknown",
+                  "forbidden",
+                  "conflict"
+                ]
+              },
+              "revision": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "description": "The revision it is at, when the caller reads it."
+              },
+              "nonce": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/uuid"
+                  }
+                ]
+              },
+              "days": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "cascade": {
+                "$ref": "#/$defs/cascade"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "results"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "restore_all"
+        },
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "description": "Each memory on its own: unknown is no longer on the trash row given.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "result",
+              "revision",
+              "held"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/uuid"
+              },
+              "result": {
+                "enum": [
+                  "restored",
+                  "unknown",
+                  "forbidden",
+                  "conflict"
+                ]
+              },
+              "revision": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "description": "The revision it is at, when the caller reads it."
+              },
+              "held": {
+                "$ref": "#/$defs/held"
+              },
+              "cascade": {
+                "$ref": "#/$defs/cascade"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "results"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "delete_all"
+        },
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "description": "Each memory on its own; deleted is for good.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "result"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/uuid"
+              },
+              "result": {
+                "enum": [
+                  "deleted",
+                  "unknown",
+                  "forbidden"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "results"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "share_all"
+        },
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "description": "Each memory on its own, by a share's own rules.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "result",
+              "revision",
+              "projectLeft"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/uuid"
+              },
+              "result": {
+                "enum": [
+                  "moved",
+                  "unchanged",
+                  "unknown",
+                  "forbidden",
+                  "conflict",
+                  "held",
+                  "no_author",
+                  "scopes_off",
+                  "invalid"
+                ]
+              },
+              "revision": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "description": "The revision it is at, when the caller reads it."
+              },
+              "projectLeft": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "project",
+        "scopes",
+        "changed",
+        "unchanged"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "enum": [
+            "project_create",
+            "project_update"
+          ]
+        },
+        "project": {
+          "$ref": "#/$defs/project"
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        "unchanged": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "slug",
+        "owner",
+        "memories",
+        "scopes"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "project_delete"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "slug": {
+          "$ref": "#/$defs/slug"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "memories": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many memories left it, each keeping the state it had as a version; memories tagged with one of its aliases keep their tags."
+        },
+        "scopes": {
+          "$ref": "#/$defs/scopes"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "loops",
+        "next",
+        "count",
+        "youOwe",
+        "owedToYou"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "loops": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/openLoop"
+          }
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The asked list's whole length, from the statement that read the page."
+        },
+        "youOwe": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "owedToYou": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "due",
+        "next",
+        "count",
+        "overdue",
+        "upcoming",
+        "later",
+        "zone"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "due": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/dueRow"
+          }
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The asked list's whole length, from the statement that read the page."
+        },
+        "overdue": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "upcoming": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "later": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "decisions",
+        "next",
+        "count",
+        "open",
+        "dueNow",
+        "upcoming",
+        "resolved",
+        "scored"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "decisions": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/decisionRow"
+          }
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The asked list's whole length, from the statement that read the page."
+        },
+        "open": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dueNow": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "upcoming": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resolved": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "scored": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "description": "Calibration (SB-P6-01; MemoryDecisions.Calibrate): how sure the person was against how things turned out, over their own scored decisions, each figure with how many decisions it rests on and none below its minimum.",
+      "required": [
+        "ok",
+        "source",
+        "ready",
+        "n",
+        "nStated",
+        "nInferred",
+        "minDecisions",
+        "minBand",
+        "minTopic",
+        "brier",
+        "gap",
+        "direction",
+        "bands",
+        "headline",
+        "topic",
+        "kind",
+        "line",
+        "topicLine",
+        "stated",
+        "hit"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "source": {
+          "enum": [
+            "all",
+            "stated",
+            "inferred"
+          ]
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The scored list's length."
+        },
+        "nStated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nInferred": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minDecisions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minBand": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minTopic": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "brier": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "gap": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -1,
+          "maximum": 1
+        },
+        "direction": {
+          "enum": [
+            "over",
+            "under",
+            "in_line",
+            null
+          ]
+        },
+        "bands": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/calibrationBand"
+          }
+        },
+        "headline": {
+          "enum": [
+            "50-59",
+            "60-69",
+            "70-79",
+            "80-89",
+            "90-95",
+            null
+          ]
+        },
+        "topic": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "n",
+                "gap",
+                "direction"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "n": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "gap": {
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                },
+                "direction": {
+                  "enum": [
+                    "over",
+                    "under"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "not_ready",
+            "rate",
+            "in_line",
+            "no_range"
+          ]
+        },
+        "line": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "topicLine": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 400
+        },
+        "stated": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "hit": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    {
+      "description": "op queues: how many wait in each of a person's review queues, each the length of that queue's own list.",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "held",
+        "duplicates",
+        "contradictions",
+        "stale",
+        "candidates",
+        "insights"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "held": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicates": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "contradictions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stale": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "candidates": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "insights": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    {
+      "description": "op insight_candidates: the pairs the nightly pass found, in one state, best first.",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "candidates",
+        "next",
+        "count"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "candidates": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/pair"
+          }
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The whole list's length, read with the page."
+        }
+      }
+    },
+    {
+      "description": "op insight_stream: the one insight stream, one view at a time, and what today came to.",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "view",
+        "count",
+        "proposed",
+        "older",
+        "confirmed",
+        "snoozed",
+        "closed",
+        "candidates",
+        "day",
+        "insights",
+        "next"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "view": {
+          "enum": [
+            "proposed",
+            "older",
+            "confirmed",
+            "snoozed",
+            "closed",
+            "all"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The asked view's whole length, read with the page."
+        },
+        "proposed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "older": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "confirmed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "snoozed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "closed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "candidates": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many pairs wait on this caller (op insight_candidates' count)."
+        },
+        "day": {
+          "$ref": "#/$defs/insightDay"
+        },
+        "insights": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/streamInsight"
+          }
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        }
+      }
+    },
+    {
+      "description": "op insight_history: an insight's feedback and reviews, newest first.",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "review",
+        "count",
+        "events"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "review": {
+          "enum": [
+            "proposed",
+            "confirmed",
+            "dismissed"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "events": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/insightEvent"
+          }
+        }
+      }
+    },
+    {
+      "description": "op review_insight: a person's confirm, dismiss or reopen.",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "id",
+        "review",
+        "view",
+        "reviewedAt",
+        "unchanged"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "review_insight"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "review": {
+          "enum": [
+            "proposed",
+            "confirmed",
+            "dismissed"
+          ]
+        },
+        "view": {
+          "enum": [
+            "proposed",
+            "older",
+            "confirmed",
+            "snoozed",
+            "closed"
+          ]
+        },
+        "reviewedAt": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "unchanged": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "description": "op resolve: a person's step in a review queue, through MemoryStore.ResolveItem as the app, an item leaving its queue once. One step's fields are filled, the others null: a memory's place for a memory's step, target and decision for a settling, review and view for an insight, candidate, note and insight for a pair, checkedAt, was and retracted for a still true. No memory's words.",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "queue",
+        "action",
+        "id",
+        "unchanged",
+        "waiting",
+        "stillCounted",
+        "revision",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "changed",
+        "held",
+        "target",
+        "decision",
+        "review",
+        "view",
+        "reviewedAt",
+        "candidate",
+        "decidedAt",
+        "note",
+        "insight",
+        "checkedAt",
+        "was",
+        "retracted"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "resolve"
+        },
+        "queue": {
+          "enum": [
+            "held",
+            "duplicates",
+            "contradictions",
+            "stale",
+            "insight_candidates",
+            "insights"
+          ]
+        },
+        "action": {
+          "enum": [
+            "release",
+            "keep_copy",
+            "settle_keep_both",
+            "settle_replace",
+            "still_true",
+            "use_candidate",
+            "reject_candidate",
+            "confirm_insight",
+            "dismiss_insight"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "unchanged": {
+          "type": "boolean",
+          "description": "This call changed nothing."
+        },
+        "waiting": {
+          "type": "boolean",
+          "description": "The item was waiting in its queue when the call came; false: nothing was written."
+        },
+        "stillCounted": {
+          "type": "boolean",
+          "description": "Its queue still counts it: a copy with a further flag standing."
+        },
+        "revision": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "scope": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/scope"
+            }
+          ]
+        },
+        "owner": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/owner"
+            }
+          ]
+        },
+        "status": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/status"
+            }
+          ]
+        },
+        "scopes": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/scopes"
+            }
+          ]
+        },
+        "changed": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        "held": {
+          "$ref": "#/$defs/held"
+        },
+        "cascade": {
+          "$ref": "#/$defs/cascade"
+        },
+        "duplicates": {
+          "$ref": "#/$defs/copies"
+        },
+        "contradictionCandidates": {
+          "$ref": "#/$defs/candidates"
+        },
+        "target": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/uuid"
+            }
+          ]
+        },
+        "decision": {
+          "enum": [
+            "keep_both",
+            "replaced",
+            null
+          ]
+        },
+        "review": {
+          "enum": [
+            "proposed",
+            "confirmed",
+            "dismissed",
+            null
+          ]
+        },
+        "view": {
+          "enum": [
+            "proposed",
+            "older",
+            "confirmed",
+            "snoozed",
+            "closed",
+            null
+          ]
+        },
+        "reviewedAt": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "candidate": {
+          "enum": [
+            "used",
+            "rejected",
+            null
+          ]
+        },
+        "decidedAt": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "insight": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/uuid"
+            }
+          ]
+        },
+        "checkedAt": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "was": {
+          "enum": [
+            "not_confirmed",
+            "retracted_source",
+            null
+          ]
+        },
+        "retracted": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        }
+      }
+    },
+    {
+      "description": "op standing (run 22): the standing instructions this caller reads, oldest first (the oldest 50 of a scope are those that may fire), as list_standing lists them, with the whole list's length and how many of it may fire, are held and are over the limit, read with the page. served: whether any fires at all now (engine.recall on and the embeddings model loaded).",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "standing",
+        "next",
+        "count",
+        "firing",
+        "held",
+        "overLimit",
+        "maxInScope",
+        "maxFires",
+        "served"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "standing": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/standingInstruction"
+          }
+        },
+        "next": {
+          "$ref": "#/$defs/cursor"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many the whole list holds by the same filter, the cursor aside: the length of the list."
+        },
+        "firing": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many of the list may fire."
+        },
+        "held": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many of the list are held, themselves or by their project."
+        },
+        "overLimit": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many of the list are past the oldest maxInScope of their scope."
+        },
+        "maxInScope": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxFires": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "served": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "description": "op resolve_all (run 22): one of a review queue's one-word steps for several items, each through op resolve's one door and answered on its own: resolved, unchanged (it was not waiting, so nothing was written), or why not. revision: a memory's, from still_true or a conflict; review and view: an insight's review now; candidate: a pair's decision now. No one's words. A person's step: an AI client's channel is refused before anything is read.",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "op",
+        "action",
+        "results"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "op": {
+          "const": "resolve_all"
+        },
+        "action": {
+          "enum": [
+            "still_true",
+            "reject_candidate",
+            "confirm_insight",
+            "dismiss_insight"
+          ]
+        },
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "result",
+              "revision",
+              "review",
+              "view",
+              "candidate"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/uuid"
+              },
+              "result": {
+                "enum": [
+                  "resolved",
+                  "unchanged",
+                  "unknown",
+                  "forbidden",
+                  "conflict",
+                  "held",
+                  "retracted",
+                  "invalid"
+                ]
+              },
+              "revision": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1
+              },
+              "review": {
+                "enum": [
+                  "proposed",
+                  "confirmed",
+                  "dismissed",
+                  null
+                ]
+              },
+              "view": {
+                "enum": [
+                  "proposed",
+                  "older",
+                  "confirmed",
+                  "snoozed",
+                  "closed",
+                  null
+                ]
+              },
+              "candidate": {
+                "enum": [
+                  "used",
+                  "rejected",
+                  null
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "code",
+        "reason"
+      ],
+      "properties": {
+        "ok": {
+          "const": false
+        },
+        "code": {
+          "enum": [
+            "unknown",
+            "forbidden",
+            "invalid",
+            "too_large",
+            "conflict",
+            "key_reused",
+            "unknown_project",
+            "taken",
+            "nothing_to_undo",
+            "no_version",
+            "not_visible",
+            "pruned",
+            "moved",
+            "scopes_off",
+            "held",
+            "no_author",
+            "retracted",
+            "unavailable",
+            "too_many_candidates",
+            "needs_person",
+            "not_offered",
+            "settled",
+            "protected",
+            "limit",
+            "not_due"
+          ],
+          "description": "unknown: no such memory the caller reads (one in the trash, of another scope or never made answer alike); forbidden: not this login's to change (the author lock); conflict: changed since expected (revision is the current one); pruned: revision is the oldest still kept; unknown_project: known lists the slugs the caller reads; scopes_off, held and no_author: a share's (with memory.share on), refused while memory scopes are off, for a memory held for review, and for taking back one no current person wrote; unavailable: the map did not answer just now (a dismissal op while the engine is starting), which is not the memory tools going off. retracted: still true's, for a memory marked wrong (deprecated), which is not confirmed as true. too_many_candidates: capsule_status, over 200 canonical memories in a capsule's slots. needs_person: only a person does this; never answered here, since the app is a person's channel, and the words an AI client's call gets. not_offered: the two are not queued as a possible contradiction, or one of them no longer stands. settled: a person settled the pair already. protected: a replacement its rules refuse, with why. limit: past the 50 standing instructions of a scope. not_due: a digest asked for before its time."
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "known": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/$defs/slug"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+    },
+    "scope": {
+      "enum": [
+        "private",
+        "shared"
+      ]
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$",
+      "description": "The scope's subject: a person's id, or household for Family."
+    },
+    "status": {
+      "enum": [
+        "canonical",
+        "draft",
+        "deprecated"
+      ]
+    },
+    "scopes": {
+      "enum": [
+        "off",
+        "on"
+      ],
+      "description": "The install's memory.scopes: off, every memory is the household's, visible to everyone in it."
+    },
+    "cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "instant": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "maybeInstant": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "held": {
+      "description": "Held for review (D-039): why (instruction, hidden, too_long, burst for a write burst, SB-P5-01, or held_project for a write into a project a held memory made, SB-P3-21) and the signals this write's screening found (none when it was held before). Only a person releases it (op release).",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "reason",
+            "signals"
+          ],
+          "properties": {
+            "reason": {
+              "enum": [
+                "instruction",
+                "hidden",
+                "too_long",
+                "burst",
+                "held_project"
+              ]
+            },
+            "signals": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z_]{1,40}$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "projectRef": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "slug",
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "slug": {
+              "$ref": "#/$defs/slug"
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "kind": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "episodic",
+        "semantic",
+        null
+      ]
+    },
+    "importance": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "volatility": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "durable",
+        "state",
+        "volatile",
+        null
+      ]
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "scope",
+        "owner",
+        "author",
+        "source",
+        "kind",
+        "importance",
+        "volatility",
+        "status",
+        "tags",
+        "project",
+        "content",
+        "truncated",
+        "held",
+        "validFrom",
+        "unknownStart",
+        "validUntil",
+        "revision",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "author": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The person who wrote it, or null for a login with no person."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "kind": {
+          "$ref": "#/$defs/kind"
+        },
+        "importance": {
+          "$ref": "#/$defs/importance"
+        },
+        "volatility": {
+          "$ref": "#/$defs/volatility"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "project": {
+          "$ref": "#/$defs/projectRef"
+        },
+        "content": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Whole from get, a held memory's included; a preview of at most 300 characters in a list (truncated when longer), none for a held memory there."
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "held": {
+          "$ref": "#/$defs/held"
+        },
+        "validFrom": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "unknownStart": {
+          "type": "boolean"
+        },
+        "validUntil": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "updatedAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "capsule": {
+          "$ref": "#/$defs/capsule"
+        },
+        "state": {
+          "enum": [
+            "current",
+            "replaced",
+            "ended",
+            "retracted"
+          ],
+          "description": "What it is now (migration 049, memory_validity_state): current (no end, or one still to come), replaced (ended where a live memory of its scope that supersedes it began: replacedBy), ended (ended, replaced by nothing live) or retracted (marked wrong: deprecated). Sent by an engine with the truth states; an older one sends none, which reads as current."
+        },
+        "replacedBy": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/uuid"
+            }
+          ],
+          "description": "The memory that replaced it (memory_replaced_by): set only while state is replaced."
+        },
+        "retractedSources": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          },
+          "description": "The retracted memories of its own scope it was built on, which flagged it for a check (the retraction cascade, SB-P4-08), oldest flag first, at most 100 (the engine serves no more); empty when it carries none."
+        },
+        "duplicateOf": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/copy"
+          },
+          "description": "The memories of its own scope it was flagged as a possible copy of when saved (SB-P5-02, migration 063) that stand now (both live: not held, marked wrong, ended or in the trash), closest first; only when there is one, never on a held memory."
+        },
+        "contradictions": {
+          "$ref": "#/$defs/candidates",
+          "description": "The memories of its scope that stand against it as possible contradictions (SB-P5-03, migration 068): both live and no person has settled them, closest first, only when it has any; never for a held memory."
+        }
+      },
+      "not": {
+        "properties": {
+          "held": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "held",
+          "duplicateOf"
+        ]
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "state": {
+              "const": "replaced"
+            },
+            "replacedBy": {
+              "$ref": "#/$defs/uuid"
+            }
+          },
+          "required": [
+            "state",
+            "replacedBy"
+          ]
+        },
+        {
+          "properties": {
+            "state": {
+              "not": {
+                "const": "replaced"
+              }
+            },
+            "replacedBy": {
+              "type": "null"
+            }
+          }
+        }
+      ],
+      "allOf": [
+        {
+          "not": {
+            "properties": {
+              "held": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "held",
+              "contradictions"
+            ]
+          }
+        }
+      ]
+    },
+    "listed": {
+      "description": "A memory in a list: a held one without its words, tags, project or capsule slot (they wait for a person, D-039).",
+      "allOf": [
+        {
+          "$ref": "#/$defs/memory"
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "held": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "content": {
+                  "type": "null"
+                },
+                "tags": {
+                  "maxItems": 0
+                },
+                "project": {
+                  "type": "null"
+                },
+                "truncated": {
+                  "const": false
+                },
+                "capsule": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "current",
+        "scope",
+        "owner",
+        "status",
+        "kind",
+        "importance",
+        "volatility",
+        "tags",
+        "project",
+        "content",
+        "held",
+        "validFrom",
+        "unknownStart",
+        "validUntil",
+        "writtenAt",
+        "retiredAt",
+        "person",
+        "channel",
+        "client"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "current": {
+          "type": "boolean"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "kind": {
+          "$ref": "#/$defs/kind"
+        },
+        "importance": {
+          "$ref": "#/$defs/importance"
+        },
+        "volatility": {
+          "$ref": "#/$defs/volatility"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "project": {
+          "$ref": "#/$defs/projectRef"
+        },
+        "content": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "None for a state that was held, unless a later state releases the same text."
+        },
+        "held": {
+          "$ref": "#/$defs/held"
+        },
+        "validFrom": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "unknownStart": {
+          "type": "boolean"
+        },
+        "validUntil": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "writtenAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "retiredAt": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "person": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "channel": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "app",
+            "mcp",
+            "cli",
+            "system",
+            "capture",
+            null
+          ]
+        },
+        "client": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "held": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "content": {
+              "type": "null"
+            },
+            "tags": {
+              "maxItems": 0
+            },
+            "project": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revision",
+        "event",
+        "at",
+        "person",
+        "channel",
+        "client",
+        "fields",
+        "scope",
+        "owner",
+        "kept",
+        "status",
+        "preview",
+        "held",
+        "to"
+      ],
+      "properties": {
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "event": {
+          "type": "string",
+          "pattern": "^[a-z_]{1,40}$"
+        },
+        "at": {
+          "$ref": "#/$defs/instant"
+        },
+        "person": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "channel": {
+          "enum": [
+            "app",
+            "mcp",
+            "cli",
+            "system",
+            "capture"
+          ]
+        },
+        "client": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "kept": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "canonical",
+            "draft",
+            "deprecated",
+            null
+          ]
+        },
+        "preview": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 160
+        },
+        "held": {
+          "type": "boolean"
+        },
+        "to": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "held": {
+              "const": false
+            }
+          }
+        },
+        {
+          "properties": {
+            "preview": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    },
+    "trashed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "scope",
+        "owner",
+        "author",
+        "source",
+        "status",
+        "preview",
+        "truncated",
+        "held",
+        "reason",
+        "channel",
+        "trashedBy",
+        "trashedAt",
+        "purgeAfter",
+        "daysLeft",
+        "nonce",
+        "mayDeleteForever",
+        "revision"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "author": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "preview": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "At most 300 characters; none for a held memory."
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "held": {
+          "$ref": "#/$defs/held"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "channel": {
+          "enum": [
+            "app",
+            "mcp",
+            "cli",
+            "system"
+          ]
+        },
+        "trashedBy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The person whose login moved it there, or null."
+        },
+        "trashedAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "purgeAfter": {
+          "$ref": "#/$defs/instant"
+        },
+        "daysLeft": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nonce": {
+          "$ref": "#/$defs/uuid"
+        },
+        "mayDeleteForever": {
+          "type": "boolean",
+          "description": "Whether this caller may delete it for good (op delete with this nonce and a confirmation)."
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "held": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "preview": {
+              "type": "null"
+            },
+            "truncated": {
+              "const": false
+            }
+          }
+        }
+      ]
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slug",
+        "name",
+        "scope",
+        "owner",
+        "aliases",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "slug": {
+          "$ref": "#/$defs/slug"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "enum": [
+            "active",
+            "archived"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "author": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/owner"
+            }
+          ],
+          "description": "The person who made it; none for a login with no person, or a memory write's project."
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "updatedAt": {
+          "$ref": "#/$defs/instant"
+        }
+      }
+    },
+    "cascade": {
+      "description": "What the change's retraction cascade did (migration 049, SB-P4-08), sent only when it did something: the memories this one had replaced that are current again (reopened) or replaced by it again (reclosed), and those built on it flagged for a check (flagged) or no longer (unflagged). Each is a memory of its own scope, at most 25 of each.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reopened",
+        "reclosed",
+        "flagged",
+        "unflagged"
+      ],
+      "properties": {
+        "reopened": {
+          "type": "array",
+          "maxItems": 25,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        },
+        "reclosed": {
+          "type": "array",
+          "maxItems": 25,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        },
+        "flagged": {
+          "type": "array",
+          "maxItems": 25,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        },
+        "unflagged": {
+          "type": "array",
+          "maxItems": 25,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        }
+      }
+    },
+    "capsule": {
+      "description": "The capsule slot a person put the memory in (SB-P3-22, migration 039): core with identity, preferences, constraints or principles, or project (its project's capsule) with current-state, decisions or open-questions; null when it is in none. A capsule serves it only while it is canonical and not held.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "slot"
+          ],
+          "properties": {
+            "kind": {
+              "const": "core"
+            },
+            "slot": {
+              "enum": [
+                "identity",
+                "preferences",
+                "constraints",
+                "principles"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "slot"
+          ],
+          "properties": {
+            "kind": {
+              "const": "project"
+            },
+            "slot": {
+              "enum": [
+                "current-state",
+                "decisions",
+                "open-questions"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "reviewed": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A held memory in the review queue (SB-P5-01, SB-P3-22): why it is held and how the write that held it came, never its words, tags or project, which get serves a person whole.",
+      "required": [
+        "id",
+        "scope",
+        "owner",
+        "author",
+        "source",
+        "status",
+        "reason",
+        "score",
+        "signals",
+        "heldAt",
+        "heldBy",
+        "channel",
+        "client",
+        "mayRelease",
+        "revision"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "author": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "reason": {
+          "enum": [
+            "instruction",
+            "hidden",
+            "too_long",
+            "burst",
+            "held_project"
+          ]
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z_]{1,40}$"
+          }
+        },
+        "heldAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "heldBy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The person the holding write's login speaks for, or null."
+        },
+        "channel": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "app",
+            "mcp",
+            "cli",
+            "system",
+            "capture",
+            null
+          ],
+          "description": "How the holding write came; null when the reader's history does not reach it."
+        },
+        "client": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        },
+        "mayRelease": {
+          "type": "boolean",
+          "description": "Whether this caller may release it (the author lock; never through an AI client's channel)."
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        }
+      }
+    },
+    "link": {
+      "type": "string",
+      "pattern": "^(relationship:[0-9a-f]{64}|made-link:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",
+      "description": "A link's id on the map (app_graph's edges): the map's own suggestion, or a link a person or an AI client made."
+    },
+    "dismissalId": {
+      "type": "string",
+      "pattern": "^(memories|stars):[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}:[a-z][a-z0-9_-]{0,63}$",
+      "description": "memories (between two native memories, kept by the memories) or stars (between two other stars, kept by the star rows), the two ids smaller first, and the link type."
+    },
+    "dismissal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "type",
+        "stars",
+        "dismissedAt",
+        "by",
+        "mine",
+        "mayRestore"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/dismissalId"
+        },
+        "kind": {
+          "enum": [
+            "memories",
+            "stars"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+        },
+        "stars": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "title"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000,
+                "description": "The star's id on the map (app_graph's nodes)."
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 1000
+              }
+            }
+          }
+        },
+        "dismissedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "by": {
+          "enum": [
+            "person",
+            "ai_client"
+          ],
+          "description": "person: a person's channel (the app's login or the terminal's); ai_client: an AI client's unlink."
+        },
+        "mine": {
+          "type": "boolean",
+          "description": "This caller's own login or person made it."
+        },
+        "mayRestore": {
+          "type": "boolean",
+          "description": "This caller may take it back (whoever may change either end)."
+        }
+      }
+    },
+    "linkType": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+      "description": "A link's type as the store names it: one of Second Brain's eight (relates_to, supersedes, caused_by, decided, about_person, part_of_project, follows, drawn_from) for a made link, or the map's own word (similar_to, ...) for its suggestion."
+    },
+    "linkRefs": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/uuid"
+          },
+          "type": {
+            "$ref": "#/$defs/linkType"
+          }
+        }
+      }
+    },
+    "connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One connection of a memory (run 17, as the MCP connections tool's): a link a person or an AI client made (made true, linkId its own id) or the map's suggestion between the two memories' stars (made false, linkId null); direction from the memory asked about, none for a type with no direction; verification verified for a person's link, inferred for an AI client's, suggested for an automatic one; mine: this login or its person made it; imported: an import brought it (a Second Brain export's or another install's Rhythm export), so it has no maker here and its verification is as the file gave it, or verified once a person here confirms it (it stays imported); mayUnlink: unlink would remove it (a suggestion: dismiss it) for this caller; at: when it was made or first found; confidence: as given, or a suggestion's strength.",
+      "required": [
+        "linkId",
+        "made",
+        "type",
+        "direction",
+        "verification",
+        "mine",
+        "imported",
+        "mayUnlink",
+        "at",
+        "confidence",
+        "memory"
+      ],
+      "properties": {
+        "linkId": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/uuid"
+            }
+          ]
+        },
+        "made": {
+          "type": "boolean"
+        },
+        "type": {
+          "$ref": "#/$defs/linkType"
+        },
+        "direction": {
+          "enum": [
+            "outgoing",
+            "incoming",
+            "none"
+          ]
+        },
+        "verification": {
+          "enum": [
+            "verified",
+            "inferred",
+            "suggested"
+          ]
+        },
+        "mine": {
+          "type": "boolean"
+        },
+        "imported": {
+          "type": "boolean"
+        },
+        "mayUnlink": {
+          "type": "boolean"
+        },
+        "at": {
+          "$ref": "#/$defs/instant"
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "memory": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "The other memory, as its reader is served it: a held one without its words (preview null), with its hold.",
+          "required": [
+            "id",
+            "scope",
+            "owner",
+            "status",
+            "state",
+            "kind",
+            "preview",
+            "truncated",
+            "held"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "scope": {
+              "$ref": "#/$defs/scope"
+            },
+            "owner": {
+              "$ref": "#/$defs/owner"
+            },
+            "status": {
+              "$ref": "#/$defs/status"
+            },
+            "state": {
+              "enum": [
+                "current",
+                "replaced",
+                "ended",
+                "retracted"
+              ]
+            },
+            "kind": {
+              "$ref": "#/$defs/kind"
+            },
+            "preview": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 120
+            },
+            "truncated": {
+              "type": "boolean"
+            },
+            "held": {
+              "$ref": "#/$defs/held"
+            }
+          }
+        }
+      }
+    },
+    "staleMemory": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One memory of the stale queue (run 17; migration 053's memory_stale_reason): one this caller may change that the nightly pass found out of date (reason not_confirmed: its volatility's time passed since `since`, its last change or still true; foundAt when the pass found it) or that a memory it was built on, marked wrong or moved to the trash since, flagged (reason retracted_source, which wins; retractedSources names them). A held memory is never in the queue. revision: the one a still true names.",
+      "required": [
+        "id",
+        "scope",
+        "owner",
+        "author",
+        "status",
+        "volatility",
+        "reason",
+        "since",
+        "foundAt",
+        "confirmedAt",
+        "preview",
+        "truncated",
+        "retractedSources",
+        "revision"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "author": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/owner"
+            }
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "volatility": {
+          "$ref": "#/$defs/volatility"
+        },
+        "reason": {
+          "enum": [
+            "not_confirmed",
+            "retracted_source"
+          ]
+        },
+        "since": {
+          "$ref": "#/$defs/instant"
+        },
+        "foundAt": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "confirmedAt": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "retractedSources": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        }
+      }
+    },
+    "copy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "score"
+      ],
+      "description": "A memory of the same scope that one was flagged as a possible copy of when saved (SB-P5-02, migration 063), and how close: the dot product of the two texts' vectors under the live model (at or above the install's duplicate threshold), or 1 for the same words, case and spacing aside.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "copies": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/copy"
+      }
+    },
+    "duplicateMemory": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One memory of the duplicate review (SB-P5-02; migration 063's memory_duplicate_listed): one this caller may change that was flagged when saved as a possible copy of another memory of its scope, while both stand (live: not held, marked wrong, ended or in the trash). duplicateOf names the copies, closest first. A held memory is never in it. revision: the one a keep_copy names.",
+      "required": [
+        "id",
+        "scope",
+        "owner",
+        "author",
+        "status",
+        "createdAt",
+        "preview",
+        "truncated",
+        "duplicateOf",
+        "revision"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "author": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/owner"
+            }
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "duplicateOf": {
+          "$ref": "#/$defs/copies"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "score",
+        "proposed"
+      ],
+      "description": "A memory of the same scope that stands against one as a possible contradiction (SB-P5-03, migration 068), how close, and whether somebody has named it a contradiction. A person settles it.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "proposed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/candidate"
+      }
+    },
+    "contradictionSide": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "author",
+        "status",
+        "preview",
+        "truncated",
+        "startedAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "author": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ]
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "startedAt": {
+          "$ref": "#/$defs/maybeInstant",
+          "description": "When it began being true: its valid_from, else when it was written; null when its start is unknown, which counts as before every other. Only the side that began later can replace the other."
+        }
+      }
+    },
+    "contradiction": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One pair of the contradiction review (SB-P5-03; migration 068's memory_contradiction_listed): two live memories of one scope, memory the one whose words were checked and conflict the one they came close to, which says nothing of which is older (each side's startedAt does), this caller may change either. proposed: who named it a contradiction and why, or null. maySettle: this caller may settle it here, the app being a person's channel.",
+      "required": [
+        "scope",
+        "owner",
+        "score",
+        "offeredAt",
+        "memory",
+        "conflict",
+        "proposed",
+        "maySettle"
+      ],
+      "properties": {
+        "scope": {
+          "enum": [
+            "private",
+            "shared"
+          ]
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "offeredAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "memory": {
+          "$ref": "#/$defs/contradictionSide"
+        },
+        "conflict": {
+          "$ref": "#/$defs/contradictionSide"
+        },
+        "proposed": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "at",
+                "person",
+                "client",
+                "reason"
+              ],
+              "properties": {
+                "at": {
+                  "$ref": "#/$defs/instant"
+                },
+                "person": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "client": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 80
+                },
+                "reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 200
+                }
+              }
+            }
+          ]
+        },
+        "maySettle": {
+          "type": "boolean"
+        }
+      }
+    },
+    "briefItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "preview",
+        "truncated"
+      ],
+      "description": "One memory of a brief's section: its place and a preview. A held or trashed memory is in no section.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "briefDated": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "preview",
+        "truncated",
+        "window",
+        "at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "window": {
+          "enum": [
+            "overdue",
+            "upcoming"
+          ]
+        },
+        "at": {
+          "$ref": "#/$defs/instant"
+        },
+        "local": {
+          "type": "string",
+          "maxLength": 40
+        }
+      }
+    },
+    "briefLoop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "preview",
+        "truncated",
+        "counterparty"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "counterparty": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        }
+      }
+    },
+    "briefStale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "preview",
+        "truncated",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "pattern": "^[a-z_]{1,40}$"
+        }
+      }
+    },
+    "briefInsight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "scope",
+        "owner",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        }
+      }
+    },
+    "briefContradiction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "preview",
+        "truncated",
+        "conflict"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "conflict": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "preview",
+            "truncated"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "preview": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "truncated": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "briefGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "group",
+        "family",
+        "client",
+        "changes",
+        "memories",
+        "until"
+      ],
+      "properties": {
+        "group": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "family": {
+          "type": "string",
+          "pattern": "^[a-z_]{1,40}$"
+        },
+        "client": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "changes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "memories": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "until": {
+          "$ref": "#/$defs/instant"
+        }
+      }
+    },
+    "resurfaced": {
+      "description": "A resurfaced old memory (SB-P5-17): never held, trashed, marked wrong or the engine's own, so it always has its words. preview: at most 280 characters of them.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "preview",
+        "truncated",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "preview": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 280
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/instant"
+        }
+      }
+    },
+    "changeRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "event",
+        "at",
+        "changes",
+        "preview",
+        "truncated",
+        "held"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "event": {
+          "type": "string",
+          "pattern": "^[a-z_]{1,40}$",
+          "description": "Its newest change's kind in the group."
+        },
+        "at": {
+          "$ref": "#/$defs/instant"
+        },
+        "changes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How many of the group's changes are this memory's."
+        },
+        "preview": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "At most 120 characters of its words now; none for a held memory, or one this reader no longer reads."
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "held": {
+          "type": "boolean"
+        }
+      }
+    },
+    "changeGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "group",
+        "family",
+        "person",
+        "client",
+        "changes",
+        "memories",
+        "from",
+        "until",
+        "capped",
+        "items"
+      ],
+      "properties": {
+        "group": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,200}$",
+          "description": "What undo_group takes, as it is given."
+        },
+        "family": {
+          "type": "string",
+          "pattern": "^[a-z_]{1,40}$",
+          "description": "edit, status, release, revert, resolve, outcome, due or standing."
+        },
+        "person": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/owner"
+            }
+          ],
+          "description": "The person the client's login speaks for, or none."
+        },
+        "client": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200,
+          "description": "The name the client gave itself, stored data."
+        },
+        "changes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "memories": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "from": {
+          "$ref": "#/$defs/instant"
+        },
+        "until": {
+          "$ref": "#/$defs/instant"
+        },
+        "capped": {
+          "type": "boolean",
+          "description": "More memories than one group undo takes (50): it undoes the oldest 50."
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/changeRow"
+          },
+          "description": "Its newest memories, one row each; memories says how many it has in all."
+        }
+      }
+    },
+    "capsuleSlot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slot",
+        "state",
+        "filledBy",
+        "duplicates",
+        "invalid",
+        "waiting"
+      ],
+      "properties": {
+        "slot": {
+          "enum": [
+            "identity",
+            "preferences",
+            "constraints",
+            "principles",
+            "current-state",
+            "decisions",
+            "open-questions"
+          ]
+        },
+        "state": {
+          "enum": [
+            "filled",
+            "empty",
+            "duplicate",
+            "omitted"
+          ],
+          "description": "filled: one memory fills it and the capsule serves it; empty: none does; duplicate: two or more do, and none is served; omitted: the slots before it took the budget."
+        },
+        "filledBy": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/uuid"
+            }
+          ]
+        },
+        "duplicates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        },
+        "invalid": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "reason"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/uuid"
+              },
+              "reason": {
+                "enum": [
+                  "content-too-large",
+                  "empty-content"
+                ]
+              }
+            }
+          }
+        },
+        "waiting": {
+          "type": "array",
+          "description": "The memories in the slot that the capsule does not serve, and what each waits for.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "status",
+              "held",
+              "expired"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/uuid"
+              },
+              "status": {
+                "$ref": "#/$defs/status"
+              },
+              "held": {
+                "type": "boolean"
+              },
+              "expired": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "openLoop": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One open loop as its reader is served it (migration 058's memory_open_loop; SB-P6-01): a memory tagged task and not task:done, live, not held, not marked wrong and its window open, this caller's own to change. direction: out (the person owes it) or in (owed to the person); counterparty: the other person's name in words, or none. A held memory is never listed, so every row has its words. revision: the one a resolve_loop names.",
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "author",
+        "status",
+        "direction",
+        "counterparty",
+        "tags",
+        "project",
+        "createdAt",
+        "preview",
+        "truncated"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "author": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/owner"
+            }
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "direction": {
+          "enum": [
+            "out",
+            "in"
+          ]
+        },
+        "counterparty": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "string"
+          }
+        },
+        "project": {
+          "$ref": "#/$defs/projectRef"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "dueRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One memory on a reader's due list (migration 061's memory_due; SB-P6-01). window: overdue (its moment has come), upcoming (within 48 hours) or later; at: the moment; local: how it reads on the install's clocks; kind: due, event or wake; source: explicit (a caller gave it) or text (read from the memory's words); loop: the open loop's direction when it is one. A held memory is never listed, so every row has its words. revision: the one a resolve_due names.",
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "author",
+        "status",
+        "window",
+        "at",
+        "local",
+        "kind",
+        "source",
+        "loop",
+        "tags",
+        "project",
+        "createdAt",
+        "preview",
+        "truncated"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "author": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/owner"
+            }
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "window": {
+          "enum": [
+            "overdue",
+            "upcoming",
+            "later"
+          ]
+        },
+        "at": {
+          "$ref": "#/$defs/instant"
+        },
+        "local": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "kind": {
+          "enum": [
+            "due",
+            "event",
+            "wake"
+          ]
+        },
+        "source": {
+          "enum": [
+            "explicit",
+            "text"
+          ]
+        },
+        "loop": {
+          "enum": [
+            "out",
+            "in",
+            null
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "string"
+          }
+        },
+        "project": {
+          "$ref": "#/$defs/projectRef"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "dueDate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "at",
+        "local",
+        "zone",
+        "kind",
+        "source"
+      ],
+      "properties": {
+        "at": {
+          "$ref": "#/$defs/instant"
+        },
+        "local": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "kind": {
+          "enum": [
+            "due",
+            "event",
+            "wake"
+          ]
+        },
+        "source": {
+          "enum": [
+            "explicit",
+            "text"
+          ]
+        }
+      }
+    },
+    "decisionRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One decision as its reader is served it (migration 060; SB-P6-01). confidence: 0.05 to 0.95 in steps of 0.05, or none, as the person gave it, set once; confidenceSource: stated or inferred, with it. outcome: none yet, right, wrong, mixed or unknown (too early to tell); rearms: how often unknown asked again; reviewAt: when to look at it again, none once nothing is left to ask; window: which window that date falls in, none with no date. current: its window is open (a scored list keeps decisions replaced since). edited: its words differ from those it was recorded with, so the confidence was given for other words. revision: the one a record_outcome names.",
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "author",
+        "status",
+        "confidence",
+        "confidenceSource",
+        "outcome",
+        "rearms",
+        "reviewAt",
+        "window",
+        "current",
+        "edited",
+        "tags",
+        "project",
+        "createdAt",
+        "preview",
+        "truncated"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "author": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/owner"
+            }
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.05,
+          "maximum": 0.95
+        },
+        "confidenceSource": {
+          "enum": [
+            "stated",
+            "inferred",
+            null
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "right",
+            "wrong",
+            "mixed",
+            "unknown",
+            null
+          ]
+        },
+        "rearms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "reviewAt": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "window": {
+          "enum": [
+            "overdue",
+            "upcoming",
+            "later",
+            null
+          ]
+        },
+        "current": {
+          "type": "boolean"
+        },
+        "edited": {
+          "type": "boolean"
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "string"
+          }
+        },
+        "project": {
+          "$ref": "#/$defs/projectRef"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "calibrationBand": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One band of folded confidences: how many decisions fall in it, and only when shown (at least minBand in it, and calibration ready) its figures, each null otherwise.",
+      "required": [
+        "band",
+        "n",
+        "nStated",
+        "nInferred",
+        "shown",
+        "meanConfidence",
+        "hitRate",
+        "low",
+        "high"
+      ],
+      "properties": {
+        "band": {
+          "enum": [
+            "50-59",
+            "60-69",
+            "70-79",
+            "80-89",
+            "90-95"
+          ]
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nStated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nInferred": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "shown": {
+          "type": "boolean"
+        },
+        "meanConfidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "hitRate": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "low": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "high": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "pairSide": {
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "createdAt",
+        "importance",
+        "preview",
+        "truncated"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "importance": {
+          "$ref": "#/$defs/importance"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "pair": {
+      "description": "One pair of an older and a newer memory of one scope: never a held, trashed, deprecated or ended memory.",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "scope",
+        "owner",
+        "score",
+        "signals",
+        "similarity",
+        "gapDays",
+        "foundAt",
+        "older",
+        "newer",
+        "status",
+        "decidedAt",
+        "note",
+        "insight"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0
+        },
+        "signals": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "enum": [
+              "similar",
+              "weighty"
+            ]
+          }
+        },
+        "similarity": {
+          "type": "number"
+        },
+        "gapDays": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "foundAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "older": {
+          "$ref": "#/$defs/pairSide"
+        },
+        "newer": {
+          "$ref": "#/$defs/pairSide"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "used",
+            "rejected"
+          ]
+        },
+        "decidedAt": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Why, in whoever decided it's words: stored data."
+        },
+        "insight": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/uuid"
+            }
+          ],
+          "description": "The insight written from the pair, only when this reader reads that insight's scope."
+        }
+      }
+    },
+    "insightDay": {
+      "description": "What today came to for this caller, in the install's time zone, so a day with no insight says so.",
+      "additionalProperties": false,
+      "required": [
+        "date",
+        "zone",
+        "outcome",
+        "note",
+        "insight",
+        "declined",
+        "says"
+      ],
+      "properties": {
+        "date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "outcome": {
+          "enum": [
+            "saved",
+            "quiet",
+            "blocked",
+            "none"
+          ]
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "A quiet or blocked run's note, in its client's words: stored data."
+        },
+        "insight": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/uuid"
+            }
+          ]
+        },
+        "declined": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "says": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "The same in plain words: the engine's own, never a client's."
+        }
+      }
+    },
+    "streamInsight": {
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "view",
+        "review",
+        "reviewedAt",
+        "snoozeUntil",
+        "snoozeEnded",
+        "shownAt",
+        "scope",
+        "owner",
+        "candidates",
+        "mayReview",
+        "insight"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "view": {
+          "enum": [
+            "proposed",
+            "older",
+            "confirmed",
+            "snoozed",
+            "closed"
+          ]
+        },
+        "review": {
+          "enum": [
+            "proposed",
+            "confirmed",
+            "dismissed"
+          ],
+          "description": "proposed: an AI's, no fact; confirmed: a person said it holds; dismissed: a person said it does not."
+        },
+        "reviewedAt": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "snoozeUntil": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "snoozeEnded": {
+          "type": "boolean"
+        },
+        "shownAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "candidates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/uuid"
+          }
+        },
+        "mayReview": {
+          "type": "boolean",
+          "description": "Whether this login may confirm or dismiss it (066's insight_may_review)."
+        },
+        "insight": {
+          "$ref": "app_insights.output.schema.json#/$defs/insight"
+        }
+      }
+    },
+    "insightEvent": {
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "value",
+        "until",
+        "note",
+        "person",
+        "channel",
+        "client",
+        "at"
+      ],
+      "properties": {
+        "event": {
+          "enum": [
+            "feedback",
+            "confirmed",
+            "dismissed",
+            "reopened",
+            "replaced"
+          ]
+        },
+        "value": {
+          "enum": [
+            "interesting",
+            "explore",
+            "not_useful",
+            "later",
+            "handled",
+            null
+          ]
+        },
+        "until": {
+          "$ref": "#/$defs/maybeInstant"
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "person": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/owner"
+            }
+          ]
+        },
+        "channel": {
+          "enum": [
+            "app",
+            "mcp",
+            "cli",
+            null
+          ]
+        },
+        "client": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "at": {
+          "$ref": "#/$defs/instant"
+        }
+      }
+    },
+    "standingInstruction": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One standing instruction (SB-P5-12, migration 065) as list_standing serves it: where it came from (scope, owner, author, source, status, project and when), its whole words (at most 500 characters; none for a held one, which comes without its project too), and whether it fires: fires false says why, reason held (held for review), project_held (in a project held for review) or over_limit (past the oldest 50 of its scope). revision: the one a stop names.",
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "author",
+        "source",
+        "status",
+        "project",
+        "createdAt",
+        "content",
+        "held",
+        "fires",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "author": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The person who wrote it, or null for a login with no person."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "project": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "slug"
+              ],
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "slug": {
+                  "$ref": "#/$defs/slug"
+                }
+              }
+            }
+          ]
+        },
+        "createdAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "content": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 500
+        },
+        "held": {
+          "$ref": "#/$defs/held"
+        },
+        "fires": {
+          "type": "boolean"
+        },
+        "reason": {
+          "enum": [
+            "held",
+            "project_held",
+            "over_limit",
+            null
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "held": {
+                  "type": "null"
+                },
+                "content": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "properties": {
+                "held": {
+                  "type": "object"
+                },
+                "content": {
+                  "type": "null"
+                },
+                "project": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "fires": {
+                  "const": true
+                },
+                "reason": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "fires": {
+                  "const": false
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /path/to/rhythm/harness/hooks/rhythm-hook.mjs --agent claude-code",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /path/to/rhythm/harness/hooks/rhythm-hook.mjs --agent claude-code",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

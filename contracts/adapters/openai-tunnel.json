@@ -1,0 +1,18 @@
+{
+  "name": "openai-tunnel",
+  "title": "OpenAI Secure MCP Tunnel",
+  "kinds": ["Exposure"],
+  "summary": "ChatGPT reaches /mcp through OpenAI's tunnel client, an outbound-only container with its own token; no domain or open port.",
+  "defaultEnabled": false,
+  "profile": "openai-tunnel",
+  "docs": "docs/adapters/openai-tunnel.md",
+  "harnessToken": true,
+  "settings": [
+    { "key": "tunnelId", "prompt": "Tunnel ID from the OpenAI platform's tunnel settings", "type": "string", "required": true,
+      "pattern": "^tunnel_([a-z0-9]{4}_)?[a-z0-9]{32}$", "help": "tunnel_ followed by 32 lower case letters and digits; copy it whole" }
+  ],
+  "secrets": [
+    { "purpose": "key", "prompt": "Runtime API key (a restricted key with Tunnels Read and Use, never an admin key)", "source": "paste" }
+  ],
+  "connect": false
+}

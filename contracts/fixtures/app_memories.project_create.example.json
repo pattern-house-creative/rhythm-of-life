@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "op": "project_create",
+  "project": {
+    "id": "6d3c2a10-0000-4000-8000-00000000b102",
+    "slug": "canal-walks",
+    "name": "Canal Walks",
+    "scope": "shared",
+    "owner": "household",
+    "aliases": ["towpath"],
+    "status": "active",
+    "description": "DEMO: walks along the Wendle canal.",
+    "author": null,
+    "revision": 1,
+    "createdAt": "2026-11-02T09:30:00+00:00",
+    "updatedAt": "2026-11-02T09:30:00+00:00"
+  },
+  "scopes": "off",
+  "changed": [],
+  "unchanged": false
+}

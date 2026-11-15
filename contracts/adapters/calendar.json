@@ -1,0 +1,64 @@
+{
+  "name": "calendar",
+  "title": "Calendar",
+  "kinds": ["MemorySource"],
+  "summary": "Events as stars, read only. Needs your own private ICS link: off and unconnected until you enter it yourself.",
+  "unofficial": false,
+  "defaultEnabled": false,
+  "profile": null,
+  "docs": "docs/adapters/calendar.md",
+  "settings": [
+    {
+      "key": "owner",
+      "prompt": "Whose calendar is this?",
+      "type": "person",
+      "required": true,
+      "help": "A person id, or household for a calendar the whole family shares."
+    },
+    {
+      "key": "daysBack",
+      "prompt": "How many days back to show",
+      "type": "int",
+      "default": 7,
+      "help": "0 to 90."
+    },
+    {
+      "key": "daysAhead",
+      "prompt": "How many days ahead to show",
+      "type": "int",
+      "default": 30,
+      "help": "1 to 365."
+    },
+    {
+      "key": "pollSeconds",
+      "prompt": "At most how often to read the calendar, in seconds",
+      "type": "int",
+      "default": 900,
+      "help": "300 to 86400. It is read at map rebuilds; a failed read waits longer each time, up to six hours."
+    }
+  ],
+  "secrets": [
+    {
+      "purpose": "link",
+      "prompt": "Paste your calendar's private ICS link",
+      "source": "paste",
+      "required": true,
+      "help": "Its secret iCal address, https or webcal. Anyone holding it can read the calendar. It is never shown back or written to rhythm.yaml."
+    },
+    {
+      "purpose": "link_2",
+      "prompt": "A second calendar's private ICS link",
+      "source": "paste",
+      "required": false,
+      "help": "Leave empty for none."
+    },
+    {
+      "purpose": "link_3",
+      "prompt": "A third calendar's private ICS link",
+      "source": "paste",
+      "required": false,
+      "help": "Leave empty for none."
+    }
+  ],
+  "connect": true
+}

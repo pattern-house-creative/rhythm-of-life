@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/resolve_due.output.schema.json",
+  "title": "resolve_due answer",
+  "description": "The memory tool resolve_due's answer (SB-P5-10, migration 061): a memory's due date snoozed or cleared, as a change of the memory. action snooze: due is the date it moved to (a memory with no date took one, kind wake), still to come and at most 5 years ahead; clear_date: due is null and it left list_due. before is the date it had, or null. changed is [\"due\"]: the state before is kept as a version, the revision moved, history records it (due_changed) and undo puts it back; or empty with unchanged true when it was so already (snoozed to the same moment, or cleared with no date), and nothing was written. A write's fields otherwise: no memory's words, a project by id and slug only. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body (held: a memory held for review; retracted: one marked wrong; invalid: one whose time has ended, an until that has come or is over 5 years ahead, snooze without until, clear_date with one).",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "project",
+        "action",
+        "due",
+        "before",
+        "changed",
+        "unchanged",
+        "message"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ]
+        },
+        "scopes": {
+          "$ref": "memory.defs.schema.json#/$defs/scopes"
+        },
+        "project": {
+          "$ref": "memory.defs.schema.json#/$defs/writtenProject"
+        },
+        "action": {
+          "enum": [
+            "snooze",
+            "clear_date"
+          ]
+        },
+        "due": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeDue"
+        },
+        "before": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeDue"
+        },
+        "changed": {
+          "type": "array",
+          "maxItems": 1,
+          "items": {
+            "const": "due"
+          }
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "allOf": [
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "unchanged": {
+                  "const": false
+                },
+                "changed": {
+                  "minItems": 1
+                }
+              }
+            },
+            {
+              "properties": {
+                "unchanged": {
+                  "const": true
+                },
+                "changed": {
+                  "maxItems": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "action": {
+                  "const": "snooze"
+                },
+                "due": {
+                  "$ref": "memory.defs.schema.json#/$defs/due"
+                }
+              }
+            },
+            {
+              "properties": {
+                "action": {
+                  "const": "clear_date"
+                },
+                "due": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

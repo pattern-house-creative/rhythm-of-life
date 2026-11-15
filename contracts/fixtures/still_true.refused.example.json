@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "retracted",
+  "error": "A memory marked wrong (deprecated) is not confirmed as true: set another status first if it is right after all"
+}

@@ -1,0 +1,29 @@
+/* Frame sizing belongs to the shared frame, including when Studio opens before
+   the lazily loaded dashboard view has ever been mounted. */
+.dashboard-frame {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color-scheme: dark;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.dashboard-frame.drawn {
+  opacity: 1;
+}
+.dashboard-frame[hidden] {
+  display: none;
+}
+@media (max-width: 760px), (max-height: 500px) {
+  .dashboard-frame {
+    border-radius: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-frame {
+    transition: none;
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "subject": "alex",
+  "selection": "history",
+  "today": "2026-10-28",
+  "start": "2026-10-14T12:00:00Z",
+  "end": "2026-10-28T12:00:00Z",
+  "timezone": "Europe/London",
+  "range": { "low": 70, "high": 180, "unit": "mg/dL" },
+  "displayUnit": "mg/dL",
+  "complete": true,
+  "demo": false,
+  "provider": "nightscout",
+  "series": [
+    [1793001600, 104],
+    [1793001900, 126],
+    [1793002200, 40, -1],
+    [1793187900, 108],
+    [1793188200, 110],
+    [1793188500, 112]
+  ],
+  "intervalMinutes": 5,
+  "sources": [
+    { "kind": "archive", "provider": "csv", "start": "2026-10-26T08:00:00Z", "end": "2026-10-26T08:10:00Z", "readings": 3, "timeBasis": "device-local" },
+    { "kind": "live", "provider": "nightscout", "start": "2026-10-28T11:45:00Z", "end": "2026-10-28T11:55:00Z", "readings": 3, "timeBasis": "source-zone" }
+  ],
+  "latest": { "resourceId": "6d3c2a10-0000-4000-8000-0000000a0002", "observedAt": "2026-10-28T11:55:00Z", "sourceUpdatedAt": "2026-10-28T11:55:00Z" },
+  "lastSyncedAt": "2026-10-28T11:56:00Z",
+  "summary": {
+    "startDate": "2026-10-14",
+    "endDate": "2026-10-27",
+    "intervalMinutes": 5,
+    "sourceKind": "archive",
+    "timeBasis": "device-local-unverified",
+    "lastImportedAt": "2026-10-27T06:00:00Z",
+    "readings": 3,
+    "exactReadings": 2,
+    "exactSum": 230,
+    "bands": { "veryLow": 1, "low": 0, "inRange": 2, "high": 0, "veryHigh": 0 },
+    "gmi": { "minDays": 14, "minCoverage": 0.7 }
+  }
+}

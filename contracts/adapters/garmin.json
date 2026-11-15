@@ -1,0 +1,29 @@
+{
+  "name": "garmin",
+  "title": "Garmin",
+  "kinds": ["MeasurementSource"],
+  "summary": "Sleep, HRV, heart rate, activities and training from Garmin: your own Personal API key, or Garmin Connect's exports in a folder.",
+  "unofficial": false,
+  "defaultEnabled": false,
+  "profile": null,
+  "docs": "docs/adapters/garmin.md",
+  "settings": [
+    { "key": "owner", "prompt": "Whose Garmin is it?", "type": "person", "required": true,
+      "help": "One person from people; Garmin data is personal, never household." },
+    { "key": "pollSeconds", "prompt": "Seconds between regular syncs", "type": "int", "default": 21600,
+      "help": "3600 to 86400. Only used with a key." },
+    { "key": "deviceTimezone", "prompt": "Time zone of the watch's days (empty: the install's)", "type": "string",
+      "help": "An IANA name such as Europe/London." },
+    { "key": "historyDays", "prompt": "Days the first sync reads", "type": "int", "default": 14,
+      "help": "1 to 365. Later syncs read the last 7 days." },
+    { "key": "importPath", "prompt": "Folder of Garmin Connect exports, inside the engine", "type": "path", "default": "/data/import/garmin",
+      "help": "Compose mounts RHYTHM_IMPORT_DIR at /data/import, so put the files in its garmin folder." },
+    { "key": "distanceUnit", "prompt": "Distance unit of your exported activity lists (km or mi)", "type": "string", "default": "km",
+      "help": "The unit Garmin Connect shows you; the export does not say it." }
+  ],
+  "secrets": [
+    { "purpose": "api_key", "prompt": "Garmin Personal API key (leave empty to use exported files only)", "source": "paste", "required": false,
+      "help": "Garmin Connect, Personal API Key page. Garmin shows the key once and it expires when you chose." }
+  ],
+  "connect": false
+}

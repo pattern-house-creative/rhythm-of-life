@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "needs_person",
+  "error": "These two are queued for a person's review as a possible contradiction, so a person decides whether one replaces the other, from the app or the terminal: tell the person and leave them as they are"
+}

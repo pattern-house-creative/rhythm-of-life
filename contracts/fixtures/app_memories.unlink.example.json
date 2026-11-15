@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "op": "unlink",
+  "id": "6d3c2a10-0000-4000-8000-00000000e001",
+  "target": "6d3c2a10-0000-4000-8000-00000000e004",
+  "removed": [],
+  "kept": [],
+  "dismissed": [
+    "similar_to"
+  ],
+  "already": 0,
+  "unchanged": false,
+  "scope": "shared",
+  "owner": "household",
+  "scopes": "off"
+}

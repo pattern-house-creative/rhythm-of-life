@@ -1,0 +1,229 @@
+/* Shared pieces of the sleep, recovery and training panels: section headings,
+   soft cards, glucose lines and two-week trends. Each panel is a container, so
+   its layout follows the panel's own width rather than the window's. */
+
+.recovery-panel,
+.training-panel {
+  container: body-panel / inline-size;
+}
+
+.body-section {
+  margin-top: 40px;
+}
+.body-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.body-heading > span {
+  font-size: 11px;
+  color: #8fa9b7;
+}
+.body-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.body-section + .body-grid,
+.sleep-hero + .body-grid {
+  margin-top: 40px;
+}
+.body-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 20px 20px 18px;
+  border: 1px solid #93b4c321;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #61879712, #61879703);
+}
+/* An odd card out takes the whole row. */
+.body-grid > .body-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+.body-card > small {
+  font-size: 10px;
+  color: #718993;
+  letter-spacing: 0.2px;
+}
+.body-number {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.body-number strong {
+  font: 300 40px/1.05 "Manrope Variable";
+  letter-spacing: -1.6px;
+  color: #d7e5e9;
+}
+.body-number strong small {
+  font-size: 15px;
+  letter-spacing: 0;
+  color: #8fa9b7;
+}
+.body-number > span {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #8fa9b7;
+}
+.word {
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #d0b6e7;
+  border: 1px solid #d0b6e740;
+  border-radius: 20px;
+  padding: 3px 8px;
+}
+.word.mint {
+  color: #7bdcbb;
+  border-color: #7bdcbb40;
+}
+.word.warm {
+  color: #c1a66d;
+  border-color: #c1a66d40;
+}
+.band-word {
+  font-size: 10px;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: #d0b6e7;
+}
+
+/* Quiet one-line stats. */
+.quiet-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 34px;
+  margin-top: 30px;
+  padding: 20px 4px 4px;
+  border-top: 1px solid #93b4c321;
+}
+.quiet-stats > div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.quiet-stats b {
+  font: 350 20px "Manrope Variable";
+  letter-spacing: -0.5px;
+  color: #c7d8de;
+}
+.quiet-stats span {
+  font-size: 10px;
+  color: #8ca7b4;
+}
+
+/* Glucose through a night or a workout. */
+.glucose-line {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.glucose-band {
+  fill: #78c9b112;
+  stroke: #78c9b126;
+  stroke-width: 0.6;
+}
+.glucose-span {
+  fill: #d7e5e90d;
+}
+.glucose-run {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.glucose-run.in {
+  stroke: #78c9b1;
+}
+.glucose-run.low {
+  stroke: #e08a97;
+}
+.glucose-run.high {
+  stroke: #c6ad7c;
+}
+.glucose-dot.in {
+  fill: #78c9b1;
+}
+.glucose-dot.low {
+  fill: #e08a97;
+}
+.glucose-dot.high {
+  fill: #c6ad7c;
+}
+
+/* Two-week trends. */
+.trend {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.trend-band {
+  fill: #b6a6cc2e;
+}
+.trend-average {
+  fill: none;
+  stroke: #b6a6cc66;
+  stroke-width: 1.2;
+  stroke-dasharray: 3 4;
+}
+.trend-line {
+  fill: none;
+  stroke: #b6a6cc59;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.trend-dot {
+  fill: #b6a6cc99;
+}
+.trend-focus {
+  fill: #d0b6e7;
+  stroke: #0f1820;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 6px #d0b6e799);
+}
+.trend.rose .trend-line {
+  stroke: #e08a9752;
+}
+.trend.rose .trend-dot {
+  fill: #e08a9799;
+}
+.trend.rose .trend-focus {
+  fill: #eaa3ad;
+  filter: drop-shadow(0 0 6px #e08a9799);
+}
+
+.trend.mint .trend-line {
+  stroke: #7bdcbb4d;
+}
+.trend.mint .trend-dot {
+  fill: #7bdcbb99;
+}
+.trend.mint .trend-focus {
+  fill: #9be6cd;
+  filter: drop-shadow(0 0 6px #7bdcbb99);
+}
+
+@container body-panel (max-width: 560px) {
+  .body-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .body-number strong {
+    font-size: 36px;
+  }
+  .quiet-stats {
+    gap: 14px 24px;
+  }
+}

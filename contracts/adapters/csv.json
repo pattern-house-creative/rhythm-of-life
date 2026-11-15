@@ -1,0 +1,25 @@
+{
+  "name": "csv",
+  "title": "CSV import",
+  "kinds": ["MeasurementSource"],
+  "summary": "Numbers from CSV files (time, metric, value, unit) dropped in the import folder become data stars.",
+  "defaultEnabled": true,
+  "profile": null,
+  "docs": "docs/adapters/csv.md",
+  "settings": [
+    {
+      "key": "path",
+      "prompt": "Import folder inside the engine container",
+      "type": "path",
+      "default": "/data/import",
+      "help": "Compose mounts the host folder named by RHYTHM_IMPORT_DIR in .env here, read-only. Its documents/ folder belongs to the documents adapter."
+    },
+    {
+      "key": "owner",
+      "prompt": "Whose numbers are they when a row names no subject (a person id, or household)?",
+      "type": "person",
+      "default": "household"
+    }
+  ],
+  "secrets": []
+}

@@ -1,0 +1,131 @@
+/* A resurfaced old memory on Home: one slim line under the brief, its words opening in place, in the sky's own column, so no corner,
+   no layout and no grid track changes for it, the sky's way in and caption stay at its foot, and with the engine's memories off none
+   of this is drawn. Open, it takes at most 38% of the column, whatever room the layout gives the sky, its words scroll, and where a
+   column's height is its content's, the words' own cap holds. */
+.resurface-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 0;
+  max-height: 38%;
+  max-width: 560px;
+  width: 100%;
+  align-self: center;
+  margin-bottom: 8px;
+  color: #d7e5e9;
+  border: 1px solid #93b4c321;
+  border-radius: 14px;
+  background: linear-gradient(100deg, #172229e6, #0e171ecc);
+  font-size: 12px;
+}
+.resurface-line {
+  display: flex;
+  flex: none;
+  align-items: center;
+  min-width: 0;
+}
+.resurface-says {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 32px;
+  padding: 4px 4px 4px 12px;
+  text-align: left;
+  color: inherit;
+}
+.resurface-says small {
+  flex: none;
+  font-size: 10px;
+  color: #8fa5b2;
+}
+.resurface-says span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.resurface-says svg {
+  flex: none;
+  margin-left: auto;
+  color: #6c828e;
+  transition: transform 0.2s ease;
+}
+.resurface-says svg[data-open] {
+  transform: rotate(180deg);
+}
+.resurface-dismiss {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: #6c828e;
+}
+.resurface-dismiss:hover:not(:disabled) {
+  color: #d7e5e9;
+}
+.resurface-open {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(22vh, 120px);
+  max-height: min(22svh, 120px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.resurface-open[hidden] {
+  display: none;
+}
+.resurface-open p {
+  margin: 0;
+  padding: 0 12px 10px;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+  line-height: 1.4;
+}
+/* The box for what is said draws nothing, and is there before anything is said in it. */
+.resurface-said {
+  display: contents;
+}
+.resurface-card :is(button, [tabindex]):focus-visible {
+  outline: 2px solid #95d2d9;
+  outline-offset: 1px;
+}
+.resurface-failed {
+  flex: none;
+  padding: 0 12px 8px;
+  font-size: 10px;
+  color: #c1a66d;
+}
+/* An upright phone's sky runs to the screen's edges; the card keeps the page's gutter. */
+@media (max-width: 760px) and (min-height: 501px) {
+  .resurface-card {
+    width: calc(100% - 2 * var(--gutter, 16px));
+  }
+}
+/* A finger's room on any phone, as the Memories view gives. */
+@media (max-width: 760px), (max-height: 500px) {
+  .resurface-says {
+    min-height: 40px;
+  }
+  .resurface-dismiss {
+    width: 40px;
+    height: 40px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resurface-says svg {
+    transition: none;
+  }
+}
+/* A short upright phone has a sky of a few rows under the brief; the line gives way, and the sky keeps them. */
+@media (max-width: 760px) and (min-height: 501px) and (max-height: 700px) {
+  .resurface-card {
+    display: none;
+  }
+}

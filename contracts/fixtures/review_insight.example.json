@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000c001",
+  "action": "confirm",
+  "review": "confirmed",
+  "view": "confirmed",
+  "unchanged": false,
+  "reviewed_at": "2026-10-15T07:31:12+00:00",
+  "message": "Confirmed: list_insight_stream shows it among the confirmed. Who reviewed it and when is kept: insight_history."
+}

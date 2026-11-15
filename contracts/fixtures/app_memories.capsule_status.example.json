@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "kind": "project",
+  "project": "wendle-plot",
+  "scope": "shared",
+  "complete": false,
+  "populated": true,
+  "hash": "sha256:6f1ed002ab5595859014ebf0951522d9f6f1ed002ab5595859014ebf0951522d",
+  "chars": 214,
+  "maxChars": 12000,
+  "served": false,
+  "slots": [
+    {
+      "slot": "current-state",
+      "state": "filled",
+      "filledBy": "6d3c2a10-0000-4000-8000-00000000b001",
+      "duplicates": [],
+      "invalid": [],
+      "waiting": []
+    },
+    {
+      "slot": "decisions",
+      "state": "duplicate",
+      "filledBy": null,
+      "duplicates": ["6d3c2a10-0000-4000-8000-00000000b002", "6d3c2a10-0000-4000-8000-00000000b003"],
+      "invalid": [],
+      "waiting": []
+    },
+    {
+      "slot": "open-questions",
+      "state": "empty",
+      "filledBy": null,
+      "duplicates": [],
+      "invalid": [],
+      "waiting": [
+        { "id": "6d3c2a10-0000-4000-8000-00000000b004", "status": "draft", "held": false, "expired": false },
+        { "id": "6d3c2a10-0000-4000-8000-00000000b005", "status": "canonical", "held": true, "expired": false }
+      ]
+    }
+  ]
+}

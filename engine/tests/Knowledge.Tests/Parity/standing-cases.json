@@ -1,0 +1,511 @@
+{
+  "schema": "rhythm-parity-standing.v1",
+  "label": "DEMO: labelled standing instructions and questions, for the standing threshold (SB-P5-12). Every text is invented. None of these instructions is in corpus.json but mem-alex-standing, so the gate's answers are untouched.",
+  "labels": {
+    "fire": "the question is asked at the moment the instruction is about: doing or about to do what its situation names, so the person who wrote the instruction would want it applied to the answer.",
+    "near": "the question shares words or a topic with the instruction but is about something else: a different subject that reuses a key word, so applying the instruction would be plainly wrong.",
+    "intent": "the question is about the instruction's subject but with another purpose, such as a fact or a past event, so the instruction's situation has not come up: it should not fire, and a fire would do less harm than a near miss's, since the answer says to apply it only if it fits. Upstream reports these apart for that reason."
+  },
+  "rules": [
+    "Every label is by meaning, written from the instruction and the question alone. A score may choose which pair is read, never its label.",
+    "fire, near and intent name the questions written for that instruction. Each instruction has at least 4 fire, 3 near and 2 intent questions, and no question is a golden query's words.",
+    "Any other pair of an instruction and a question (another instruction's question, or a golden query, named by its id) is a negative unless also labels it otherwise: fire, near or intent as above, with why. Every such pair scoring at or above where the reading started (0.50 under MiniLM, 0.65 under bge-small; the scores chose which pairs were read, never their labels) is in also, and ThresholdTuningTests holds that true; below that, a pair not listed was not read.",
+    "A golden query whose relevant records name a standing memory is a fire for it (the rule run 18 used). The questions are asked as a reader of the instruction's scope; the threshold counts every pair whoever asks, since a threshold is a score and scope narrows what fires afterwards.",
+    "mem-alex-standing is the corpus's standing memory, here for the questions written for it; its text is the corpus's."
+  ],
+  "instructions": [
+    {
+      "id": "mem-alex-standing",
+      "scope": "personal:alex",
+      "fire": [
+        "plan my trip to Edinburgh next month",
+        "how should I get to the conference in Rotterdam?",
+        "find me a route to Manchester for the weekend",
+        "I need to travel to Oslo in the spring, what is the best way?"
+      ],
+      "near": [
+        "how long is the connection lead for the car charger?",
+        "the flight path over the allotment seems noisier lately",
+        "what did the toy trains in the loft sell for?"
+      ],
+      "intent": [
+        "which trips did Alex take last year?",
+        "how much did the Leeds train cost?"
+      ]
+    },
+    {
+      "id": "st-flights",
+      "scope": "personal:alex",
+      "text": "When booking a flight for Alex, check the shared calendar for conflicts first and ask for an aisle seat.",
+      "fire": [
+        "book me a flight to Lisbon in March",
+        "can you find flights to Edinburgh for the week of the 12th?",
+        "which seat should I pick on the plane to Oslo?",
+        "help me book plane tickets for the summit in Rotterdam"
+      ],
+      "near": [
+        "how long can a swift stay in flight without landing?",
+        "what is the keyboard shortcut for a new calendar entry?",
+        "who sorted out the merge conflict on the release branch?"
+      ],
+      "intent": [
+        "how much did Alex spend on flights last year?",
+        "when was Alex's last flight?"
+      ]
+    },
+    {
+      "id": "st-patch",
+      "scope": "personal:alex",
+      "text": "When reviewing a patch for the audio team, run the waveform benchmark before approving it.",
+      "fire": [
+        "please review this patch for the audio encoder",
+        "is this pull request from the audio team ready to approve?",
+        "take a look at the diff the audio team sent over",
+        "can I approve the waveform change now?"
+      ],
+      "near": [
+        "the fence has a patch of rot near the gate",
+        "which team does Sam's running friend play for?",
+        "how do I patch a puncture on a bike tyre?"
+      ],
+      "intent": [
+        "how many patches has the audio team merged this year?",
+        "who wrote the waveform benchmark?"
+      ]
+    },
+    {
+      "id": "st-runs",
+      "scope": "personal:alex",
+      "text": "When planning a long run, keep it under 15 km until the physio clears the knee.",
+      "fire": [
+        "plan my long run for this Sunday",
+        "how far should I run this weekend?",
+        "can I do 20 km on Saturday?",
+        "put together a long running route for next week"
+      ],
+      "near": [
+        "how long does the washing machine's long cycle run?",
+        "the printer ran out of ink halfway through the long report",
+        "what is the plan for the kitchen's knee-high cupboards?"
+      ],
+      "intent": [
+        "what was my longest run last year?",
+        "when did the physio first see my knee?"
+      ]
+    },
+    {
+      "id": "st-restaurants",
+      "scope": "personal:alex",
+      "text": "When suggesting a restaurant for Alex and Sam, avoid places with no vegetarian main course.",
+      "fire": [
+        "where should we go for dinner on Friday?",
+        "find us a restaurant near the station for our anniversary",
+        "can you suggest somewhere to eat in York?",
+        "book a table for two somewhere nice"
+      ],
+      "near": [
+        "where does the main water pipe come into the house?",
+        "does a vegetarian diet suit a cat?",
+        "which course does the coast path take after the harbour?"
+      ],
+      "intent": [
+        "what was that restaurant we liked in York called?",
+        "how much did dinner cost last time?"
+      ]
+    },
+    {
+      "id": "st-savings",
+      "scope": "personal:alex",
+      "text": "When Alex talks about moving savings, remind Alex that the sabbatical fund stays untouched until spring 2027.",
+      "fire": [
+        "should I move some savings to pay for the kitchen?",
+        "can I borrow from my savings for a new bike?",
+        "which savings pot can I dip into this month?",
+        "I want to transfer money out of my savings account"
+      ],
+      "near": [
+        "how much does the new boiler save on the bills?",
+        "the spring on the garden gate has gone",
+        "where does the council keep the fund for the playground?"
+      ],
+      "intent": [
+        "how much is in the sabbatical fund?",
+        "when did Alex start saving?"
+      ]
+    },
+    {
+      "id": "st-meetings",
+      "scope": "personal:alex",
+      "text": "When scheduling a meeting for Alex at work, never book over the Tuesday release window.",
+      "fire": [
+        "set up a meeting with the encoder team next week",
+        "find a slot for a design review on Tuesday",
+        "book an hour with my manager",
+        "when can I schedule the planning call?"
+      ],
+      "near": [
+        "how big is the window in the library's meeting room?",
+        "is the parish council meeting about the verges on Tuesday?",
+        "when was the last release of the seed catalogue?"
+      ],
+      "intent": [
+        "who was at last Tuesday's meeting?",
+        "what did we decide in the release meeting?"
+      ]
+    },
+    {
+      "id": "st-packing",
+      "scope": "personal:alex",
+      "text": "When packing for the coast walk, put the blister kit at the top of the bag.",
+      "fire": [
+        "what should I pack for the coast walk?",
+        "help me make a packing list for the walking trip",
+        "I am filling my rucksack for the first stage tomorrow",
+        "what goes in the bag for the coast path?"
+      ],
+      "near": [
+        "who packs the boxes when the kitchen is emptied?",
+        "the shopping bag at the top of the stairs has split",
+        "what kit do the bell ringers wear at the coast festival?"
+      ],
+      "intent": [
+        "how many blisters did I get last time?",
+        "what did the rucksack cost?"
+      ]
+    },
+    {
+      "id": "st-vet",
+      "scope": "personal:sam",
+      "text": "When booking Pepper in at the vet, ask for the renal checks to be done at the same visit.",
+      "fire": [
+        "book Pepper a vet appointment",
+        "Pepper needs her jabs, can you arrange the vet?",
+        "make an appointment for the cat next month",
+        "call the vet about a check-up for Pepper"
+      ],
+      "near": [
+        "the council's check of the water meter is next week",
+        "who booked the hall for the spring concert?",
+        "which visit to the dentist was the one for the crown?"
+      ],
+      "intent": [
+        "when did Pepper last see the vet?",
+        "what did the vet's bill come to?"
+      ]
+    },
+    {
+      "id": "st-allotment",
+      "scope": "personal:sam",
+      "text": "When planning what to sow on the allotment, rotate so that beans never follow beans.",
+      "fire": [
+        "what should I sow on the plot this spring?",
+        "help me plan the allotment beds for next year",
+        "can I put broad beans in the same bed again?",
+        "draw up a planting plan for the plot"
+      ],
+      "near": [
+        "what are we having with the baked beans for tea?",
+        "what is the plot of the book the reading group picked?",
+        "whose turn is it to rotate the car's tyres?"
+      ],
+      "intent": [
+        "what grew best on the plot last year?",
+        "how big is the allotment?"
+      ]
+    },
+    {
+      "id": "st-choir",
+      "scope": "personal:sam",
+      "text": "When Sam is asked to take on extra choir duties, remind Sam of the promise to do one job a term.",
+      "fire": [
+        "the choir want me to run the raffle as well, should I?",
+        "can I say yes to organising the choir's summer concert?",
+        "I have been asked to take on the music library for the choir",
+        "should I volunteer for another job in the choir?"
+      ],
+      "near": [
+        "what extra duties does the night shift get at the library?",
+        "how long is the school term after Easter?",
+        "who promised to bring the ladder back?"
+      ],
+      "intent": [
+        "who does the choir's raffle?",
+        "what jobs has Sam done for the choir this year?"
+      ]
+    },
+    {
+      "id": "st-exercise",
+      "scope": "personal:sam",
+      "text": "When suggesting exercise for Sam, leave out climbing until the wrist has healed.",
+      "fire": [
+        "suggest a workout for this week",
+        "what exercise can I do on Saturday?",
+        "help me plan some training sessions",
+        "any ideas for keeping fit this month?"
+      ],
+      "near": [
+        "the wrist strap on the old watch is broken",
+        "how often does the exercise bike need oil?",
+        "why has the ivy been climbing over the fence?"
+      ],
+      "intent": [
+        "when did Sam hurt the wrist?",
+        "how much was the climbing wall's day pass?"
+      ]
+    },
+    {
+      "id": "st-japanese",
+      "scope": "personal:sam",
+      "text": "When Sam asks for Japanese practice, use hiragana only and add the reading in brackets.",
+      "fire": [
+        "give me some Japanese practice sentences",
+        "quiz me on my Japanese vocabulary",
+        "can you write me a short Japanese dialogue to read?",
+        "help me practise for my Japanese class"
+      ],
+      "near": [
+        "what is the Japanese maple doing by the shed?",
+        "what do the brackets on the shelf hold up?",
+        "which book does the reading group start next?"
+      ],
+      "intent": [
+        "who teaches the Japanese class?",
+        "how long has Sam been learning Japanese?"
+      ]
+    },
+    {
+      "id": "st-notices",
+      "scope": "personal:sam",
+      "text": "When drafting notices about the library catalogue move, write them for readers with no technical background.",
+      "fire": [
+        "draft a notice about the catalogue move for the library's readers",
+        "write an announcement that the library's catalogue is changing",
+        "help me word a sign telling readers about the new catalogue",
+        "can you draft the email to library members about the migration?"
+      ],
+      "near": [
+        "the seed catalogue came in the post yesterday",
+        "where are the notices for the allotment society pinned?",
+        "how technical is the background reading for the Japanese exam?"
+      ],
+      "intent": [
+        "who wrote the last notice about the catalogue?",
+        "how many books are in the library's catalogue?"
+      ]
+    },
+    {
+      "id": "st-bins",
+      "scope": "family",
+      "text": "When the bin day moves for a bank holiday, put a reminder on the fridge note for both of us.",
+      "fire": [
+        "the bins are a day late because of the bank holiday, what should we do?",
+        "the council moved collection day for Christmas week",
+        "what do we need to do now the bin day has moved for the holiday?",
+        "bank holiday next Monday, so the bins move to Tuesday this time"
+      ],
+      "near": [
+        "where is the fridge's water filter?",
+        "the bank rang about the holiday pay",
+        "what can go in the garden waste sacks?"
+      ],
+      "intent": [
+        "how many bank holidays are there this year?",
+        "who took the bins out last week?"
+      ]
+    },
+    {
+      "id": "st-trades",
+      "scope": "family",
+      "text": "When booking a tradesperson for the house, ask for a written quote and check they are insured.",
+      "fire": [
+        "find someone to fix the leaking tap in the bathroom",
+        "get an electrician in to look at the garden office",
+        "we need someone to fix the roof, who should we call?",
+        "book a joiner for the new shelves"
+      ],
+      "near": [
+        "who insures the car now?",
+        "what is the best quote from the book the reading group chose?",
+        "which house on the street has the blue door?"
+      ],
+      "intent": [
+        "what did the plumber charge last time?",
+        "who fixed the boiler in the end?"
+      ]
+    },
+    {
+      "id": "st-guests",
+      "scope": "family",
+      "text": "When guests stay over, tell them the guest wifi joining card is on the hall shelf.",
+      "fire": [
+        "my parents are staying next weekend, what do we need to sort out?",
+        "friends are coming to stay, can you write them some house notes?",
+        "what should I tell the guests before they arrive?",
+        "the neighbours' cousins are staying in our spare room on Friday"
+      ],
+      "near": [
+        "which shelf is the spare smoker kept on?",
+        "who stayed late to stack the chairs in the hall?",
+        "the shed's joining strip has come away"
+      ],
+      "intent": [
+        "who stayed with us last Christmas?",
+        "when did we buy the guest bed?"
+      ]
+    },
+    {
+      "id": "st-heating",
+      "scope": "family",
+      "text": "When changing the heat pump settings, note the old values on the card by the cylinder first.",
+      "fire": [
+        "turn the heat pump flow temperature down a bit",
+        "how do I change the heating schedule on the heat pump?",
+        "can you walk me through adjusting the heat pump's settings?",
+        "I want to lower the hot water setting on the pump"
+      ],
+      "near": [
+        "what did the installer charge for the cylinder?",
+        "change the settings on the television's parental lock",
+        "where is the card for the library's self-checkout?"
+      ],
+      "intent": [
+        "who installed the heat pump?",
+        "how much electricity did the heat pump use in January?"
+      ]
+    },
+    {
+      "id": "st-journeys",
+      "scope": "family",
+      "text": "When planning a long car journey, charge to 100% the night before and check the route's chargers.",
+      "fire": [
+        "we are driving to Cornwall in August, what should we sort out for the car?",
+        "plan a road trip to Scotland in the electric car",
+        "how do we get to York by car next weekend?",
+        "I am driving to my sister's in Wales on Saturday"
+      ],
+      "near": [
+        "the night bus route has changed",
+        "what is the charge for a late library book?",
+        "how long is the journey of the swallows to Africa?"
+      ],
+      "intent": [
+        "how many miles did we drive last year?",
+        "when did we last have the car serviced?"
+      ]
+    },
+    {
+      "id": "st-shop",
+      "scope": "family",
+      "text": "When writing the food shop, leave out anything with peanuts because of Sam's allergy.",
+      "fire": [
+        "write the food list for this week",
+        "what should I put on the supermarket order for the weekend?",
+        "add snacks to the grocery delivery",
+        "help me do the weekly food order online"
+      ],
+      "near": [
+        "the car park behind the shop is closed",
+        "how many nuts and bolts does the shed door need?",
+        "who is allergic to the cat?"
+      ],
+      "intent": [
+        "how much did last week's food order cost?",
+        "when did Sam find out about the allergy?"
+      ]
+    },
+    {
+      "id": "st-hives",
+      "scope": "family",
+      "text": "When opening a hive, tell the neighbours over the fence the day before.",
+      "fire": [
+        "we are going to open the hives on Saturday, what do we need to do first?",
+        "planning a hive inspection for tomorrow",
+        "I am about to check the colony at the orchard",
+        "pick a day to go through the hives this month"
+      ],
+      "near": [
+        "what colour shall we paint the fence?",
+        "when do the neighbours' cousins go home?",
+        "what time does the new cafe open the day before a holiday?"
+      ],
+      "intent": [
+        "how many hives do we have?",
+        "who built the hive stands?"
+      ]
+    },
+    {
+      "id": "st-insurance",
+      "scope": "family",
+      "text": "When renewing an insurance policy, compare at least three quotes before accepting the renewal price.",
+      "fire": [
+        "the renewal for the house cover has arrived, should I just pay it?",
+        "our car cover is up for renewal next month",
+        "renew the contents insurance for me",
+        "the renewal letter for the pet insurance came today"
+      ],
+      "near": [
+        "the quote for the oak shelves came in high",
+        "what is the price of a library card renewal?",
+        "which policy does the school have on phones?"
+      ],
+      "intent": [
+        "how much was the car insurance last year?",
+        "who did we insure the house with before?"
+      ]
+    }
+  ],
+  "also": [
+    { "instruction": "mem-alex-standing", "golden": "q-para-race", "label": "near", "why": "training for a race is not planning a trip; shares only train" },
+    { "instruction": "mem-alex-standing", "golden": "q-para-train", "label": "intent", "why": "the time of a train already chosen: a fact about a trip, not planning one" },
+    { "instruction": "mem-alex-standing", "query": "when was Alex's last flight?", "label": "intent", "why": "a past trip, not one being planned" },
+    { "instruction": "st-allotment", "golden": "q-inject-beans", "label": "intent", "why": "when a crop is sown is a fact about beans; which bed they go in has not come up" },
+    { "instruction": "st-bins", "golden": "q-vis-bins-family", "label": "intent", "why": "the usual collection day, with no holiday moving it" },
+    { "instruction": "st-choir", "golden": "q-asof-samjob", "label": "near", "why": "Sam's paid work, not a choir duty; shares job" },
+    { "instruction": "st-choir", "golden": "q-current-samjob", "label": "near", "why": "Sam's paid work, not a choir duty; shares job" },
+    { "instruction": "st-choir", "golden": "q-commit-talk", "label": "near", "why": "a talk Sam agreed to give, not a choir duty" },
+    { "instruction": "st-exercise", "golden": "q-para-wrist", "label": "intent", "why": "why Sam stopped: the past of what the instruction is about, no exercise being suggested" },
+    { "instruction": "st-exercise", "golden": "q-stale-gym-member", "label": "near", "why": "whether a membership is still paid for is about money; shares climbing" },
+    { "instruction": "st-exercise", "golden": "q-vis-steps-alex", "label": "near", "why": "a count of steps, nobody asking what to do" },
+    { "instruction": "st-flights", "query": "book a table for two somewhere nice", "label": "near", "why": "booking a table, not a flight; shares book" },
+    { "instruction": "st-flights", "golden": "q-para-travel", "label": "intent", "why": "what Alex likes: a fact about flying, nothing being booked" },
+    { "instruction": "st-guests", "query": "book a joiner for the new shelves", "label": "near", "why": "shelves for a joiner to fit, no guest in it" },
+    { "instruction": "st-guests", "golden": "q-inject-partyhub", "label": "near", "why": "bookings on a party site, not anyone staying" },
+    { "instruction": "st-guests", "golden": "q-vis-wifi-sam", "label": "intent", "why": "the card itself, with no guest coming" },
+    { "instruction": "st-heating", "golden": "q-asof-quote", "label": "intent", "why": "what the heat pump cost, no setting being changed" },
+    { "instruction": "st-heating", "golden": "q-para-bills", "label": "intent", "why": "what the heat pump saved, no setting being changed" },
+    { "instruction": "st-heating", "golden": "q-para-checklist", "label": "intent", "why": "before it is fitted: the heat pump, but no setting to change yet" },
+    { "instruction": "st-heating", "golden": "q-para-heating", "label": "intent", "why": "what the heat pump replaces, no setting being changed" },
+    { "instruction": "st-heating", "golden": "q-vis-quote-family", "label": "intent", "why": "what the heat pump cost, no setting being changed" },
+    { "instruction": "st-hives", "golden": "q-long-inspect", "label": "intent", "why": "how often it is done in general, no hive being opened" },
+    { "instruction": "st-hives", "golden": "q-para-varroa", "label": "intent", "why": "what the hives are treated with, no day chosen" },
+    { "instruction": "st-japanese", "query": "how technical is the background reading for the Japanese exam?", "label": "intent", "why": "Sam studying Japanese, but asking about an exam, not for practice" },
+    { "instruction": "st-japanese", "golden": "q-graph-japanese", "label": "intent", "why": "what belongs with the class, not asking for practice" },
+    { "instruction": "st-japanese", "golden": "q-ml-ja-cross", "label": "intent", "why": "when the class is, not asking for practice" },
+    { "instruction": "st-journeys", "query": "put together a long running route for next week", "label": "near", "why": "a route to run, not a car journey; shares long and route" },
+    { "instruction": "st-journeys", "golden": "q-long-range", "label": "intent", "why": "the car's range as a fact, no journey being planned" },
+    { "instruction": "st-journeys", "golden": "q-para-charge", "label": "intent", "why": "charging at home as a fact, no journey being planned" },
+    { "instruction": "st-meetings", "golden": "q-asof-commute", "label": "near", "why": "which days Alex is in the office, no meeting being booked" },
+    { "instruction": "st-meetings", "golden": "q-current-commute", "label": "near", "why": "which days Alex is in the office, no meeting being booked" },
+    { "instruction": "st-meetings", "golden": "q-para-release-day", "label": "near", "why": "when releases are tagged, no meeting being booked; shares release" },
+    { "instruction": "st-notices", "golden": "q-long-readonly", "label": "intent", "why": "a date of the catalogue move, no notice being drafted" },
+    { "instruction": "st-patch", "query": "set up a meeting with the encoder team next week", "label": "near", "why": "a meeting, not a patch; a team in common" },
+    { "instruction": "st-patch", "golden": "q-commit-review", "label": "intent", "why": "which patch was promised, not reviewing one now" },
+    { "instruction": "st-patch", "golden": "q-exact-ctx-waveform", "label": "near", "why": "a ticket about a waveform view; shares waveform" },
+    { "instruction": "st-patch", "golden": "q-graph-waveform", "label": "near", "why": "what is linked to a freeze; shares waveform" },
+    { "instruction": "st-runs", "golden": "q-graph-knee", "label": "intent", "why": "what the advice affects, no run being planned" },
+    { "instruction": "st-runs", "golden": "q-health-knee", "label": "intent", "why": "what the physio said, no run being planned" },
+    { "instruction": "st-savings", "golden": "q-vis-sabbatical-family", "label": "intent", "why": "the fund itself, nothing being moved" },
+    { "instruction": "st-savings", "golden": "q-vis-savings-sam", "label": "intent", "why": "how much is saved, nothing being moved" },
+    { "instruction": "st-shop", "golden": "q-vis-plot-alex", "label": "near", "why": "what grows on the plot, not what to buy" },
+    { "instruction": "st-trades", "query": "book a table for two somewhere nice", "label": "near", "why": "booking a table, not a tradesperson; shares book" },
+    { "instruction": "st-trades", "query": "friends are coming to stay, can you write them some house notes?", "label": "near", "why": "house notes for guests, no work on the house" },
+    { "instruction": "st-trades", "golden": "q-asof-insurance", "label": "near", "why": "who insures the home, not whether a tradesperson is insured" },
+    { "instruction": "st-trades", "golden": "q-current-insurance", "label": "near", "why": "who insures the home, not whether a tradesperson is insured" },
+    { "instruction": "st-trades", "golden": "q-inject-deposit", "label": "near", "why": "a deposit for a party venue, no work on the house" },
+    { "instruction": "st-trades", "golden": "q-vis-quote-family", "label": "intent", "why": "a quote from a tradesperson already had, nobody being booked" },
+    { "instruction": "st-trades", "query": "renew the contents insurance for me", "label": "near", "why": "renewing a policy, no tradesperson" },
+    { "instruction": "st-trades", "query": "the renewal for the house cover has arrived, should I just pay it?", "label": "near", "why": "renewing a policy, no tradesperson" },
+    { "instruction": "st-trades", "query": "who did we insure the house with before?", "label": "near", "why": "who insured the home, not whether a tradesperson is insured" },
+    { "instruction": "st-vet", "golden": "q-vis-kidney-alex", "label": "intent", "why": "a result the cat had, no visit being booked" }
+  ]
+}

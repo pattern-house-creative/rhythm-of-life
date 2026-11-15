@@ -1,0 +1,25 @@
+{
+  "name": "documents",
+  "title": "Documents",
+  "kinds": ["DocumentSource"],
+  "summary": "PDFs, text and Markdown files, added in the app or dropped in the import folder's documents/, become document stars.",
+  "defaultEnabled": true,
+  "profile": null,
+  "docs": "docs/adapters/documents.md",
+  "settings": [
+    {
+      "key": "path",
+      "prompt": "Documents folder inside the engine container",
+      "type": "path",
+      "default": "/data/import/documents",
+      "help": "The documents/ folder of the import folder (RHYTHM_IMPORT_DIR), read-only."
+    },
+    {
+      "key": "owner",
+      "prompt": "Whose documents are they (a person id, or household)?",
+      "type": "person",
+      "default": "household"
+    }
+  ],
+  "secrets": []
+}

@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_due.output.schema.json",
+  "title": "list_due answer",
+  "description": "The memory tool list_due's answer (SB-P5-10, migration 061): the caller's own memories with a due date, soonest first. A memory is on the list while it has a due date and is not task:done, live, not held, not marked wrong and with its window open (061's memory_due, one predicate). window is the list asked: overdue (its moment has come), upcoming (within the next 48 hours), later, or all. total is that list's whole length for this caller, and overdue, upcoming and later each window's length under the same filters, read in the same statement as the page, so each count is the length of its list. zone is the install's time zone, in which each item's local reads. Only memories the caller may change and owns (058's memory_loop_mine, as list_loops): a Family admin is not served another member's. Each item: its due date, its window, loop (the open loop's direction when it is one, else null), its tags and project, when it was written, and a 500-character preview of its words (a held memory is never on it). Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "window",
+        "total",
+        "overdue",
+        "upcoming",
+        "later",
+        "zone",
+        "items",
+        "next",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "window": {
+          "enum": [
+            "overdue",
+            "upcoming",
+            "later",
+            "all"
+          ]
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "overdue": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many are due already, under the same filters."
+        },
+        "upcoming": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many are due within the next 48 hours, under the same filters."
+        },
+        "later": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many are due after that, under the same filters."
+        },
+        "zone": {
+          "type": "string",
+          "pattern": "^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+){1,2})$",
+          "description": "The install's time zone."
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/item"
+          }
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z0-9_-]{1,200}$",
+          "description": "Pass as cursor for the next page; null at the end."
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "window": {
+              "const": "all"
+            }
+          }
+        },
+        {
+          "properties": {
+            "window": {
+              "const": "overdue"
+            },
+            "items": {
+              "items": {
+                "properties": {
+                  "window": {
+                    "const": "overdue"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "window": {
+              "const": "upcoming"
+            },
+            "items": {
+              "items": {
+                "properties": {
+                  "window": {
+                    "const": "upcoming"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "window": {
+              "const": "later"
+            },
+            "items": {
+              "items": {
+                "properties": {
+                  "window": {
+                    "const": "later"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ],
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "author",
+        "status",
+        "due",
+        "window",
+        "loop",
+        "tags",
+        "project",
+        "created_at",
+        "content",
+        "truncated"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "author": {
+          "$ref": "memory.defs.schema.json#/$defs/person"
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ]
+        },
+        "due": {
+          "$ref": "memory.defs.schema.json#/$defs/due"
+        },
+        "window": {
+          "$ref": "memory.defs.schema.json#/$defs/dueWindow"
+        },
+        "loop": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/loopDirection"
+            }
+          ],
+          "description": "The open loop's direction when it is one (list_loops lists it too), else null."
+        },
+        "tags": {
+          "$ref": "memory.defs.schema.json#/$defs/tags"
+        },
+        "project": {
+          "$ref": "memory.defs.schema.json#/$defs/writtenProject"
+        },
+        "created_at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant",
+          "description": "When it was written."
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "content is a preview: get reads the whole text."
+        }
+      }
+    }
+  }
+}

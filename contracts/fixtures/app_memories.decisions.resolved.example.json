@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "decisions": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a051",
+      "revision": 2,
+      "scope": "shared",
+      "owner": "household",
+      "author": "alex",
+      "status": "canonical",
+      "confidence": 0.7,
+      "confidenceSource": "stated",
+      "outcome": "right",
+      "rearms": 0,
+      "reviewAt": null,
+      "window": null,
+      "current": true,
+      "edited": false,
+      "tags": [
+        "pellow"
+      ],
+      "project": null,
+      "createdAt": "2026-10-20T09:30:00+00:00",
+      "preview": "DEMO: Alex chose Pellow option 1.",
+      "truncated": false
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a052",
+      "revision": 2,
+      "scope": "shared",
+      "owner": "household",
+      "author": "alex",
+      "status": "canonical",
+      "confidence": 0.9,
+      "confidenceSource": "inferred",
+      "outcome": "wrong",
+      "rearms": 0,
+      "reviewAt": null,
+      "window": null,
+      "current": true,
+      "edited": false,
+      "tags": [
+        "pellow"
+      ],
+      "project": null,
+      "createdAt": "2026-10-20T09:30:00+00:00",
+      "preview": "DEMO: Alex chose Pellow option 2.",
+      "truncated": false
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a053",
+      "revision": 2,
+      "scope": "shared",
+      "owner": "household",
+      "author": "alex",
+      "status": "canonical",
+      "confidence": null,
+      "confidenceSource": null,
+      "outcome": "unknown",
+      "rearms": 1,
+      "reviewAt": "2027-02-01T09:00:00+00:00",
+      "window": "later",
+      "current": true,
+      "edited": false,
+      "tags": [
+        "pellow"
+      ],
+      "project": null,
+      "createdAt": "2026-10-20T09:30:00+00:00",
+      "preview": "DEMO: Alex chose Pellow option 3.",
+      "truncated": false
+    }
+  ],
+  "next": null,
+  "count": 3,
+  "open": 2,
+  "dueNow": 1,
+  "upcoming": 0,
+  "resolved": 3,
+  "scored": 3
+}

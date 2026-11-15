@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "op": "resolve_due",
+  "id": "6d3c2a10-0000-4000-8000-00000000a043",
+  "revision": 3,
+  "to": null,
+  "scope": "private",
+  "owner": "alex",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "changed": [
+    "due"
+  ],
+  "unchanged": false,
+  "replayed": false,
+  "droppedTags": [],
+  "held": null,
+  "action": "clear_date",
+  "due": null,
+  "before": {
+    "at": "2026-11-05T09:30:00+00:00",
+    "local": "2026-11-05 09:30",
+    "zone": "Europe/London",
+    "kind": "wake",
+    "source": "explicit"
+  }
+}

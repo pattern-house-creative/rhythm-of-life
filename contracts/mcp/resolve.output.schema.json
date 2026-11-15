@@ -1,0 +1,833 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/resolve.output.schema.json",
+  "title": "resolve answer",
+  "description": "The memory tool resolve's answer (SB-P5-15, migration 071): one tool for every review queue's action, each that queue's own step with its author lock and audit row. queue is the queue the action belongs to. An item leaves its queue once: unchanged true means nothing was written, because it was no longer waiting, in that word or another, and its message says so and which tool changes it from there. still_counted true says the brief's section for that queue counted it and still does, as after a snooze to within 48 hours or a copy with another flag standing. newly_counted true says it did not and now does, so that section's count rose by one: only a snooze from past the 48 hours into them, which answers still_counted false. Of a memory: a write's fields (no memory's words, a project by id and slug only) and the field changed, with a date's due and before and a decision's result, previous and review_at when the step ran; a second resolve carries the place alone. Of an insight: review and view. Of a candidate: decision, note, insight_id (only to a reader of that insight's scope) and notice, since a note is a client's words. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body: needs_person (release, settle_keep_both or settle_replace, a person's alone, answered alike whatever the id names, nothing read), held (a memory held for review), retracted (one marked wrong), unknown (no item the caller reads by that id), forbidden (not this login's: the author lock, or an insight this login saved), conflict (a stale expected_revision), invalid (an argument that does not go with the action, an until that has come, received on what the person owes, a replaced insight).",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "queue",
+        "action",
+        "id",
+        "unchanged",
+        "still_counted",
+        "newly_counted",
+        "revision",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "project",
+        "changed",
+        "due",
+        "before",
+        "result",
+        "previous",
+        "review_at",
+        "review",
+        "view",
+        "decision",
+        "note",
+        "insight_id",
+        "message",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "queue": {
+          "enum": [
+            "stale",
+            "loops",
+            "decisions",
+            "due",
+            "standing",
+            "duplicates",
+            "insight_candidates",
+            "insights"
+          ]
+        },
+        "action": {
+          "enum": [
+            "still_true",
+            "done",
+            "received",
+            "not_a_task",
+            "outcome",
+            "snooze",
+            "clear_date",
+            "stop_standing",
+            "keep_copy",
+            "use_candidate",
+            "reject_candidate",
+            "confirm_insight",
+            "dismiss_insight"
+          ]
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "still_counted": {
+          "type": "boolean"
+        },
+        "newly_counted": {
+          "type": "boolean"
+        },
+        "revision": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/revision"
+            }
+          ]
+        },
+        "scope": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/scope"
+            }
+          ]
+        },
+        "owner": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/subject"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft",
+            null
+          ]
+        },
+        "scopes": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/scopes"
+            }
+          ]
+        },
+        "project": {
+          "$ref": "memory.defs.schema.json#/$defs/writtenProject"
+        },
+        "changed": {
+          "type": "array",
+          "maxItems": 1,
+          "items": {
+            "enum": [
+              "checked",
+              "tags",
+              "outcome",
+              "due",
+              "standing",
+              "duplicate_of"
+            ]
+          }
+        },
+        "due": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeDue"
+        },
+        "before": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeDue"
+        },
+        "result": {
+          "enum": [
+            "right",
+            "wrong",
+            "mixed",
+            "unknown",
+            null
+          ]
+        },
+        "previous": {
+          "enum": [
+            "right",
+            "wrong",
+            "mixed",
+            "unknown",
+            null
+          ]
+        },
+        "review_at": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant"
+        },
+        "review": {
+          "enum": [
+            "proposed",
+            "confirmed",
+            "dismissed",
+            null
+          ]
+        },
+        "view": {
+          "enum": [
+            "proposed",
+            "older",
+            "confirmed",
+            "snoozed",
+            "closed",
+            null
+          ]
+        },
+        "decision": {
+          "enum": [
+            "used",
+            "rejected",
+            null
+          ]
+        },
+        "note": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          ]
+        },
+        "insight_id": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/uuid"
+            }
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "notice": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/notice"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "queue": {
+                  "const": "stale"
+                },
+                "action": {
+                  "enum": [
+                    "still_true"
+                  ]
+                },
+                "revision": {
+                  "$ref": "memory.defs.schema.json#/$defs/revision"
+                },
+                "scope": {
+                  "$ref": "memory.defs.schema.json#/$defs/scope"
+                },
+                "owner": {
+                  "$ref": "memory.defs.schema.json#/$defs/subject"
+                },
+                "status": {
+                  "enum": [
+                    "canonical",
+                    "draft"
+                  ]
+                },
+                "scopes": {
+                  "$ref": "memory.defs.schema.json#/$defs/scopes"
+                },
+                "changed": {
+                  "type": "array",
+                  "maxItems": 1,
+                  "items": {
+                    "const": "checked"
+                  }
+                },
+                "review": {
+                  "type": "null"
+                },
+                "view": {
+                  "type": "null"
+                },
+                "decision": {
+                  "type": "null"
+                },
+                "note": {
+                  "type": "null"
+                },
+                "insight_id": {
+                  "type": "null"
+                },
+                "notice": {
+                  "type": "null"
+                },
+                "due": {
+                  "type": "null"
+                },
+                "before": {
+                  "type": "null"
+                },
+                "result": {
+                  "type": "null"
+                },
+                "previous": {
+                  "type": "null"
+                },
+                "review_at": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "queue": {
+                  "const": "loops"
+                },
+                "action": {
+                  "enum": [
+                    "done",
+                    "received",
+                    "not_a_task"
+                  ]
+                },
+                "revision": {
+                  "$ref": "memory.defs.schema.json#/$defs/revision"
+                },
+                "scope": {
+                  "$ref": "memory.defs.schema.json#/$defs/scope"
+                },
+                "owner": {
+                  "$ref": "memory.defs.schema.json#/$defs/subject"
+                },
+                "status": {
+                  "enum": [
+                    "canonical",
+                    "draft"
+                  ]
+                },
+                "scopes": {
+                  "$ref": "memory.defs.schema.json#/$defs/scopes"
+                },
+                "changed": {
+                  "type": "array",
+                  "maxItems": 1,
+                  "items": {
+                    "const": "tags"
+                  }
+                },
+                "review": {
+                  "type": "null"
+                },
+                "view": {
+                  "type": "null"
+                },
+                "decision": {
+                  "type": "null"
+                },
+                "note": {
+                  "type": "null"
+                },
+                "insight_id": {
+                  "type": "null"
+                },
+                "notice": {
+                  "type": "null"
+                },
+                "due": {
+                  "type": "null"
+                },
+                "before": {
+                  "type": "null"
+                },
+                "result": {
+                  "type": "null"
+                },
+                "previous": {
+                  "type": "null"
+                },
+                "review_at": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "queue": {
+                  "const": "decisions"
+                },
+                "action": {
+                  "enum": [
+                    "outcome"
+                  ]
+                },
+                "revision": {
+                  "$ref": "memory.defs.schema.json#/$defs/revision"
+                },
+                "scope": {
+                  "$ref": "memory.defs.schema.json#/$defs/scope"
+                },
+                "owner": {
+                  "$ref": "memory.defs.schema.json#/$defs/subject"
+                },
+                "status": {
+                  "enum": [
+                    "canonical",
+                    "draft"
+                  ]
+                },
+                "scopes": {
+                  "$ref": "memory.defs.schema.json#/$defs/scopes"
+                },
+                "changed": {
+                  "type": "array",
+                  "maxItems": 1,
+                  "items": {
+                    "const": "outcome"
+                  }
+                },
+                "review": {
+                  "type": "null"
+                },
+                "view": {
+                  "type": "null"
+                },
+                "decision": {
+                  "type": "null"
+                },
+                "note": {
+                  "type": "null"
+                },
+                "insight_id": {
+                  "type": "null"
+                },
+                "notice": {
+                  "type": "null"
+                },
+                "due": {
+                  "type": "null"
+                },
+                "before": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "queue": {
+                  "const": "due"
+                },
+                "action": {
+                  "enum": [
+                    "snooze",
+                    "clear_date"
+                  ]
+                },
+                "revision": {
+                  "$ref": "memory.defs.schema.json#/$defs/revision"
+                },
+                "scope": {
+                  "$ref": "memory.defs.schema.json#/$defs/scope"
+                },
+                "owner": {
+                  "$ref": "memory.defs.schema.json#/$defs/subject"
+                },
+                "status": {
+                  "enum": [
+                    "canonical",
+                    "draft"
+                  ]
+                },
+                "scopes": {
+                  "$ref": "memory.defs.schema.json#/$defs/scopes"
+                },
+                "changed": {
+                  "type": "array",
+                  "maxItems": 1,
+                  "items": {
+                    "const": "due"
+                  }
+                },
+                "review": {
+                  "type": "null"
+                },
+                "view": {
+                  "type": "null"
+                },
+                "decision": {
+                  "type": "null"
+                },
+                "note": {
+                  "type": "null"
+                },
+                "insight_id": {
+                  "type": "null"
+                },
+                "notice": {
+                  "type": "null"
+                },
+                "result": {
+                  "type": "null"
+                },
+                "previous": {
+                  "type": "null"
+                },
+                "review_at": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "queue": {
+                  "const": "standing"
+                },
+                "action": {
+                  "enum": [
+                    "stop_standing"
+                  ]
+                },
+                "revision": {
+                  "$ref": "memory.defs.schema.json#/$defs/revision"
+                },
+                "scope": {
+                  "$ref": "memory.defs.schema.json#/$defs/scope"
+                },
+                "owner": {
+                  "$ref": "memory.defs.schema.json#/$defs/subject"
+                },
+                "status": {
+                  "enum": [
+                    "canonical",
+                    "draft"
+                  ]
+                },
+                "scopes": {
+                  "$ref": "memory.defs.schema.json#/$defs/scopes"
+                },
+                "changed": {
+                  "type": "array",
+                  "maxItems": 1,
+                  "items": {
+                    "const": "standing"
+                  }
+                },
+                "review": {
+                  "type": "null"
+                },
+                "view": {
+                  "type": "null"
+                },
+                "decision": {
+                  "type": "null"
+                },
+                "note": {
+                  "type": "null"
+                },
+                "insight_id": {
+                  "type": "null"
+                },
+                "notice": {
+                  "type": "null"
+                },
+                "due": {
+                  "type": "null"
+                },
+                "before": {
+                  "type": "null"
+                },
+                "result": {
+                  "type": "null"
+                },
+                "previous": {
+                  "type": "null"
+                },
+                "review_at": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "queue": {
+                  "const": "duplicates"
+                },
+                "action": {
+                  "enum": [
+                    "keep_copy"
+                  ]
+                },
+                "revision": {
+                  "$ref": "memory.defs.schema.json#/$defs/revision"
+                },
+                "scope": {
+                  "$ref": "memory.defs.schema.json#/$defs/scope"
+                },
+                "owner": {
+                  "$ref": "memory.defs.schema.json#/$defs/subject"
+                },
+                "status": {
+                  "enum": [
+                    "canonical",
+                    "draft"
+                  ]
+                },
+                "scopes": {
+                  "$ref": "memory.defs.schema.json#/$defs/scopes"
+                },
+                "changed": {
+                  "type": "array",
+                  "maxItems": 1,
+                  "items": {
+                    "const": "duplicate_of"
+                  }
+                },
+                "review": {
+                  "type": "null"
+                },
+                "view": {
+                  "type": "null"
+                },
+                "decision": {
+                  "type": "null"
+                },
+                "note": {
+                  "type": "null"
+                },
+                "insight_id": {
+                  "type": "null"
+                },
+                "notice": {
+                  "type": "null"
+                },
+                "due": {
+                  "type": "null"
+                },
+                "before": {
+                  "type": "null"
+                },
+                "result": {
+                  "type": "null"
+                },
+                "previous": {
+                  "type": "null"
+                },
+                "review_at": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "queue": {
+                  "const": "insight_candidates"
+                },
+                "action": {
+                  "enum": [
+                    "use_candidate",
+                    "reject_candidate"
+                  ]
+                },
+                "still_counted": {
+                  "const": false
+                },
+                "revision": {
+                  "type": "null"
+                },
+                "scope": {
+                  "type": "null"
+                },
+                "owner": {
+                  "type": "null"
+                },
+                "status": {
+                  "type": "null"
+                },
+                "scopes": {
+                  "type": "null"
+                },
+                "project": {
+                  "type": "null"
+                },
+                "changed": {
+                  "maxItems": 0
+                },
+                "due": {
+                  "type": "null"
+                },
+                "before": {
+                  "type": "null"
+                },
+                "result": {
+                  "type": "null"
+                },
+                "previous": {
+                  "type": "null"
+                },
+                "review_at": {
+                  "type": "null"
+                },
+                "review": {
+                  "type": "null"
+                },
+                "view": {
+                  "type": "null"
+                },
+                "decision": {
+                  "enum": [
+                    "used",
+                    "rejected"
+                  ]
+                },
+                "notice": {
+                  "$ref": "memory.defs.schema.json#/$defs/notice"
+                }
+              }
+            },
+            {
+              "properties": {
+                "queue": {
+                  "const": "insights"
+                },
+                "action": {
+                  "enum": [
+                    "confirm_insight",
+                    "dismiss_insight"
+                  ]
+                },
+                "still_counted": {
+                  "const": false
+                },
+                "revision": {
+                  "type": "null"
+                },
+                "scope": {
+                  "type": "null"
+                },
+                "owner": {
+                  "type": "null"
+                },
+                "status": {
+                  "type": "null"
+                },
+                "scopes": {
+                  "type": "null"
+                },
+                "project": {
+                  "type": "null"
+                },
+                "changed": {
+                  "maxItems": 0
+                },
+                "due": {
+                  "type": "null"
+                },
+                "before": {
+                  "type": "null"
+                },
+                "result": {
+                  "type": "null"
+                },
+                "previous": {
+                  "type": "null"
+                },
+                "review_at": {
+                  "type": "null"
+                },
+                "review": {
+                  "enum": [
+                    "proposed",
+                    "confirmed",
+                    "dismissed"
+                  ]
+                },
+                "view": {
+                  "enum": [
+                    "proposed",
+                    "older",
+                    "confirmed",
+                    "snoozed",
+                    "closed"
+                  ]
+                },
+                "decision": {
+                  "type": "null"
+                },
+                "note": {
+                  "type": "null"
+                },
+                "insight_id": {
+                  "type": "null"
+                },
+                "notice": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "newly_counted": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "newly_counted": {
+                  "const": true
+                },
+                "queue": {
+                  "const": "due"
+                },
+                "action": {
+                  "const": "snooze"
+                },
+                "unchanged": {
+                  "const": false
+                },
+                "still_counted": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

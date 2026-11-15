@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "protected",
+  "reason": "This memory can't replace that one, since it ends before the other does: nothing was settled and nothing changed."
+}

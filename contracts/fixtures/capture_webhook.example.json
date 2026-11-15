@@ -1,0 +1,13 @@
+{
+  "event": "ticket.closed",
+  "delivered": "2026-10-12T09:30:00Z",
+  "repository": {
+    "name": "demo-garden-app",
+    "url": "https://tracker.example.invalid/demo-garden-app"
+  },
+  "ticket": {
+    "number": 17,
+    "title": "DEMO: the gate latch is broken",
+    "closedBy": "sam"
+  }
+}

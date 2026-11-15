@@ -1,0 +1,252 @@
+{
+  "schema": "rhythm-titles-set/1",
+  "label": "DEMO: fictional notes and memories for the titles-model evaluation (SB-P2-14, D-027). Every person, place, business, number and code is invented; the people are alex and sam, the shared scope is Family.",
+  "rule": "D-027",
+  "lanes": {
+    "subject": "the first line already names what the text is about (a heading, or a statement as an AI client saves one)",
+    "preamble": "the first line is a lead-in that names nothing (note to self, a date, TODO, ok)",
+    "fragment": "the first line is a list item, a figure or a link, not the subject of the whole text"
+  },
+  "items": [
+    {
+      "id": "t01", "scope": "family", "author": "sam", "lane": "subject", "lang": "en",
+      "text": "The boiler service is booked with Tarnhill Heating for Thursday 13 November.\nThe engineer asked us to clear the cupboard under the stairs and leave the side gate unlocked; the key safe code is 3816.",
+      "reference": "Boiler service booked for 13 November",
+      "subject": ["boiler"], "private": ["3816", "key safe"], "accept": ["appointment", "visit"]
+    },
+    {
+      "id": "t02", "scope": "personal:sam", "author": "sam", "lane": "subject", "lang": "en",
+      "text": "Sam's climbing gym membership renews every March at 38 GBP a month.\nCancel before 20 February if the new job's hours clash; the membership number is CG-55104.",
+      "reference": "Climbing gym membership renews in March",
+      "subject": ["climbing", "gym", "membership"], "private": ["55104"], "accept": []
+    },
+    {
+      "id": "t03", "scope": "personal:alex", "author": "alex", "lane": "subject", "lang": "en",
+      "text": "Alex prefers trains over flights for trips under six hours.\nAvoid connections shorter than 20 minutes and book a forward-facing window seat.",
+      "reference": "Alex prefers trains for short trips",
+      "subject": ["train", "travel", "trip"], "private": [], "accept": ["travel", "rail"]
+    },
+    {
+      "id": "t04", "scope": "family", "author": "alex", "lane": "subject", "lang": "en",
+      "text": "Bin collection moves from Monday to Tuesday from 3 November 2026.\nRecycling stays fortnightly; the garden waste bin needs a new council sticker by the end of the month.",
+      "reference": "Bin collection moves to Tuesday",
+      "subject": ["bin", "collection", "recycling"], "private": [], "accept": []
+    },
+    {
+      "id": "t05", "scope": "personal:sam", "author": "sam", "lane": "subject", "lang": "en",
+      "text": "Booked Pepper the cat in at Quillon Vets for her annual booster on 12 November.\nShe needs to be in the carrier by 9:15; the receptionist said the bill will be about 64 GBP.",
+      "reference": "Pepper's vet booster on 12 November",
+      "subject": ["pepper", "vet", "booster", "cat"], "private": ["64"], "accept": ["appointment", "vaccination", "vaccine", "jab", "veterinary"]
+    },
+    {
+      "id": "t06", "scope": "personal:alex", "author": "alex", "lane": "subject", "lang": "en",
+      "text": "Alex's passport expires on 2 April 2027, so renew it before the sabbatical.\nThe old passport number ends in 4471, and there is a photo booth in Wrenmoor library.",
+      "reference": "Renew Alex's passport before April 2027",
+      "subject": ["passport"], "private": ["4471", "Wrenmoor"], "accept": ["renewal"]
+    },
+    {
+      "id": "t07", "scope": "family", "author": "alex", "lane": "subject", "lang": "en",
+      "text": "Kitchen refit: chose sage green cabinets and oak worktops.\nThe budget is capped at 14,000 GBP, and Marta from Copperline Kitchens starts fitting on 19 January.",
+      "reference": "Kitchen refit: sage cabinets, oak worktops",
+      "subject": ["kitchen"], "private": ["14,000", "Marta", "Copperline"], "accept": []
+    },
+    {
+      "id": "t08", "scope": "personal:sam", "author": "sam", "lane": "subject", "lang": "en",
+      "text": "Sam promised to return the borrowed ladder to the neighbours at number 9 by Saturday.\nThey also lent us the hedge trimmer, which still needs a new blade.",
+      "reference": "Return the borrowed ladder by Saturday",
+      "subject": ["ladder"], "private": [], "accept": []
+    },
+    {
+      "id": "t09", "scope": "personal:alex", "author": "alex", "lane": "subject", "lang": "en",
+      "text": "Alex started a new job as audio lead at Larkspur Labs on 1 September 2025.\nThe salary is 52,500 GBP and the line manager is called Imogen.",
+      "reference": "Alex's new job at Larkspur Labs",
+      "subject": ["job", "larkspur", "audio"], "private": ["52,500", "Imogen"], "accept": ["role", "position"]
+    },
+    {
+      "id": "t10", "scope": "family", "author": "sam", "lane": "subject", "lang": "en",
+      "text": "The car's MOT is due on 28 November at Fellgate Garage.\nLast year it failed on a worn tyre, and the garage quoted 180 GBP for the rear brakes.",
+      "reference": "Car MOT due on 28 November",
+      "subject": ["mot", "car"], "private": ["180"], "accept": []
+    },
+    {
+      "id": "t11", "scope": "personal:sam", "author": "sam", "lane": "subject", "lang": "en",
+      "text": "Sam's allotment moved to plot 22 at Nettlebank allotments on 1 March 2026.\nPlot 22 has the big water butt; the shed padlock combination is 0905.",
+      "reference": "Allotment moved to plot 22",
+      "subject": ["allotment", "plot"], "private": ["0905"], "accept": []
+    },
+    {
+      "id": "t12", "scope": "personal:alex", "author": "alex", "lane": "subject", "lang": "en",
+      "text": "Fixed the export crash in RHY-4127 by pinning the encoder to v2.14.3.\nThe regression came from the v2.15.0 resampler; the client contact is Priya at Fenwick Audio.",
+      "reference": "Export crash fixed in RHY-4127",
+      "subject": ["export", "crash", "encoder"], "private": ["Priya", "Fenwick"], "accept": ["fix"]
+    },
+    {
+      "id": "t13", "scope": "family", "author": "alex", "lane": "subject", "lang": "en",
+      "text": "Water meter reading on 1 October: 04217 cubic metres.\nThe next estimated bill is due in January, so read it again on 1 January.",
+      "reference": "Water meter reading for 1 October",
+      "subject": ["water"], "private": [], "accept": []
+    },
+    {
+      "id": "t14", "scope": "personal:sam", "author": "sam", "lane": "subject", "lang": "en",
+      "text": "Sam is planning a surprise 40th birthday party for Alex on 5 December 2026.\nIt is at the Ottervale boathouse; keep it secret from Alex and ask guests to arrive by 7pm.",
+      "reference": "Surprise 40th birthday party for Alex",
+      "subject": ["birthday", "party"], "private": ["Ottervale", "boathouse"], "accept": []
+    },
+    {
+      "id": "t15", "scope": "personal:alex", "author": "alex", "lane": "subject", "lang": "en",
+      "text": "Alex's favourite café is Kelptide Café on the harbour.\nAsk for the flat white with oat milk; the owner, Ruth, keeps the window table free on Fridays.",
+      "reference": "Alex's favourite café",
+      "subject": ["café", "kelptide", "coffee"], "private": ["Ruth"], "accept": ["coffee"]
+    },
+    {
+      "id": "t16", "scope": "family", "author": "alex", "lane": "subject", "lang": "en",
+      "text": "# Heat pump checklist\n\n- Clear the side passage for the outdoor unit.\n- Move the bikes out of the garage.\n- Grant reference GR-88213 goes on the installer's form.",
+      "reference": "Heat pump checklist",
+      "subject": ["heat pump"], "private": ["88213"], "accept": []
+    },
+    {
+      "id": "t17", "scope": "personal:sam", "author": "sam", "lane": "subject", "lang": "en",
+      "text": "## Planting plan for plot 22\n\n- Broad beans in November.\n- Garlic by the shed.\n- Ask Gwen next door before cutting back the shared hedge.",
+      "reference": "Planting plan for plot 22",
+      "subject": ["planting", "plot", "allotment", "garden"], "private": ["Gwen"], "accept": []
+    },
+    {
+      "id": "t18", "scope": "family", "author": "alex", "lane": "subject", "lang": "fr",
+      "text": "Recette de la tarte aux pommes de grand-mère : beurre demi-sel et pommes Reinette.\nCuire 35 minutes à 180 °C ; le secret, c'est une pincée de cannelle.",
+      "reference": "Tarte aux pommes de grand-mère",
+      "subject": ["tarte", "pomme", "recette"], "private": ["cannelle"], "accept": []
+    },
+    {
+      "id": "t19", "scope": "personal:alex", "author": "alex", "lane": "preamble", "lang": "en",
+      "text": "Note to self\nThe spare key is under the blue plant pot by the back door, and the alarm code is 2604.\nTell the house sitter on Friday.",
+      "reference": "Spare key and alarm for the house sitter",
+      "subject": ["key", "alarm", "sitter"], "private": ["2604", "plant pot", "back door"], "accept": []
+    },
+    {
+      "id": "t20", "scope": "family", "author": "sam", "lane": "preamble", "lang": "en",
+      "text": "Quick reminder for tomorrow\nTake the recycling out tonight, because collection moved to Tuesday this week, and put the glass box out too.",
+      "reference": "Recycling out tonight for Tuesday collection",
+      "subject": ["recycling", "bin", "collection", "glass"], "private": [], "accept": []
+    },
+    {
+      "id": "t21", "scope": "personal:sam", "author": "sam", "lane": "preamble", "lang": "en",
+      "text": "Things to remember\nPepper's flea treatment is due on the 1st of every month. The vet said to weigh her first; she was 4.2 kg in October.",
+      "reference": "Pepper's monthly flea treatment",
+      "subject": ["flea", "treatment"], "private": ["4.2 kg"], "accept": []
+    },
+    {
+      "id": "t22", "scope": "personal:alex", "author": "alex", "lane": "preamble", "lang": "en",
+      "text": "From the call this morning\nThe Oakvale Media contract renewal is moving to January. The day rate stays at 420 GBP, and they want the stems as 48 kHz WAV files.",
+      "reference": "Oakvale Media contract renewal moves to January",
+      "subject": ["contract", "oakvale", "renewal"], "private": ["420"], "accept": []
+    },
+    {
+      "id": "t23", "scope": "family", "author": "sam", "lane": "preamble", "lang": "en",
+      "text": "Okay so\nThe community choir's coach trip to Brackenford is on 21 November. Deposits of 12 GBP are due by Friday, and Sam is collecting them.",
+      "reference": "Choir coach trip to Brackenford on 21 November",
+      "subject": ["choir", "trip", "coach", "brackenford"], "private": [], "accept": []
+    },
+    {
+      "id": "t24", "scope": "personal:sam", "author": "sam", "lane": "preamble", "lang": "en",
+      "text": "Idea\nTurn the box room into a small workshop: a pegboard wall, a fold-down bench and a dehumidifier. Budget about 300 GBP.",
+      "reference": "Box room workshop idea",
+      "subject": ["workshop", "box room"], "private": [], "accept": []
+    },
+    {
+      "id": "t25", "scope": "personal:alex", "author": "alex", "lane": "preamble", "lang": "en",
+      "text": "Monday 3 November\nThe dentist moved the check-up to 10:40 on Thursday. Bring the referral letter for the hygienist.",
+      "reference": "Dentist check-up moved to Thursday",
+      "subject": ["dentist", "dental", "check-up"], "private": [], "accept": ["appointment"]
+    },
+    {
+      "id": "t26", "scope": "family", "author": "alex", "lane": "preamble", "lang": "en",
+      "text": "TODO\n- Renew the home insurance before 30 November (policy HX-20931).\n- Ask about adding the bikes to the contents cover.",
+      "reference": "Renew home insurance before 30 November",
+      "subject": ["insurance"], "private": ["20931"], "accept": []
+    },
+    {
+      "id": "t27", "scope": "personal:sam", "author": "sam", "lane": "preamble", "lang": "en",
+      "text": "Re what we talked about\nSam will cover the Wednesday dog walks for the Ashworths while they are away, 12 to 26 November. Their side door key is in the kitchen drawer.",
+      "reference": "Dog walks for the Ashworths in November",
+      "subject": ["dog", "walk"], "private": ["kitchen drawer", "side door"], "accept": []
+    },
+    {
+      "id": "t28", "scope": "personal:alex", "author": "alex", "lane": "preamble", "lang": "en",
+      "text": "Random thought\nIf the sabbatical starts in April, the coast path's first stage from Wrenmouth to Gullhaven is about 18 miles; take the train down the night before.",
+      "reference": "Coast path first stage for the sabbatical",
+      "subject": ["coast path", "sabbatical", "wrenmouth", "gullhaven"], "private": [], "accept": []
+    },
+    {
+      "id": "t29", "scope": "family", "author": "alex", "lane": "preamble", "lang": "de",
+      "text": "Kurze Notiz\nDie Heizungsablesung ist am 14. November zwischen 8 und 12 Uhr. Bitte den Keller aufräumen; der Schlüssel liegt im Briefkasten.",
+      "reference": "Heizungsablesung am 14. November",
+      "subject": ["heizung", "ablesung"], "private": ["Briefkasten"], "accept": ["ablesung"]
+    },
+    {
+      "id": "t30", "scope": "personal:sam", "author": "sam", "lane": "preamble", "lang": "es",
+      "text": "Para no olvidar\nLa cena con los compañeros del club de remo es el viernes 28 a las 20:30 en el Mirador. Hay que reservar antes del miércoles.",
+      "reference": "Cena del club de remo el viernes 28",
+      "subject": ["cena", "remo"], "private": [], "accept": []
+    },
+    {
+      "id": "t31", "scope": "family", "author": "sam", "lane": "fragment", "lang": "en",
+      "text": "- milk\n- eggs\n- oat milk for Alex\n- bin bags\n- birthday candles (hide them)\nSaturday big shop.",
+      "reference": "Saturday big shop list",
+      "subject": ["shop", "shopping", "grocery", "groceries"], "private": ["candles", "birthday"], "accept": ["shopping", "grocery", "groceries"]
+    },
+    {
+      "id": "t32", "scope": "personal:alex", "author": "alex", "lane": "fragment", "lang": "en",
+      "text": "10k in 52:30\nFirst run under 53 minutes since the knee niggle. Splits were even and the new shoes help. Next target: under 50 by March.",
+      "reference": "10k run in 52:30",
+      "subject": ["10k", "run"], "private": ["knee"], "accept": []
+    },
+    {
+      "id": "t33", "scope": "personal:sam", "author": "sam", "lane": "fragment", "lang": "en",
+      "text": "Tuesday\nPicked up the new glasses from Lindqvist Opticians. The frames were 145 GBP after the voucher, and the next eye test is in two years.",
+      "reference": "New glasses from Lindqvist Opticians",
+      "subject": ["glasses", "optician", "lindqvist"], "private": ["145"], "accept": []
+    },
+    {
+      "id": "t34", "scope": "family", "author": "alex", "lane": "fragment", "lang": "en",
+      "text": "3 x 2h sessions, 45 GBP each\nPiano lessons for Sam with Mrs Halloran start on 6 January; pay each term. The practice keyboard goes in the box room.",
+      "reference": "Sam's piano lessons from 6 January",
+      "subject": ["piano", "lesson"], "private": ["Halloran"], "accept": []
+    },
+    {
+      "id": "t35", "scope": "personal:alex", "author": "alex", "lane": "fragment", "lang": "en",
+      "text": "https://example.invalid/listings/flat-7731\nThe flat on Weir Street: two bedrooms, 1,150 GBP a month, viewing on Saturday at 11. Ask about the damp patch in the bathroom.",
+      "reference": "Weir Street flat viewing on Saturday",
+      "subject": ["flat", "weir street"], "private": [], "accept": []
+    },
+    {
+      "id": "t36", "scope": "personal:sam", "author": "sam", "lane": "fragment", "lang": "en",
+      "text": "Pages 40–112\nBook club: The Salt Orchard, for 4 December at Hettie's. Sam is bringing the cheese board.",
+      "reference": "Book club: The Salt Orchard on 4 December",
+      "subject": ["book club", "salt orchard"], "private": ["Hettie"], "accept": []
+    },
+    {
+      "id": "t37", "scope": "family", "author": "sam", "lane": "fragment", "lang": "en",
+      "text": "Meter: 48211\nElectricity reading for the switch to Brightwater Energy on 1 December. The new tariff is 24.5p per kWh, fixed for a year.",
+      "reference": "Electricity meter reading for the Brightwater switch",
+      "subject": ["electricity", "brightwater", "supplier", "tariff", "switch"], "private": [], "accept": []
+    },
+    {
+      "id": "t38", "scope": "personal:alex", "author": "alex", "lane": "fragment", "lang": "en",
+      "text": "ok\nAlex agreed to give the best man's speech at Tomasz's wedding on 9 May 2027 in Corran Bay. Keep it under six minutes, and no stories about the stag weekend.",
+      "reference": "Best man's speech for the May 2027 wedding",
+      "subject": ["speech", "wedding", "best man"], "private": ["Tomasz", "stag"], "accept": []
+    },
+    {
+      "id": "t39", "scope": "family", "author": "sam", "lane": "fragment", "lang": "fr",
+      "text": "à faire\n- Appeler le plombier pour la fuite sous l'évier\n- Racheter du joint silicone",
+      "reference": "Appeler le plombier pour la fuite",
+      "subject": ["plombier", "fuite", "évier"], "private": [], "accept": []
+    },
+    {
+      "id": "t40", "scope": "personal:sam", "author": "sam", "lane": "fragment", "lang": "de",
+      "text": "Sa., 10 Uhr\nFlohmarkt am Hafen: Stand Nummer 31 ist für uns reserviert. Die Standgebühr ist 15 Euro; den Tapeziertisch von den Nachbarn leihen.",
+      "reference": "Flohmarkt am Hafen, Samstag 10 Uhr",
+      "subject": ["flohmarkt", "markt"], "private": [], "accept": ["samstag"]
+    }
+  ]
+}

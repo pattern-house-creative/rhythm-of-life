@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "forbidden",
+  "error": "A capsule slot is set or cleared by a person, from the app or the terminal, never by an AI client"
+}

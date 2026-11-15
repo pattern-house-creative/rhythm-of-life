@@ -1,0 +1,98 @@
+{
+  "about": "Fictional demo notes for the engine's demo adapter. Every name, place and number here is invented. Shown as DEMO.",
+  "projects": [
+    { "id": "spring-garden", "name": "Spring garden" },
+    { "id": "half-marathon", "name": "Half marathon training" },
+    { "id": "kitchen", "name": "Kitchen and meals" }
+  ],
+  "notes": [
+    {
+      "id": "note-morning-walks",
+      "title": "Morning walks before work",
+      "text": "Alex and Sam walk the canal loop most mornings, about forty minutes. On walking days the step count is higher and Alex sleeps a little longer. (Demo note.)",
+      "projects": ["half-marathon"],
+      "links": ["note-running-plan", "note-sleep-routine"],
+      "daysAgo": 3
+    },
+    {
+      "id": "note-running-plan",
+      "title": "Ten-week running plan",
+      "text": "Three runs a week: one easy, one tempo, one long run on Sunday. Rest days stay rest days. Week six is the hardest. (Demo note.)",
+      "projects": ["half-marathon"],
+      "links": ["note-race-day"],
+      "daysAgo": 12
+    },
+    {
+      "id": "note-race-day",
+      "title": "Race day checklist",
+      "text": "Number pinned the night before, porridge two hours ahead, start slower than feels right. Take a small snack at the halfway point, as on the Sunday long runs, so energy holds up. (Demo note.)",
+      "projects": ["half-marathon"],
+      "links": [],
+      "daysAgo": 9
+    },
+    {
+      "id": "note-sleep-routine",
+      "title": "Sleep routine experiment",
+      "text": "Screens off at ten, lights low, the same wake time every day for two weeks. Compare sleep minutes before and after. (Demo note.)",
+      "projects": [],
+      "links": ["note-evening-tea"],
+      "daysAgo": 6
+    },
+    {
+      "id": "note-evening-tea",
+      "title": "Evening tea instead of coffee",
+      "text": "Switched the afternoon coffee for a herbal tea. Falling asleep feels easier, but it has only been a week. (Demo note.)",
+      "projects": [],
+      "links": [],
+      "daysAgo": 5
+    },
+    {
+      "id": "note-mood-check",
+      "title": "Mood after the long run",
+      "text": "Sam noticed the evening mood check-in runs higher after the Sunday long run, and lower after a short night. Keep logging both until race day and see whether it holds. (Demo note.)",
+      "projects": ["half-marathon"],
+      "links": ["note-running-plan", "note-sleep-routine"],
+      "daysAgo": 2
+    },
+    {
+      "id": "note-meal-plan",
+      "title": "Weekly meal plan",
+      "text": "Batch-cook lentil soup on Sunday, fish on Wednesday, pasta before the long run. Shopping list lives on the fridge. (Demo note.)",
+      "projects": ["kitchen"],
+      "links": ["note-bread"],
+      "daysAgo": 7
+    },
+    {
+      "id": "note-bread",
+      "title": "Sourdough notes",
+      "text": "The starter likes the warm shelf. Seventy per cent hydration worked best; the last loaf rose well. (Demo note.)",
+      "projects": ["kitchen"],
+      "links": [],
+      "daysAgo": 20
+    },
+    {
+      "id": "note-seedlings",
+      "title": "Seedlings on the windowsill",
+      "text": "Tomatoes and basil sown in trays. Move them out once nights stay above ten degrees. (Demo note.)",
+      "projects": ["spring-garden"],
+      "links": ["note-raised-bed"],
+      "daysAgo": 15
+    },
+    {
+      "id": "note-raised-bed",
+      "title": "Raised bed plan",
+      "text": "One bed for salad, one for beans and courgettes. Water early in the morning. Gardening counts as activity minutes too. (Demo note.)",
+      "projects": ["spring-garden"],
+      "links": [],
+      "daysAgo": 11
+    },
+    {
+      "id": "note-weekly-review",
+      "title": "Sunday weekly review",
+      "text": "Look back at the week: walks, runs, sleep and meals. Pick one small change for next week and write it down here. (Demo note.)",
+      "projects": [],
+      "links": ["note-morning-walks", "note-sleep-routine", "note-meal-plan"],
+      "daysAgo": 1
+    }
+  ]
+}

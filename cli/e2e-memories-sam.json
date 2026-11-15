@@ -1,0 +1,19 @@
+{"format":"rhythm-memories","version":1,
+"install":"00000000-0000-4000-8000-000000000e2e",
+"export":"00000000-0000-4000-8000-00000000e2e2",
+"exportedAt":"2026-11-02T21:30:48.888707+00:00",
+"reader":{"person":"sam"},"scopes":"on",
+"projects":[
+{"id": "c6558e74-1b5d-42d7-a745-4e34fd0008bb", "name": "picking", "slug": "picking", "scope": "shared", "author": null, "status": "active", "aliases": [], "subject": "household", "revision": 1, "createdAt": "2026-11-02T21:30:48.82295+00:00", "updatedAt": "2026-11-02T21:30:48.82295+00:00", "description": ""},
+{"id": "b4da6c2b-46dd-498b-b4e6-c5a34b1bbccb", "name": "surprise", "slug": "surprise", "scope": "private", "author": "sam", "status": "active", "aliases": [], "subject": "sam", "revision": 1, "createdAt": "2026-11-02T21:30:48.844607+00:00", "updatedAt": "2026-11-02T21:30:48.844607+00:00", "description": ""}
+],
+"memories":[
+{"id": "ba9cc5bd-7333-4c27-87a5-b55cf7037726", "hold": null, "kind": null, "tags": [], "scope": "shared", "trash": null, "author": null, "source": "mcp", "status": "draft", "capsule": null, "content": "DEMO: the family quince picking is on Saturday morning.", "project": "c6558e74-1b5d-42d7-a745-4e34fd0008bb", "subject": "household", "revision": 1, "versions": [], "createdAt": "2026-11-02T21:30:48.82295+00:00", "holdScore": null, "updatedAt": "2026-11-02T21:30:48.82295+00:00", "validFrom": null, "importance": null, "validUntil": null, "volatility": null, "capsuleSlot": null},
+{"id": "2fafa4c2-71f9-48e5-8783-6e5c3bf769cb", "hold": null, "kind": null, "tags": [], "scope": "shared", "trash": null, "author": "alex", "source": "mcp", "status": "draft", "capsule": null, "content": "DEMO: bring the fictional ladder for the quince picking.", "project": null, "subject": "household", "revision": 1, "versions": [], "createdAt": "2026-11-02T21:30:48.833956+00:00", "holdScore": null, "updatedAt": "2026-11-02T21:30:48.833956+00:00", "validFrom": null, "importance": null, "validUntil": null, "volatility": null, "capsuleSlot": null},
+{"id": "6ee47f95-1a58-4ebb-8527-b1fec6eecd9b", "hold": null, "kind": null, "tags": [], "scope": "private", "trash": null, "author": "sam", "source": "mcp", "status": "draft", "capsule": null, "content": "DEMO: Sam's fictional quince surprise for Alex.", "project": "b4da6c2b-46dd-498b-b4e6-c5a34b1bbccb", "subject": "sam", "revision": 1, "versions": [], "createdAt": "2026-11-02T21:30:48.844607+00:00", "holdScore": null, "updatedAt": "2026-11-02T21:30:48.844607+00:00", "validFrom": null, "importance": null, "validUntil": null, "volatility": null, "capsuleSlot": null},
+{"id": "11f2d8fd-c6b0-451c-bc23-d6fd624c7cf1", "hold": null, "kind": null, "tags": [], "scope": "private", "trash": null, "author": "sam", "source": "mcp", "status": "draft", "capsule": null, "content": "DEMO: Sam's fictional quince shopping list.", "project": null, "subject": "sam", "revision": 1, "versions": [], "createdAt": "2026-11-02T21:30:48.854239+00:00", "holdScore": null, "updatedAt": "2026-11-02T21:30:48.854239+00:00", "validFrom": null, "importance": null, "validUntil": null, "volatility": null, "capsuleSlot": null}
+],
+"links":[
+{"id": "58125f48-1066-43b4-89fc-82c0d8e0137f", "type": "relates_to", "trash": null, "source": "6ee47f95-1a58-4ebb-8527-b1fec6eecd9b", "target": "11f2d8fd-c6b0-451c-bc23-d6fd624c7cf1", "subject": "sam", "evidence": "DEMO link", "createdAt": "2026-11-02T21:30:48.863496+00:00", "lifecycle": "active", "verification": "verified"}
+],
+"counts":{"projects":2,"memories":4,"links":1}}

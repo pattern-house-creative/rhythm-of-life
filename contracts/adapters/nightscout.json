@@ -1,0 +1,37 @@
+{
+  "name": "nightscout",
+  "title": "Nightscout",
+  "kinds": ["MeasurementSource"],
+  "summary": "Glucose from your own Nightscout site, as a live CGM feed (sensor readings every few minutes).",
+  "unofficial": false,
+  "defaultEnabled": false,
+  "profile": null,
+  "docs": "docs/adapters/nightscout.md",
+  "settings": [
+    {
+      "key": "url",
+      "prompt": "Your Nightscout site's address",
+      "type": "url",
+      "required": true,
+      "help": "For example https://nightscout.example.invalid/. Plain http only for a site on your own network (a single-label host or a private address)."
+    },
+    { "key": "owner", "prompt": "Whose readings these are", "type": "person", "required": true },
+    {
+      "key": "pollSeconds",
+      "prompt": "How often to read new entries, in seconds",
+      "type": "int",
+      "default": 300,
+      "help": "60 to 86400. A failed read waits longer each time, up to an hour."
+    }
+  ],
+  "secrets": [
+    {
+      "purpose": "token",
+      "prompt": "A Nightscout access token with the readable role (or the site's API secret)",
+      "source": "paste",
+      "required": false,
+      "help": "Create one in Nightscout's Admin tools: a subject with the readable role. Leave empty if your site is readable without one."
+    }
+  ],
+  "connect": false
+}

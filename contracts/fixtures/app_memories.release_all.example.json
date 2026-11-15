@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "op": "release_all",
+  "results": [
+    { "id": "6d3c2a10-0000-4000-8000-00000000b002", "result": "released", "revision": 2 },
+    { "id": "6d3c2a10-0000-4000-8000-00000000b003", "result": "conflict", "revision": 2 },
+    { "id": "6d3c2a10-0000-4000-8000-00000000b009", "result": "unknown", "revision": null }
+  ]
+}

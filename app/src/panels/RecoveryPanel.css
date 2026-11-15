@@ -1,0 +1,492 @@
+/* Sleep & recovery: last night as rings, two weeks of nights, and the
+   morning's recovery signals. */
+
+.recovery-panel {
+  --deep: #8a76c4;
+  --light: #5f7c95;
+  --rem: #d0b6e7;
+  --awake: #c1a66d;
+}
+
+/* Last night. */
+.sleep-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: start;
+  gap: 44px;
+  padding: 30px 0 34px;
+  border-top: 1px solid #93b4c321;
+  border-bottom: 1px solid #93b4c321;
+}
+.sleep-hero::before {
+  /* A soft moonlit glow behind the rings. */
+  content: "";
+  position: absolute;
+  left: -60px;
+  top: 140px;
+  width: 340px;
+  height: 340px;
+  transform: translateY(-50%);
+  background: radial-gradient(circle, #b6a6cc1c 0, #b6a6cc00 62%);
+  pointer-events: none;
+}
+.sleep-ring {
+  position: relative;
+  width: 220px;
+  aspect-ratio: 1;
+}
+.sleep-ring svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.ring-track {
+  fill: none;
+  stroke: #93b4c317;
+  stroke-width: 5;
+}
+.ring-track.inner {
+  stroke-width: 14;
+  stroke: #93b4c30f;
+}
+.score-tip {
+  fill: #e9f2f2;
+  filter: drop-shadow(0 0 7px #d0b6e7);
+}
+.stage-arc.deep {
+  stroke: var(--deep);
+}
+.stage-arc.light {
+  stroke: var(--light);
+}
+.stage-arc.rem {
+  stroke: var(--rem);
+}
+.stage-arc.awake {
+  stroke: var(--awake);
+}
+.sleep-ring-centre {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+.sleep-ring-centre strong {
+  font: 300 62px/1 "Manrope Variable";
+  letter-spacing: -3px;
+  color: #e3eef0;
+}
+.sleep-ring-centre strong.duration {
+  font-size: 38px;
+  letter-spacing: -1.4px;
+}
+.sleep-ring-centre small {
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #718993;
+  margin-top: 4px;
+}
+.sleep-side {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+.sleep-duration strong {
+  display: block;
+  font: 300 44px/1 "Manrope Variable";
+  letter-spacing: -1.8px;
+  color: #d7e5e9;
+}
+.sleep-duration span {
+  display: block;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #8fa9b7;
+}
+.stage-list {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stage-list li {
+  display: grid;
+  grid-template-columns: 10px 56px 62px 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #a4b9c4;
+}
+.stage-list i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--stage);
+}
+.stage-list b {
+  font: 400 13px "Manrope Variable";
+  color: #d7e5e9;
+  text-align: right;
+}
+.stage-list small {
+  font-size: 10px;
+  color: #718993;
+  text-align: right;
+}
+.stage-share {
+  height: 4px;
+  border-radius: 4px;
+  background: #93b4c314;
+  overflow: hidden;
+}
+.stage-share span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--stage);
+  opacity: 0.85;
+}
+.stage-list .deep {
+  --stage: var(--deep);
+}
+.stage-list .light {
+  --stage: var(--light);
+}
+.stage-list .rem {
+  --stage: var(--rem);
+}
+.stage-list .awake {
+  --stage: var(--awake);
+}
+.stage-empty {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #8fa9b7;
+}
+
+/* The morning after: Body Battery recharged and at wake. */
+.sleep-morning {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 30px;
+  padding: 14px 0 0;
+  border-top: 1px solid #93b4c317;
+}
+.sleep-morning > div {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+.sleep-morning strong {
+  font: 300 28px/1 "Manrope Variable";
+  letter-spacing: -0.8px;
+  color: #a9ead4;
+}
+.sleep-morning span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: #8fa9b7;
+}
+
+/* Glucose while asleep. */
+.night-glucose {
+  padding: 16px 16px 14px;
+  border-radius: 14px;
+  background: #0b131980;
+  border: 1px solid #93b4c317;
+}
+.night-glucose .eyebrow {
+  font-size: 8px;
+  color: #88bba9;
+  margin-bottom: 10px;
+}
+.night-glucose-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 8px;
+  letter-spacing: 0.6px;
+  color: #718993;
+}
+.night-glucose-words {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #8fa9b7;
+}
+.night-glucose-words b {
+  font: 400 15px "Manrope Variable";
+  color: #d7e5e9;
+}
+.night-glucose-words i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #718993;
+  align-self: center;
+}
+.night-glucose-words .low-words b {
+  color: #eaa3ad;
+}
+
+/* Two weeks of nights. */
+.night-chart {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 8px;
+  height: 178px;
+  padding-right: 22px;
+}
+.night-plot {
+  position: absolute;
+  inset: 22px 0 22px 0;
+  pointer-events: none;
+}
+.night-guide {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed #93b4c32e;
+}
+.night-guide small {
+  position: absolute;
+  right: 0;
+  top: -6px;
+  font-size: 8px;
+  line-height: 1;
+  color: #718993;
+}
+.night {
+  display: grid;
+  grid-template-rows: 16px minmax(0, 1fr) 16px;
+  gap: 6px;
+  align-items: end;
+  justify-items: center;
+  min-width: 0;
+  padding: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.night:disabled {
+  cursor: default;
+}
+.night-score {
+  font-size: 9px;
+  color: #8fa9b7;
+  transition: color 0.3s;
+}
+.night-track {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 18px;
+  height: 100%;
+  border-radius: 18px;
+  background: #93b4c30a;
+}
+.night-bar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  opacity: 0.62;
+  transition:
+    opacity 0.35s,
+    box-shadow 0.35s;
+}
+.night-bar > span {
+  min-height: 1px;
+  flex-basis: 0;
+}
+.night-bar .deep {
+  background: var(--deep);
+}
+.night-bar .light {
+  background: var(--light);
+}
+.night-bar .rem {
+  background: var(--rem);
+}
+.night-bar .awake {
+  background: var(--awake);
+}
+.night small {
+  font-size: 9px;
+  color: #718993;
+}
+.night:not(:disabled):hover .night-bar {
+  opacity: 0.85;
+}
+.night[aria-pressed="true"] .night-bar {
+  opacity: 1;
+  box-shadow: 0 0 22px #b6a6cc40;
+}
+.night[aria-pressed="true"] .night-score,
+.night[aria-pressed="true"] small {
+  color: #e3eef0;
+}
+.night:focus-visible {
+  outline: 1px solid #b6a6cc80;
+  outline-offset: 3px;
+}
+.back-to-latest {
+  margin-top: 14px;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  color: #d0b6e7;
+  border: 1px solid #d0b6e733;
+  border-radius: 20px;
+  padding: 7px 13px;
+}
+
+/* Readiness and Body Battery. */
+.readiness {
+  position: relative;
+  width: 170px;
+  align-self: center;
+}
+.readiness svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+.gauge-track {
+  stroke: #93b4c31c;
+}
+.gauge-tick {
+  stroke: #93b4c340;
+  stroke-width: 1;
+}
+.gauge-tip {
+  fill: #e9f2f2;
+  filter: drop-shadow(0 0 7px #b6a6cc);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.readiness-centre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 34%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.readiness-centre strong {
+  font: 300 46px/1 "Manrope Variable";
+  letter-spacing: -2px;
+  color: #e3eef0;
+}
+.battery {
+  margin-top: auto;
+}
+.battery-when {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 10px;
+  color: #718993;
+}
+.battery-track {
+  position: relative;
+  height: 10px;
+  border-radius: 10px;
+  background: #93b4c314;
+}
+.battery-range {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #b6a6cc, #7bdcbb);
+  box-shadow: 0 0 16px #7bdcbb33;
+}
+.battery-mark {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 18px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: #b6a6cc;
+}
+.battery-mark.high {
+  background: #e9f2f2;
+}
+.battery-words {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 12px;
+  font-size: 10px;
+  color: #8fa9b7;
+}
+.battery-words span {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.battery-nights small {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  color: #718993;
+}
+.battery-words b {
+  font: 400 14px "Manrope Variable";
+  color: #d7e5e9;
+}
+
+@container body-panel (max-width: 560px) {
+  .sleep-hero {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 28px;
+    padding-top: 22px;
+  }
+  .sleep-hero::before {
+    left: 50%;
+    top: 132px;
+    transform: translate(-50%, -50%);
+  }
+  .sleep-ring {
+    width: 210px;
+  }
+  .sleep-side {
+    width: 100%;
+  }
+  .sleep-duration {
+    text-align: center;
+  }
+  .night-chart {
+    gap: 4px;
+    height: 160px;
+    padding-right: 18px;
+  }
+  .night-score {
+    font-size: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .night-bar,
+  .night-score {
+    transition: none;
+  }
+}

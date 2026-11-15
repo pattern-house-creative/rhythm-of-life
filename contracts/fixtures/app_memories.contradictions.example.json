@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "contradictions": [
+    {
+      "scope": "shared",
+      "owner": "household",
+      "score": 0.88,
+      "offeredAt": "2026-10-31T10:05:00+00:00",
+      "memory": {
+        "id": "6d3c2a10-0000-4000-8000-00000000a062",
+        "revision": 1,
+        "author": "alex",
+        "status": "draft",
+        "preview": "DEMO: the Wendle bins go out on Wednesdays from 3 November.",
+        "truncated": false,
+        "startedAt": "2026-10-31T10:05:00+00:00"
+      },
+      "conflict": {
+        "id": "6d3c2a10-0000-4000-8000-00000000a061",
+        "revision": 2,
+        "author": "sam",
+        "status": "canonical",
+        "preview": "DEMO: the Wendle bins go out on Tuesdays from 3 November.",
+        "truncated": false,
+        "startedAt": "2026-10-12T09:00:00+00:00"
+      },
+      "proposed": {
+        "at": "2026-10-31T10:06:00+00:00",
+        "person": "alex",
+        "client": "demo-client",
+        "reason": "Tuesday against Wednesday from the same date"
+      },
+      "maySettle": true
+    }
+  ],
+  "next": null,
+  "count": 1
+}

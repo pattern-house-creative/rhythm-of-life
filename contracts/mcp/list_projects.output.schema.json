@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_projects.output.schema.json",
+  "title": "list_projects answer",
+  "description": "The memory tool list_projects's answer (SB-P3-09): the memory projects the caller reads, by name, each description cut to its first line of up to 200 characters. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "projects",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "projects": {
+          "type": "array",
+          "maxItems": 500,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "slug",
+              "name",
+              "scope",
+              "owner",
+              "description",
+              "aliases",
+              "status",
+              "author",
+              "revision",
+              "updated_at"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "memory.defs.schema.json#/$defs/uuid"
+              },
+              "slug": {
+                "$ref": "memory.defs.schema.json#/$defs/slug"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "scope": {
+                "$ref": "memory.defs.schema.json#/$defs/scope"
+              },
+              "owner": {
+                "$ref": "memory.defs.schema.json#/$defs/subject"
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "aliases": {
+                "type": "array",
+                "maxItems": 16,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "archived"
+                ]
+              },
+              "author": {
+                "$ref": "memory.defs.schema.json#/$defs/person"
+              },
+              "revision": {
+                "$ref": "memory.defs.schema.json#/$defs/revision"
+              },
+              "updated_at": {
+                "$ref": "memory.defs.schema.json#/$defs/instant"
+              }
+            }
+          }
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

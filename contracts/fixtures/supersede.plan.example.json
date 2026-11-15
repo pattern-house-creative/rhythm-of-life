@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "action": "plan",
+  "id": "6d3c2a10-0000-4000-8000-00000000a003",
+  "replaces": "6d3c2a10-0000-4000-8000-00000000a001",
+  "at": "2026-10-31T07:40:00+00:00",
+  "reason": null,
+  "confirmation": "3f9a1c07b2e45d68",
+  "revision": 4,
+  "scope": "shared",
+  "owner": "household",
+  "status": "canonical",
+  "scopes": "off",
+  "message": "The plan, not applied: memory 6d3c2a10-0000-4000-8000-00000000a001 would stop being true at 2026-10-31 07:40 UTC, when memory 6d3c2a10-0000-4000-8000-00000000a003 began, and stay in history as replaced by it, out of recall and capsules, and on the map only as a star marked replaced. Nothing has changed. Tell the person, and once they agree call supersede again with confirmation 3f9a1c07b2e45d68; if either memory changes first, ask for the plan again."
+}

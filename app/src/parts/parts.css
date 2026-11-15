@@ -1,0 +1,419 @@
+/* A dashboard's native parts (nativeParts.tsx): Home's own tiles, its sky and
+   the daily insights, each filling its cell of the grid. A part lays itself
+   out by its cell's size (container queries), never by the window or Home's
+   layout, so the rules here outrank the window's tile rules in App.css for a
+   part, and Home's own corners never match them. Folded, a tile takes its
+   content's height in the column, centred in its row; a map and a card take
+   the height the grid gives them. */
+.native-part {
+  container: part / size;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.native-part[data-fold] {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ----- The tiles: label, the reading, then what room allows. */
+.native-part .tile-button {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 12px 0 8px;
+  overflow: hidden;
+}
+.native-part[data-fold] .tile-button {
+  height: auto;
+  padding: 10px 0 6px;
+}
+.native-part .section-label {
+  flex: none;
+  font-size: 8px;
+  letter-spacing: 1.4px;
+}
+.native-part :is(.spark-axis, .quiet-copy, .tile-footer) {
+  display: none;
+}
+.native-part .tile-footer {
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+/* Glucose: the reading and its caption at the smallest; the three-hour line,
+   time in range, the axis, the trend in words and the footer as the cell
+   grows. */
+.native-part .glucose-value {
+  font-size: clamp(34px, 24cqh, 68px);
+  letter-spacing: -0.06em;
+  margin: 6px 0 4px;
+  gap: 12px;
+}
+.native-part .sparkline {
+  display: none;
+  flex: none;
+  height: clamp(40px, 14cqh, 64px);
+  margin: 6px -2px 0;
+}
+.native-part .glucose-history.compact {
+  display: none;
+  margin-top: 12px;
+  padding-top: 10px;
+}
+@container part (min-height: 190px) {
+  .native-part .sparkline {
+    display: block;
+  }
+}
+@container part (min-height: 280px) {
+  .native-part .glucose-history.compact {
+    display: block;
+  }
+}
+@container part (min-height: 360px) {
+  .native-part .spark-axis {
+    display: flex;
+  }
+  .native-part .quiet-copy {
+    display: block;
+  }
+}
+@container part (min-height: 430px) {
+  .native-part .tile-footer {
+    display: flex;
+  }
+}
+/* A wide, short cell reads like Home's band: the reading beside its line. */
+@container part (min-width: 420px) and (max-height: 279px) {
+  .native-part.part-glucose .tile-button {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "label label"
+      "value spark"
+      "caption spark";
+    column-gap: 22px;
+  }
+  .native-part.part-glucose .section-label {
+    grid-area: label;
+  }
+  .native-part.part-glucose .glucose-value {
+    grid-area: value;
+    font-size: clamp(34px, 30cqh, 56px);
+  }
+  .native-part.part-glucose .metric-caption {
+    grid-area: caption;
+    align-self: start;
+  }
+  .native-part.part-glucose .sparkline {
+    grid-area: spark;
+    display: block;
+    align-self: center;
+    height: clamp(40px, 34cqh, 64px);
+  }
+}
+/* A tall, narrow cell reads like Home's tall column: the reading in the middle
+   of the room, its line under it, time in range at the foot. */
+@container part (orientation: portrait) and (min-height: 430px) {
+  .native-part.part-glucose .glucose-value {
+    font-size: clamp(56px, 28cqw, 112px);
+    margin-top: auto;
+  }
+  .native-part.part-glucose .glucose-history.compact {
+    margin-top: auto;
+  }
+}
+/* Folded, glucose reads as on Home's phone layout. */
+.native-part[data-fold] .glucose-value {
+  font-size: 50px;
+  margin: 4px 0 0;
+}
+.native-part[data-fold] .sparkline {
+  display: block;
+  height: 54px;
+}
+.native-part[data-fold] .glucose-history.compact {
+  display: block;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+/* Recovery: sleep, then the night's signals, then the note. */
+.native-part .sleep-value {
+  font-size: clamp(24px, 16cqh, 36px);
+  margin: 8px 0 10px;
+}
+.native-part .sleep-value > span {
+  display: none;
+}
+.native-part .recovery-pair {
+  gap: 16px;
+  font-size: 8px;
+}
+.native-part .recovery-pair b {
+  font-size: clamp(15px, 9cqh, 20px);
+  margin-top: 4px;
+}
+.native-part .recovery-pair small {
+  font-size: 8px;
+}
+.native-part .recovery-pair svg {
+  display: none;
+}
+@container part (max-height: 150px) {
+  .native-part .recovery-pair {
+    display: none;
+  }
+}
+@container part (min-width: 260px) and (min-height: 220px) {
+  .native-part .sleep-value > span,
+  .native-part .recovery-pair svg {
+    display: inline;
+  }
+  .native-part .sleep-value {
+    margin: 14px 0 18px;
+  }
+}
+
+/* Training: the latest activity, the week, the steps. */
+.native-part .workout-title {
+  font-size: 11px;
+  margin: 8px 0 2px;
+}
+.native-part .run-value {
+  font-size: clamp(24px, 16cqh, 34px);
+  margin: 0;
+}
+.native-part .run-value > span {
+  display: block;
+  margin: 4px 0 0;
+  font-size: 9px;
+}
+.native-part .week-activity {
+  display: none;
+  flex: 1 1 0;
+  min-height: 40px;
+  max-height: 90px;
+  height: auto;
+  margin-top: 10px;
+}
+@container part (max-height: 150px) {
+  .native-part .run-value > span {
+    display: none;
+  }
+}
+@container part (min-height: 240px) {
+  .native-part .week-activity {
+    display: flex;
+  }
+}
+
+/* A training source's tile while none is on, and other quiet states. */
+.native-part .quiet-tile .quiet-copy,
+.native-part .part-quiet,
+.dashboard-zone .part-quiet {
+  display: block;
+  margin-top: 12px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #7d949e;
+}
+.part-quiet .part-again {
+  margin-left: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.native-part.part-glucose .main-hint {
+  padding-top: 14px;
+}
+
+/* Changed lately and the daily insights: Home's corner, with its rule. */
+.native-part:is(.part-changed, .part-insights) {
+  display: flex;
+  flex-direction: column;
+  padding-top: 14px;
+  border-top: 1px solid #90b9c523;
+}
+/* Nothing squeezes: what doesn’t fit runs out of the cell’s bottom. */
+.native-part:is(.part-changed, .part-insights) > * {
+  flex-shrink: 0;
+}
+.native-part.part-insights > p {
+  font-size: 11px;
+  line-height: 1.9;
+  color: #8da1ac;
+}
+.native-part:is(.part-changed, .part-insights)[data-fold] {
+  padding-bottom: 10px;
+}
+.native-part.part-changed h2 {
+  font-size: clamp(17px, 10cqh, 23px);
+  max-width: none;
+  margin: 12px 0 8px;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.native-part:is(.part-changed, .part-insights) p {
+  max-width: none;
+  margin-top: 10px;
+}
+.native-part.part-changed :is(.context-link, .context-foot) {
+  margin-top: 12px;
+}
+.native-part.part-changed .context-foot {
+  margin-top: auto;
+  padding-top: 10px;
+}
+@container part (max-height: 170px) {
+  .native-part.part-changed > p,
+  .native-part.part-changed .context-foot {
+    display: none;
+  }
+}
+@container part (max-height: 130px) {
+  .native-part.part-changed h2 {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+}
+@container part (min-height: 260px) {
+  .native-part.part-changed h2 {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+.native-part .insight-corner-title {
+  font-size: clamp(17px, 10cqh, 23px);
+  max-width: none;
+  margin: 12px 0 8px;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.native-part .insight-corner-line {
+  display: -webkit-box;
+  max-width: none;
+}
+.native-part .insight-corner-foot {
+  margin-top: 12px;
+}
+@container part (min-height: 260px) {
+  .native-part .insight-corner-title {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+@container part (max-height: 170px) {
+  .native-part .insight-corner-line {
+    display: none;
+  }
+}
+@container part (max-height: 130px) {
+  .native-part .insight-corner-title {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+}
+/* A narrow corner keeps "Changed lately" and drops the foot it would cover;
+   the whole insight still opens it. */
+@container part (max-width: 240px) {
+  .native-part .insight-corner-foot {
+    display: none;
+  }
+}
+.native-part.part-insights .insight-corner::before {
+  display: none;
+}
+.native-part.part-insights .insight-earlier-link {
+  align-self: flex-start;
+}
+
+/* ----- A card: another dashboard's card filling the part. */
+.card-part {
+  height: 100%;
+}
+.native-part .dashboard-card {
+  min-height: 0;
+  gap: 8px;
+  padding-top: 12px;
+}
+.native-part .dashboard-card-frame {
+  min-height: 0;
+}
+
+/* ----- A map: the sky in its own view, its heading above and its caption
+   below, as on Home. */
+.native-part.part-map {
+  display: flex;
+  flex-direction: column;
+}
+.native-part.part-map .graph-heading {
+  display: flex;
+  position: static;
+  flex: none;
+  min-height: 18px;
+  align-items: center;
+  padding: 0 12px;
+}
+.native-part.part-map .graph-heading > span:last-child {
+  font-size: 8px;
+}
+.native-part.part-map .map-focus {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.native-part.part-map .graph-caption {
+  bottom: 6px;
+  padding: 0 12px;
+}
+.native-part.part-map .graph-empty {
+  padding: 0 16px;
+  text-align: center;
+}
+.native-part.part-map .graph-empty h3 {
+  font-size: 14px;
+}
+.map-actions {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+.map-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 4px 12px;
+  border: 1px solid #779eb540;
+  border-radius: 14px;
+  background: #0f1920cc;
+  font-size: 10px;
+  color: #b1c1cd;
+}
+.map-actions button:hover,
+.map-actions button:focus-visible {
+  border-color: #9ccfe066;
+  color: #dce3e8;
+}
+/* Folded, the sky holds still: a vertical swipe on it scrolls the column. It
+   outweighs App.css's touch-action: none for a sky that isn't interactive,
+   whichever comes later in the built stylesheet. */
+.constellation.is-fixed:not(.is-interactive) .graph-svg {
+  touch-action: pan-y;
+  cursor: default;
+}

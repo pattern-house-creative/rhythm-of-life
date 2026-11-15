@@ -1,0 +1,312 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/undo.output.schema.json",
+  "title": "undo answer",
+  "description": "The memory tool undo's answer (SB-P3-09): one memory's newest change undone or the memory put back as at a revision (action reverted), a forgotten memory brought back from the trash with its links (restored; right after a restore, an undo of the newest change answers restored with unchanged true and restored null, changing nothing), or a call's work on a group of AI changes (group). A held memory stays held through it. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "action",
+        "id",
+        "revision",
+        "to",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "changed",
+        "unchanged",
+        "held",
+        "restored",
+        "group",
+        "message"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "action": {
+          "enum": [
+            "reverted",
+            "restored",
+            "group"
+          ]
+        },
+        "id": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/uuid"
+            }
+          ]
+        },
+        "revision": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "to": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "scope": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/scope"
+            }
+          ]
+        },
+        "owner": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/subject"
+            }
+          ]
+        },
+        "status": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/status"
+            }
+          ]
+        },
+        "scopes": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/scopes"
+            }
+          ]
+        },
+        "changed": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z_]{1,40}$"
+          }
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "held": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeHeld"
+        },
+        "restored": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "links",
+                "links_gone",
+                "trashed_at"
+              ],
+              "properties": {
+                "links": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "links_gone": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "trashed_at": {
+                  "$ref": "memory.defs.schema.json#/$defs/instant"
+                }
+              }
+            }
+          ]
+        },
+        "group": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "key",
+                "total",
+                "remaining",
+                "done",
+                "capped",
+                "results",
+                "redo"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]{1,200}$"
+                },
+                "total": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50
+                },
+                "remaining": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50
+                },
+                "done": {
+                  "type": "boolean"
+                },
+                "capped": {
+                  "type": "boolean"
+                },
+                "results": {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "id",
+                      "result"
+                    ],
+                    "properties": {
+                      "id": {
+                        "$ref": "memory.defs.schema.json#/$defs/uuid"
+                      },
+                      "result": {
+                        "enum": [
+                          "undone",
+                          "unchanged",
+                          "changed_since",
+                          "forbidden",
+                          "unknown",
+                          "not_visible",
+                          "pruned",
+                          "moved",
+                          "nothing_to_undo",
+                          "no_version",
+                          "invalid",
+                          "needs_person"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "redo": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Za-z0-9_-]{1,200}$"
+                }
+              }
+            }
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "action": {
+              "const": "reverted"
+            },
+            "id": {
+              "type": "string"
+            },
+            "restored": {
+              "type": "null"
+            },
+            "group": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "description": "Brought back from the trash by this call: what came back with it.",
+          "properties": {
+            "action": {
+              "const": "restored"
+            },
+            "id": {
+              "type": "string"
+            },
+            "unchanged": {
+              "const": false
+            },
+            "restored": {
+              "type": "object"
+            },
+            "group": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "description": "Back from the trash already, its newest change that restore: nothing changed, so restored is null.",
+          "properties": {
+            "action": {
+              "const": "restored"
+            },
+            "id": {
+              "type": "string"
+            },
+            "unchanged": {
+              "const": true
+            },
+            "restored": {
+              "type": ["object", "null"]
+            },
+            "group": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "action": {
+              "const": "group"
+            },
+            "id": {
+              "type": "null"
+            },
+            "restored": {
+              "type": "null"
+            },
+            "group": {
+              "type": "object"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

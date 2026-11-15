@@ -1,0 +1,30 @@
+{
+  "command": {
+    "id": "6d3c2a10-0000-4000-8000-00000000c001",
+    "action": "set_home",
+    "args": { "dashboard": "6d3c2a10-0000-4000-8000-00000000d001" },
+    "sender": { "kind": "assistant" },
+    "sentAt": "2026-10-28T12:00:00.120000+00:00",
+    "deliveredAt": "2026-10-28T12:00:00.180000+00:00",
+    "doneAt": null,
+    "result": "delivered",
+    "detail": {},
+    "ms": { "deliver": 60, "show": null }
+  },
+  "screen": {
+    "id": "fictional-kitchen-screen1",
+    "name": "Kitchen iPad",
+    "settings": {
+      "layout": "hero",
+      "tiles": { "main": "main", "recovery": "recovery", "training": "training", "changed": "changed" },
+      "home": null,
+      "grid": {
+        "parts": [
+          { "id": "map", "x": 3, "y": 0, "w": 9, "h": 8 }, { "id": "main", "x": 0, "y": 0, "w": 3, "h": 12 },
+          { "id": "recovery", "x": 3, "y": 8, "w": 3, "h": 4 }, { "id": "training", "x": 6, "y": 8, "w": 3, "h": 4 },
+          { "id": "changed", "x": 9, "y": 8, "w": 3, "h": 4 }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000e001",
+  "connections": [
+    {
+      "linkId": "6d3c2a10-0000-4000-8000-00000000c101",
+      "made": true,
+      "type": "caused_by",
+      "direction": "outgoing",
+      "verification": "verified",
+      "mine": true,
+      "imported": false,
+      "mayUnlink": true,
+      "at": "2026-11-04T10:20:00+00:00",
+      "confidence": null,
+      "memory": {
+        "id": "6d3c2a10-0000-4000-8000-00000000e002",
+        "scope": "shared",
+        "owner": "household",
+        "status": "canonical",
+        "state": "current",
+        "kind": "episodic",
+        "preview": "DEMO: the Wendle shed roof leaked in the storm.",
+        "truncated": false,
+        "held": null
+      }
+    },
+    {
+      "linkId": "6d3c2a10-0000-4000-8000-00000000c102",
+      "made": true,
+      "type": "relates_to",
+      "direction": "none",
+      "verification": "inferred",
+      "mine": false,
+      "imported": false,
+      "mayUnlink": true,
+      "at": "2026-11-03T17:05:00+00:00",
+      "confidence": 0.7,
+      "memory": {
+        "id": "6d3c2a10-0000-4000-8000-00000000e003",
+        "scope": "shared",
+        "owner": "household",
+        "status": "draft",
+        "state": "current",
+        "kind": null,
+        "preview": "DEMO: the Wendle plot gets a new water butt.",
+        "truncated": false,
+        "held": null
+      }
+    },
+    {
+      "linkId": null,
+      "made": false,
+      "type": "similar_to",
+      "direction": "none",
+      "verification": "suggested",
+      "mine": false,
+      "imported": false,
+      "mayUnlink": true,
+      "at": "2026-11-02T08:00:00+00:00",
+      "confidence": 0.81,
+      "memory": {
+        "id": "6d3c2a10-0000-4000-8000-00000000e004",
+        "scope": "shared",
+        "owner": "household",
+        "status": "draft",
+        "state": "current",
+        "kind": null,
+        "preview": null,
+        "truncated": false,
+        "held": {
+          "reason": "instruction",
+          "signals": []
+        }
+      }
+    }
+  ],
+  "truncated": false
+}

@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "invalid",
+  "error": "Two memories in different scopes never link: both ends of a link are in one scope"
+}

@@ -1,0 +1,359 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_insight_stream.output.schema.json",
+  "title": "list_insight_stream answer",
+  "description": "The memory tool list_insight_stream's answer (SB-P5-06, migration 066): the one insight stream, one view at a time, with what an AI proposed kept apart from what a person confirmed: a view confirmed is only an insight whose review is confirmed. A snooze ends by the clock. An insight nobody reviewed moves from proposed to older after a week, so what waits stays bounded, and may still be reviewed. proposed, older, confirmed, snoozed and closed are each view's length for this caller and total the asked one's, read in the statement that makes the page. Behind memory.tools, off by default. See contracts/README.md section 2.1.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "view",
+        "total",
+        "proposed",
+        "older",
+        "confirmed",
+        "snoozed",
+        "closed",
+        "candidates",
+        "day",
+        "items",
+        "next",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "view": {
+          "enum": [
+            "proposed",
+            "older",
+            "confirmed",
+            "snoozed",
+            "closed",
+            "all"
+          ]
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "proposed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "older": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "No review after a week: no longer counted as waiting on a person."
+        },
+        "confirmed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "snoozed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "closed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "candidates": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many insight candidates wait on this caller (list_insight_candidates' total)."
+        },
+        "day": {
+          "$ref": "#/$defs/day"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/item"
+          }
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z0-9_-]{1,200}$",
+          "description": "Pass as cursor for the next page; null at the end."
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ],
+  "$defs": {
+    "day": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "date",
+        "zone",
+        "outcome",
+        "note",
+        "insight_id",
+        "declined",
+        "says"
+      ],
+      "description": "What today came to for this caller, in the install's time zone, so a day with no insight says so.",
+      "properties": {
+        "date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "zone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "outcome": {
+          "enum": [
+            "saved",
+            "quiet",
+            "blocked",
+            "none"
+          ],
+          "description": "saved: an insight the caller reads was saved today, or the newest run it reads today says it saved one it reads; quiet or blocked: the newest run it reads said so; none: neither, so no run it reads has logged, or one said saved and named no insight."
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "A quiet or blocked run's note, in its client's words: stored data."
+        },
+        "insight_id": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/uuid"
+            }
+          ],
+          "description": "The newest insight of a saved day, or the one its newest run names; else null."
+        },
+        "declined": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Candidates of the scopes the caller reads declined today."
+        },
+        "says": {
+          "enum": [
+            "An insight was proposed today.",
+            "No insight today: the daily run looked and found nothing worth saying.",
+            "No insight today: the daily run was blocked.",
+            "No insight today: none you read was saved, and no run says why."
+          ],
+          "description": "The same in plain words: the engine's own, never a client's."
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "outcome": {
+              "const": "saved"
+            },
+            "insight_id": {
+              "$ref": "memory.defs.schema.json#/$defs/uuid"
+            },
+            "note": {
+              "type": "null"
+            },
+            "says": {
+              "const": "An insight was proposed today."
+            }
+          }
+        },
+        {
+          "properties": {
+            "outcome": {
+              "const": "quiet"
+            },
+            "insight_id": {
+              "type": "null"
+            },
+            "says": {
+              "const": "No insight today: the daily run looked and found nothing worth saying."
+            }
+          }
+        },
+        {
+          "properties": {
+            "outcome": {
+              "const": "blocked"
+            },
+            "insight_id": {
+              "type": "null"
+            },
+            "says": {
+              "const": "No insight today: the daily run was blocked."
+            }
+          }
+        },
+        {
+          "properties": {
+            "outcome": {
+              "const": "none"
+            },
+            "insight_id": {
+              "type": "null"
+            },
+            "note": {
+              "type": "null"
+            },
+            "says": {
+              "const": "No insight today: none you read was saved, and no run says why."
+            }
+          }
+        }
+      ]
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "view",
+        "review",
+        "reviewed_at",
+        "snooze_until",
+        "snooze_ended",
+        "shown_at",
+        "scope",
+        "owner",
+        "candidates",
+        "insight"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "view": {
+          "enum": [
+            "proposed",
+            "older",
+            "confirmed",
+            "snoozed",
+            "closed"
+          ]
+        },
+        "review": {
+          "enum": [
+            "proposed",
+            "confirmed",
+            "dismissed"
+          ],
+          "description": "proposed: an AI's, no fact; confirmed: a person said it holds; dismissed: a person said it does not. Feedback never moves it."
+        },
+        "reviewed_at": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant"
+        },
+        "snooze_until": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant",
+          "description": "When a snooze ends or ended; null when it is not snoozed."
+        },
+        "snooze_ended": {
+          "type": "boolean",
+          "description": "A snooze has passed its end: the insight is back in the view it was in."
+        },
+        "shown_at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant",
+          "description": "When it became one to show: when it was made, or when its snooze ended."
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "candidates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "memory.defs.schema.json#/$defs/uuid"
+          },
+          "description": "The insight candidates it was written from."
+        },
+        "insight": {
+          "$ref": "app_insights.output.schema.json#/$defs/insight",
+          "description": "The record exactly as list_insights and app_insights give it."
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "view": {
+              "const": "confirmed"
+            },
+            "review": {
+              "const": "confirmed"
+            },
+            "reviewed_at": {
+              "$ref": "memory.defs.schema.json#/$defs/instant"
+            }
+          }
+        },
+        {
+          "properties": {
+            "view": {
+              "const": "proposed"
+            },
+            "review": {
+              "const": "proposed"
+            },
+            "reviewed_at": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "view": {
+              "const": "older"
+            },
+            "review": {
+              "const": "proposed"
+            },
+            "reviewed_at": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "view": {
+              "const": "snoozed"
+            },
+            "snooze_until": {
+              "$ref": "memory.defs.schema.json#/$defs/instant"
+            },
+            "snooze_ended": {
+              "const": false
+            }
+          }
+        },
+        {
+          "properties": {
+            "view": {
+              "const": "closed"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

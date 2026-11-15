@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "stale": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000e011",
+      "scope": "shared",
+      "owner": "household",
+      "author": "alex",
+      "status": "canonical",
+      "volatility": "volatile",
+      "reason": "not_confirmed",
+      "since": "2026-10-12T09:00:00+00:00",
+      "foundAt": "2026-11-04T02:10:00+00:00",
+      "confirmedAt": null,
+      "preview": "DEMO: the Pellow bus leaves at 07:40 on weekdays.",
+      "truncated": false,
+      "retractedSources": [],
+      "revision": 3
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000e012",
+      "scope": "shared",
+      "owner": "household",
+      "author": null,
+      "status": "draft",
+      "volatility": null,
+      "reason": "retracted_source",
+      "since": "2026-11-01T15:30:00+00:00",
+      "foundAt": null,
+      "confirmedAt": "2026-10-20T08:00:00+00:00",
+      "preview": "DEMO: the choir practises in the Pellow hall.",
+      "truncated": false,
+      "retractedSources": [
+        "6d3c2a10-0000-4000-8000-00000000e013"
+      ],
+      "revision": 1
+    }
+  ],
+  "next": null,
+  "count": 2
+}

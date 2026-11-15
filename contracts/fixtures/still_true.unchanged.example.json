@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a011",
+  "revision": 2,
+  "scope": "shared",
+  "owner": "household",
+  "status": "canonical",
+  "scopes": "off",
+  "project": null,
+  "changed": [],
+  "unchanged": true,
+  "checked_at": "2026-11-03T09:00:00+00:00",
+  "was": null,
+  "retracted": [],
+  "message": "Nothing changed: it was confirmed at 2026-11-03 09:00 UTC already, at this revision, and is not in the stale queue."
+}

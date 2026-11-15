@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <AssemblyName>Knowledge</AssemblyName>
+    <RootNamespace>Knowledge</RootNamespace>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <!-- What /health, the MCP server info and `rhythm doctor` report, in three parts. Kept in step with package.json
+         and app/package.json (docs/dev/conventions.md, Releases). -->
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.31.1" />
+    <PackageReference Include="Microsoft.ML.Tokenizers" Version="2.0.1" />
+    <PackageReference Include="Npgsql" Version="10.0.3" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+    <!-- PDF text for the documents adapter. Apache-2.0 (docs/adapters/documents.md). -->
+    <PackageReference Include="PdfPig" Version="0.1.16" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Adapters and the install commands live beside the core (engine/src/Adapters/<Name>/, engine/src/Cli/) but
+         build into the same assembly. -->
+    <Compile Include="../Adapters/**/*.cs" />
+    <Compile Include="../Cli/**/*.cs" />
+    <!-- Migrations keep the resource names an existing install recorded: Knowledge.Migrations.<file>. -->
+    <EmbeddedResource Include="../../migrations/*.sql" LogicalName="Knowledge.Migrations.%(Filename)%(Extension)" />
+    <!-- The fictional demo seed (demo/engine/), read by the demo adapter. -->
+    <EmbeddedResource Include="../../../demo/engine/*.json" LogicalName="Knowledge.Demo.%(Filename)%(Extension)" />
+    <!-- The settings schema: the keys of rhythm.yaml this version knows (Config/SettingsKeys.cs). -->
+    <EmbeddedResource Include="../../../contracts/rhythm.schema.json" LogicalName="Knowledge.Contracts.rhythm.schema.json" />
+    <InternalsVisibleTo Include="Knowledge.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Original package licences/notices survive publish and the final image. -->
+    <Content Include="../../../LICENSE;../../../NOTICE" Link="%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../../docs/licenses/nuget/**/*" Link="licenses/nuget/%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../../docs/licenses/nuget.json" Link="licenses/nuget.json"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- For the install commands: adapter descriptors (what `rhythm connect` asks) and the examples `rhythm init`
+         starts from, next to the engine (adapters/, templates/). -->
+    <Content Include="../../../contracts/adapters/*.json" Exclude="../../../contracts/adapters/*.schema.json" Link="adapters/%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../../deploy/compose/rhythm.example.yaml" Link="templates/rhythm.example.yaml"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../../deploy/compose/.env.example" Link="templates/env.example"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

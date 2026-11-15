@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-0000000b0001",
+  "source": "6d3c2a10-0000-4000-8000-00000000a002",
+  "target": "6d3c2a10-0000-4000-8000-00000000a001",
+  "from": "6d3c2a10-0000-4000-8000-00000000a001",
+  "to": "6d3c2a10-0000-4000-8000-00000000a002",
+  "type": "relates_to",
+  "directed": false,
+  "verification": "inferred",
+  "provenance": "system",
+  "created": true,
+  "unchanged": false,
+  "scope": "shared",
+  "owner": "household",
+  "scopes": "off",
+  "message": "Linked memory 6d3c2a10-0000-4000-8000-00000000a002 to memory 6d3c2a10-0000-4000-8000-00000000a001 (relates_to, which has no direction). It is an AI client's link, shown as inferred until a person confirms it. The map shows it to whoever reads both memories, recall's hops follow it, and unlink removes it."
+}

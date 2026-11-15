@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "op": "share_all",
+  "results": [
+    { "id": "6d3c2a10-0000-4000-8000-00000000b001", "result": "moved", "revision": 2, "projectLeft": true },
+    { "id": "6d3c2a10-0000-4000-8000-00000000b002", "result": "unchanged", "revision": 1, "projectLeft": false },
+    { "id": "6d3c2a10-0000-4000-8000-00000000b003", "result": "held", "revision": null, "projectLeft": false },
+    { "id": "6d3c2a10-0000-4000-8000-00000000b004", "result": "invalid", "revision": null, "projectLeft": false }
+  ]
+}

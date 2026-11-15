@@ -1,0 +1,15 @@
+{
+  "about": "How the demo adapter generates fictional measurements: deterministic numbers from these ranges, never from a person or device. Shown as DEMO. Everyday wellbeing: steps, sleep and resting heart rate from a fictional activity tracker, and an evening mood check-in from one to five.",
+  "subject": "fixture",
+  "timezone": "Europe/London",
+  "series": [
+    { "metric": "steps", "unit": "count", "every": "1d", "days": 30, "base": 8200, "swing": 2400, "noise": 1500, "min": 2500, "max": 16000,
+      "source": "Demo activity tracker" },
+    { "metric": "sleep_minutes", "unit": "min", "every": "1d", "days": 30, "base": 430, "swing": 30, "noise": 25, "min": 330, "max": 520,
+      "source": "Demo activity tracker" },
+    { "metric": "resting_heart_rate", "unit": "bpm", "every": "1d", "days": 30, "base": 58, "swing": 3, "noise": 2, "min": 50, "max": 68,
+      "source": "Demo activity tracker" },
+    { "metric": "mood", "unit": "score", "every": "1d", "days": 30, "base": 3.6, "swing": 0.6, "noise": 0.9, "min": 1, "max": 5,
+      "source": "Demo mood log" }
+  ]
+}

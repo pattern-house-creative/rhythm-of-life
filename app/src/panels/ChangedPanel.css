@@ -1,0 +1,229 @@
+/* The Changed lately tile's label opens its panel, as the health tiles' do. */
+.changed-open {
+  width: 100%;
+  min-height: 28px;
+  margin: -6px 0;
+  text-align: left;
+  color: #90a5ae;
+  transition: color 0.3s;
+}
+.changed-open:hover,
+.changed-open:focus-visible {
+  color: #c2d1da;
+}
+.changed-label-end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.changed-label-end > svg {
+  color: #6c828e;
+  transition: color 0.3s;
+}
+.changed-open:hover .changed-label-end > svg {
+  color: #a8bec7;
+}
+
+/* The panel sits on the right, beside its tile, over a scrim that leaves the
+   sky in view. */
+.detail-backdrop.detail-changed {
+  justify-content: flex-end;
+  background: linear-gradient(
+    270deg,
+    #070c11e6 0,
+    #070c11b3 50%,
+    #070c1166 100%
+  );
+}
+.detail-changed .detail-panel {
+  width: min(600px, 100%);
+}
+.app.view-changed .graph-zone {
+  opacity: 0.45;
+  filter: saturate(0.75);
+}
+
+.changed-panel .detail-title p:not(.eyebrow) {
+  max-width: 420px;
+}
+.changed-panel .freshness-note {
+  margin: -14px 0 22px;
+}
+.changed-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+  padding: 0 0 22px;
+  border-bottom: 1px solid #93b4c321;
+  font-size: 11px;
+  color: #91aab7;
+}
+.changed-counts span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.changed-counts svg {
+  color: #88bba9;
+}
+.changed-counts b {
+  font: 350 20px "Manrope Variable";
+  letter-spacing: -0.5px;
+  color: #d7e5e9;
+}
+.changed-day {
+  margin-top: 24px;
+}
+.changed-day h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 6px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #88bba9;
+}
+.changed-day h3 small {
+  font-size: 9px;
+  letter-spacing: 1.4px;
+  color: #718993;
+}
+.changed-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.changed-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid #93b4c317;
+  animation: changed-item-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.changed-item:last-child {
+  border-bottom: 0;
+}
+@keyframes changed-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.changed-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  border: 1px solid #93b4c321;
+}
+.changed-body {
+  min-width: 0;
+}
+.changed-body h4 {
+  margin: 1px 0 4px;
+  font: 350 18px/1.35 "Manrope Variable";
+  letter-spacing: -0.4px;
+  color: #d7e5e9;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.changed-meta {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  color: #8ca7b4;
+}
+.changed-overview {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #91aab7;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.changed-links {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 9px 0 0;
+  font-size: 10px;
+  color: #8fa9b7;
+}
+.changed-dots-line {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.changed-dots-line:empty {
+  display: none;
+}
+.changed-dots-line i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #b2a4cb;
+  opacity: 0.8;
+}
+.changed-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid #93b4c333;
+  border-radius: 18px;
+  font-size: 11px;
+  color: #b1c1cd;
+  white-space: nowrap;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+.changed-explore:hover,
+.changed-explore:focus-visible {
+  background: #89bace14;
+  border-color: #93b4c35c;
+  color: #d7e5e9;
+}
+
+@media (max-width: 760px) and (min-height: 501px) {
+  .detail-backdrop.detail-changed {
+    padding: env(safe-area-inset-top) 0 0;
+    background: #070c11cc;
+  }
+  .detail-changed .detail-panel {
+    width: 100%;
+  }
+  .changed-item {
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .changed-icon {
+    width: 30px;
+    height: 30px;
+  }
+  .changed-explore {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: -4px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .changed-item {
+    animation: none;
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "AfterAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "rhythm-capture",
+            "type": "command",
+            "command": "node /path/to/rhythm/harness/hooks/rhythm-hook.mjs --agent gemini-cli",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "rhythm-capture",
+            "type": "command",
+            "command": "node /path/to/rhythm/harness/hooks/rhythm-hook.mjs --agent gemini-cli",
+            "timeout": 10000
+          }
+        ]
+      }
+    ]
+  }
+}

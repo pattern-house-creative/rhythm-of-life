@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "not_offered",
+  "reason": "These two are not queued as a possible contradiction, so nothing changed"
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/ingest_measurements.input.schema.json",
+  "title": "ingest_measurements arguments",
+  "description": "Numeric samples an external plugin writes through MCP. See contracts/README.md section 4.4.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["provider", "subject", "idempotencyKey", "source", "measurements"],
+  "properties": {
+    "provider": { "$ref": "#/$defs/id" },
+    "subject": { "$ref": "#/$defs/id" },
+    "idempotencyKey": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{8,200}$" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["externalId", "kind", "title", "fetchedAt"],
+      "properties": {
+        "externalId": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "kind": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,40}$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "fetchedAt": { "$ref": "#/$defs/instant" },
+        "sourceUpdatedAt": { "$ref": "#/$defs/instant" },
+        "revision": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "url": { "type": "string", "pattern": "^https://", "maxLength": 2000 },
+        "timezone": { "$ref": "#/$defs/timezone" },
+        "device": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+            "model": { "type": "string", "minLength": 1, "maxLength": 200 }
+          }
+        }
+      }
+    },
+    "measurements": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["metric", "value", "unit", "observedAt", "key"],
+        "properties": {
+          "metric": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{0,63}$" },
+          "value": { "type": "number" },
+          "unit": { "type": "string", "pattern": "^[A-Za-z0-9%/._ -]{1,16}$" },
+          "observedAt": { "$ref": "#/$defs/instant" },
+          "localDate": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+          "key": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "quality": { "enum": ["ok", "estimated", "calibration", "censored_high", "censored_low", "invalid"] },
+          "deviceId": { "type": "string", "minLength": 1, "maxLength": 200 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" },
+    "instant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "timezone": { "type": "string", "pattern": "^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+){1,2})$" }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "schema": "prompt-capsule-mcp.v1",
+  "etag": "\"pcv1-b9594998dbc594020e1d978fa92b2cbab52133c82ecb19c5b8b668b16f070dde\"",
+  "capsule": {
+    "ok": true,
+    "schema": "prompt-capsule.v1",
+    "kind": "core",
+    "scope": "private",
+    "workspace": "personal",
+    "prompt_hash": "sha256:84bce6d10765fa87506ff95f859450894603b57607b4ede4457deb991db9a8fb",
+    "text": "{\n  \"schema\": \"prompt-capsule.v1\",\n  \"kind\": \"core\",\n  \"sections\": [\n    {\n      \"slot\": \"identity\",\n      \"content\": \"DEMO: Alex is a gardener who walks the canal most mornings.\"\n    },\n    {\n      \"slot\": \"preferences\",\n      \"content\": \"DEMO: Alex prefers short answers with the reasoning last.\"\n    }\n  ]\n}",
+    "sections": [
+      {
+        "slot": "identity",
+        "source_entry_id": "6d3c2a10-0000-4000-8000-00000000c001"
+      },
+      {
+        "slot": "preferences",
+        "source_entry_id": "6d3c2a10-0000-4000-8000-00000000c002"
+      }
+    ],
+    "omitted_slots": [],
+    "missing_slots": [
+      "principles"
+    ],
+    "complete": false,
+    "populated": true,
+    "invalid_entries": [],
+    "duplicate_slots": [
+      {
+        "slot": "constraints",
+        "entry_ids": [
+          "6d3c2a10-0000-4000-8000-00000000c003",
+          "6d3c2a10-0000-4000-8000-00000000c004"
+        ]
+      }
+    ],
+    "char_count": 310,
+    "max_chars": 12000
+  }
+}

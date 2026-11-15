@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/connections.output.schema.json",
+  "title": "connections answer",
+  "description": "The memory tool connections' answer (SB-P4-02): a memory's neighbours one step away, each a memory the caller reads. First the links people and AI clients made (made true, link_id the link's own id), newest first, then the map's suggestions between this memory's star and another memory's (made false, no link_id: a similarity the rebuild found at both stars' current revisions, none dismissed), strongest first. direction is from the memory asked about; for a type with no direction, none. verification and provenance say who made it (verified and explicit: a person; inferred and system: an AI client; suggested and inferred: the map). mine: the caller's person made it; may_unlink: unlink would remove it, or dismiss a suggestion, for the caller. at: when it was made, or first found; confidence: as given, or a suggestion's strength. truncated: there were more than limit. The neighbour's preview is at most 120 characters of its words, none for one held for review. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "connections",
+        "truncated",
+        "scopes",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "connections": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "link_id",
+              "made",
+              "type",
+              "direction",
+              "verification",
+              "provenance",
+              "mine",
+              "may_unlink",
+              "at",
+              "confidence",
+              "memory"
+            ],
+            "properties": {
+              "link_id": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "memory.defs.schema.json#/$defs/uuid"
+                  }
+                ]
+              },
+              "made": {
+                "type": "boolean"
+              },
+              "type": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+              },
+              "direction": {
+                "enum": [
+                  "outgoing",
+                  "incoming",
+                  "none"
+                ]
+              },
+              "verification": {
+                "enum": [
+                  "verified",
+                  "inferred",
+                  "suggested"
+                ]
+              },
+              "provenance": {
+                "enum": [
+                  "explicit",
+                  "system",
+                  "inferred"
+                ]
+              },
+              "mine": {
+                "type": "boolean"
+              },
+              "may_unlink": {
+                "type": "boolean"
+              },
+              "at": {
+                "$ref": "memory.defs.schema.json#/$defs/instant"
+              },
+              "confidence": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 1
+              },
+              "memory": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "scope",
+                  "owner",
+                  "status",
+                  "state",
+                  "kind",
+                  "preview",
+                  "truncated",
+                  "held"
+                ],
+                "description": "The other memory, as its reader is served it: a held one without its words (preview null), with its hold.",
+                "properties": {
+                  "id": {
+                    "$ref": "memory.defs.schema.json#/$defs/uuid"
+                  },
+                  "scope": {
+                    "$ref": "memory.defs.schema.json#/$defs/scope"
+                  },
+                  "owner": {
+                    "$ref": "memory.defs.schema.json#/$defs/subject"
+                  },
+                  "status": {
+                    "$ref": "memory.defs.schema.json#/$defs/status"
+                  },
+                  "state": {
+                    "enum": [
+                      "current",
+                      "replaced",
+                      "ended",
+                      "retracted"
+                    ]
+                  },
+                  "kind": {
+                    "$ref": "memory.defs.schema.json#/$defs/kind"
+                  },
+                  "preview": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 120
+                  },
+                  "truncated": {
+                    "type": "boolean"
+                  },
+                  "held": {
+                    "$ref": "memory.defs.schema.json#/$defs/maybeHeld"
+                  }
+                },
+                "anyOf": [
+                  {
+                    "properties": {
+                      "held": {
+                        "type": "null"
+                      },
+                      "preview": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "held": {
+                        "type": "object"
+                      },
+                      "preview": {
+                        "type": "null"
+                      },
+                      "truncated": {
+                        "const": false
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "made": {
+                        "const": true
+                      },
+                      "link_id": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "made": {
+                        "const": false
+                      },
+                      "link_id": {
+                        "type": "null"
+                      },
+                      "mine": {
+                        "const": false
+                      },
+                      "verification": {
+                        "enum": [
+                          "inferred",
+                          "suggested"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "verification": {
+                        "const": "verified"
+                      },
+                      "provenance": {
+                        "const": "explicit"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "verification": {
+                        "const": "inferred"
+                      },
+                      "provenance": {
+                        "const": "system"
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "verification": {
+                        "const": "suggested"
+                      },
+                      "provenance": {
+                        "const": "inferred"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "scopes": {
+          "$ref": "memory.defs.schema.json#/$defs/scopes"
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

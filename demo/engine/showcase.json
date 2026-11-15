@@ -1,0 +1,93 @@
+{
+  "about": "Fictional dashboards and an insight the demo adapter saves, so a new install has some of each. Stars are written as {data:<group>} or {note:<id>} and become graph ids at seed time. A dashboard's corner is where its card goes on the ambient screen while that corner is free. Shown as DEMO.",
+  "dashboards": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000d001",
+      "title": "DEMO · Week at a glance",
+      "description": "Fictional demo data: sleep, steps, resting heart rate and evening mood over the last two weeks.",
+      "note": "Demo dashboard seeded with the fictional dataset: sleep, steps, resting heart rate and mood, with a tall card.",
+      "corner": "main",
+      "feeds": [
+        {
+          "name": "sleep",
+          "kind": "data",
+          "star": "{data:sleep}",
+          "days": 14,
+          "by": "day"
+        },
+        {
+          "name": "steps",
+          "kind": "data",
+          "star": "{data:activity}",
+          "days": 14,
+          "by": "day",
+          "metrics": [
+            "steps"
+          ]
+        },
+        {
+          "name": "heart",
+          "kind": "data",
+          "star": "{data:heart}",
+          "days": 14,
+          "by": "day"
+        },
+        {
+          "name": "mood",
+          "kind": "data",
+          "star": "{data:mood}",
+          "days": 14,
+          "by": "day"
+        }
+      ],
+      "html": "<style>\n.w{display:grid;gap:22px;max-width:980px;margin:0 auto;padding:clamp(12px,3vw,24px) clamp(16px,3vw,24px)}\n.tag{font-size:11px;letter-spacing:.14em;color:var(--rhythm-caution)}\n.w h1{font-size:clamp(20px,2.4vw,26px);margin:2px 0 0}\n.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px 24px}\n.fig b{display:block;font-family:var(--rhythm-display);font-weight:500;font-size:clamp(26px,3.6vw,36px);line-height:1.1}\n.fig span{color:var(--rhythm-muted);font-size:12px}\n.chart h2{font-size:13px;font-weight:500;color:var(--rhythm-muted);margin:0 0 6px}\n.chart svg{display:block;width:100%;height:120px}\n.note{margin:0;color:var(--rhythm-muted);font-size:12px}\n.card{display:none}\nhtml[data-mode=card],html[data-mode=card] body{height:100%;overflow:hidden}\nhtml[data-mode=card] .w{display:none}\nhtml[data-mode=card] .card{display:flex;flex-direction:column;justify-content:center;gap:16px;height:100%;padding:2px}\nhtml[data-shape=compact] .card .fig:not(.lead),html[data-shape=compact] .card .chart{display:none}\nhtml[data-shape=compact] .card .lead b{font-size:clamp(36px,9vw,56px)}\nhtml[data-shape=tall] .card{justify-content:flex-start;gap:12px;padding-top:6px}\nhtml[data-shape=tall] .card .figs{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 14px}\nhtml[data-shape=tall] .card .lead{grid-column:1/-1}\nhtml[data-shape=tall] .card .lead b{font-size:clamp(40px,12vw,60px)}\nhtml[data-shape=tall] .card .fig:not(.lead) b{font-size:clamp(20px,5.4vw,26px)}\nhtml[data-shape=tall] .card .chart{flex:1 1 auto;display:flex;flex-direction:column;min-height:56px}\nhtml[data-shape=tall] .card .chart svg{flex:1 1 auto;height:auto;min-height:32px}\n</style>\n<div class=\"card\">\n  <div class=\"figs\">\n    <div class=\"fig lead\"><b data-k=\"sleep\">—</b><span>average sleep, last 7 nights</span></div>\n    <div class=\"fig\"><b data-k=\"steps\">—</b><span>steps a day</span></div>\n    <div class=\"fig\"><b data-k=\"heart\">—</b><span>resting heart rate</span></div>\n    <div class=\"fig\"><b data-k=\"mood\">—</b><span>evening mood, of 5</span></div>\n  </div>\n  <div class=\"chart\"><h2>Steps, last 14 days</h2><svg data-c=\"steps\" role=\"img\" aria-label=\"Steps each day\"></svg></div>\n  <p class=\"note\">DEMO · fictional data</p>\n</div>\n<div class=\"w\">\n  <div><div class=\"tag\">DEMO</div><h1>Week at a glance</h1></div>\n  <div class=\"figs\">\n    <div class=\"fig\"><b data-k=\"sleep\">—</b><span>average sleep, last 7 nights</span></div>\n    <div class=\"fig\"><b data-k=\"steps\">—</b><span>steps a day</span></div>\n    <div class=\"fig\"><b data-k=\"heart\">—</b><span>resting heart rate</span></div>\n    <div class=\"fig\"><b data-k=\"mood\">—</b><span>evening mood, of 5</span></div>\n  </div>\n  <div class=\"chart\"><h2>Steps per day</h2><svg data-c=\"steps\" role=\"img\" aria-label=\"Steps each day\"></svg></div>\n  <div class=\"chart\"><h2>Sleep per night</h2><svg data-c=\"sleep\" role=\"img\" aria-label=\"Sleep each night\"></svg></div>\n  <div class=\"chart\"><h2>Evening mood</h2><svg data-c=\"mood\" role=\"img\" aria-label=\"Mood each evening\"></svg></div>\n  <p class=\"note\" id=\"about\"></p>\n</div>\n<script>\n(function () {\n  var last = null, ns = \"http://www.w3.org/2000/svg\";\n  function rows(f) { return f && f.status === \"ok\" ? f.rows : []; }\n  function week(rs, key) {\n    rs = rs.slice(-7);\n    return rs.length ? rs.reduce(function (a, r) { return a + r[key]; }, 0) / rs.length : null;\n  }\n  function put(k, text) { document.querySelectorAll(\"[data-k=\" + k + \"]\").forEach(function (e) { e.textContent = text; }); }\n  function bars(svg, rs, key, color, floor, top) {\n    var w = svg.clientWidth || 300, h = svg.clientHeight || 120;\n    svg.setAttribute(\"viewBox\", \"0 0 \" + w + \" \" + h);\n    svg.textContent = \"\";\n    if (!rs.length) return;\n    top = top || Math.max.apply(null, rs.map(function (r) { return r[key]; })) || 1;\n    var step = w / rs.length;\n    rs.forEach(function (r, i) {\n      var bh = Math.max(2, (h - 2) * (r[key] - floor) / Math.max(top - floor, 1)), b = document.createElementNS(ns, \"rect\");\n      b.setAttribute(\"x\", i * step + step * 0.18); b.setAttribute(\"y\", h - bh);\n      b.setAttribute(\"width\", Math.max(step * 0.64, 1)); b.setAttribute(\"height\", bh); b.setAttribute(\"rx\", 2);\n      b.setAttribute(\"fill\", color); b.setAttribute(\"opacity\", i >= rs.length - 7 ? 0.9 : 0.4);\n      svg.appendChild(b);\n    });\n  }\n  function draw(d) {\n    last = d;\n    var f = d.feeds, sleep = rows(f.sleep), steps = rows(f.steps), heart = rows(f.heart), mood = rows(f.mood);\n    var s = week(sleep, \"mean\"), p = week(steps, \"sum\"), r = week(heart, \"mean\"), m = week(mood, \"mean\");\n    put(\"sleep\", s === null ? \"—\" : Math.floor(s / 60) + \" h \" + Math.round(s % 60) + \" m\");\n    put(\"steps\", p === null ? \"—\" : Math.round(p).toLocaleString(\"en-GB\"));\n    put(\"heart\", r === null ? \"—\" : Math.round(r) + \" bpm\");\n    put(\"mood\", m === null ? \"—\" : m.toFixed(1));\n    document.querySelectorAll(\"svg[data-c]\").forEach(function (svg) {\n      var k = svg.getAttribute(\"data-c\");\n      if (k === \"steps\") bars(svg, steps, \"sum\", \"var(--rhythm-knowledge)\", 0);\n      else if (k === \"sleep\") bars(svg, sleep, \"mean\", \"var(--rhythm-memory)\", 240);\n      else bars(svg, mood, \"mean\", \"var(--rhythm-health)\", 0, 5);\n    });\n    var missing = [\"sleep\", \"steps\", \"heart\", \"mood\"].filter(function (k) { return !f[k] || f[k].status !== \"ok\"; });\n    document.getElementById(\"about\").textContent = missing.length\n      ? \"Unavailable right now: \" + missing.join(\", \") + \".\"\n      : \"Fictional demo data: the last 14 days, with the last 7 brighter.\";\n  }\n  rhythm.onData(draw);\n  addEventListener(\"resize\", function () { if (last) draw(last); });\n})();\n</script>"
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000d002",
+      "title": "DEMO · Mood log",
+      "description": "Fictional demo data: an evening mood check-in from one to five, the last two weeks.",
+      "note": "Demo dashboard seeded with the fictional dataset.",
+      "corner": "recovery",
+      "feeds": [
+        {
+          "name": "mood",
+          "kind": "data",
+          "star": "{data:mood}",
+          "days": 14,
+          "by": "day"
+        }
+      ],
+      "html": "<style>\n.w{display:grid;gap:18px;max-width:880px;margin:0 auto;padding:clamp(12px,3vw,24px) clamp(16px,3vw,24px)}\n.tag{font-size:11px;letter-spacing:.14em;color:var(--rhythm-caution)}\n.w h1{font-size:clamp(20px,2.4vw,26px);margin:2px 0 0}\n.big b{display:block;font-family:var(--rhythm-display);font-weight:500;font-size:clamp(36px,8vw,52px);line-height:1}\n.big span,.note{color:var(--rhythm-muted);font-size:12px}\n.note{margin:0}\n.days{display:flex;gap:5px;align-items:flex-end;height:90px}\n.days i{flex:1;max-width:20px;border-radius:6px;background:var(--rhythm-health)}\n.card{display:none}\nhtml[data-mode=card],html[data-mode=card] body{height:100%;overflow:hidden}\nhtml[data-mode=card] .w{display:none}\nhtml[data-mode=card] .card{display:flex;flex-direction:column;justify-content:center;gap:12px;height:100%;padding:2px}\nhtml[data-shape=compact] .card .days{display:none}\nhtml[data-shape=tall] .card{justify-content:flex-start;padding-top:8px}\nhtml[data-shape=tall] .card .days{flex:1 1 auto;height:auto;min-height:60px}\n</style>\n<div class=\"card\">\n  <div class=\"big\"><b data-k=\"week\">—</b><span>average mood this week, of 5</span></div>\n  <div class=\"days\" data-c></div>\n  <p class=\"note\" data-k=\"latest\"></p>\n</div>\n<div class=\"w\">\n  <div><div class=\"tag\">DEMO</div><h1>Mood log</h1></div>\n  <div class=\"big\"><b data-k=\"week\">—</b><span>average this week, of 5</span></div>\n  <div class=\"days\" data-c role=\"img\" aria-label=\"Mood each evening, the last 14 days\"></div>\n  <p class=\"note\" data-k=\"latest\"></p>\n  <p class=\"note\">Fictional evening check-ins from one to five, the last 14 days.</p>\n</div>\n<script>\nrhythm.onData(function (d) {\n  var f = d.feeds.mood, rows = f && f.status === \"ok\" ? f.rows : [], week = rows.slice(-7), last = rows[rows.length - 1];\n  function put(k, text) { document.querySelectorAll(\"[data-k=\" + k + \"]\").forEach(function (e) { e.textContent = text; }); }\n  put(\"week\", week.length ? (week.reduce(function (a, r) { return a + r.mean; }, 0) / week.length).toFixed(1) : \"—\");\n  put(\"latest\", f && f.status !== \"ok\" ? \"The mood log is unavailable: \" + f.reason\n    : last ? \"Latest check-in: \" + Math.round(last.mean) + \" of 5, on \" + last.date : \"No check-ins yet\");\n  document.querySelectorAll(\"[data-c]\").forEach(function (el) {\n    el.textContent = \"\";\n    rows.forEach(function (r, i) {\n      var day = document.createElement(\"i\");\n      day.style.height = Math.max(8, r.mean / 5 * 100) + \"%\";\n      day.style.opacity = i >= rows.length - 7 ? 0.9 : 0.4;\n      day.title = r.date + \": \" + r.mean + \" of 5\";\n      el.appendChild(day);\n    });\n  });\n});\n</script>"
+    }
+  ],
+  "insight": {
+    "id": "6d3c2a10-0000-4000-8000-00000000e001",
+    "kind": "discovery",
+    "title": "DEMO · Longer sleep after walking days",
+    "summary": "In the fictional demo data, nights after a day with more steps run a little longer.",
+    "whyItMatters": "A demo of how an insight links stars and sources; nothing here is about a real person.",
+    "nextStep": "Connect your own notes or numbers, then ask your AI for a daily insight.",
+    "evidenceLevel": "weak",
+    "limitations": "Fictional data generated for the demo.",
+    "points": [
+      {
+        "text": "Steps and sleep minutes rise together on most demo days.",
+        "type": "observed",
+        "source": 0
+      }
+    ],
+    "stars": [
+      "{data:activity}",
+      "{data:sleep}",
+      "{note:note-morning-walks}"
+    ],
+    "sources": [
+      {
+        "kind": "graph",
+        "title": "Demo data stars",
+        "locator": "{data:activity}"
+      }
+    ],
+    "generatedBy": "demo"
+  }
+}

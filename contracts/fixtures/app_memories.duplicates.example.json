@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "duplicates": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000e060",
+      "scope": "shared",
+      "owner": "household",
+      "author": "sam",
+      "status": "draft",
+      "createdAt": "2026-10-31T08:00:00+00:00",
+      "preview": "DEMO: the Wendle bins go out on Tuesdays from 3 November; recycling stays fortnightly.",
+      "truncated": false,
+      "duplicateOf": [
+        { "id": "6d3c2a10-0000-4000-8000-00000000e061", "score": 0.91 }
+      ],
+      "revision": 1
+    }
+  ],
+  "next": null,
+  "count": 1
+}

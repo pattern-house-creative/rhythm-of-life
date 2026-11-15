@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "action": "superseded",
+  "id": "6d3c2a10-0000-4000-8000-00000000a003",
+  "replaces": "6d3c2a10-0000-4000-8000-00000000a001",
+  "at": "2026-10-31T07:40:00+00:00",
+  "reason": null,
+  "confirmation": null,
+  "revision": 5,
+  "scope": "shared",
+  "owner": "household",
+  "status": "canonical",
+  "scopes": "off",
+  "message": "Memory 6d3c2a10-0000-4000-8000-00000000a001 is history now: true until 2026-10-31 07:40 UTC, replaced by memory 6d3c2a10-0000-4000-8000-00000000a003. Recall and capsules leave it out, and the map shows it only as a star marked replaced; get and history keep it in its own words. If that was wrong, undo(6d3c2a10-0000-4000-8000-00000000a001) makes it current again."
+}

@@ -1,0 +1,285 @@
+Rhythm of Life
+Copyright 2026 Rhythm of Life contributors
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Third-party packages the build pulls in keep their own licences.
+
+Second Brain
+Parts of Rhythm adapt the behaviour and algorithms of Second Brain (second-brain-cloudflare, read at commit 228cea49,
+version 4.0.1), used under the MIT License:
+
+  Copyright (c) 2026 Rahil Pirani
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
+No Second Brain code or text is copied; each piece is restated for Rhythm's own engine, database and tests:
+- Keyword search (engine/src/Core/LexicalSearch.cs): matching any content word instead of every word, leaving out the
+  function words a question is made of unless nothing else is left, and weighting each word by how rare it is among
+  the candidates, after Second Brain's keyword arm (src/recall/search.ts, src/recall/fts.ts, src/text/tokenize.ts).
+- Combined retrieval (engine/src/Core/Recall.cs): reciprocal rank fusion of keyword and meaning results with keyword
+  weights from the rarity of the words a result holds, maximal marginal relevance in blocks of five, graph neighbours
+  at the 5th and 10th places with a decay per hop, an output budget with larger excerpts for the leading matches, and
+  a notice when semantic search is skipped, after Second Brain's recall (src/recall/rrf.ts, src/recall/search.ts,
+  src/recall/math.ts, src/recall/snippet.ts, src/recall/neighborhood.ts, src/graph/traverse.ts).
+- Time phrases (engine/src/Core/TimePhrases.cs): relative phrases ("yesterday", "this week", "last month") and a month
+  and day that stands alone read in the install's time zone as a window on a record's time, with the guards that keep a
+  name, an as-of date or a range from becoming one, after Second Brain's time phrases (src/text/temporal.ts).
+- The retrieval gate (engine/tests/Knowledge.Tests/Parity/ParityGate*.cs): a gate whose rules are fixed before any
+  run, a minimum sample, paired cluster bootstrap intervals, a minimum detectable effect, expected gaps kept out of the
+  gains, and a locked baseline, after Second Brain's locked evaluation (test/eval/gate.ts, test/eval/stats.ts,
+  test/eval/lock.ts, test/eval/corpus/build.ts).
+- The memory scope contract (docs/dev/memory.md): an author lock, scope filters that only narrow, and history that
+  starts when a memory is shared, after src/lib/entry-access.ts, src/lib/scope.ts and src/memory/history-visibility.ts.
+- The embeddings index job (engine/src/Core/EmbeddingBackfill.cs): a keyset cursor kept per target model, so a run
+  resumes after a stop and a change of model starts its own sweep; a per-run budget that always takes its first row;
+  and a pause instead of a retry loop when nothing succeeds, after Second Brain's re-embedding run and pending-vector
+  backfill (src/migration/embedding.ts, src/vectorize/pending.ts).
+- The native memory store (engine/src/Core/Memories.cs, engine/migrations/033_memstore.sql): tags in the namespaces
+  the engine sets itself left off and named, #hashtags taken as tags (all digits left alone), a limit of 131 072 bytes
+  of UTF-8, an append as a dated update, new text clearing the volatility verdict, and a project a write names made
+  when it is new, after Second Brain's write paths (src/tags/system.ts, src/tags/t7.ts, src/text/hashtags.ts,
+  src/lib/content-size.ts, src/capture/entry.ts, src/capture/store.ts, src/projects/autocreate.ts).
+- The project registry (engine/migrations/035_memory_projects.sql, engine/src/Core/MemoryProjects.cs): one registry per
+  scope, a slug that never changes once made, a name, a description, up to 16 aliases that claim plain tags (a memory of
+  the project's scope tagged with one is a member, its tags not rewritten), archive that hides a project from the list
+  unless asked, and delete that removes the grouping only, after Second Brain's project registry
+  (src/projects/registry.ts); a Family project changed only by the person who made it or a Family admin, a slug or an
+  alias never naming two projects of one scope, and a version kept of a memory whose project is deleted are Rhythm's
+  own.
+- A project's own view on the map (engine/src/Core/RelationshipEngine.cs): a project's members seeded from the links
+  with a member at one end, after Second Brain's project graph (src/graph/traverse.ts); the project's star first, then
+  the stars in it, then the stars they link to, each in the map's own order, are Rhythm's own.
+- Holds on native memories (engine/migrations/036_holds.sql, engine/src/Core/MemoryHolds.cs): families of instruction
+  phrases and hidden-character signals, each counted once by its weight, a hold at a score of 1.0, text normalised
+  before phrases are matched, text over 32 KiB held as too long with its head and tail scanned, and no automatic
+  release, after Second Brain's quarantine (src/quarantine/score.ts, src/quarantine/hold.ts,
+  src/quarantine/normalize.ts); the patterns are Rhythm's own.
+- Write bursts (engine/migrations/045_quarantine.sql): a login's memory writes after its 40th in ten minutes held for a
+  person whatever their words, only content writes counted, and instruction phrases left unscored on a person's own
+  channel while hidden characters still count, after Second Brain's burst rule and channel factors
+  (src/quarantine/burst.ts, src/quarantine/score.ts); one login as one actor, which of Rhythm's channels are a person's
+  own, an import scored as an AI client's and a held project kept out of every list are Rhythm's own.
+- Sharing a memory (engine/migrations/048_memory_share.sql, engine/src/Core/MemoryShare.cs): a share that moves the
+  memory rather than copying it, the move and its audit row committed together, and a move to where the memory already
+  is answering unchanged, after Second Brain's share (src/capture/share.ts); taking a memory back only to its author's
+  private scope, never one no person wrote, a held memory shared only once a person releases it, and the move kept as a
+  version are Rhythm's own.
+- The audit trails (engine/migrations/037_admin_audit.sql, engine/src/Core/AdminAudit.cs): an insert-only trail of
+  setup changes beside the memory trail, each row naming who made it and through which channel, and an AI client's
+  own name cleaned of control characters and angle brackets, white space folded and cut to a fixed length rather
+  than refused, after Second Brain's admin and memory audit (src/lib/admin-audit.ts, src/lib/audit.ts,
+  src/mcp/client-label.ts); the events and their triggers are Rhythm's own.
+- The Second Brain export importer (engine/src/Cli/SecondBrainImport.cs, engine/migrations/059_second_brain_import.sql):
+  reading a file Second Brain exports (version 3, and the older shapes its own importer still reads), each row checked
+  as its importer checks one, and its hold reasons read as Rhythm's where Rhythm holds alike, after Second Brain's
+  export, import and quarantine tags (src/routes/entries.ts, src/entries/import.ts, src/quarantine/tags.ts); a new id
+  for every record with its own kept in an origin map, nothing matched by title, the scope map, and every field the
+  file lacks named in the report are Rhythm's own.
+- Prompt capsules (engine/src/Core/Capsules.cs, engine/migrations/039_capsules.sql): fixed core and project slots in a
+  fixed order, canonical memories only, a slot two memories fill reported rather than chosen, a 12 000-character
+  budget whose sections are kept whole as a prefix of the slot order, text with no ids or times, its SHA-256 and a
+  strong ETag of the whole answer, and at most 200 candidates, after Second Brain's prompt capsules
+  (src/prompt-capsule/types.ts, select.ts, serialize.ts, etag.ts, build.ts); the slots as typed columns, the missing
+  slots and the report's shape are Rhythm's own.
+- Undo for native memories (engine/migrations/041_memory_undo.sql, engine/src/Core/MemoryUndo.cs): the newest change
+  or a numbered version undone as a change of its own, so an undo is undone the same way, reaching only the history
+  the caller sees, a person's own newest changes theirs to undo, and an AI client's burst of changes undone as a
+  group a few memories a call, its members found again by the server from an opaque key and undone only while the
+  group's changes are still a memory's newest, after Second Brain's undo and change groups (src/memory/undo.ts,
+  src/memory/versions.ts, src/brief/changes.ts); the hold rules and the key are Rhythm's own.
+- The memory trash (engine/migrations/038_memory_trash.sql, engine/src/Core/MemoryTrash.cs): a forgotten memory kept
+  with its text and versions, restore as the trash's own undo with no version written, every step that consumes a
+  trash row naming its nonce so a stale view never acts on a row purged, restored or trashed again since, delete
+  forever never through an AI client's channel and leaving an audit trail with none of the memory's words, and a purge
+  bounded per run, after Second Brain's trash (src/memory/trash.ts, src/memory/trash-list.ts, src/memory/cleanup.ts);
+  the memory kept in place, its links kept in the trash row and the retention given again on a restore are Rhythm's own.
+- The opt-in recall log (engine/migrations/042_recall_log.sql, engine/src/Core/RecallLog.cs): the question kept as
+  asked, the daily cap checked inside the write, a few expired rows purged on each write, a follow-up window of 30
+  minutes and only the latest recall marked followed, after Second Brain's sampled recall log (src/recall/log.ts); the
+  rows and counts kept per reader's scope, apart from the memory rows, and only while the log is on are Rhythm's own.
+- The memory tools (engine/src/Core/Mcp/MemoryTools.cs, engine/src/Core/Mcp/ToolText.cs): the tool names remember,
+  append, update, get, list_recent, set_status, forget, undo, history, list_projects and list_teams with their
+  arguments, a held memory listed by id without its words, the trash listed with the days left and restored by undo,
+  and the behaviour asked of an AI client in the descriptions (one memory per thing worth finding, append over a near
+  copy, get before relying on a truncated preview, forget only when the person asks), after Second Brain's MCP server
+  (src/mcp/server.ts); the answers as JSON with output schemas, the channel fixed for every tool and the refusals of a
+  release, a delete forever and a capsule slot through them are Rhythm's own.
+- Truth over time (engine/migrations/049_truth.sql, engine/src/Core/MemoryTruth.cs): when a memory was true as a window
+  from its start to its end, windows compared rather than arrival order before one memory replaces another, the states
+  current, replaced, ended and retracted, and the memories a retracted one had replaced reopened and those built on it
+  flagged, undone when it comes back, after Second Brain's validity windows and retraction hooks
+  (src/memory/validity.ts, src/recall/validity-view.ts); the plan and its confirmation in place of a model's verdict,
+  the flags table and the cascade as a trigger on the memory trail are Rhythm's own.
+- The link vocabulary (engine/src/Core/LinkTypes.cs, engine/migrations/051_typed_links.sql): the eight edge types by
+  their names, which of them has no direction, the rule that decided and follows join two episodic memories only with
+  an unclassified end never qualifying, and the three provenances, after Second Brain's edge types (src/graph/types.ts,
+  src/graph/edges.ts); the provenances read as Rhythm's verifications, the rule kept by the map for the links Rhythm
+  states while a source's own links stay as stated, and a link's confidence, source revision and checked time are
+  Rhythm's own.
+- Links a person or an AI client makes (engine/migrations/052_made_links.sql, engine/src/Core/MemoryLinks.cs): the link,
+  unlink and connections tools with their arguments, an explicit typed link inside one scope, relates_to kept with its
+  ends in one order, unlinking every type between two memories or one, and a memory's neighbours one step away with
+  their type, provenance, date and a short preview, after Second Brain's MCP server and graph (src/mcp/server.ts,
+  src/graph/edges.ts, src/graph/traverse.ts); the author lock on a link's source end and on its removal, the refusal of
+  a held memory and of supersedes (supersede's own), a suggestion dismissed rather than deleted, and the map and
+  recall's hops reading the links under the read predicate are Rhythm's own.
+- Staleness (engine/migrations/053_staleness.sql, engine/src/Core/MemoryStaleness.cs): 14 days for a volatile memory
+  and 90 for a state one before it may be out of date, a bounded nightly pass that finds those, one stale queue that
+  its count and its list both read, and still true, which confirms a memory without changing it, after Second Brain's
+  volatility, staleness pass, stale queue and still_true (src/memory/volatility.ts, src/staleness/pass.ts,
+  src/memory/stale.ts, src/memory/actions.ts); volatility only as the caller gave it (no heuristic), the pass's place
+  per scope on the nightly runner, a mark that holds only at the revision it was made at, and still true keeping every
+  version are Rhythm's own.
+- Link upkeep (engine/migrations/056_link_upkeep.sql, engine/src/Core/MemoryLinkPruning.cs): an automatic link under a
+  weight of 0.3 pruned once it has gone 7 days unchecked, a link someone stated never deleted by a job and reported when
+  its end is gone, after Second Brain's graph pass and graph statistics (src/graph/pass.ts, src/routes/admin.ts); a
+  change of a memory's words invalidating the links drawn from them, the pass's place per scope on the nightly runner,
+  a link with an end in the trash left for the restore, and the broken links counted rather than listed are Rhythm's
+  own.
+- Links on save (engine/migrations/062_links_on_save.sql, engine/src/Core/MemoryLinkInference.cs): a saved memory linked
+  to at most 3 of its workspace's closest memories, relates_to, or follows when both are episodic and the earlier was
+  written within 30 minutes and is the only one so, the score as the link's weight, and the same again when its words
+  change, after Second Brain's edge inference on write (src/graph/edges.ts); the threshold re-derived per model from
+  labelled pairs, the link kept automatic until a person makes it, a pair someone dismissed never linked again, held,
+  trashed and replaced memories left out, and an out-of-date automatic link drawn again rather than duplicated are
+  Rhythm's own.
+- As-of recall (engine/src/Core/RecallAsOf.cs, engine/src/Core/Recall.cs): what was true at a past moment with every
+  correction made since, a memory's words of then from the states it keeps, a belief of then marked wrong since listed
+  under the true answers and never among them, at most three, newest retraction first, found through a supersede link
+  too, after Second Brain's as-of recall (src/recall/as-of.ts); leaving out a memory held then, from before it came into
+  the reader's scope or whose state then is no longer kept, and a catalog record answering only when unchanged since,
+  are Rhythm's own.
+- Digests (engine/migrations/054_digests.sql, engine/src/Core/MemoryDigests.cs): a digest of one project or one topic
+  tag in one scope, drawn from its long tail of memories by upstream's rule (importance under 4, recalled never, or
+  fewer than twice and over 60 days old, not a digest, not in a capsule slot, not held), at least 10 and
+  the 50 newest of them, one a day, and the digest tool that reads the newest, after Second Brain's compression and
+  digest tool (src/compression/eligibility.ts, src/compression/digest.ts, src/mcp/server.ts); the paragraph written by
+  the AI client from the engine's list and saved with that list's basis, every source left untouched and linked by
+  drawn_from instead of marked rolled up, a memory flagged by a retracted source left out, and a save from the same
+  basis answering the digest saved from it are Rhythm's own.
+- Open loops (engine/migrations/058_loops.sql, engine/src/Core/MemoryLoops.cs): a memory tagged task and not
+  task:done is an open loop unless an agent's build-log tag marks it, a commitment is owed to or by the person with the
+  other person's name kept as a slug of it, and a loop is resolved done, received or not a task, after Second Brain's
+  open-loops queue, two-way commitments and resolve actions (src/memory/loops.ts, src/commitments/direction.ts,
+  src/capture/t7-capture.ts, src/memory/actions.ts); the direction and counterparty kept by the engine beside the
+  memory rather than in its tags, one predicate that every count and list reads, a resolve kept as a version that undo
+  takes back, a Family admin never listed another member's commitments, and a name that reads like instructions
+  refused are Rhythm's own.
+- The decision ledger (engine/migrations/060_decisions.sql, engine/src/Core/MemoryDecisions.cs): a decision saved with
+  a confidence rounded to 0.05 within 0.05 to 0.95, stated or inferred, and a review date 90 days on; an outcome right,
+  wrong, mixed or unknown, unknown asking again twice; and calibration that folds a call below 50% onto the other
+  outcome, counts mixed as half, bands the folded confidences, reads a Brier score and an 80% Wilson interval, names at
+  most one topic, and shows nothing below minimums of 10, 5 and 5 decisions, after Second Brain's decision capture,
+  outcome action and calibration (src/decisions/capture.ts, outcome.ts, queries.ts, calibration.ts,
+  src/memory/actions.ts); the confidence and outcome kept by the engine beside the memory rather than in reserved tags,
+  an outcome recorded as a change of state that undo takes back with no note written into the memory, one predicate
+  for every list and count with calibration's sample count equal to its scored list's length, a held decision never
+  scored, the band figures withheld below their minimum rather than returned unshown, and every review date a calendar
+  day at 09:00 are Rhythm's own.
+- Due dates (engine/migrations/061_due_dates.sql, engine/src/Core/DueDates.cs, engine/src/Core/MemoryDue.cs): a due
+  date with its kind (due, event or wake) and source, an explicit date or date and time anchored in the install's time
+  zone when it has none, an unambiguous date read from a memory's words by a whitespace-guarded pattern (an ISO date, a
+  month name and day, a numeric date with a four-digit year that reads one way only), the due feed's overdue and
+  48-hour windows, and snooze and clear as resolve actions, after Second Brain's time anchors and due feed
+  (src/when/input.ts, src/when/heuristic.ts, src/when/timezone.ts, src/memory/actions.ts, src/routes/admin.ts); taking
+  a date from the words only when they name one day (where upstream takes the soonest of several), saying why none was
+  taken, refusing a time the clocks skip or pass twice, reading a day before its month name, checking a weekday written
+  beside a date against it, one predicate that every count and list reads, and a snooze or clear kept as a version
+  that undo takes back are Rhythm's own; no model reads memories for dates (upstream's nightly date pass is not
+  adapted).
+- Contradiction candidates (engine/migrations/068_contradictions.sql, engine/src/Core/MemoryContradictions.cs): the
+  close memories of a write's scope offered as possible contradictions, and an id proposed for one checked against those
+  offered, after Second Brain's contradiction check (src/capture/duplicate.ts and src/capture/entry.ts at the pinned commit).
+  There a model decides and the older memory is closed; here the calling AI proposes and a person settles it.
+- Duplicates and protection (engine/migrations/063_duplicates.sql, engine/src/Core/MemoryDuplicates.cs): a save
+  compared with the memories of its own workspace, held and superseded ones left out, and flagged as a possible copy
+  from a duplicate threshold (0.85 to start), and the protection of confirmed memories, memories of importance 4 or
+  more, memories from session transcripts (claude-code, codex-session, cursor-session) and rows a system job wrote and
+  nobody edited since, after Second Brain's duplicate check and capture rules (src/capture/duplicate.ts,
+  src/capture/entry.ts, src/constants.ts, src/tags/system.ts); never refusing or merging a copy (upstream blocks one
+  at 0.95 and lets a model merge or replace), naming at most three copies with their scores, a review list with its
+  count from one predicate, a person's keep both, flags that lapse when either memory stops being live, the thresholds
+  per model behind one switch, and the rules held by the database's supersede for every channel are Rhythm's own.
+- Standing instructions (engine/migrations/065_standing.sql, engine/src/Core/MemoryStanding.cs,
+  engine/src/Core/Mcp/RecallReply.cs): a memory marked to be applied when its topic comes up, at most 500 characters
+  and 50 in a workspace, the oldest of a workspace firing when more are held, at most 2 firing for a question by the
+  cosine of its vector to the question's, one with a project only for a question naming that project, held, deprecated
+  and ended ones never, shown above recall's results as the person's own note to apply only if it fits, listed with
+  whether each fires, and stopped as a versioned, undoable change, after Second Brain's standing memory
+  (src/standing/fire.ts, src/standing/cache.ts, src/capture/entry.ts, src/capture/t7-capture.ts, src/memory/actions.ts,
+  src/recall/render.ts, src/routes/standing.ts); refusing an over-long or over-limit one with nothing saved (upstream
+  saves the memory unmarked), a column in place of a reserved tag, reading the rows at each question with no cache, a
+  held one keeping no place in a workspace, and a threshold per model behind one switch, chosen by precision first on
+  labelled cases, are Rhythm's own.
+- Insight candidates (engine/migrations/064_insight_candidates.sql, engine/src/Core/InsightCandidates.cs,
+  engine/src/Core/MemoryInsights.cs): a bounded nightly accrual that walks memories oldest first from a cursor and
+  pairs each with memories of its own scope written 30 or more days before it, held, replaced, deprecated and the
+  brain's own rows left out, one row a pair whichever way round, never written twice, used or rejected by the
+  reasoning step, and upstream's candidate score (similarity, the log of the days between, an importance boost, a
+  bonus for a pair sharing no topic and a penalty for two state facts), after Second Brain's candidate accrual, score
+  and eligibility (src/insight/candidates.ts, src/insight/score.ts, src/insight/eligibility.ts); a pair of two
+  important memories proposed whatever their likeness, the threshold read per model, at most three pairs a memory, a
+  walk per scope that starts again at its end, a pair served only while both its memories stay in its scope, a dry run
+  for the reader's own scopes, a decision kept with who made it, and no 80-character floor are Rhythm's own.
+- The resurfaced memory (engine/migrations/070_resurface.sql, engine/src/Core/MemoryResurface.cs): one old memory a day on the home
+  page, how old and how important it must be, leaving out events, finished tasks and what its own jobs wrote, and a dismissal that
+  retires it for good, after Second Brain's resurface pick (src/brief/compute.ts, src/runtime/resurface-state.ts). A pick read by a hash of the day with nothing
+  kept, a dismissal kept per reader in a checked table with no cap, an unrated memory being eligible, and leaving out capsule slots,
+  standing instructions and what rests on something marked wrong are Rhythm's own.
+- The Memories view's tasks, due dates and decisions (app/src/MemoryPlans.tsx): lists of what is owed both ways, what is due
+  by its windows and decisions with their outcomes and calibration, after Second Brain's web app (public/js/loops.js,
+  public/js/due.js, public/js/ledger.js). Its screens and words, and a count on the brief opening the list it is the
+  length of, are Rhythm's own.
+- The Memories view's list, projects and AI changes (app/src/MemoryList.tsx, app/src/MemoryProjects.tsx,
+  app/src/MemoryChanges.tsx): filters with a tag's count, several memories chosen for one step, a project made with a
+  preview of its slug and its capsule's status beside it, and an AI client's burst of changes undone with one tap, after
+  Second Brain's web app (public/js/recent.js, public/js/projects.js, public/js/ai-changes.js, public/js/undo.js). Its
+  screens and words, each step as a person's through one channel, and each of several answered on its own are Rhythm's own.
+- The Memories view's review queues (app/src/MemoryQueues.tsx, app/src/MemoryInsightReview.tsx): what waits on a person, queue by
+  queue, each item leaving once, after Second Brain's web app and its resolve (src/memory/actions.ts). Its screens and words, a
+  person's settling and insight review kept off every AI client's token, and each count the length of its list are Rhythm's own.
+- One resolve (engine/migrations/071_resolve.sql, engine/src/Core/MemoryResolve.cs): one tool for every queue's action, with upstream's
+  action names where it has them (done, received, not_a_task, snooze, clear_date, still_true, outcome, confirm_insight, dismiss_insight,
+  stop_standing), after Second Brain's resolve (src/mcp/server.ts, src/memory/actions.ts, src/decisions/outcome.ts). An item leaving its
+  queue once whatever the word, keep_copy and a candidate's two, and a person's steps answered as such are Rhythm's own.
+- The brief (engine/migrations/069_brief.sql, engine/src/Core/MemoryBrief.cs): sections for what is due, decisions to review, what
+  is owed each way, what may be out of date, pending insights, a project's standing instructions, calibration and what AI tools
+  changed, how many of each it shows, and when a client should call it, after Second Brain's agent brief (src/brief/compute.ts,
+  src/brief/changes.ts, src/mcp/server.ts). Each section being the head of a list another tool walks, a project narrowing only the
+  standing section, and one rule reading a due date and a review date are Rhythm's own.
+- The one insight stream (engine/migrations/066_insight_stream.sql, engine/src/Core/InsightStream.cs): an insight held
+  apart as proposed until it is confirmed or dismissed, and a reasoning step's explicit refusal, after Second Brain's
+  insight lifecycle and weekly reasoning (src/memory/patterns.ts, src/memory/actions.ts, src/insight/reason.ts). Who
+  may review one, that the login that saved it never does, a snooze that ends by the clock, the kept feedback, a pair's
+  insight citing both memories, and a day that says what it came to are Rhythm's own.
+- The calendar adapter (engine/src/Adapters/Calendar/): a secret iCal link as a connector's one credential, webcal read as
+  https, a read of a feed as one GET of a window 30 days ahead, a star per occurrence, an occurrence's identity from its UID
+  and the time it was due, a bound on occurrences per event and on the walk of a rule, an override moved into the window and
+  one with no series in the feed standing alone, and the other host of an iCloud published calendar tried once, after
+  Second Brain's calendar connector (src/integrations/calendar.ts). Its parser and rules are Rhythm's own (Second Brain
+  uses ical.js); stars read by reference in place of mirrored memories are Rhythm's own too.
+- Session hooks for coding agents (harness/hooks/): the shapes of secret taken out of a session's capture (a person's own
+  token wherever it appears, bearer values, provider key shapes, JWTs, whole private key blocks, a URL's password,
+  assignments to a secret's name, long mixed-case runs) with a UUID, a commit id and a path left alone, injected context
+  and instruction files kept out, a gate on how much was said, one capture for one session's content by its hash, and a
+  message kept to send later when the engine cannot be reached, after Second Brain's hooks
+  (integrations/agent-hooks-core/core.js, integrations/claude-code-hooks/session-end.js). Reading only the message each
+  agent documents and never the transcript, the five families of signal, a list of folders, the secrets the environment
+  names, and refusing rather than waiting when the endpoint is off are Rhythm's own.

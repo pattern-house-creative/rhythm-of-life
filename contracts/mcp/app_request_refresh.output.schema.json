@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_request_refresh.output.schema.json",
+  "title": "app_request_refresh structuredContent",
+  "description": "Whether a map rebuild now was accepted (at most one request every 3 minutes, none while one waits or runs), and what is already under way. See contracts/README.md section 2.2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["accepted", "pendingSince", "running", "nextAllowedAt", "lastFinishedAt"],
+  "properties": {
+    "accepted": { "type": "boolean" },
+    "pendingSince": { "$ref": "#/$defs/maybeInstant" },
+    "running": { "type": "boolean" },
+    "nextAllowedAt": { "$ref": "#/$defs/maybeInstant" },
+    "lastFinishedAt": { "$ref": "#/$defs/maybeInstant" }
+  },
+  "$defs": {
+    "maybeInstant": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    }
+  }
+}

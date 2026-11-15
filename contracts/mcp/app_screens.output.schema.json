@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_screens.output.schema.json",
+  "title": "app_screens structuredContent",
+  "description": "One shape per op (docs/dev/screens.md section 3.4): listen {command (null when none came), screen}; done {ok: true}; send {command}; list {screens}; rename {screen}. What a screen shows (showing) is the app's own object (sections 5 and 10.8, parts included), passed as the screen sent it; what it keeps (settings) is checked by the engine (sections 5, 8 and 10.5).",
+  "oneOf": [
+    {
+      "type": "object", "additionalProperties": false, "required": ["command", "screen"],
+      "properties": {
+        "command": { "anyOf": [{ "$ref": "#/$defs/command" }, { "type": "null" }] },
+        "screen": { "$ref": "#/$defs/screen" }
+      }
+    },
+    {
+      "type": "object", "additionalProperties": false, "required": ["ok"],
+      "properties": { "ok": { "const": true } }
+    },
+    {
+      "type": "object", "additionalProperties": false, "required": ["command"],
+      "properties": { "command": { "$ref": "#/$defs/command" } }
+    },
+    {
+      "type": "object", "additionalProperties": false, "required": ["screens"],
+      "properties": { "screens": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/listed" } } }
+    },
+    {
+      "type": "object", "additionalProperties": false, "required": ["screen"],
+      "properties": { "screen": { "$ref": "#/$defs/screen" } }
+    }
+  ],
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{16,64}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 60 },
+    "screen": {
+      "description": "The screen as this answer leaves it.",
+      "type": "object", "additionalProperties": false, "required": ["id", "name", "settings"],
+      "properties": { "id": { "$ref": "#/$defs/id" }, "name": { "$ref": "#/$defs/name" }, "settings": { "$ref": "#/$defs/settings" } }
+    },
+    "settings": {
+      "description": "What a screen keeps, each member optional: a new screen keeps nothing until it sends its settings, and one older than piece 2 keeps no home. tiles gives each tile its place, each place once. home null is the default Home (the sky and tiles); a home dashboard deleted since stays here, and the screen shows the default Home instead. grid is its Home grid once someone has moved or resized a Home part there (docs/dev/screens.md 10.5), never null.",
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "layout": { "enum": ["corners", "hero", "band"] },
+        "tiles": {
+          "type": "object", "additionalProperties": false, "required": ["main", "recovery", "training", "changed"],
+          "properties": {
+            "main": { "$ref": "#/$defs/place" }, "recovery": { "$ref": "#/$defs/place" },
+            "training": { "$ref": "#/$defs/place" }, "changed": { "$ref": "#/$defs/place" }
+          }
+        },
+        "home": {
+          "anyOf": [
+            { "type": "null" },
+            {
+              "type": "object", "additionalProperties": false, "required": ["dashboard"],
+              "properties": { "dashboard": { "type": "string", "pattern": "(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" } }
+            }
+          ]
+        },
+        "grid": { "$ref": "#/$defs/grid" }
+      }
+    },
+    "grid": {
+      "description": "A screen's Home grid: Home's five parts, each once, on 12 columns by 12 rows of cells. The engine also checks that none overlap and that each is at least Home's smallest size (the map 4 x 4, each corner 2 x 3).",
+      "type": "object", "additionalProperties": false, "required": ["parts"],
+      "properties": {
+        "parts": {
+          "type": "array", "minItems": 5, "maxItems": 5,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["id", "x", "y", "w", "h"],
+            "properties": {
+              "id": { "enum": ["map", "main", "recovery", "training", "changed"] },
+              "x": { "type": "integer", "minimum": 0, "maximum": 11 }, "y": { "type": "integer", "minimum": 0, "maximum": 11 },
+              "w": { "type": "integer", "minimum": 1, "maximum": 12 }, "h": { "type": "integer", "minimum": 1, "maximum": 12 }
+            }
+          }
+        }
+      }
+    },
+    "place": { "enum": ["main", "recovery", "training", "changed"] },
+    "listed": {
+      "description": "A screen seen in the last 24 hours, most recent first; open when heard from in the last 60 seconds; self is the screen that asked.",
+      "type": "object", "additionalProperties": false, "required": ["id", "name", "open", "seenAt", "showing", "self"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" }, "name": { "$ref": "#/$defs/name" }, "open": { "type": "boolean" },
+        "seenAt": { "$ref": "#/$defs/instant" }, "showing": { "type": "object" }, "self": { "type": "boolean" }
+      }
+    },
+    "command": {
+      "description": "One command for one screen. result is pending until a screen takes it, delivered until it reports, then shown or failed; one not taken within 30 seconds is expired. ms is the delay from sentAt to delivery and to the report, in milliseconds.",
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "action", "args", "sender", "sentAt", "deliveredAt", "doneAt", "result", "detail", "ms"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "action": { "type": "string", "pattern": "^[a-z_]{1,32}$" },
+        "args": { "type": "object" },
+        "sender": {
+          "oneOf": [
+            {
+              "type": "object", "additionalProperties": false, "required": ["kind"],
+              "properties": { "kind": { "const": "assistant" } }
+            },
+            {
+              "type": "object", "additionalProperties": false, "required": ["kind", "screen", "name"],
+              "properties": { "kind": { "const": "screen" }, "screen": { "$ref": "#/$defs/id" }, "name": { "$ref": "#/$defs/name" } }
+            }
+          ]
+        },
+        "sentAt": { "$ref": "#/$defs/instant" },
+        "deliveredAt": { "$ref": "#/$defs/maybeInstant" },
+        "doneAt": { "$ref": "#/$defs/maybeInstant" },
+        "result": { "enum": ["pending", "delivered", "shown", "failed", "expired"] },
+        "detail": { "type": "object" },
+        "ms": {
+          "type": "object", "additionalProperties": false, "required": ["deliver", "show"],
+          "properties": { "deliver": { "$ref": "#/$defs/delay" }, "show": { "$ref": "#/$defs/delay" } }
+        }
+      }
+    },
+    "delay": { "type": ["integer", "null"], "minimum": 0 },
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "instant": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "maybeInstant": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    }
+  }
+}

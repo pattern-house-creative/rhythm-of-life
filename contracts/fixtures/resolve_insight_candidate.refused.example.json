@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "invalid",
+  "error": "This candidate was rejected already: a decision on a candidate stays as it was made"
+}

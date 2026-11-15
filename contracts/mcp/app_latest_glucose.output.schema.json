@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_latest_glucose.output.schema.json",
+  "title": "app_latest_glucose structuredContent",
+  "description": "One person's latest live glucose reading, in mg/dL whatever unit the source sent. Only a live feed (a provider with the live policy) gives the current reading; an archive never does. See contracts/README.md section 2.2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["selection", "complete", "subject", "rows"],
+  "properties": {
+    "selection": { "const": "latest" },
+    "complete": { "const": true },
+    "subject": { "$ref": "#/$defs/subject", "description": "The person answered for: the one asked, else the first person with glucose data, else (demo data only) the synthetic demo subject." },
+    "rows": { "type": "array", "maxItems": 1, "items": { "$ref": "#/$defs/row" } }
+  },
+  "$defs": {
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource_id", "subject_id", "provider", "source_kind", "timezone", "source_updated_at", "metric", "sample_key",
+        "observed_at", "value", "unit", "quality", "total_samples", "demo", "stale"],
+      "properties": {
+        "resource_id": { "$ref": "#/$defs/uuid" },
+        "subject_id": { "$ref": "#/$defs/subject" },
+        "provider": { "$ref": "#/$defs/provider" },
+        "source_kind": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,40}$" },
+        "timezone": { "type": ["string", "null"], "maxLength": 64 },
+        "source_updated_at": { "type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+        "metric": { "const": "glucose" },
+        "sample_key": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "observed_at": { "$ref": "#/$defs/second" },
+        "value": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": { "const": "mg/dL" },
+        "quality": { "type": "string", "maxLength": 200, "description": "Semicolon-separated: source-reported, then comparison=< or > for a censored reading, time_basis=..." },
+        "total_samples": { "const": 1 },
+        "demo": { "type": "boolean", "description": "True for the engine's fictional demo seed." },
+        "stale": { "type": "boolean", "description": "Older than 15 minutes when answered." }
+      }
+    },
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "subject": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" },
+    "provider": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,40}$" },
+    "second": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" }
+  }
+}

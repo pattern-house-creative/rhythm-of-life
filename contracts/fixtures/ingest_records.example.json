@@ -1,0 +1,19 @@
+{
+  "provider": "carelink",
+  "subject": "alex",
+  "idempotencyKey": "carelink:alex:settings:2026-10-28",
+  "records": [
+    {
+      "externalId": "settings-2026-10-28",
+      "kind": "device-settings",
+      "title": "Pump settings on 28 October 2026",
+      "text": "Basal pattern: Standard. Active insulin time: 3 h. (Fictional example.)",
+      "observedAt": "2026-10-28T08:00:00Z",
+      "timezone": "Europe/London",
+      "revision": "r-77",
+      "fetchedAt": "2026-10-28T12:00:05Z",
+      "metadata": { "format": "text/plain", "demo": true },
+      "links": [{ "externalId": "cgm-2026-10-28", "relationship": "describes" }]
+    }
+  ]
+}

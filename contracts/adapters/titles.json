@@ -1,0 +1,19 @@
+{
+  "name": "titles",
+  "title": "Local titles",
+  "kinds": ["TitleModel"],
+  "summary": "Short star titles from a model on your own machine (Ollama); off, stars keep their excerpts.",
+  "unofficial": false,
+  "defaultEnabled": false,
+  "profile": "titles",
+  "docs": "docs/adapters/titles.md",
+  "settings": [
+    { "key": "provider", "prompt": "Model server", "type": "string", "default": "ollama", "help": "Only ollama for now." },
+    { "key": "model", "prompt": "Model to use (pull it first)", "type": "string", "required": true,
+      "help": "There is no default. For example qwen3:4b-instruct-2507-q4_K_M; see docs/adapters/titles.md for its licence." },
+    { "key": "url", "prompt": "Model server address", "type": "url", "default": "http://titles:11434/",
+      "help": "A compose service on the internal network; plain http, no dots in the host." }
+  ],
+  "secrets": [],
+  "connect": false
+}

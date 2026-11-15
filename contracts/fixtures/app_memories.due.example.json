@@ -1,0 +1,70 @@
+{
+  "ok": true,
+  "due": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a042",
+      "revision": 1,
+      "scope": "private",
+      "owner": "alex",
+      "author": "alex",
+      "status": "draft",
+      "window": "overdue",
+      "at": "2026-11-03T00:00:00+00:00",
+      "local": "2026-11-03 00:00",
+      "kind": "due",
+      "source": "text",
+      "loop": "out",
+      "tags": [
+        "task"
+      ],
+      "project": null,
+      "createdAt": "2026-10-20T09:30:00+00:00",
+      "preview": "DEMO: Alex will return the Pellow library books by 2026-11-03.",
+      "truncated": false
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a043",
+      "revision": 2,
+      "scope": "private",
+      "owner": "alex",
+      "author": "alex",
+      "status": "draft",
+      "window": "upcoming",
+      "at": "2026-11-05T09:30:00+00:00",
+      "local": "2026-11-05 09:30",
+      "kind": "wake",
+      "source": "explicit",
+      "loop": null,
+      "tags": [],
+      "project": null,
+      "createdAt": "2026-10-20T09:30:00+00:00",
+      "preview": "DEMO: ask Sam whether the Pellow allotment shed key is back.",
+      "truncated": false
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a044",
+      "revision": 1,
+      "scope": "private",
+      "owner": "alex",
+      "author": "alex",
+      "status": "draft",
+      "window": "later",
+      "at": "2026-11-20T09:00:00+00:00",
+      "local": "2026-11-20 09:00",
+      "kind": "event",
+      "source": "explicit",
+      "loop": null,
+      "tags": [],
+      "project": null,
+      "createdAt": "2026-10-20T09:30:00+00:00",
+      "preview": "DEMO: book the Pellow hall for the spring fair.",
+      "truncated": false
+    }
+  ],
+  "next": null,
+  "count": 3,
+  "overdue": 1,
+  "upcoming": 1,
+  "later": 1,
+  "zone": "Europe/London"
+}

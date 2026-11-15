@@ -1,0 +1,58 @@
+# Tailscale exposure: the app and the engine's /mcp on your tailnet, over HTTPS with the tailnet's own
+# certificate, at https://<RHYTHM_TAILSCALE_HOSTNAME>.<your tailnet>.ts.net. Nothing is published on the host.
+#
+# Included from deploy/compose/compose.yaml. The service starts only with the profile:
+#   COMPOSE_PROFILES=tailscale in .env, or --profile tailscale
+# Steps, what it exposes and how to undo it: deploy/exposure/tailscale/README.md.
+#
+# Sign-in: the first start prints a login link (docker compose logs tailscale); the node's key then stays in the
+# tailscale-state volume. No auth key or other secret is needed.
+
+services:
+  tailscale:
+    profiles: ["tailscale"]
+    image: ${RHYTHM_TAILSCALE_IMAGE:-tailscale/tailscale:v1.88.3}
+    hostname: ${RHYTHM_TAILSCALE_HOSTNAME:-rhythm}
+    environment:
+      TS_HOSTNAME: ${RHYTHM_TAILSCALE_HOSTNAME:-rhythm}
+      TS_STATE_DIR: /var/lib/tailscale
+      # Userspace networking: no /dev/net/tun, no extra capabilities; serve handles the HTTPS itself.
+      TS_USERSPACE: "true"
+      TS_ACCEPT_DNS: "false"
+      TS_SERVE_CONFIG: /config/serve.json
+    configs:
+      - source: tailscale_serve
+        target: /config/serve.json
+    volumes:
+      - tailscale-state:/var/lib/tailscale
+    networks:
+      # internal reaches app:8080 and engine:8080; egress reaches the tailnet.
+      - internal
+      - egress
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+configs:
+  # tailscale serve: HTTPS on 443 of the tailnet name. "/" is the app; "/mcp" is the engine's MCP endpoint, passed
+  # through with its path. The engine's /health and anything else on it stay unreachable. Funnel (public internet)
+  # stays off. Containerboot fills in ${TS_CERT_DOMAIN}; $$ keeps compose from reading it as a variable.
+  tailscale_serve:
+    content: |
+      {
+        "TCP": { "443": { "HTTPS": true } },
+        "Web": {
+          "$${TS_CERT_DOMAIN}:443": {
+            "Handlers": {
+              "/": { "Proxy": "http://app:8080" },
+              "/mcp": { "Proxy": "http://engine:8080/mcp" }
+            }
+          }
+        },
+        "AllowFunnel": { "$${TS_CERT_DOMAIN}:443": false }
+      }
+
+volumes:
+  tailscale-state: {}

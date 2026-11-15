@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/review_insight.output.schema.json",
+  "title": "review_insight answer",
+  "description": "The memory tool review_insight's answer (SB-P5-06, migration 066): a person's confirm or dismiss of one insight, or a reopen, which takes its review back to proposed, under memory.md section 5's rule and never by the login that saved it (forbidden). It changes the review alone, so view says where that puts it in list_insight_stream: a reopened insight marked not useful or handled stays closed until new feedback, and a snooze in force holds it. A repeat is unchanged. Behind memory.tools, off by default. See contracts/README.md section 2.1.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "action",
+        "review",
+        "view",
+        "unchanged",
+        "reviewed_at",
+        "message"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "action": {
+          "enum": [
+            "confirm",
+            "dismiss",
+            "reopen"
+          ]
+        },
+        "review": {
+          "enum": [
+            "confirmed",
+            "dismissed",
+            "proposed"
+          ]
+        },
+        "view": {
+          "enum": [
+            "proposed",
+            "older",
+            "confirmed",
+            "snoozed",
+            "closed"
+          ],
+          "description": "The view of list_insight_stream its review and status put it in now."
+        },
+        "unchanged": {
+          "type": "boolean"
+        },
+        "reviewed_at": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant",
+          "description": "When it was reviewed; null once reopened."
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "action": {
+              "const": "confirm"
+            },
+            "review": {
+              "const": "confirmed"
+            },
+            "view": {
+              "enum": [
+                "confirmed",
+                "snoozed"
+              ]
+            },
+            "reviewed_at": {
+              "$ref": "memory.defs.schema.json#/$defs/instant"
+            }
+          }
+        },
+        {
+          "properties": {
+            "action": {
+              "const": "dismiss"
+            },
+            "review": {
+              "const": "dismissed"
+            },
+            "view": {
+              "const": "closed"
+            },
+            "reviewed_at": {
+              "$ref": "memory.defs.schema.json#/$defs/instant"
+            }
+          }
+        },
+        {
+          "properties": {
+            "action": {
+              "const": "reopen"
+            },
+            "review": {
+              "const": "proposed"
+            },
+            "view": {
+              "enum": [
+                "proposed",
+                "older",
+                "snoozed",
+                "closed"
+              ]
+            },
+            "reviewed_at": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

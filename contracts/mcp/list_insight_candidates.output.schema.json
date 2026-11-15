@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_insight_candidates.output.schema.json",
+  "title": "list_insight_candidates answer",
+  "description": "The memory tool list_insight_candidates' answer (SB-P5-05, migration 064): pairs of an older and a newer memory of one scope, written 30 or more days apart, that the nightly pass found worth a reasoning client's look together, best first (score, upstream's). signals: similar (the two memories' words at or above the insight threshold the install reads, under the model named) and weighty (both of importance 3 or more), at least one. A candidate is listed while it waits (neither used nor rejected) and both memories are readable to the caller, of the candidate's scope, and neither held for review, marked wrong, ended nor in the trash; total is the whole list's length for this caller, read in the same statement as the page (one predicate, 064's memory_insight_listed, so the count is the length of the list). dry_run true: a sample of the pairs the next nightly pass would add, from the start of its walk in the scopes the caller reads (at most 10 memories a scope, each compared with the latest 300 earlier memories where the pass compares up to 2000, so for a memory with more the pass may keep other pairs), written nowhere: no candidate, no place, no history; each has no id and no found_at, total is how many it found, and there is no next page. Each memory's content is a preview of up to 500 characters, truncated when longer. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body (unavailable: a dry run while the local embeddings model is not loaded; invalid: a cursor that is not one an answer gave, or a dry run given one). Since SB-P5-06 (migration 066) state used or rejected lists what was decided instead of what waits, each with its status, decided_at, note and insight_id.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "dry_run",
+        "total",
+        "items",
+        "next",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "dry_run": {
+          "type": "boolean"
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/candidate"
+          }
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z0-9_-]{1,200}$",
+          "description": "Pass as cursor for the next page; null at the end, and always in a dry run."
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "dry_run": {
+              "const": false
+            },
+            "items": {
+              "items": {
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "found_at": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "dry_run": {
+              "const": true
+            },
+            "next": {
+              "type": "null"
+            },
+            "items": {
+              "items": {
+                "properties": {
+                  "id": {
+                    "type": "null"
+                  },
+                  "found_at": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ],
+  "$defs": {
+    "side": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "created_at",
+        "importance",
+        "content",
+        "truncated"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "created_at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant",
+          "description": "When the memory was written: what the 30 days between the two are counted from."
+        },
+        "importance": {
+          "$ref": "memory.defs.schema.json#/$defs/importance"
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "content is a preview: get reads the whole text."
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "scope",
+        "owner",
+        "score",
+        "signals",
+        "similarity",
+        "model",
+        "gap_days",
+        "found_at",
+        "status",
+        "decided_at",
+        "note",
+        "insight_id",
+        "older",
+        "newer"
+      ],
+      "properties": {
+        "id": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/uuid"
+            }
+          ],
+          "description": "What resolve_insight_candidate takes; null in a dry run."
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "signals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "similar",
+              "weighty"
+            ]
+          }
+        },
+        "similarity": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1
+        },
+        "model": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+          "description": "The embeddings model that scored the similarity: one model's scores mean nothing against another's."
+        },
+        "gap_days": {
+          "type": "integer",
+          "minimum": 30,
+          "description": "Whole days between the two memories' writing."
+        },
+        "found_at": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant",
+          "description": "When the nightly pass found it; null in a dry run."
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "used",
+            "rejected",
+            null
+          ],
+          "description": "What became of it (SB-P5-06, migration 066): pending, waiting; used, an insight came of it; rejected, it was declined. Null in a dry run."
+        },
+        "decided_at": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant",
+          "description": "When it was decided; null while it waits."
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Why it was declined or used, in the deciding client's words: stored data."
+        },
+        "insight_id": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/uuid"
+            }
+          ],
+          "description": "The insight written from the pair, when the caller reads that insight's scope; else null."
+        },
+        "older": {
+          "$ref": "#/$defs/side"
+        },
+        "newer": {
+          "$ref": "#/$defs/side"
+        }
+      }
+    }
+  }
+}

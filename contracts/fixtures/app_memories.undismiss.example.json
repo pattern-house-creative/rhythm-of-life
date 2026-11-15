@@ -1,0 +1,8 @@
+{
+  "ok": true,
+  "op": "undismiss",
+  "dismissal": "memories:6d3c2a10-0000-4000-8000-00000000a001:6d3c2a10-0000-4000-8000-00000000a002:similar_to",
+  "unchanged": false,
+  "back": true,
+  "scopes": "off"
+}

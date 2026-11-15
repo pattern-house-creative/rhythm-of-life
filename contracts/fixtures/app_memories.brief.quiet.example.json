@@ -1,0 +1,59 @@
+{
+  "ok": true,
+  "project": null,
+  "unknownProject": false,
+  "zone": "Europe/London",
+  "says": "Nothing needs attention.",
+  "due": {
+    "count": 0,
+    "overdue": 0,
+    "upcoming": 0,
+    "items": []
+  },
+  "decisions": {
+    "count": 0,
+    "overdue": 0,
+    "upcoming": 0,
+    "items": []
+  },
+  "youOwe": {
+    "count": 0,
+    "items": []
+  },
+  "owedToYou": {
+    "count": 0,
+    "items": []
+  },
+  "stale": {
+    "count": 0,
+    "items": []
+  },
+  "insights": {
+    "count": 0,
+    "items": []
+  },
+  "contradictions": {
+    "count": 0,
+    "items": []
+  },
+  "duplicates": {
+    "count": 0,
+    "items": []
+  },
+  "held": 0,
+  "standing": {
+    "count": 0,
+    "items": []
+  },
+  "calibration": {
+    "ready": false,
+    "n": 0,
+    "line": null
+  },
+  "changes": {
+    "count": 0,
+    "changes": 0,
+    "truncated": false,
+    "groups": []
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "insights": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000e000002",
+      "kind": "discovery",
+      "title": "The boiler is due a service",
+      "summary": "In this fictional example, the boiler manual added in the app asks for a service once a year.",
+      "whyItMatters": "A fictional example of a source of this kind.",
+      "nextStep": "Nothing: this is a contract example.",
+      "points": [
+        {
+          "text": "The manual says to call for a service once a year.",
+          "type": "observed",
+          "source": 0
+        }
+      ],
+      "evidenceLevel": "weak",
+      "limitations": "Fictional data.",
+      "stars": [
+        {
+          "graphId": "rhythm:documents:household%3Aupload%3A5f0c2a9e7d1b4c3a8e6f0a1b2c3d4e5f",
+          "title": "Fictional boiler manual"
+        }
+      ],
+      "sources": [
+        {
+          "kind": "document",
+          "title": "Fictional boiler manual",
+          "locator": "upload:5f0c2a9e7d1b4c3a8e6f0a1b2c3d4e5f",
+          "retrievedAt": "2026-10-28T06:55:00+00:00"
+        }
+      ],
+      "generatedBy": "harness-daily",
+      "generatedAt": "2026-10-28T07:00:00+00:00",
+      "sourcesAsOf": "2026-10-28T06:55:00+00:00",
+      "supersedes": null,
+      "status": "new",
+      "feedback": null,
+      "createdAt": "2026-10-28T07:00:01.5+00:00",
+      "updatedAt": "2026-10-28T07:00:01.5+00:00"
+    }
+  ],
+  "runs": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000f000002",
+      "generatedBy": "harness-daily",
+      "outcome": "saved",
+      "note": null,
+      "insightId": "6d3c2a10-0000-4000-8000-00000e000002",
+      "at": "2026-10-28T07:00:02+00:00"
+    }
+  ]
+}

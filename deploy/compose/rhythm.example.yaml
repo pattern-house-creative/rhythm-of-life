@@ -1,0 +1,127 @@
+# rhythm.example.yaml: the settings of one Rhythm of Life install. Nothing here is secret.
+#
+# Copy it to rhythm.yaml next to this file (or let `rhythm init` write it) and edit the copy.
+# rhythm.yaml is never committed. Secrets are files under secrets/, never values in here:
+# see docs/configuration.md. Schema: contracts/rhythm.schema.json.
+#
+# Until rhythm.yaml exists, compose mounts this example, which runs the app in demo mode.
+
+version: 1
+
+instance:
+  name: Rhythm of Life            # shown in the app and its install manifest
+
+timezone: Europe/London           # IANA name: "today", day boundaries and charts use it
+
+people:                           # everyone listed sees everything in this install
+  - id: alex
+    name: Alex
+  - id: sam
+    name: Sam
+# A shared "household" subject always exists as well; don't list it.
+
+memory:                           # per-person private memories (docs/dev/memory.md section 6)
+  scopes: off                     # off: everyone listed sees everything; on: private and Family scopes (docs/security.md)
+
+demo:
+  enabled: true                   # seed the engine with fictional data, always labelled DEMO
+
+engine:
+  url: http://engine:8080         # the app's server calls {url}/mcp; empty means demo mode
+  allowedHosts: [localhost, 127.0.0.1, "[::1]", engine]
+  publicMcpUrl: http://127.0.0.1:8181/mcp   # printed for MCP clients by `rhythm up`
+  legacyToolNames: false          # list the old tool names too (contracts/README.md 2.3)
+  legacySearch: false             # false: ranked keyword search; true or absent: as before ranking (every word, newest first)
+
+app:
+  publicUrl: http://127.0.0.1:8080   # printed for people by `rhythm up`
+  credentialExpiry: null          # optional RFC 3339 instant; after it the app stops calling the engine
+
+graph:
+  refreshSeconds: 900             # built-in timer that rebuilds the map
+  freshnessSeconds: 2100          # a map older than this shows as stale
+  maxMemories: 3000
+  maxDocuments: 1000
+  nodeLimit: 300
+  similarity:                     # dashed "similar" links from the local embeddings model (off while it is off)
+    threshold: 0.6                # 0.2-0.95; null turns similar links off
+    neighbors: 3                  # similar links per star
+    documentThreshold: 0.8        # between two documents (0.2-0.99); null uses threshold
+    mutualThreshold: 0.45         # stars each among the other's closest link from here (0.2-0.95); null turns it off
+
+health:
+  glucose:
+    displayUnit: mg/dL            # mg/dL or mmol/L
+    low: 70                       # mg/dL, the usual published target range
+    high: 180
+  gmi:
+    minDays: 14
+    minCoverage: 0.7
+
+adapters:
+  notes:                          # a Markdown folder: notes become stars, links become edges
+    enabled: true
+    path: /data/notes             # inside the engine; compose mounts RHYTHM_NOTES_DIR here
+    owner: household
+  csv:                            # numbers from CSV files: time, metric, value, unit
+    enabled: true
+    path: /data/import            # compose mounts RHYTHM_IMPORT_DIR here
+    owner: household
+  documents:                      # PDFs and text: added in the app, dropped in documents/, or saved through MCP
+    enabled: true
+    path: /data/import/documents  # the import folder's documents/
+    owner: household
+  embeddings:                     # local semantic search (MiniLM, runs inside the engine)
+    enabled: true
+    sources: [documents, notes, memories]   # texts semantic search finds besides saved copies; drive keeps Drive text too
+  titles:                         # short star titles from a local model; off falls back to excerpts
+    enabled: false                # also start --profile titles and pull the model (docs/adapters/titles.md)
+    provider: ollama
+    model: ""                     # required when on; no default (for example qwen3:4b-instruct-2507-q4_K_M)
+    url: http://titles:11434/     # the titles service on the internal network
+  drive:                          # Google Drive, with your own Google Cloud project (docs/adapters/drive.md)
+    enabled: false
+    roots: []                     # folder IDs whose files become stars; none by default
+    edits: false                  # allow dashboards' declared writes to Sheets and Docs
+    owner: household
+  garmin:                         # Garmin: your own Personal API key, or Garmin Connect's exports (docs/adapters/garmin.md)
+    enabled: false
+    owner: alex                   # the person whose Garmin it is
+    pollSeconds: 21600            # regular sync with a key, 3600-86400
+    deviceTimezone: null          # the watch's days; null means timezone above
+    importPath: /data/import/garmin   # exported files, inside the engine (RHYTHM_IMPORT_DIR/garmin)
+    distanceUnit: km              # km or mi: the unit of an exported activity list
+  second-brain:                   # a hosted memory service, read by reference (docs/adapters/second-brain.md)
+    enabled: false
+    url: https://brain.example.invalid/
+    teams: []                     # team workspace IDs to show besides your personal one
+    owner: household
+  nightscout:                     # a Nightscout site as a live CGM feed (docs/adapters/nightscout.md)
+    enabled: false
+    url: https://nightscout.example.invalid/
+    owner: alex
+    pollSeconds: 300
+  calendar:                       # your own calendar, read only, over a private ICS link you enter yourself: ./rhythm connect calendar (docs/adapters/calendar.md)
+    enabled: false
+    owner: alex                   # whose calendar it is; household for one the whole family shares
+    daysBack: 7
+    daysAhead: 30
+    pollSeconds: 900
+  tailscale:                      # exposure: your tailnet (deploy/exposure/tailscale/); profile tailscale
+    enabled: false
+  cloudflare:                     # exposure: Cloudflare Tunnel + Access (deploy/exposure/cloudflare/); profile cloudflare
+    enabled: false
+    hostname: rhythm.example.invalid        # the app, behind Cloudflare Access
+    mcpHostname: rhythm-mcp.example.invalid # only /mcp; also add it to engine.allowedHosts
+  openai-tunnel:                  # exposure: ChatGPT through OpenAI's Secure MCP Tunnel (deploy/exposure/openai-tunnel/); profile openai-tunnel
+    enabled: false                # ./rhythm connect openai-tunnel adds tunnelId, the tunnel's ID from the OpenAI platform
+
+plugins: {}                       # out-of-repo containers that write through ingest_* tools
+# plugins:
+#   carelink:                       # the optional CareLink plugin (docs/adapters/carelink.md)
+#     enabled: true
+#     providers: [carelink-live, carelink-csv]
+#     subjects: [alex]
+#     policy: live                  # the live feed ...
+#     policies: { carelink-csv: archive }   # ... and the CSV history, kept as originals
+#     domain: health

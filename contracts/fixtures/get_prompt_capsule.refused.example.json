@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "schema": "prompt-capsule-mcp.v1",
+  "code": "unknown_project",
+  "status": 404,
+  "error": "No project by that name in this scope; known projects: allotment, canal-walks",
+  "known_projects": [
+    "allotment",
+    "canal-walks"
+  ]
+}

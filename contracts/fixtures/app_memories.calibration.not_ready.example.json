@@ -1,0 +1,78 @@
+{
+  "ok": true,
+  "source": "all",
+  "ready": false,
+  "n": 3,
+  "nStated": 2,
+  "nInferred": 1,
+  "minDecisions": 10,
+  "minBand": 5,
+  "minTopic": 5,
+  "brier": null,
+  "gap": null,
+  "direction": null,
+  "bands": [
+    {
+      "band": "50-59",
+      "n": 0,
+      "nStated": 0,
+      "nInferred": 0,
+      "shown": false,
+      "meanConfidence": null,
+      "hitRate": null,
+      "low": null,
+      "high": null
+    },
+    {
+      "band": "60-69",
+      "n": 0,
+      "nStated": 0,
+      "nInferred": 0,
+      "shown": false,
+      "meanConfidence": null,
+      "hitRate": null,
+      "low": null,
+      "high": null
+    },
+    {
+      "band": "70-79",
+      "n": 2,
+      "nStated": 1,
+      "nInferred": 1,
+      "shown": false,
+      "meanConfidence": null,
+      "hitRate": null,
+      "low": null,
+      "high": null
+    },
+    {
+      "band": "80-89",
+      "n": 1,
+      "nStated": 1,
+      "nInferred": 0,
+      "shown": false,
+      "meanConfidence": null,
+      "hitRate": null,
+      "low": null,
+      "high": null
+    },
+    {
+      "band": "90-95",
+      "n": 0,
+      "nStated": 0,
+      "nInferred": 0,
+      "shown": false,
+      "meanConfidence": null,
+      "hitRate": null,
+      "low": null,
+      "high": null
+    }
+  ],
+  "headline": null,
+  "topic": null,
+  "kind": "not_ready",
+  "line": "Calibration shows once 10 decisions have an outcome (right, wrong or mixed) and a confidence; there are 3 so far.",
+  "topicLine": null,
+  "stated": null,
+  "hit": null
+}

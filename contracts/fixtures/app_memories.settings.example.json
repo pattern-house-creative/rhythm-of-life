@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "scopes": "off",
+  "person": null,
+  "share": false,
+  "capsules": false,
+  "capture": false,
+  "secondBrainImport": false,
+  "recall": false,
+  "recallLog": false,
+  "nightSummary": false,
+  "trashDays": 14,
+  "versionsKept": 20,
+  "maxBytes": 131072
+}

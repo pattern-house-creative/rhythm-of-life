@@ -1,0 +1,12 @@
+{
+  "name": "tailscale",
+  "title": "Tailscale",
+  "kinds": ["Exposure"],
+  "summary": "The app and /mcp on your tailnet over HTTPS, with no published port; sign in once from the link in the container's log.",
+  "defaultEnabled": false,
+  "profile": "tailscale",
+  "docs": "docs/adapters/tailscale.md",
+  "settings": [],
+  "secrets": [],
+  "connect": false
+}

@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_stale.output.schema.json",
+  "title": "list_stale answer",
+  "description": "The memory tool list_stale's answer (SB-P4-09, migration 053): the stale queue of the memories the caller reads and may change, longest unchanged and unconfirmed first, and total, the whole queue's length for this caller, read in the same statement as the page (one predicate, 053's memory_stale_reason, so the count is the length of the list). reason not_confirmed: its volatility's time (state 90 days, volatile 14) passed since since, when it was last changed or confirmed, and the nightly pass found it at found_at; retracted_source: a memory it was built on was marked wrong (retracted_sources names them; it wins over not_confirmed). confirmed_at: its last still true. A held memory is never in the queue. content is a preview of up to 500 characters, truncated when longer. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "total",
+        "stale",
+        "next",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stale": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/staleItem"
+          }
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z0-9_-]{1,200}$",
+          "description": "Pass as cursor for the next page; null at the end."
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ],
+  "$defs": {
+    "staleItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "author",
+        "status",
+        "volatility",
+        "reason",
+        "since",
+        "found_at",
+        "confirmed_at",
+        "content",
+        "truncated",
+        "retracted_sources"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "author": {
+          "$ref": "memory.defs.schema.json#/$defs/person"
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ]
+        },
+        "volatility": {
+          "$ref": "memory.defs.schema.json#/$defs/volatility"
+        },
+        "reason": {
+          "enum": [
+            "not_confirmed",
+            "retracted_source"
+          ]
+        },
+        "since": {
+          "$ref": "memory.defs.schema.json#/$defs/instant",
+          "description": "When it was last changed or confirmed (still_true), whichever is newer."
+        },
+        "found_at": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant",
+          "description": "When the nightly pass found it out of date; null for retracted_source."
+        },
+        "confirmed_at": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant",
+          "description": "Its last still true, at any revision; null when never."
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "content is a preview: get reads the whole text."
+        },
+        "retracted_sources": {
+          "type": "array",
+          "maxItems": 200,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "memory.defs.schema.json#/$defs/uuid"
+          },
+          "description": "Retracted memories it was built on, as get serves them."
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "reason": {
+              "const": "not_confirmed"
+            },
+            "found_at": {
+              "type": "string"
+            },
+            "volatility": {
+              "enum": [
+                "state",
+                "volatile"
+              ]
+            },
+            "retracted_sources": {
+              "maxItems": 0
+            }
+          }
+        },
+        {
+          "properties": {
+            "reason": {
+              "const": "retracted_source"
+            },
+            "found_at": {
+              "type": "null"
+            },
+            "retracted_sources": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    }
+  }
+}

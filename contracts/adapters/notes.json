@@ -1,0 +1,25 @@
+{
+  "name": "notes",
+  "title": "Notes folder",
+  "kinds": ["MemorySource"],
+  "summary": "A folder of Markdown notes, Obsidian-style: each note a star, [[links]] solid lines, folders and #tags projects.",
+  "defaultEnabled": true,
+  "profile": null,
+  "docs": "docs/adapters/notes.md",
+  "settings": [
+    {
+      "key": "path",
+      "prompt": "Notes folder inside the engine container",
+      "type": "path",
+      "default": "/data/notes",
+      "help": "Compose mounts the host folder named by RHYTHM_NOTES_DIR in .env here, read-only."
+    },
+    {
+      "key": "owner",
+      "prompt": "Whose notes are they (a person id, or household)?",
+      "type": "person",
+      "default": "household"
+    }
+  ],
+  "secrets": []
+}

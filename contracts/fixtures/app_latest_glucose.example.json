@@ -1,0 +1,24 @@
+{
+  "selection": "latest",
+  "complete": true,
+  "subject": "alex",
+  "rows": [
+    {
+      "resource_id": "6d3c2a10-0000-4000-8000-0000000a0002",
+      "subject_id": "alex",
+      "provider": "nightscout",
+      "source_kind": "glucose-readings",
+      "timezone": "Europe/London",
+      "source_updated_at": "2026-10-28T11:55:00Z",
+      "metric": "glucose",
+      "sample_key": "2026-10-28T11:55:00Z",
+      "observed_at": "2026-10-28T11:55:00Z",
+      "value": 112,
+      "unit": "mg/dL",
+      "quality": "source-reported;time_basis=explicit-offset",
+      "total_samples": 1,
+      "demo": false,
+      "stale": false
+    }
+  ]
+}

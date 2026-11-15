@@ -1,0 +1,14 @@
+{
+  "command": {
+    "id": "6d3c2a10-0000-4000-8000-00000000c003",
+    "action": "move",
+    "args": { "part": "map", "place": "right", "dashboard": "6d3c2a10-0000-4000-8000-00000000d001" },
+    "sender": { "kind": "screen", "screen": "fictional-hallway-screen2", "name": "Hallway PC" },
+    "sentAt": "2026-10-28T12:02:00+00:00",
+    "deliveredAt": "2026-10-28T12:02:00.05+00:00",
+    "doneAt": "2026-10-28T12:02:00.62+00:00",
+    "result": "shown",
+    "detail": { "summary": "Moved the map right, beside the page" },
+    "ms": { "deliver": 50, "show": 620 }
+  }
+}

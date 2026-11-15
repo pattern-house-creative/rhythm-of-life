@@ -1,0 +1,26 @@
+# cli/e2e.sh and cli/lifecycle.sh only, merged after deploy/compose/compose.yaml through COMPOSE_FILE: the engine reads
+# the pinned MiniLM files from a folder on the host, mounted read-only, so its first start downloads nothing (tests
+# never download a model). Given a folder, the engine never downloads, even when the files there do not match their
+# checksums (Embeddings.Open); both scripts check that the model is on and that the engine's data folder holds no
+# model. The cli service gets the same folder, so rhythm recall runs its meaning arm too (it only ever loads a model
+# from there).
+#
+# RHYTHM_E2E_MODEL_DIR is set by each script from RHYTHM_MODEL_DIR, as an absolute path Docker reads.
+
+services:
+  engine:
+    environment:
+      RHYTHM_MODEL_DIR: /models/minilm
+    volumes:
+      - type: bind
+        source: ${RHYTHM_E2E_MODEL_DIR:?run through cli/e2e.sh or cli/lifecycle.sh, which set RHYTHM_E2E_MODEL_DIR}
+        target: /models/minilm
+        read_only: true
+  cli:
+    environment:
+      RHYTHM_MODEL_DIR: /models/minilm
+    volumes:
+      - type: bind
+        source: ${RHYTHM_E2E_MODEL_DIR:?run through cli/e2e.sh or cli/lifecycle.sh, which set RHYTHM_E2E_MODEL_DIR}
+        target: /models/minilm
+        read_only: true

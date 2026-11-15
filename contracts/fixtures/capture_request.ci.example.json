@@ -1,0 +1,10 @@
+{
+  "text": "DEMO: CI build 412 of main passed on 12 October 2026. https://ci.example.invalid/builds/412",
+  "source": "ci",
+  "tags": [
+    "build",
+    "main"
+  ],
+  "project": "demo-garden-app",
+  "idempotencyKey": "ci-build-412"
+}

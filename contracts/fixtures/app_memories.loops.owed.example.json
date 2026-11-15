@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "loops": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a031",
+      "revision": 1,
+      "scope": "shared",
+      "owner": "household",
+      "author": "alex",
+      "status": "draft",
+      "direction": "in",
+      "counterparty": "Sam",
+      "tags": [
+        "task",
+        "pellow"
+      ],
+      "project": null,
+      "createdAt": "2026-10-20T09:30:00+00:00",
+      "preview": "DEMO: Sam promised to bring the Pellow ladder back by Saturday.",
+      "truncated": false
+    }
+  ],
+  "next": null,
+  "count": 1,
+  "youOwe": 1,
+  "owedToYou": 1
+}

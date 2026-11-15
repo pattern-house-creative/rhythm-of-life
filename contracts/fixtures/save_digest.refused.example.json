@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "not_due",
+  "error": "Not due: a digest of this was written at 2026-11-02 21:15 UTC (memory 6d3c2a10-0000-4000-8000-00000000d200); the next is due a day after it"
+}

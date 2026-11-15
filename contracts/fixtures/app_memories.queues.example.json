@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "held": 1,
+  "duplicates": 2,
+  "contradictions": 1,
+  "stale": 3,
+  "candidates": 2,
+  "insights": 1
+}

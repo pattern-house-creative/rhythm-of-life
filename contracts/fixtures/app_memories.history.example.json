@@ -1,0 +1,61 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000b001",
+  "revision": 3,
+  "changes": [
+    {
+      "revision": 3,
+      "event": "status_changed",
+      "at": "2026-11-02T09:45:00+00:00",
+      "person": null,
+      "channel": "app",
+      "client": null,
+      "fields": [],
+      "scope": "shared",
+      "owner": "household",
+      "kept": true,
+      "status": "canonical",
+      "preview": "DEMO: the Wendle allotment gate code changes on Tuesdays now.",
+      "held": false,
+      "to": null
+    },
+    {
+      "revision": 2,
+      "event": "updated",
+      "at": "2026-11-02T09:41:12+00:00",
+      "person": "alex",
+      "channel": "mcp",
+      "client": "DEMO client",
+      "fields": ["content"],
+      "scope": "shared",
+      "owner": "household",
+      "kept": true,
+      "status": "draft",
+      "preview": "DEMO: the Wendle allotment gate code changes on Tuesdays now.",
+      "held": false,
+      "to": null
+    },
+    {
+      "revision": 1,
+      "event": "created",
+      "at": "2026-11-02T09:30:00.123456+00:00",
+      "person": null,
+      "channel": "app",
+      "client": null,
+      "fields": [],
+      "scope": "shared",
+      "owner": "household",
+      "kept": true,
+      "status": "draft",
+      "preview": "DEMO: the Wendle allotment gate code changes on Mondays. #wendle",
+      "held": false,
+      "to": null
+    }
+  ],
+  "next": null,
+  "cut": false,
+  "earlierBy": null,
+  "kept": 20,
+  "oldestKept": 1,
+  "pruned": false
+}

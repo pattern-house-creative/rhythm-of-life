@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/insight_history.output.schema.json",
+  "title": "insight_history answer",
+  "description": "The memory tool insight_history's answer (SB-P5-06, migration 066): one insight's feedback and reviews, newest first, what the latest feedback replaced included, and who replaced it once a person had confirmed it (replaced). Behind memory.tools, off by default. See contracts/README.md section 2.1.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "id",
+        "review",
+        "total",
+        "items",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "review": {
+          "enum": [
+            "proposed",
+            "confirmed",
+            "dismissed"
+          ]
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many there are, whatever limit serves."
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/event"
+          }
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ],
+  "$defs": {
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "value",
+        "until",
+        "note",
+        "person",
+        "channel",
+        "client",
+        "at"
+      ],
+      "properties": {
+        "event": {
+          "enum": [
+            "feedback",
+            "confirmed",
+            "dismissed",
+            "reopened",
+            "replaced"
+          ]
+        },
+        "value": {
+          "enum": [
+            "interesting",
+            "explore",
+            "not_useful",
+            "later",
+            "handled",
+            null
+          ],
+          "description": "A feedback's value; null for a review or a replacement."
+        },
+        "until": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant",
+          "description": "How long a later snoozed it."
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Words given with it: stored data."
+        },
+        "person": {
+          "$ref": "memory.defs.schema.json#/$defs/person"
+        },
+        "channel": {
+          "enum": [
+            "app",
+            "mcp",
+            "cli",
+            null
+          ],
+          "description": "Null for a feedback given before the history began or with memory.tools off, when who gave it was not recorded."
+        },
+        "client": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant"
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "event": {
+              "const": "feedback"
+            },
+            "value": {
+              "enum": [
+                "interesting",
+                "explore",
+                "not_useful",
+                "later",
+                "handled"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "event": {
+              "enum": [
+                "confirmed",
+                "dismissed",
+                "reopened",
+                "replaced"
+              ]
+            },
+            "value": {
+              "type": "null"
+            },
+            "until": {
+              "type": "null"
+            },
+            "channel": {
+              "enum": [
+                "app",
+                "mcp",
+                "cli"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

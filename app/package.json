@@ -1,0 +1,61 @@
+{
+  "name": "rhythm-of-life-app",
+  "private": true,
+  "version": "0.1.0-alpha.1",
+  "description": "Rhythm of Life app: the PWA and its server facade.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build && npm run build:server",
+    "build:server": "tsc -p tsconfig.api.json",
+    "start": "node build/server/node.js",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "smoke": "node scripts/smoke.mjs",
+    "verify": "npm test && npm run build && npm run smoke",
+    "format": "prettier --write src tests server api scripts *.ts *.json *.html *.md"
+  },
+  "dependencies": {
+    "undici": "7.30.1",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@fontsource-variable/dm-sans": "^5.3.0",
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "@types/d3-drag": "^3.0.7",
+    "@types/d3-force": "^3.0.10",
+    "@types/d3-selection": "^3.0.12",
+    "@types/d3-zoom": "^3.0.9",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "d3-drag": "^3.0.0",
+    "d3-force": "^3.0.0",
+    "d3-selection": "^3.0.0",
+    "d3-zoom": "^3.0.0",
+    "jsdom": "^30.1.3",
+    "lucide-react": "^1.61.0",
+    "motion": "^14.6.0",
+    "oxlint": "^1.88.0",
+    "pdfjs-dist": "6.4.299",
+    "prettier": "^3.9.10",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "recharts": "^3.10.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.4",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "capture": "on",
+  "engineUrl": "http://127.0.0.1:8181",
+  "tokenFile": "/path/to/rhythm/deploy/compose/secrets/capture_my-laptop_token",
+  "folders": ["/path/to/code/garden-app"],
+  "project": "garden-app"
+}

@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/supersede.output.schema.json",
+  "title": "supersede answer",
+  "description": "The memory tool supersede's answer (SB-P4-06, migration 049): one memory, true now (id), replacing an earlier one of its scope (replaces). action plan: nothing written; the earlier one would stop being true at at, and confirmation, passed back once the person agrees, applies exactly that plan. superseded: applied; the earlier one is history, true until at. unchanged: nothing needed doing, reason replaced (id replaces it already), ended (it had stopped being true at at, before id began; at may be null for none) or enclosed (id is told as over already within its time; at is the earlier one's end, null while it is current). revision, scope, owner and status are the replaced memory's. No memory's words. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "action",
+        "id",
+        "replaces",
+        "at",
+        "reason",
+        "confirmation",
+        "revision",
+        "scope",
+        "owner",
+        "status",
+        "scopes",
+        "message"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "action": {
+          "enum": [
+            "plan",
+            "superseded",
+            "unchanged"
+          ]
+        },
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "replaces": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "at": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeInstant"
+        },
+        "reason": {
+          "enum": [
+            null,
+            "replaced",
+            "ended",
+            "enclosed"
+          ]
+        },
+        "confirmation": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{16}$"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "status": {
+          "$ref": "memory.defs.schema.json#/$defs/status"
+        },
+        "scopes": {
+          "$ref": "memory.defs.schema.json#/$defs/scopes"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "action": {
+              "const": "plan"
+            },
+            "confirmation": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "null"
+            },
+            "at": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "action": {
+              "const": "superseded"
+            },
+            "confirmation": {
+              "type": "null"
+            },
+            "reason": {
+              "type": "null"
+            },
+            "at": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "action": {
+              "const": "unchanged"
+            },
+            "confirmation": {
+              "type": "null"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

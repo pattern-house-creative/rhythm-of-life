@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a070",
+  "revision": 2,
+  "scope": "private",
+  "owner": "alex",
+  "status": "draft",
+  "scopes": "on",
+  "project": null,
+  "changed": [],
+  "unchanged": true,
+  "message": "Nothing changed: it is stopped already."
+}

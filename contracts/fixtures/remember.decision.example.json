@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a041",
+  "revision": 1,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "changed": [],
+  "unchanged": false,
+  "replayed": false,
+  "dropped_tags": [],
+  "held": null,
+  "message": "Stored as a draft, a household memory, visible to everyone in the household (per-person scopes are off). set_status canonical confirms it once the person agrees it is right. Saved as a decision: list_decisions lists it, and it comes up for review on 2027-03-01; then record_outcome records how it turned out. Confidence 70% (stated).",
+  "decision": {
+    "confidence": 0.7,
+    "confidence_source": "stated",
+    "review_at": "2027-03-01T09:00:00+00:00",
+    "clamped": null
+  }
+}

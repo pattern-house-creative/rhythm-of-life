@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "op": "status",
+  "id": "6d3c2a10-0000-4000-8000-00000000c002",
+  "revision": 3,
+  "to": null,
+  "scope": "shared",
+  "owner": "household",
+  "status": "deprecated",
+  "scopes": "off",
+  "project": null,
+  "changed": ["status"],
+  "unchanged": false,
+  "replayed": false,
+  "droppedTags": [],
+  "held": null,
+  "cascade": {
+    "reopened": ["6d3c2a10-0000-4000-8000-00000000c001"],
+    "reclosed": [],
+    "flagged": ["6d3c2a10-0000-4000-8000-00000000c003"],
+    "unflagged": []
+  }
+}

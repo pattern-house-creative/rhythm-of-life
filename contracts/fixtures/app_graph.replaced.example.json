@@ -1,0 +1,51 @@
+{
+  "nodes": [
+    {
+      "id": "memory:memory:6d3c2a10-0000-4000-8000-00000000c002",
+      "title": "DEMO: the Pellow choir rehearses on Wednesday evenings now.",
+      "type": "memory",
+      "overview": "DEMO: the Pellow choir rehearses on Wednesday evenings now.",
+      "provenance": { "sourceId": "memory", "recordId": "6d3c2a10-0000-4000-8000-00000000c002", "observedAt": "2026-11-02T18:00:00+00:00", "demo": false },
+      "resource": {
+        "identity": { "provider": "memory", "account": "memory", "externalId": "6d3c2a10-0000-4000-8000-00000000c002" },
+        "canonicalUrl": null,
+        "sourceUrl": null,
+        "sourceModifiedAt": "2026-11-02T18:00:00+00:00",
+        "retrievedAt": "2026-11-02T18:10:00.5+00:00",
+        "revision": "memory-sha256:example-2",
+        "owner": "household",
+        "access": { "scope": "shared", "canRead": true, "canOpen": false },
+        "availability": "available",
+        "content": null,
+        "representation": "index"
+      },
+      "groups": [{ "id": "memory:family", "label": "Family" }]
+    },
+    {
+      "id": "memory:memory:6d3c2a10-0000-4000-8000-00000000c001",
+      "title": "DEMO: the Pellow choir rehearses on Tuesday evenings.",
+      "type": "memory",
+      "overview": "DEMO: the Pellow choir rehearses on Tuesday evenings.",
+      "provenance": { "sourceId": "memory", "recordId": "6d3c2a10-0000-4000-8000-00000000c001", "observedAt": "2026-11-02T18:05:00+00:00", "demo": false },
+      "resource": {
+        "identity": { "provider": "memory", "account": "memory", "externalId": "6d3c2a10-0000-4000-8000-00000000c001" },
+        "canonicalUrl": null,
+        "sourceUrl": null,
+        "sourceModifiedAt": "2026-11-02T18:05:00+00:00",
+        "retrievedAt": "2026-11-02T18:10:00.5+00:00",
+        "revision": "memory-sha256:example-1",
+        "owner": "household",
+        "access": { "scope": "shared", "canRead": true, "canOpen": false },
+        "availability": "available",
+        "content": null,
+        "representation": "index"
+      },
+      "groups": [{ "id": "memory:family", "label": "Family" }],
+      "truth": { "state": "replaced", "replacedBy": "memory:memory:6d3c2a10-0000-4000-8000-00000000c002" }
+    }
+  ],
+  "edges": [],
+  "nextCursor": null,
+  "completeness": "partial",
+  "issues": []
+}

@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a001",
+  "revision": 4,
+  "scope": "shared",
+  "owner": "household",
+  "status": "canonical",
+  "scopes": "off",
+  "trash": {
+    "nonce": "6d3c2a10-0000-4000-8000-00000000f001",
+    "trashed_at": "2026-11-01T10:00:00+00:00",
+    "purge_after": "2026-11-15T10:00:00+00:00",
+    "days": 14,
+    "links": 2
+  },
+  "replayed": false,
+  "message": "Moved to the trash with its 2 links; it is deleted for good after 14 days, and until then undo(id, nonce) with this answer's trash nonce brings it back (a retry with the same nonce changes nothing). Deleting it for good sooner is a person's step, from the trash in the app's Memories view."
+}

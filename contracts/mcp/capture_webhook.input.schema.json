@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "POST /capture, a webhook's own payload",
+  "description": "Any JSON object naming a member other than capture_request's fields: it is kept whole as the memory's text, indented, source webhook. The key, if any, comes in the Idempotency-Key header.",
+  "type": "object",
+  "minProperties": 1
+}

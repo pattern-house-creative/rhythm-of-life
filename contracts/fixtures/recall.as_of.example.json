@@ -1,0 +1,89 @@
+{
+  "query": "when does the choir rehearse?",
+  "asOf": "2026-09-15T18:00:00.0000000Z",
+  "results": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a201",
+      "subject_id": "household",
+      "provider": "memory",
+      "external_id": "6d3c2a10-0000-4000-8000-00000000a201",
+      "domain": "memory",
+      "kind": "memory",
+      "title": "Memory",
+      "source_url": null,
+      "revision": "memory:4",
+      "source_updated_at": null,
+      "indexed_at": "2026-09-01T09:00:00.25+00:00",
+      "local_date": null,
+      "timezone": null,
+      "metadata": "{}",
+      "stale": true,
+      "excerpt": "DEMO: the choir rehearses on Tuesday evenings.",
+      "truncated": false,
+      "length": 46,
+      "score": 0.032522,
+      "asOf": {
+        "revision": 2,
+        "status": "canonical",
+        "writtenAt": "2026-09-01T09:05:00.5000000Z",
+        "changedAt": "2026-09-20T10:00:00.7500000Z",
+        "recordedAfter": false
+      }
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a102",
+      "subject_id": "household",
+      "provider": "documents",
+      "external_id": "choir-letter.txt",
+      "domain": "household",
+      "kind": "document",
+      "title": "DEMO · Choir letter",
+      "source_url": null,
+      "revision": "sha256-demo-choir-letter-1",
+      "source_updated_at": "2026-08-30T17:20:00+00:00",
+      "indexed_at": "2026-10-28T11:45:00.5+00:00",
+      "local_date": null,
+      "timezone": null,
+      "metadata": "{}",
+      "stale": false,
+      "excerpt": "DEMO: Welcome back to the choir for the autumn term.",
+      "truncated": false,
+      "length": 52,
+      "score": 0.016129
+    }
+  ],
+  "retracted": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a202",
+      "subject_id": "household",
+      "provider": "memory",
+      "external_id": "6d3c2a10-0000-4000-8000-00000000a202",
+      "domain": "memory",
+      "kind": "memory",
+      "title": "Memory",
+      "source_url": null,
+      "revision": "memory:3",
+      "source_updated_at": null,
+      "indexed_at": "2026-09-10T08:00:00.1+00:00",
+      "local_date": null,
+      "timezone": null,
+      "metadata": "{}",
+      "stale": true,
+      "excerpt": "DEMO: the choir rehearses on Wednesday evenings now.",
+      "truncated": false,
+      "length": 52,
+      "retractedAt": "2026-09-20T10:00:00.7500000Z",
+      "insteadOf": "6d3c2a10-0000-4000-8000-00000000a201",
+      "asOf": {
+        "revision": 2,
+        "status": "canonical",
+        "writtenAt": "2026-09-10T08:01:00.0000000Z",
+        "changedAt": "2026-09-20T10:00:00.7500000Z",
+        "recordedAfter": false
+      }
+    }
+  ],
+  "notices": [],
+  "semanticSkipped": false,
+  "receipt": "rc1-8b20e4f1c07a93d6"
+}

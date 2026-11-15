@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_recent_glucose.output.schema.json",
+  "title": "app_recent_glucose structuredContent",
+  "description": "Recent glucose of one person, in mg/dL. With no arguments: 24 hours of live readings as rows. With {days: 14}: a compact series in 5-minute slots, the person's archive up to the first live reading in the window and their live feeds from then on, never interleaved. A provider's stretch (archive or live) follows its policy, not its name. Both forms carry the archive's 14-day totals. See contracts/README.md section 2.2.",
+  "oneOf": [{ "$ref": "#/$defs/day" }, { "$ref": "#/$defs/fortnight" }],
+  "$defs": {
+    "day": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject", "selection", "today", "start", "end", "timezone", "range", "displayUnit", "complete", "demo", "provider",
+        "rows", "lastSyncedAt", "summary"],
+      "properties": {
+        "subject": { "$ref": "#/$defs/subject" },
+        "selection": { "const": "history" },
+        "today": { "$ref": "#/$defs/date" },
+        "start": { "$ref": "#/$defs/second", "description": "end less 24 hours." },
+        "end": { "$ref": "#/$defs/second", "description": "When answered, in whole seconds; exclusive." },
+        "timezone": { "type": "string", "maxLength": 64 },
+        "range": { "$ref": "#/$defs/range" },
+        "displayUnit": { "enum": ["mg/dL", "mmol/L"] },
+        "complete": { "type": "boolean" },
+        "demo": { "type": "boolean" },
+        "provider": { "$ref": "#/$defs/maybeProvider" },
+        "rows": { "type": "array", "maxItems": 300, "description": "One live reading per 5-minute slot.", "items": { "$ref": "#/$defs/row" } },
+        "lastSyncedAt": { "$ref": "#/$defs/maybeSecond" },
+        "summary": { "$ref": "#/$defs/maybeSummary" }
+      }
+    },
+    "fortnight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject", "selection", "today", "start", "end", "timezone", "range", "displayUnit", "complete", "demo", "provider",
+        "series", "intervalMinutes", "sources", "latest", "lastSyncedAt", "summary"],
+      "properties": {
+        "subject": { "$ref": "#/$defs/subject" },
+        "selection": { "const": "history" },
+        "today": { "$ref": "#/$defs/date" },
+        "start": { "$ref": "#/$defs/second", "description": "end less 14 days exactly." },
+        "end": { "$ref": "#/$defs/second", "description": "When answered, in whole seconds; exclusive." },
+        "timezone": { "type": "string", "maxLength": 64 },
+        "range": { "$ref": "#/$defs/range" },
+        "displayUnit": { "enum": ["mg/dL", "mmol/L"] },
+        "complete": { "type": "boolean", "description": "False when more than 4200 slots had readings; the newest are kept." },
+        "demo": { "type": "boolean", "description": "True for the engine's fictional demo seed." },
+        "provider": { "$ref": "#/$defs/maybeProvider", "description": "The newest live reading's provider, else the newest archive reading's." },
+        "series": {
+          "type": "array",
+          "maxItems": 4200,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 3,
+            "prefixItems": [
+              { "type": "integer", "description": "Epoch seconds, strictly increasing." },
+              { "type": "number", "exclusiveMinimum": 0, "description": "mg/dL." },
+              { "enum": [-1, 1], "description": "Present only for a reading below (-1) or above (1) the sensor's range." }
+            ]
+          }
+        },
+        "intervalMinutes": { "const": 5 },
+        "sources": {
+          "type": "array",
+          "maxItems": 2,
+          "description": "At most an archive stretch followed by a live one; the archive ends before the live stretch starts.",
+          "items": { "oneOf": [{ "$ref": "#/$defs/archiveStretch" }, { "$ref": "#/$defs/liveStretch" }] }
+        },
+        "latest": {
+          "description": "The newest live reading; null when the window holds no live reading.",
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["resourceId", "observedAt", "sourceUpdatedAt"],
+              "properties": {
+                "resourceId": { "$ref": "#/$defs/uuid" },
+                "observedAt": { "$ref": "#/$defs/second" },
+                "sourceUpdatedAt": { "$ref": "#/$defs/maybeSecond" }
+              }
+            }
+          ]
+        },
+        "lastSyncedAt": { "$ref": "#/$defs/maybeSecond" },
+        "summary": { "$ref": "#/$defs/maybeSummary" }
+      }
+    },
+    "archiveStretch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "provider", "start", "end", "readings", "timeBasis"],
+      "properties": {
+        "kind": { "const": "archive" },
+        "provider": { "$ref": "#/$defs/provider" },
+        "start": { "$ref": "#/$defs/second" },
+        "end": { "$ref": "#/$defs/second" },
+        "readings": { "type": "integer", "minimum": 1 },
+        "timeBasis": { "const": "device-local", "description": "The device's clock, converted with its time zone by whoever wrote it." }
+      }
+    },
+    "liveStretch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "provider", "start", "end", "readings", "timeBasis"],
+      "properties": {
+        "kind": { "const": "live" },
+        "provider": { "$ref": "#/$defs/provider" },
+        "start": { "$ref": "#/$defs/second" },
+        "end": { "$ref": "#/$defs/second" },
+        "readings": { "type": "integer", "minimum": 1 },
+        "timeBasis": { "const": "source-zone" }
+      }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource_id", "subject_id", "provider", "source_kind", "timezone", "source_updated_at", "metric", "sample_key",
+        "observed_at", "local_date", "value", "unit", "value_mgdl", "quality"],
+      "properties": {
+        "resource_id": { "$ref": "#/$defs/uuid" },
+        "subject_id": { "$ref": "#/$defs/subject" },
+        "provider": { "$ref": "#/$defs/provider" },
+        "source_kind": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,40}$" },
+        "timezone": { "type": ["string", "null"], "maxLength": 64 },
+        "source_updated_at": { "$ref": "#/$defs/maybeSecond" },
+        "metric": { "const": "glucose" },
+        "sample_key": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "observed_at": { "$ref": "#/$defs/second" },
+        "local_date": { "$ref": "#/$defs/date" },
+        "value": { "type": "number", "exclusiveMinimum": 0, "description": "mg/dL, converted when the source sent mmol/L." },
+        "unit": { "const": "mg/dL" },
+        "value_mgdl": { "type": "number", "exclusiveMinimum": 0, "description": "The same value; the private version's name for it." },
+        "quality": { "type": "string", "maxLength": 200 }
+      }
+    },
+    "maybeSummary": {
+      "description": "The archive's latest 14 complete local days within the last 60, one reading per 5-minute slot; null without an archive.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["startDate", "endDate", "intervalMinutes", "sourceKind", "timeBasis", "lastImportedAt", "readings", "exactReadings",
+            "exactSum", "bands", "gmi"],
+          "properties": {
+            "startDate": { "$ref": "#/$defs/date", "description": "endDate less 13 days." },
+            "endDate": { "$ref": "#/$defs/date", "description": "At least one day before today." },
+            "intervalMinutes": { "const": 5 },
+            "sourceKind": { "const": "archive" },
+            "timeBasis": { "const": "device-local-unverified" },
+            "lastImportedAt": { "$ref": "#/$defs/maybeSecond" },
+            "readings": { "type": "integer", "minimum": 1 },
+            "exactReadings": { "type": "integer", "minimum": 0 },
+            "exactSum": { "type": "number", "minimum": 0 },
+            "bands": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["veryLow", "low", "inRange", "high", "veryHigh"],
+              "description": "Readings below 54, from 54 to below low, low to high, above high to 250, above 250 mg/dL; censored readings count in the outer bands.",
+              "properties": {
+                "veryLow": { "type": "integer", "minimum": 0 },
+                "low": { "type": "integer", "minimum": 0 },
+                "inRange": { "type": "integer", "minimum": 0 },
+                "high": { "type": "integer", "minimum": 0 },
+                "veryHigh": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "gmi": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["minDays", "minCoverage"],
+              "properties": {
+                "minDays": { "type": "integer", "minimum": 1 },
+                "minCoverage": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["low", "high", "unit"],
+      "properties": { "low": { "type": "number" }, "high": { "type": "number" }, "unit": { "const": "mg/dL" } }
+    },
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "subject": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$" },
+    "provider": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,40}$" },
+    "maybeProvider": { "type": ["string", "null"], "pattern": "^[a-z][a-z0-9-]{0,40}$" },
+    "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "second": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+    "maybeSecond": { "type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "ok": true,
+  "groups": [
+    {
+      "group": "djEuNmQzYzJhMTAwMDAwNDAwMDgwMDAwMDAwMDAwMGIwMDEuMi42ZDNjMmExMDAwMDA0MDAwODAwMDAwMDAwMDAwYjAwMi4z",
+      "family": "edit",
+      "person": "alex",
+      "client": "DEMO client",
+      "changes": 3,
+      "memories": 2,
+      "from": "2026-11-02T09:30:00+00:00",
+      "until": "2026-11-02T09:34:00+00:00",
+      "capped": false,
+      "items": [
+        {
+          "id": "6d3c2a10-0000-4000-8000-00000000b002",
+          "revision": 3,
+          "event": "appended",
+          "at": "2026-11-02T09:34:00+00:00",
+          "changes": 2,
+          "preview": "DEMO: the Wendle allotment gate code changes on Tuesdays now.",
+          "truncated": false,
+          "held": false
+        },
+        {
+          "id": "6d3c2a10-0000-4000-8000-00000000b001",
+          "revision": 2,
+          "event": "updated",
+          "at": "2026-11-02T09:30:00+00:00",
+          "changes": 1,
+          "preview": null,
+          "truncated": false,
+          "held": true
+        }
+      ]
+    }
+  ],
+  "truncated": false,
+  "since": "2026-10-31T09:30:00+00:00"
+}

@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/get_prompt_capsule.output.schema.json",
+  "title": "get_prompt_capsule answer",
+  "description": "The harness tool get_prompt_capsule's answer (SB-P3-08), the JSON in its text content, upstream's prompt-capsule-mcp.v1: one scope's core or project capsule and its strong ETag; with if_none_match naming the current ETag, the ETag and unchanged true instead of the capsule; a refusal (isError true) with its code and status, and an unknown project's known ones. Listed and answered only with memory.capsules on. Its text is the scope's canonical memories, data for a prompt, never the engine's instruction.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "schema",
+        "etag",
+        "capsule"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "schema": {
+          "const": "prompt-capsule-mcp.v1"
+        },
+        "etag": {
+          "type": "string",
+          "pattern": "^\"pcv1-[0-9a-f]{64}\"$"
+        },
+        "capsule": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ok",
+            "schema",
+            "kind",
+            "scope",
+            "workspace",
+            "prompt_hash",
+            "text",
+            "sections",
+            "omitted_slots",
+            "missing_slots",
+            "complete",
+            "populated",
+            "invalid_entries",
+            "duplicate_slots",
+            "char_count",
+            "max_chars"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "schema": {
+              "const": "prompt-capsule.v1"
+            },
+            "kind": {
+              "enum": [
+                "core",
+                "project"
+              ]
+            },
+            "project_id": {
+              "$ref": "memory.defs.schema.json#/$defs/slug"
+            },
+            "scope": {
+              "$ref": "memory.defs.schema.json#/$defs/scope"
+            },
+            "workspace": {
+              "enum": [
+                "personal",
+                "company"
+              ]
+            },
+            "prompt_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 12000
+            },
+            "sections": {
+              "type": "array",
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "slot",
+                  "source_entry_id"
+                ],
+                "properties": {
+                  "slot": {
+                    "type": "string",
+                    "pattern": "^[a-z-]{1,20}$"
+                  },
+                  "source_entry_id": {
+                    "$ref": "memory.defs.schema.json#/$defs/uuid"
+                  }
+                }
+              }
+            },
+            "omitted_slots": {
+              "type": "array",
+              "maxItems": 4,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z-]{1,20}$"
+              }
+            },
+            "missing_slots": {
+              "type": "array",
+              "maxItems": 4,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z-]{1,20}$"
+              }
+            },
+            "complete": {
+              "type": "boolean"
+            },
+            "populated": {
+              "type": "boolean"
+            },
+            "invalid_entries": {
+              "type": "array",
+              "maxItems": 200,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "entry_id",
+                  "slot",
+                  "reason"
+                ],
+                "properties": {
+                  "entry_id": {
+                    "$ref": "memory.defs.schema.json#/$defs/uuid"
+                  },
+                  "slot": {
+                    "type": "string",
+                    "pattern": "^[a-z-]{1,20}$"
+                  },
+                  "reason": {
+                    "enum": [
+                      "empty-content",
+                      "content-too-large"
+                    ]
+                  }
+                }
+              }
+            },
+            "duplicate_slots": {
+              "type": "array",
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "slot",
+                  "entry_ids"
+                ],
+                "properties": {
+                  "slot": {
+                    "type": "string",
+                    "pattern": "^[a-z-]{1,20}$"
+                  },
+                  "entry_ids": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 200,
+                    "items": {
+                      "$ref": "memory.defs.schema.json#/$defs/uuid"
+                    }
+                  }
+                }
+              }
+            },
+            "char_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 12000
+            },
+            "max_chars": {
+              "const": 12000
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "schema",
+        "etag",
+        "unchanged"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "schema": {
+          "const": "prompt-capsule-mcp.v1"
+        },
+        "etag": {
+          "type": "string",
+          "pattern": "^\"pcv1-[0-9a-f]{64}\"$"
+        },
+        "unchanged": {
+          "const": true
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "schema",
+        "code",
+        "status",
+        "error"
+      ],
+      "properties": {
+        "ok": {
+          "const": false
+        },
+        "schema": {
+          "const": "prompt-capsule-mcp.v1"
+        },
+        "code": {
+          "enum": [
+            "invalid_request",
+            "forbidden",
+            "unknown_project",
+            "too_many_candidates"
+          ]
+        },
+        "status": {
+          "enum": [
+            400,
+            403,
+            404,
+            409
+          ]
+        },
+        "error": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "known_projects": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "$ref": "memory.defs.schema.json#/$defs/slug"
+          }
+        }
+      }
+    }
+  ]
+}

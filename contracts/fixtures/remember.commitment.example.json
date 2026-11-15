@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a031",
+  "revision": 1,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "changed": [],
+  "unchanged": false,
+  "replayed": false,
+  "dropped_tags": [],
+  "held": null,
+  "message": "Stored as a draft, a household memory, visible to everyone in the household (per-person scopes are off). set_status canonical confirms it once the person agrees it is right. Saved as owed to the person by Sam: an open loop, listed by list_loops (direction in) until resolve_loop marks it received.",
+  "commitment": {
+    "direction": "in",
+    "counterparty": "Sam"
+  }
+}

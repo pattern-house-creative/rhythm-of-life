@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a043",
+  "revision": 3,
+  "scope": "private",
+  "owner": "alex",
+  "status": "draft",
+  "scopes": "on",
+  "project": null,
+  "action": "clear_date",
+  "due": null,
+  "before": null,
+  "changed": [],
+  "unchanged": true,
+  "message": "Nothing changed: it has no due date."
+}

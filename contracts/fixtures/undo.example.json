@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "action": "reverted",
+  "id": "6d3c2a10-0000-4000-8000-00000000a001",
+  "revision": 5,
+  "to": 1,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "changed": [
+    "content",
+    "tags",
+    "status"
+  ],
+  "unchanged": false,
+  "held": null,
+  "restored": null,
+  "group": null,
+  "message": "Put back as at revision 1, as a change of its own (revision 5), which undo can reverse again."
+}

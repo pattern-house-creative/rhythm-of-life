@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_decisions.output.schema.json",
+  "title": "list_decisions answer",
+  "description": "The memory tool list_decisions' answer (SB-P5-11, migration 060): the caller's own decisions in one list, newest first. A decision is a memory remember saved with decision true; it is in the ledger while it is live, not held for review and not marked wrong (060's memory_decision_listed, one predicate). state is the list asked: open (no outcome yet), due (its review date has come), resolved (an outcome recorded, unknown included), scored (an outcome right, wrong or mixed and a confidence: what decision_calibration rests on, in any window) or all (open and resolved); every list but scored leaves out a decision whose window has ended. total is that list's whole length for this caller, and open, due, resolved and scored those lists' lengths under the same filters, all read in the same statement as the page, so each count is the length of its list. Only decisions the caller may change and owns: its person's private ones, and the Family ones its person wrote or no person wrote. confidence is how sure the person was (0.05 to 0.95 in steps of 0.05), with confidence_source stated or inferred, or both null; outcome null (none yet), right, wrong, mixed or unknown, rearms how often unknown asked again (at most 2); review_at when it comes up for review, null once nothing is left to ask, and due whether that has come; current whether its window is open; edited whether its words changed after it was recorded. content is a preview of up to 500 characters, truncated when longer; a held memory is never listed. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "state", "total", "open", "due", "upcoming", "resolved", "scored", "decisions", "next", "notice"],
+      "properties": {
+        "ok": { "const": true },
+        "state": { "enum": ["open", "due", "upcoming", "resolved", "scored", "all"] },
+        "total": { "type": "integer", "minimum": 0 },
+        "open": { "type": "integer", "minimum": 0, "description": "How many decisions have no outcome yet, under the same filters." },
+        "due": { "type": "integer", "minimum": 0, "description": "How many have come up for review, under the same filters." },
+        "upcoming": { "type": "integer", "minimum": 0, "description": "How many come up for review within the next 48 hours, under the same filters (migration 069)." },
+        "resolved": { "type": "integer", "minimum": 0, "description": "How many have an outcome, under the same filters." },
+        "scored": { "type": "integer", "minimum": 0, "description": "How many decision_calibration rests on, under the same filters: its n." },
+        "decisions": { "type": "array", "maxItems": 50, "items": { "$ref": "#/$defs/decision" } },
+        "next": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z0-9_-]{1,200}$",
+          "description": "Pass as cursor for the next page; null at the end."
+        },
+        "notice": { "$ref": "memory.defs.schema.json#/$defs/notice" }
+      },
+      "anyOf": [
+        { "properties": { "state": { "const": "all" }, "decisions": { "items": { "properties": { "current": { "const": true } } } } } },
+        {
+          "properties": {
+            "state": { "const": "open" },
+            "decisions": { "items": { "properties": { "outcome": { "const": null }, "current": { "const": true } } } }
+          }
+        },
+        {
+          "properties": {
+            "state": { "const": "due" },
+            "decisions": { "items": { "properties": { "due": { "const": true }, "window": { "const": "overdue" }, "current": { "const": true } } } }
+          }
+        },
+        {
+          "properties": {
+            "state": { "const": "upcoming" },
+            "decisions": { "items": { "properties": { "due": { "const": false }, "window": { "const": "upcoming" }, "current": { "const": true } } } }
+          }
+        },
+        {
+          "properties": {
+            "state": { "const": "resolved" },
+            "decisions": { "items": { "properties": { "outcome": { "enum": ["right", "wrong", "mixed", "unknown"] }, "current": { "const": true } } } }
+          }
+        },
+        {
+          "properties": {
+            "state": { "const": "scored" },
+            "decisions": {
+              "items": { "properties": { "outcome": { "enum": ["right", "wrong", "mixed"] }, "confidence": { "type": "number" } } }
+            }
+          }
+        }
+      ]
+    },
+    { "$ref": "memory.defs.schema.json#/$defs/refusal" }
+  ],
+  "$defs": {
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "revision", "scope", "owner", "author", "status", "confidence", "confidence_source", "outcome", "rearms", "review_at", "due", "window",
+        "current", "edited", "tags", "project", "created_at", "content", "truncated"],
+      "properties": {
+        "id": { "$ref": "memory.defs.schema.json#/$defs/uuid" },
+        "revision": { "$ref": "memory.defs.schema.json#/$defs/revision" },
+        "scope": { "$ref": "memory.defs.schema.json#/$defs/scope" },
+        "owner": { "$ref": "memory.defs.schema.json#/$defs/subject" },
+        "author": { "$ref": "memory.defs.schema.json#/$defs/person" },
+        "status": { "enum": ["canonical", "draft"] },
+        "confidence": { "$ref": "memory.defs.schema.json#/$defs/confidence" },
+        "confidence_source": { "$ref": "memory.defs.schema.json#/$defs/confidenceSource" },
+        "outcome": { "enum": [null, "right", "wrong", "mixed", "unknown"] },
+        "rearms": { "type": "integer", "minimum": 0, "maximum": 2, "description": "How often unknown asked again; at most twice." },
+        "review_at": { "$ref": "memory.defs.schema.json#/$defs/maybeInstant", "description": "When it comes up for review; null once nothing is left to ask." },
+        "due": { "type": "boolean", "description": "Its review date has come." },
+        "window": { "enum": [null, "overdue", "upcoming", "later"], "description": "The one due definition's window its review date falls in (migration 069, as list_due reads a due date): overdue, its moment has come; upcoming, within 48 hours; later; null with no review date." },
+        "current": { "type": "boolean", "description": "Its window is open: false only in the scored list, for a decision replaced or ended since." },
+        "edited": { "type": "boolean", "description": "Its words changed after it was recorded: its confidence was given for the words before." },
+        "tags": { "$ref": "memory.defs.schema.json#/$defs/tags" },
+        "project": { "$ref": "memory.defs.schema.json#/$defs/writtenProject" },
+        "created_at": { "$ref": "memory.defs.schema.json#/$defs/instant", "description": "When it was written." },
+        "content": { "type": "string", "maxLength": 500 },
+        "truncated": { "type": "boolean", "description": "content is a preview: get reads the whole text." }
+      },
+      "allOf": [
+        { "anyOf": [{ "properties": { "confidence": { "type": "number" }, "confidence_source": { "type": "string" } } },
+          { "properties": { "confidence": { "type": "null" }, "confidence_source": { "type": "null" } } }] },
+        { "anyOf": [{ "properties": { "outcome": { "const": null }, "rearms": { "const": 0 }, "review_at": { "type": "string" } } },
+          { "properties": { "outcome": { "const": "unknown" }, "rearms": { "minimum": 1 } } },
+          { "properties": { "outcome": { "enum": ["right", "wrong", "mixed"] }, "rearms": { "const": 0 }, "review_at": { "type": "null" }, "due": { "const": false } } }] },
+        { "anyOf": [{ "properties": { "due": { "const": false } } }, { "properties": { "due": { "const": true }, "review_at": { "type": "string" } } }] }
+      ]
+    }
+  }
+}

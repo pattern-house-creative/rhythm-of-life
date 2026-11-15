@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "standing": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000d201",
+      "revision": 1,
+      "scope": "shared",
+      "owner": "household",
+      "author": "alex",
+      "source": "app",
+      "status": "canonical",
+      "project": null,
+      "createdAt": "2026-11-02T09:30:00+00:00",
+      "content": "DEMO: when the Wendle rota comes up, list Sam's evenings first.",
+      "held": null,
+      "fires": true,
+      "reason": null
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000d202",
+      "revision": 1,
+      "scope": "shared",
+      "owner": "household",
+      "author": null,
+      "source": "mcp",
+      "status": "draft",
+      "project": null,
+      "createdAt": "2026-11-03T09:30:00+00:00",
+      "content": null,
+      "held": { "reason": "instruction", "signals": ["ignore_previous"] },
+      "fires": false,
+      "reason": "held"
+    }
+  ],
+  "next": null,
+  "count": 2,
+  "firing": 1,
+  "held": 1,
+  "overLimit": 0,
+  "maxInScope": 50,
+  "maxFires": 2,
+  "served": false
+}

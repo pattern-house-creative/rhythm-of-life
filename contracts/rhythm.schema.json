@@ -1,0 +1,452 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/rhythm.schema.json",
+  "title": "rhythm.yaml",
+  "description": "Settings of one Rhythm of Life install. Never holds a secret: secrets are files passed through *_FILE variables. See docs/configuration.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "instance", "timezone", "people"],
+  "properties": {
+    "version": { "const": 1 },
+    "instance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 60 }
+      }
+    },
+    "timezone": { "$ref": "#/$defs/timezone" },
+    "people": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "$ref": "#/$defs/personId" },
+          "name": { "type": "string", "minLength": 1, "maxLength": 60 }
+        }
+      }
+    },
+    "demo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true }
+      }
+    },
+    "memory": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "scopes": {
+          "description": "off: the household shares everything, as before; on: per-person private memories and Family (docs/dev/memory.md section 6). Absent or empty means off, as on every install until its operator sets on, which this version accepts (phase 1 has exited).",
+          "enum": ["off", "on", null],
+          "default": "off"
+        },
+        "capsules": {
+          "description": "Prompt capsules. off: AI clients are offered no prompt capsule, as before; on: they get the get_prompt_capsule tool and the rhythm://capsules/... resources, one scope's \"start here\" context from its canonical memories in fixed slots (contracts/README.md 2.1). Absent or empty means off.",
+          "enum": ["off", "on", null],
+          "default": "off"
+        },
+        "tools": {
+          "description": "The memory tools. off: AI clients are offered none of them, and a call naming one is answered as an unknown tool, as before; on: they get the 41 memory tools (MemoryTools.Names; contracts/README.md 2.1), from remember to resolve, each reading and writing as an AI client under the memory scope rules (docs/dev/memory.md sections 5 to 7). Absent or empty means off.",
+          "enum": ["off", "on", null],
+          "default": "off"
+        },
+        "share": {
+          "description": "The share tool. off: AI clients are offered no share tool, and a call naming it is answered as an unknown tool, as before; on, with tools on too: they get share (contracts/README.md 2.1), which moves one memory between its owner's private scope and Family and takes it back, only while scopes is on (docs/dev/memory.md section 5). Absent or empty means off.",
+          "enum": ["off", "on", null],
+          "default": "off"
+        },
+        "secondBrainImport": {
+          "description": "The Second Brain export importer. off: the terminal offers no importer and rhythm import-second-brain answers as a command the engine does not know, as before; on: the operator may read one file a Second Brain service exported and see what it would import, writing only with --write (docs/configuration.md). No AI client, app route or daily job imports anything with it on or off. Absent or empty means off.",
+          "enum": ["off", "on", null],
+          "default": "off"
+        },
+        "capture": {
+          "description": "The capture endpoint. off: POST /capture answers as an unknown route does and rhythm capture as a command the engine does not know, as before; on, with tools on too: a capture token (rhythm capture connect) saves memories there as drafts or held for review, into its one scope, and reads nothing (contracts/README.md section 6). Absent or empty means off.",
+          "enum": ["off", "on", null],
+          "default": "off"
+        }
+      }
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "description": "Base URL the app's server calls (it appends /mcp). Empty means demo mode.",
+          "type": "string",
+          "pattern": "^(|https?://[^/?#@\\s]+/?)$",
+          "default": "http://engine:8080"
+        },
+        "allowedHosts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": { "type": "string", "minLength": 1, "maxLength": 253 },
+          "default": ["localhost", "127.0.0.1", "[::1]", "engine"]
+        },
+        "publicMcpUrl": { "type": "string", "pattern": "^https?://\\S+/mcp$" },
+        "legacyToolNames": { "type": "boolean", "default": false },
+        "legacySearch": {
+          "description": "search_knowledge and search_resources as before ranking: every word required, newest first. Absent means true, so an install whose settings predate ranking keeps its search; rhythm init writes false.",
+          "type": "boolean",
+          "default": true
+        },
+        "recall": {
+          "description": "Combined retrieval (words and meaning in one ranked list, with reasons and a receipt). off: as before; on: AI clients get the recall tool, and the app's explorer search adds combined results with reasons. Absent or empty means off.",
+          "enum": ["off", "on", null],
+          "default": "off"
+        },
+        "searchKnowledge": {
+          "description": "Which list search_knowledge answers from. fulltext: as before; combined: the same rows in combined retrieval's order. combined needs legacySearch false; the engine refuses it at start otherwise. Absent or empty means fulltext.",
+          "enum": ["fulltext", "combined", null],
+          "default": "fulltext"
+        },
+        "recallLog": {
+          "description": "The opt-in recall log. off: no search is logged; on: each question the recall tool or the app's explorer search answers is kept in its reader's own scope with what it found and its receipt, at most 200 a day a scope, for 30 days, with follow-ups; no answer changes. Absent or empty means off.",
+          "enum": ["off", "on", null],
+          "default": "off"
+        },
+        "rerank": {
+          "description": "A local cross-encoder that reorders combined retrieval's first 20 results (the recall tool, the app's explorer search, and search_knowledge's combined mode). off: the combined list as fused, as before; bge-reranker-base or ms-marco-minilm: that model, loaded at start from RHYTHM_RERANKER_DIR_BGE or RHYTHM_RERANKER_DIR_MSMARCO, else downloaded once into the data folder at a pinned revision and checked against its SHA-256, used only after it passes a readiness probe; while it is not ready, after three failures in a row (for a minute) or when one call fails, the results keep the combined order and say so. The retrieval gate kept neither model on the test set, so it stays off (docs/dev/second-brain-parity/benchmarks.md). Absent or empty means off.",
+          "enum": ["off", "bge-reranker-base", "ms-marco-minilm", null],
+          "default": "off"
+        },
+        "writeLimit": {
+          "description": "The per-token write limit. off: no token is counted and every tool answers as before; on: a token past 300 writes in 10 minutes has its next write refused and nothing saved, until the oldest leaves the window. It counts AI clients' write tools, plugins' writes and captures; reads, the app role (its shared login included) and the terminal, never. Absent or empty means off. See docs/configuration.md and docs/security.md.",
+          "enum": ["off", "on", null],
+          "default": "off"
+        },
+        "nightSummary": {
+          "description": "The night summary of the daily jobs. off: nothing is kept and rhythm night answers as an unknown command; on: one row a night and job for 30 nights, kinds and counts only, read with rhythm night. Absent or empty means off.",
+          "enum": ["off", "on", null],
+          "default": "off"
+        }
+      }
+    },
+    "app": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "publicUrl": { "description": "The app's address that `rhythm up` prints for people.", "type": "string", "pattern": "^https?://\\S+$" },
+        "allowedHosts": {
+          "description": "More host names the app's own server answers to. It always answers to localhost, app (its name on the stack's network), IP addresses, the host of publicUrl, engine.allowedHosts and adapters.cloudflare.hostname; any other Host is refused (DNS rebinding).",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": { "type": "string", "minLength": 1, "maxLength": 253, "pattern": "^[A-Za-z0-9.:\\[\\]-]+$" }
+        },
+        "credentialExpiry": { "type": ["string", "null"], "format": "date-time", "default": null },
+        "viewers": {
+          "description": "off: everyone at the app sees the household view, as before; on: someone at the app can open a viewer session for one person with a one-time code the operator makes (rhythm viewer invite), held on the app's server (docs/security.md, Viewer sessions). Absent or empty means off. This version refuses on until the owner approves viewer sessions.",
+          "enum": ["off", "on", null],
+          "default": "off"
+        }
+      }
+    },
+    "graph": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "refreshSeconds": { "type": "integer", "minimum": 300, "maximum": 86400, "default": 900 },
+        "freshnessSeconds": { "type": "integer", "minimum": 360, "maximum": 86400, "default": 2100 },
+        "maxMemories": { "type": "integer", "minimum": 1, "maximum": 4000, "default": 3000 },
+        "maxDocuments": { "type": "integer", "minimum": 0, "maximum": 4000, "default": 1000 },
+        "nodeLimit": { "type": "integer", "minimum": 10, "maximum": 500, "default": 300 },
+        "pluginLinks": {
+          "description": "A plugin's own links between its records. off: they stay off the map, as before; on: each joins the two records' stars as that plugin's suggestion, dashed. Absent or empty means off.",
+          "enum": ["off", "on", null],
+          "default": "off"
+        },
+        "similarity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "threshold": { "type": ["number", "null"], "minimum": 0.2, "maximum": 0.95, "default": 0.6 },
+            "neighbors": { "type": "integer", "minimum": 1, "maximum": 10, "default": 3 },
+            "documentThreshold": { "type": ["number", "null"], "minimum": 0.2, "maximum": 0.99, "default": 0.8 },
+            "mutualThreshold": {
+              "description": "Two stars that are each among the other's neighbors closest link from this score up, below the thresholds above; null turns that off. Ignored while threshold is null.",
+              "type": ["number", "null"], "minimum": 0.2, "maximum": 0.95, "default": 0.45
+            },
+            "model": {
+              "description": "The model whose vectors make the map's similar and copy links (D-256). Absent: the live embeddings model's, as before. bge-small: a second vector per star from that model, read by those links alone, with its own recorded thresholds (similar 0.68, documents 0.88, mutual 0.73) in place of the three numbers above; a number set to null still turns its rule off, and neighbors is kept. Search, recall and memory writes keep the live model.",
+              "enum": ["bge-small"]
+            },
+            "maxLinks": {
+              "description": "At most this many similar links a star (D-258): a similar link is kept only while it is among the maxLinks strongest similar links of both its stars, the mutual rule's ranked by score with the rest, ties by graph id; copy links are neither capped nor counted. With either model's vectors. Absent or null: no cap, as before. Ignored while threshold is null.",
+              "type": ["integer", "null"], "minimum": 2, "maximum": 50
+            }
+          }
+        },
+        "catalog": {
+          "description": "Data star groups and provider labels, before the built-in ones; a group with a built-in group's id and provider replaces it.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "groups": {
+              "type": "array",
+              "maxItems": 100,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "label", "metrics"],
+                "properties": {
+                  "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$", "not": { "const": "other" } },
+                  "label": { "type": "string", "minLength": 1, "maxLength": 100 },
+                  "provider": { "type": "string", "pattern": "^([*]|[a-z][a-z0-9-]{0,63})$", "default": "*" },
+                  "metrics": { "type": "array", "minItems": 1, "maxItems": 100, "items": { "type": "string", "pattern": "^[a-z0-9_]{1,100}[*]?$" } },
+                  "topics": { "type": "array", "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 40 } }
+                }
+              }
+            },
+            "providers": {
+              "description": "A label per provider id, such as csv: CSV import.",
+              "type": "object",
+              "maxProperties": 50,
+              "propertyNames": { "pattern": "^[a-z][a-z0-9-]{0,63}$" },
+              "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 60 }
+            }
+          }
+        }
+      }
+    },
+    "health": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "glucose": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "displayUnit": { "enum": ["mg/dL", "mmol/L"], "default": "mg/dL" },
+            "low": { "type": "number", "minimum": 40, "maximum": 150, "default": 70 },
+            "high": { "type": "number", "minimum": 100, "maximum": 400, "default": 180 }
+          }
+        },
+        "gmi": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minDays": { "type": "integer", "minimum": 1, "maximum": 90, "default": 14 },
+            "minCoverage": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.7 }
+          }
+        }
+      }
+    },
+    "adapters": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/adapterName" },
+      "properties": {
+        "notes": {
+          "$ref": "#/$defs/adapter",
+          "properties": { "path": { "$ref": "#/$defs/containerPath" }, "owner": { "$ref": "#/$defs/subject" } },
+          "unevaluatedProperties": false
+        },
+        "csv": {
+          "$ref": "#/$defs/adapter",
+          "properties": { "path": { "$ref": "#/$defs/containerPath" }, "owner": { "$ref": "#/$defs/subject" } },
+          "unevaluatedProperties": false
+        },
+        "documents": {
+          "$ref": "#/$defs/adapter",
+          "properties": { "path": { "$ref": "#/$defs/containerPath" }, "owner": { "$ref": "#/$defs/subject" } },
+          "unevaluatedProperties": false
+        },
+        "embeddings": {
+          "$ref": "#/$defs/adapter",
+          "description": "The local embedding model (docs/configuration.md, Embedding models). The engine accepts only minilm as model for now; another model is built as the shadow first.",
+          "properties": {
+            "model": { "enum": ["minilm"], "default": "minilm" },
+            "shadow": { "enum": ["bge-small"] },
+            "backfill": { "type": "boolean", "default": false },
+            "thresholds": {
+              "description": "The similarity thresholds the engine reads the model's scores against: today (graph.similarity's numbers, as before) or tuned (the live model's own, re-tuned on the test set's labelled pairs).",
+              "enum": ["today", "tuned"],
+              "default": "today"
+            },
+            "sources": {
+              "description": "The texts the index gives semantic_search passages to besides save_document copies: documents (uploads and dropped files), notes, drive (keeps passages of readable Drive files' text), memories. Absent means none.",
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "enum": ["documents", "notes", "drive", "memories"] },
+              "default": []
+            }
+          },
+          "unevaluatedProperties": false
+        },
+        "titles": {
+          "$ref": "#/$defs/adapter",
+          "description": "model is required when enabled (there is no default); url names a compose service on the internal network.",
+          "properties": {
+            "provider": { "enum": ["ollama"], "default": "ollama" },
+            "model": { "type": "string", "pattern": "^([A-Za-z0-9._:/-]{1,100})?$" },
+            "url": { "type": "string", "pattern": "^http://[a-z][a-z0-9-]{0,62}(:[0-9]{1,5})?/?$", "default": "http://titles:11434/" }
+          },
+          "unevaluatedProperties": false
+        },
+        "drive": {
+          "$ref": "#/$defs/adapter",
+          "properties": {
+            "roots": {
+              "description": "Drive folder ids whose files become stars (a file id also works). None by default.",
+              "type": "array",
+              "maxItems": 20,
+              "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,200}$" }
+            },
+            "edits": { "type": "boolean", "default": false },
+            "owner": { "$ref": "#/$defs/subject" }
+          },
+          "unevaluatedProperties": false
+        },
+        "garmin": {
+          "$ref": "#/$defs/adapter",
+          "properties": {
+            "owner": { "$ref": "#/$defs/personId" },
+            "pollSeconds": { "type": "integer", "minimum": 3600, "maximum": 86400, "default": 21600 },
+            "deviceTimezone": { "$ref": "#/$defs/timezoneOrNull" },
+            "historyDays": { "type": "integer", "minimum": 1, "maximum": 365, "default": 14 },
+            "importPath": { "$ref": "#/$defs/containerPath", "default": "/data/import/garmin" },
+            "distanceUnit": { "enum": ["km", "mi"], "default": "km" }
+          },
+          "unevaluatedProperties": false
+        },
+        "second-brain": {
+          "$ref": "#/$defs/adapter",
+          "properties": {
+            "url": { "type": "string", "pattern": "^https://[^/?#@\\s]+/$" },
+            "teams": {
+              "description": "Team workspace ids listed besides the token's personal workspace.",
+              "type": "array",
+              "maxItems": 10,
+              "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,100}$" },
+              "default": []
+            },
+            "owner": { "$ref": "#/$defs/subject" }
+          },
+          "unevaluatedProperties": false
+        },
+        "nightscout": {
+          "$ref": "#/$defs/adapter",
+          "properties": {
+            "url": {
+              "type": "string", "pattern": "^https?://[^?#@\\s]+$",
+              "description": "https, or plain http only to a single-label host or a private address on this network (the engine checks it)."
+            },
+            "owner": { "$ref": "#/$defs/subject", "description": "Whose readings these are: a person id, not household." },
+            "pollSeconds": { "type": "integer", "minimum": 60, "maximum": 86400, "default": 300 }
+          },
+          "unevaluatedProperties": false
+        },
+        "calendar": {
+          "$ref": "#/$defs/adapter",
+          "description": "A calendar over your own private ICS links, read only. The links are secret files (secrets/adapters/calendar_link and two more, optional), never settings: the engine refuses one here.",
+          "properties": {
+            "owner": {
+              "$ref": "#/$defs/subject",
+              "description": "Whose calendar this is: a person id, or household for one the whole family shares."
+            },
+            "daysBack": { "type": "integer", "minimum": 0, "maximum": 90, "default": 7 },
+            "daysAhead": { "type": "integer", "minimum": 1, "maximum": 365, "default": 30 },
+            "pollSeconds": { "type": "integer", "minimum": 300, "maximum": 86400, "default": 900 }
+          },
+          "unevaluatedProperties": false
+        },
+        "tailscale": { "$ref": "#/$defs/adapter", "unevaluatedProperties": false },
+        "cloudflare": {
+          "$ref": "#/$defs/adapter",
+          "properties": {
+            "hostname": { "type": "string", "minLength": 1, "maxLength": 253, "description": "public host name of the app, behind Cloudflare Access" },
+            "mcpHostname": { "type": "string", "minLength": 1, "maxLength": 253, "description": "public host name that reaches only the engine's /mcp; also list it in engine.allowedHosts" }
+          },
+          "unevaluatedProperties": false
+        },
+        "openai-tunnel": {
+          "$ref": "#/$defs/adapter",
+          "properties": {
+            "tunnelId": { "type": "string", "pattern": "^tunnel_([a-z0-9]{4}_)?[a-z0-9]{32}$", "description": "the tunnel's ID from the OpenAI platform's tunnel settings; the tunnel client reads it from this file" }
+          },
+          "unevaluatedProperties": false
+        }
+      },
+      "additionalProperties": { "$ref": "#/$defs/adapter" }
+    },
+    "plugins": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/adapterName" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["enabled", "providers", "subjects", "policy"],
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "providers": { "type": "array", "minItems": 1, "maxItems": 10, "uniqueItems": true, "items": { "$ref": "#/$defs/adapterName" } },
+          "subjects": { "type": "array", "minItems": 1, "maxItems": 20, "uniqueItems": true, "items": { "$ref": "#/$defs/subject" } },
+          "policy": { "enum": ["live", "archive", "reference"] },
+          "policies": {
+            "description": "Per provider, overriding policy (for example a live feed plus an archive). Keys are some of providers.",
+            "type": "object",
+            "propertyNames": { "$ref": "#/$defs/adapterName" },
+            "additionalProperties": { "enum": ["live", "archive", "reference"] }
+          },
+          "domain": { "enum": ["health", "household", "unclassified"], "default": "unclassified" }
+        }
+      }
+    },
+    "providers": {
+      "description": "Providers no adapter or plugin owns whose records the install keeps (an older engine's or a removed plugin's), each with its policy. Without an entry such a provider is live.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/adapterName" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "policy": { "enum": ["live", "archive", "reference"], "default": "archive" },
+          "domain": { "enum": ["health", "household", "unclassified"], "default": "unclassified" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "timezone": {
+      "description": "IANA time zone name, or UTC.",
+      "type": "string",
+      "pattern": "^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+){1,2})$"
+    },
+    "timezoneOrNull": {
+      "oneOf": [{ "$ref": "#/$defs/timezone" }, { "type": "null" }]
+    },
+    "personId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$",
+      "not": { "const": "household" }
+    },
+    "subject": {
+      "description": "A person id from people, or household.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,31}$"
+    },
+    "adapterName": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,30}$" },
+    "containerPath": { "type": "string", "pattern": "^/[^\\s]*$", "maxLength": 300 },
+    "adapter": {
+      "description": "Every adapter section: enabled, plus its own keys. No key may name a secret value; keys ending in File hold paths.",
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean", "default": false }
+      },
+      "propertyNames": {
+        "pattern": "^[a-z][A-Za-z0-9]*$",
+        "not": { "pattern": "([Tt]oken|[Pp]assword|[Ss]ecret|[Aa]pi[Kk]ey)$" }
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "unsupported_type",
+  "reason": "Only PDF, .txt and .md files can be added."
+}

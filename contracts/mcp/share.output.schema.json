@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/share.output.schema.json",
+  "title": "share answer",
+  "description": "The memory tool share's answer (SB-P3-10): a memory moved between its owner's private scope and Family, or unchanged when it is there already. A write's shape: no memory's words, only where it is now and what moved with it (scope, and project and capsule when they changed); replayed is always false and dropped_tags empty. A held memory's answer names no project, and neither does an answer to a caller that does not read where the memory landed (an admin who took it back). Listed and answered only with memory.tools and memory.share on, and refused (scopes_off) while memory.scopes is off (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "$ref": "memory.defs.schema.json#/$defs/written"
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

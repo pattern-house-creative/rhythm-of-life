@@ -1,0 +1,23 @@
+# Adds the upstream stub to a stack and points the engine's adapter calls at it (README.md here). Tests only. Paths are
+# relative to deploy/compose, the folder of the first compose file:
+#   docker compose -f deploy/compose/compose.yaml -f engine/tests/upstream/compose.yaml -p rhythm-test up -d
+services:
+  upstream:
+    image: ${RHYTHM_NODE_IMAGE:-node:24-alpine}
+    command: ["node", "/stub/upstream.mjs"]
+    volumes:
+      - ../../engine/tests/upstream:/stub:ro
+    networks:
+      - internal
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  engine:
+    environment:
+      RHYTHM_TEST_UPSTREAM: http://upstream:8080
+    depends_on:
+      upstream:
+        condition: service_started

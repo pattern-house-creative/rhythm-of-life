@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "protected",
+  "error": "Memory 6d3c2a10-0000-4000-8000-00000000a001 is confirmed (canonical): only a confirmed memory replaces it. Confirm memory 6d3c2a10-0000-4000-8000-00000000a003 first (set_status canonical, once the person agrees), then ask again"
+}

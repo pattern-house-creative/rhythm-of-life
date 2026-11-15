@@ -1,0 +1,33 @@
+# Caddy in front of Rhythm of Life (deploy/exposure/reverse-proxy/README.md).
+#
+# Rhythm of Life has no login of its own. This proxy is the gate:
+#   /mcp        the engine's MCP endpoint. AI clients send their own token as "Authorization: Bearer ...", which the
+#               engine checks. Basic auth would need that same header, so this path has no proxy login.
+#   everything  the app, behind a login for the people of the household (basic auth; see the README for single
+#   else        sign-on with forward_auth instead).
+#
+# RHYTHM_SITE is the address people type: a domain name (Caddy gets a certificate for it automatically) or
+# "localhost" (Caddy's own local certificate authority). The engine sees that name as Host: add it to
+# engine.allowedHosts in rhythm.yaml.
+
+{
+	# No admin API: change this file and restart the container instead.
+	admin off
+	# For "localhost", Caddy makes its own certificate authority; it cannot (and need not) install it in the
+	# container's trust store. Trust it on your devices instead (README).
+	skip_install_trust
+}
+
+{$RHYTHM_SITE:localhost} {
+	handle /mcp {
+		reverse_proxy engine:8080
+	}
+
+	handle {
+		basic_auth {
+			# One line per person: <name> <bcrypt hash>, from `caddy hash-password`. A secret file, never committed.
+			import /run/secrets/proxy_users
+		}
+		reverse_proxy app:8080
+	}
+}

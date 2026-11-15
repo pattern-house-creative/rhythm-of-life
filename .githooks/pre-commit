@@ -1,0 +1,7 @@
+#!/bin/sh
+# Blocks a commit whose staged files or author identity fail the scrub check.
+# Enable once per clone: git config core.hooksPath .githooks
+# Without the maintainers' private pattern file, say so once and the hooks run the public rules alone:
+#   git config rhythm.scrubPublicOnly true
+if [ "$(git config --bool rhythm.scrubPublicOnly 2>/dev/null)" = true ]; then exec node scripts/scrub-check.mjs --staged --public-only; fi
+exec node scripts/scrub-check.mjs --staged

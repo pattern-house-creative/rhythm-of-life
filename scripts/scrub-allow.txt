@@ -1,0 +1,10 @@
+# Reviewed exceptions to scripts/scrub-check.mjs.
+#
+# One entry per line:  <rule-id> <path-glob> -- <reason>
+#   rule-id    a rule from the check's output, e.g. size, file:evidence-json, secret:assignment
+#              ("secret:*" covers every secret rule; use it sparingly)
+#   path-glob  repo-relative, forward slashes; * stays within a folder, ** crosses folders
+#   reason     why this is safe, at least 8 characters; reviewers read it
+#
+# Private-pattern matches cannot be listed here. Fix the content instead.
+# Keep this list short. Every entry is a place a reviewer must trust.

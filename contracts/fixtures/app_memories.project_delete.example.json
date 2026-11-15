@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "op": "project_delete",
+  "id": "6d3c2a10-0000-4000-8000-00000000b102",
+  "slug": "canal-walks",
+  "owner": "household",
+  "memories": 3,
+  "scopes": "off"
+}

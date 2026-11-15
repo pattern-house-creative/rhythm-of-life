@@ -1,0 +1,494 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/brief.output.schema.json",
+  "title": "brief answer",
+  "description": "The memory tool brief's answer (SB-P5-08, migration 069): what needs the person now. Each section is the head of a list another memory tool walks and total is that whole list's length, read in the statement that made the head, so a count is the length of its list. due is list_due's overdue and upcoming windows, decisions is list_decisions' due and upcoming, the one due definition (D-214). A memory held for review is only counted in held, with no words, and one in the trash is in no section. It writes nothing.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "project",
+        "zone",
+        "says",
+        "due",
+        "decisions",
+        "you_owe",
+        "owed_to_you",
+        "stale",
+        "insights",
+        "contradictions",
+        "duplicates",
+        "held",
+        "standing",
+        "calibration",
+        "changes",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "project": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "The project the call named, which only standing reads; null when none was named."
+        },
+        "zone": {
+          "type": "string",
+          "pattern": "^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+){1,2})$",
+          "description": "The install's time zone."
+        },
+        "says": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400,
+          "description": "What needs attention, in a line, by count alone, or that nothing does."
+        },
+        "due": {
+          "$ref": "#/$defs/due"
+        },
+        "decisions": {
+          "$ref": "#/$defs/decisions"
+        },
+        "you_owe": {
+          "$ref": "#/$defs/loops",
+          "description": "list_loops direction out."
+        },
+        "owed_to_you": {
+          "$ref": "#/$defs/loops",
+          "description": "list_loops direction in."
+        },
+        "stale": {
+          "$ref": "#/$defs/stale"
+        },
+        "insights": {
+          "$ref": "#/$defs/insights"
+        },
+        "contradictions": {
+          "$ref": "#/$defs/contradictions"
+        },
+        "duplicates": {
+          "$ref": "#/$defs/duplicates"
+        },
+        "held": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many memories this reader reads wait in the review queue for a person's release, by the queue's own predicates: a count with no words, since no AI client reads a held memory and only a person releases one."
+        },
+        "standing": {
+          "$ref": "#/$defs/standing"
+        },
+        "calibration": {
+          "$ref": "#/$defs/calibration"
+        },
+        "changes": {
+          "$ref": "#/$defs/changes"
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ],
+  "$defs": {
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "due": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "overdue",
+        "upcoming",
+        "items"
+      ],
+      "description": "list_due's overdue and upcoming windows: total is the two lengths together, and items the soonest of them, at most 5.",
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/count"
+        },
+        "overdue": {
+          "$ref": "#/$defs/count"
+        },
+        "upcoming": {
+          "$ref": "#/$defs/count"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "list_due.output.schema.json#/$defs/item"
+              },
+              {
+                "properties": {
+                  "window": {
+                    "enum": [
+                      "overdue",
+                      "upcoming"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "decisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "overdue",
+        "upcoming",
+        "items"
+      ],
+      "description": "list_decisions' due list (overdue here) and upcoming list: total is the two lengths together, and items the head of due, then of upcoming, at most 3.",
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/count"
+        },
+        "overdue": {
+          "$ref": "#/$defs/count"
+        },
+        "upcoming": {
+          "$ref": "#/$defs/count"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "list_decisions.output.schema.json#/$defs/decision"
+              },
+              {
+                "properties": {
+                  "window": {
+                    "enum": [
+                      "overdue",
+                      "upcoming"
+                    ]
+                  },
+                  "current": {
+                    "const": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "loops": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "items"
+      ],
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/count"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "$ref": "list_loops.output.schema.json#/$defs/loop"
+          }
+        }
+      }
+    },
+    "stale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "items"
+      ],
+      "description": "list_stale.",
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/count"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "$ref": "list_stale.output.schema.json#/$defs/staleItem"
+          }
+        }
+      }
+    },
+    "insights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "items"
+      ],
+      "description": "list_insight_stream's proposed view: what an AI proposed and no person has confirmed.",
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/count"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 1,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "list_insight_stream.output.schema.json#/$defs/item"
+              },
+              {
+                "properties": {
+                  "view": {
+                    "const": "proposed"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "contradictions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "items"
+      ],
+      "description": "list_contradictions. Only a person settles one.",
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/count"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "$ref": "list_contradictions.output.schema.json#/$defs/contradiction"
+          }
+        }
+      }
+    },
+    "duplicates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "items"
+      ],
+      "description": "list_duplicates.",
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/count"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "$ref": "list_duplicates.output.schema.json#/$defs/duplicateItem"
+          }
+        }
+      }
+    },
+    "standing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "items"
+      ],
+      "description": "With a project named: list_standing's with that project, those that may fire. Otherwise none.",
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/count"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "list_standing.output.schema.json#/$defs/standingItem"
+              },
+              {
+                "properties": {
+                  "fires": {
+                    "const": true
+                  },
+                  "reason": {
+                    "const": null
+                  },
+                  "held": {
+                    "const": null
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "calibration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ready",
+        "n",
+        "min_decisions",
+        "line"
+      ],
+      "description": "decision_calibration's line, only once it is ready, and n, the scored list's length.",
+      "properties": {
+        "ready": {
+          "type": "boolean"
+        },
+        "n": {
+          "$ref": "#/$defs/count"
+        },
+        "min_decisions": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "line": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 400
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "ready": {
+              "const": true
+            },
+            "line": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "ready": {
+              "const": false
+            },
+            "line": {
+              "const": null
+            }
+          }
+        }
+      ]
+    },
+    "changes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "changes",
+        "truncated",
+        "since",
+        "groups"
+      ],
+      "description": "An AI client's changes in the last 48 hours, none of a memory held now or in the trash, in groups: one login's changes of one kind through one client, each within ten minutes of the one before. total counts the groups, changes all their changes, groups shows the newest 5, and truncated says more changes were made than one read takes, so each count is at least what it says. A change this answer leaves out ends its group, so a group's key undoes what the group counts.",
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/count"
+        },
+        "changes": {
+          "$ref": "#/$defs/count"
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "since": {
+          "$ref": "memory.defs.schema.json#/$defs/instant"
+        },
+        "groups": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/group"
+          }
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "group",
+        "family",
+        "person",
+        "client",
+        "changes",
+        "memories",
+        "from",
+        "until",
+        "capped"
+      ],
+      "description": "One group: its key for undo, what kind of change it is, who made it and through what, how many, and when. No words of any memory.",
+      "properties": {
+        "group": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "family": {
+          "type": "string",
+          "pattern": "^[a-z_]{1,40}$"
+        },
+        "person": {
+          "$ref": "memory.defs.schema.json#/$defs/person"
+        },
+        "client": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "changes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "memories": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "from": {
+          "$ref": "memory.defs.schema.json#/$defs/instant"
+        },
+        "until": {
+          "$ref": "memory.defs.schema.json#/$defs/instant"
+        },
+        "capped": {
+          "type": "boolean",
+          "description": "More memories than one group undo takes, so it undoes the oldest of them."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a042",
+  "revision": 2,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "result": "unknown",
+  "previous": null,
+  "rearms": 1,
+  "review_at": "2027-02-02T09:00:00+00:00",
+  "reviews_done": false,
+  "changed": ["outcome"],
+  "unchanged": false,
+  "message": "Recorded as too early to tell: it comes up for review again on 2027-02-02 (1 of 2 times asked again). The state before is kept as a version (revision 2 now), history records it (outcome), and undo(id) takes it back."
+}

@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_graph.output.schema.json",
+  "title": "app_graph structuredContent",
+  "description": "A GraphPage: the map's stars and links as the scheduled refresh saw them, or one star (get, content, data); with engine.recall on, recall adds what combined retrieval found, as stars. content adds the star's text in resource.content (and, for a document added as a file, its archived original in resource.original); data adds one data star's recent daily measurements. Names match the app's GraphPage (app/src/knowledge.ts). See contracts/README.md section 2.2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["nodes", "edges", "nextCursor", "completeness", "issues"],
+  "properties": {
+    "nodes": { "type": "array", "maxItems": 1500, "items": { "$ref": "#/$defs/node" } },
+    "edges": { "type": "array", "maxItems": 12000, "items": { "$ref": "#/$defs/edge" } },
+    "nextCursor": { "type": ["string", "null"], "maxLength": 200 },
+    "completeness": { "enum": ["partial", "complete"] },
+    "issues": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["provider", "reason"],
+        "properties": { "provider": { "$ref": "#/$defs/provider" }, "reason": { "type": "string", "maxLength": 1000 } }
+      }
+    },
+    "removedNodeIds": { "type": "array", "maxItems": 1500, "items": { "type": "string", "maxLength": 1000 } },
+    "removedEdgeIds": { "type": "array", "maxItems": 12000, "items": { "type": "string", "maxLength": 1000 } },
+    "recall": { "$ref": "#/$defs/recall" }
+  },
+  "$defs": {
+    "recall": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Only for the recall operation (engine.recall on, SB-P2-10): what combined retrieval found for the question, as the stars on this reader's map that stand for it, best first; nodes holds those stars in the same order. offMap counts the records found that no star the reader can open stands for (never named).",
+      "required": ["query", "results", "notices", "semanticSkipped", "offMap", "receipt"],
+      "properties": {
+        "query": { "type": "string", "minLength": 1, "maxLength": 800 },
+        "results": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "score", "excerpt", "truncated", "why"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1, "maxLength": 1000, "description": "A star's graphId, one of nodes." },
+              "score": { "type": "number", "minimum": 0, "description": "The fused score: a ranking, not a confidence." },
+              "excerpt": { "type": "string", "maxLength": 300, "description": "The passage that matched, or the start of the record's text." },
+              "truncated": { "type": "boolean" },
+              "why": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["rank", "words", "meaning", "imputed"],
+                "properties": {
+                  "rank": { "type": "integer", "minimum": 1, "maximum": 20 },
+                  "words": {
+                    "oneOf": [
+                      { "type": "null" },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["rank", "terms", "exact"],
+                        "properties": {
+                          "rank": { "type": "integer", "minimum": 1 },
+                          "terms": { "type": "array", "maxItems": 64, "items": { "type": "string", "maxLength": 200 } },
+                          "exact": { "type": "integer", "minimum": 0 }
+                        }
+                      }
+                    ]
+                  },
+                  "meaning": {
+                    "oneOf": [
+                      { "type": "null" },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["rank", "similarity"],
+                        "properties": { "rank": { "type": "integer", "minimum": 1 }, "similarity": { "type": ["number", "null"] } }
+                      }
+                    ]
+                  },
+                  "imputed": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "notices": { "type": "array", "maxItems": 4, "items": { "type": "string", "minLength": 1, "maxLength": 400 } },
+        "semanticSkipped": { "type": "boolean" },
+        "offMap": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "receipt": { "type": "string", "pattern": "^rc1-[0-9a-f]{16}$" }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "type", "overview", "provenance", "resource"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 1000, "description": "The star's graphId: provider:account:externalId, each part URI-encoded." },
+        "title": { "type": "string", "maxLength": 1000 },
+        "type": { "enum": ["theme", "project", "note", "record", "document", "memory", "decision"] },
+        "overview": { "type": "string", "maxLength": 100000 },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sourceId", "recordId", "observedAt", "demo"],
+          "properties": {
+            "sourceId": { "$ref": "#/$defs/provider" },
+            "recordId": { "type": "string", "maxLength": 1000 },
+            "observedAt": { "$ref": "#/$defs/instant" },
+            "demo": { "type": "boolean", "description": "True for the engine's fictional demo seed." }
+          }
+        },
+        "resource": { "$ref": "#/$defs/resource" },
+        "groups": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label"],
+            "properties": { "id": { "type": "string", "maxLength": 300 }, "label": { "type": "string", "maxLength": 300 } }
+          }
+        },
+        "measurements": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/series" } },
+        "truth": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "replacedBy"],
+          "description": "A native memory's star that a newer memory of its scope replaced (SB-P4-11; migration 049's memory_replaced_by, judged at each read): served only while memory.tools is on, to be drawn faded, never hidden, and never presented as the current fact. replacedBy is the replacing memory's star id. Absent on every other star.",
+          "properties": {
+            "state": { "const": "replaced" },
+            "replacedBy": { "type": "string", "minLength": 1, "maxLength": 1000 }
+          }
+        }
+      }
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "canonicalUrl", "sourceUrl", "sourceModifiedAt", "retrievedAt", "revision", "owner", "access", "availability",
+        "content", "representation"],
+      "properties": {
+        "identity": { "$ref": "#/$defs/identity" },
+        "canonicalUrl": { "type": ["string", "null"], "maxLength": 4000 },
+        "sourceUrl": { "type": ["string", "null"], "maxLength": 4000 },
+        "sourceModifiedAt": { "$ref": "#/$defs/maybeInstant" },
+        "retrievedAt": { "$ref": "#/$defs/instant" },
+        "revision": { "type": ["string", "null"], "maxLength": 1000 },
+        "owner": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$", "description": "The subject the record belongs to." },
+        "access": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["scope", "canRead", "canOpen"],
+          "properties": { "scope": { "type": "string", "maxLength": 40 }, "canRead": { "type": "boolean" }, "canOpen": { "type": "boolean" } }
+        },
+        "availability": { "enum": ["available", "stale", "missing", "restricted"] },
+        "content": { "type": ["string", "null"], "maxLength": 200000, "description": "Only for operation content." },
+        "representation": { "enum": ["original", "archive", "index"] },
+        "original": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "format", "bytes", "name"],
+          "description": "Only for operation content, for a document someone added as a file (an upload or the documents folder) whose original the engine archived. GET /app/documents/<id> serves the file (contracts/README.md 1.4).",
+          "properties": {
+            "id": { "type": "string", "format": "uuid", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+            "format": { "enum": ["pdf", "text", "markdown"] },
+            "bytes": { "type": "integer", "minimum": 1 },
+            "name": { "type": "string", "minLength": 1, "maxLength": 200, "description": "The file's name, safe to save it under; it ends in the format's extension." }
+          }
+        }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "account", "externalId"],
+      "properties": {
+        "provider": { "$ref": "#/$defs/provider" },
+        "account": { "type": "string", "maxLength": 1000 },
+        "externalId": { "type": "string", "maxLength": 1000 }
+      }
+    },
+    "series": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "label", "unit", "latest", "days"],
+      "properties": {
+        "metric": { "type": "string", "maxLength": 100 },
+        "label": { "type": "string", "maxLength": 200 },
+        "unit": { "type": "string", "maxLength": 40 },
+        "latest": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value", "observedAt", "date"],
+              "properties": { "value": { "type": "number" }, "observedAt": { "$ref": "#/$defs/maybeInstant" }, "date": { "$ref": "#/$defs/date" } }
+            }
+          ]
+        },
+        "days": {
+          "type": "array",
+          "maxItems": 400,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["date", "min", "mean", "max", "count"],
+            "properties": {
+              "date": { "$ref": "#/$defs/date" },
+              "min": { "type": "number" },
+              "mean": { "type": "number" },
+              "max": { "type": "number" },
+              "count": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source", "target", "relationship", "strength", "type", "origin", "directed", "verification", "evidence",
+        "sourceModifiedAt", "retrievedAt"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "source": { "type": "string", "maxLength": 1000 },
+        "target": { "type": "string", "maxLength": 1000 },
+        "relationship": { "type": "string", "maxLength": 200 },
+        "strength": { "type": "number", "minimum": 0, "maximum": 1 },
+        "type": { "type": "string", "maxLength": 200 },
+        "origin": { "$ref": "#/$defs/identity" },
+        "directed": { "type": "boolean" },
+        "verification": { "enum": ["verified", "suggested", "inferred", "disputed", "unverified"] },
+        "evidence": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["resourceId", "excerpt", "locator", "retrievedAt"],
+            "properties": {
+              "resourceId": { "type": "string", "maxLength": 1000 },
+              "excerpt": { "type": "string", "maxLength": 2000 },
+              "locator": { "type": "string", "maxLength": 1000 },
+              "retrievedAt": { "$ref": "#/$defs/instant" }
+            }
+          }
+        },
+        "sourceModifiedAt": { "$ref": "#/$defs/maybeInstant" },
+        "retrievedAt": { "$ref": "#/$defs/instant" }
+      }
+    },
+    "provider": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,40}$" },
+    "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "instant": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "maybeInstant": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    }
+  }
+}

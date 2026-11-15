@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "day": "2026-11-07",
+  "pick": {
+    "id": "6d3c2a10-0000-4000-8000-00000000f001",
+    "revision": 2,
+    "scope": "shared",
+    "owner": "household",
+    "preview": "DEMO: the Pellow allotment's water comes on in April, and the key is with the fictional neighbour at number nine.",
+    "truncated": false,
+    "createdAt": "2026-02-14T09:30:00Z"
+  }
+}

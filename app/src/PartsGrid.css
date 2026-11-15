@@ -1,0 +1,265 @@
+/* A grid of parts: 12 columns by 12 rows of cells filling the box it is drawn
+   in, the host's own gap between every two tracks, and no borders or frames
+   between parts. Each cell is a container, so what is in it lays itself out
+   for its size. */
+.parts {
+  --parts-gap: 10px;
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  gap: var(--parts-gap);
+  /* Keyboards and screen readers follow the parts as drawn, where browsers can. */
+  reading-flow: grid-rows;
+}
+.parts.saved {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: repeat(12, minmax(0, 1fr));
+}
+/* The page alone covering the grid draws exactly as before parts: no grid,
+   nothing around the frame. */
+.parts.plain,
+.parts.plain > .parts-part,
+.parts.plain .parts-body {
+  display: contents;
+}
+.parts-part {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  container: part / size;
+  transition:
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.parts-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* A fold stacks the parts in reading order and scrolls itself; its host stays
+   still. A row of two is as tall as its taller part, and the shorter one
+   centres its content in its cell. Rows take their content's height even when
+   the column is taller than its box (an auto row would shrink a tile to
+   nothing there). */
+.parts.two,
+.parts.one {
+  grid-auto-rows: max-content;
+  align-content: start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #465b68 transparent;
+  /* The width a fold is measured at stays the same whether it scrolls or not. */
+  scrollbar-gutter: stable;
+}
+.parts.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.parts.one {
+  grid-template-columns: minmax(0, 1fr);
+}
+.parts.two > .parts-part,
+.parts.one > .parts-part {
+  container-type: inline-size;
+  justify-content: center;
+}
+.parts.two > .parts-part > .parts-body,
+.parts.one > .parts-part > .parts-body {
+  flex: 0 1 auto;
+}
+.parts.two > .parts-part[data-kind="page"] > .parts-body,
+.parts.one > .parts-part[data-kind="page"] > .parts-body,
+.parts.two > .parts-part[data-kind="map"] > .parts-body,
+.parts.one > .parts-part[data-kind="map"] > .parts-body,
+.parts.two > .parts-part[data-kind="card"] > .parts-body,
+.parts.one > .parts-part[data-kind="card"] > .parts-body {
+  flex: 1 1 auto;
+}
+/* A map in a fold is still, and a vertical swipe on it scrolls the column. */
+.parts.two > .parts-part[data-kind="map"],
+.parts.one > .parts-part[data-kind="map"] {
+  touch-action: pan-y;
+}
+
+/* The grip and the resize corner: quiet, drawn by the app over the cell and
+   never inside a frame, shown on hover or focus. */
+.parts-grip {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 22px;
+  padding: 0;
+  color: #c4d4da;
+  background: #0e171ecc;
+  border: 1px solid #93b4c329;
+  border-radius: 11px;
+  cursor: grab;
+  touch-action: none;
+  opacity: 0;
+  transition:
+    opacity 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+.parts-corner {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  z-index: 4;
+  width: 18px;
+  height: 18px;
+  cursor: nwse-resize;
+  touch-action: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.parts-corner::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #93b4c3a6;
+  border-bottom: 2px solid #93b4c3a6;
+  border-bottom-right-radius: 3px;
+}
+.parts-part:hover > .parts-grip,
+.parts-part:hover > .parts-corner,
+.parts-part[data-hover] > .parts-grip,
+.parts-part[data-hover] > .parts-corner,
+.parts-part:focus-within > .parts-grip,
+.parts-part:focus-within > .parts-corner,
+.parts-part.held > .parts-grip,
+.parts-part.held > .parts-corner {
+  opacity: 1;
+}
+.parts-grip:hover,
+.parts-grip:focus-visible,
+.parts-grip[aria-pressed="true"] {
+  color: #e4eef0;
+  border-color: #75d8b980;
+}
+.parts-grip:focus-visible {
+  outline: 2px solid #75d8b9;
+  outline-offset: 2px;
+}
+.parts-grip[aria-pressed="true"] {
+  cursor: grabbing;
+}
+/* On touch screens a dashboard's grips show quietly all the time, since a
+   touch in a frame or on a map is never heard as a touch on the part; Home's
+   show for a few seconds after a touch on Home, so an unchanged Home looks as
+   it does today. */
+@media (pointer: coarse) {
+  .parts:not(.home) .parts-grip,
+  .parts:not(.home) .parts-corner,
+  .parts.home[data-touched] .parts-grip,
+  .parts.home[data-touched] .parts-corner {
+    opacity: 0.72;
+  }
+  .parts-grip {
+    width: 36px;
+    height: 28px;
+    border-radius: 14px;
+  }
+  .parts-corner {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* A part held: lifted a little, with where it would go drawn beneath. */
+.parts-part.held {
+  z-index: 3;
+  opacity: 0.86;
+  box-shadow:
+    0 0 0 1px #75d8b966,
+    0 18px 40px #02080c99;
+  border-radius: 12px;
+}
+.parts-ghost {
+  z-index: 2;
+  pointer-events: none;
+  border: 1px dashed #75d8b999;
+  border-radius: 12px;
+  background: #75d8b912;
+  animation: parts-ghost-in 0.18s ease both;
+}
+@keyframes parts-ghost-in {
+  from {
+    opacity: 0;
+  }
+}
+/* While a part is held, a clear layer over every frame keeps the drag from
+   being lost into one. */
+.parts-shield {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  cursor: grabbing;
+}
+/* Over a Home drawn as today, only the grips and corners take the pointer. */
+.parts.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.parts.overlay .parts-grip,
+.parts.overlay .parts-corner,
+.parts.overlay .parts-shield {
+  pointer-events: auto;
+}
+/* At Home a grip or corner takes the pointer only while it shows, so a hidden
+   one never takes a click or a tap from the tile or sky beneath it: with a
+   mouse while its part is hovered, on a touch screen for the few seconds after
+   a touch, and with the keys or while held anywhere. */
+.parts.home
+  .parts-part:where(:not(:hover, [data-hover], :focus-within, .held))
+  > :is(.parts-grip, .parts-corner) {
+  pointer-events: none;
+}
+@media (pointer: coarse) {
+  .parts.home[data-touched] .parts-part > :is(.parts-grip, .parts-corner) {
+    pointer-events: auto;
+  }
+}
+.parts-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 760px), (max-height: 500px) {
+  .parts {
+    --parts-gap: 6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .parts-part,
+  .parts-grip,
+  .parts-corner {
+    transition: none;
+  }
+  .parts-ghost {
+    animation: none;
+  }
+}

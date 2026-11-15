@@ -1,0 +1,29 @@
+{
+  "subject": "alex",
+  "selection": "history",
+  "today": "2026-10-28",
+  "start": "2026-10-27T12:00:00Z",
+  "end": "2026-10-28T12:00:00Z",
+  "timezone": "Europe/London",
+  "range": { "low": 70, "high": 180, "unit": "mg/dL" },
+  "displayUnit": "mg/dL",
+  "complete": true,
+  "demo": false,
+  "provider": "nightscout",
+  "rows": [
+    {
+      "resource_id": "6d3c2a10-0000-4000-8000-0000000a0002", "subject_id": "alex", "provider": "nightscout", "source_kind": "glucose-readings",
+      "timezone": "Europe/London", "source_updated_at": "2026-10-28T11:55:00Z", "metric": "glucose", "sample_key": "2026-10-28T11:50:00Z",
+      "observed_at": "2026-10-28T11:50:00Z", "local_date": "2026-10-28", "value": 110, "unit": "mg/dL", "value_mgdl": 110,
+      "quality": "source-reported;time_basis=explicit-offset"
+    },
+    {
+      "resource_id": "6d3c2a10-0000-4000-8000-0000000a0002", "subject_id": "alex", "provider": "nightscout", "source_kind": "glucose-readings",
+      "timezone": "Europe/London", "source_updated_at": "2026-10-28T11:55:00Z", "metric": "glucose", "sample_key": "2026-10-28T11:55:00Z",
+      "observed_at": "2026-10-28T11:55:00Z", "local_date": "2026-10-28", "value": 111.7, "unit": "mg/dL", "value_mgdl": 111.7,
+      "quality": "source-reported;time_basis=explicit-offset"
+    }
+  ],
+  "lastSyncedAt": "2026-10-28T11:56:00Z",
+  "summary": null
+}

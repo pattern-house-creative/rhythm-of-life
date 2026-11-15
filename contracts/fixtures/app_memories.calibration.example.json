@@ -1,0 +1,83 @@
+{
+  "ok": true,
+  "source": "all",
+  "ready": true,
+  "n": 12,
+  "nStated": 10,
+  "nInferred": 2,
+  "minDecisions": 10,
+  "minBand": 5,
+  "minTopic": 5,
+  "brier": 0.2083,
+  "gap": 0.1458,
+  "direction": "over",
+  "bands": [
+    {
+      "band": "50-59",
+      "n": 0,
+      "nStated": 0,
+      "nInferred": 0,
+      "shown": false,
+      "meanConfidence": null,
+      "hitRate": null,
+      "low": null,
+      "high": null
+    },
+    {
+      "band": "60-69",
+      "n": 2,
+      "nStated": 2,
+      "nInferred": 0,
+      "shown": false,
+      "meanConfidence": null,
+      "hitRate": null,
+      "low": null,
+      "high": null
+    },
+    {
+      "band": "70-79",
+      "n": 8,
+      "nStated": 6,
+      "nInferred": 2,
+      "shown": true,
+      "meanConfidence": 0.7375,
+      "hitRate": 0.625,
+      "low": 0.4,
+      "high": 0.8
+    },
+    {
+      "band": "80-89",
+      "n": 2,
+      "nStated": 2,
+      "nInferred": 0,
+      "shown": false,
+      "meanConfidence": null,
+      "hitRate": null,
+      "low": null,
+      "high": null
+    },
+    {
+      "band": "90-95",
+      "n": 0,
+      "nStated": 0,
+      "nInferred": 0,
+      "shown": false,
+      "meanConfidence": null,
+      "hitRate": null,
+      "low": null,
+      "high": null
+    }
+  ],
+  "headline": "70-79",
+  "topic": {
+    "name": "pellow",
+    "n": 6,
+    "gap": 0.22,
+    "direction": "over"
+  },
+  "kind": "rate",
+  "line": "So far, when you were about 74% sure you were right 63% of the time, over 8 decisions. For 2 of them the confidence was read from your words, not stated.",
+  "topicLine": "On pellow you were right less often than you expected so far, over 6 decisions.",
+  "stated": 74,
+  "hit": 63
+}

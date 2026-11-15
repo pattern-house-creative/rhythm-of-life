@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/app_insight_feedback.output.schema.json",
+  "title": "app_insight_feedback structuredContent",
+  "description": "The insight with the feedback just recorded, as app_insights lists it. An unknown id is HTTP 404. See contracts/README.md section 2.2.",
+  "$ref": "app_insights.output.schema.json#/$defs/insight"
+}

@@ -1,0 +1,8 @@
+{
+  "text": "DEMO: Ticket 17 on the demo tracker: the gate latch is broken. Status: open.",
+  "source": "demo-tracker",
+  "mirror": "tracker:ticket/17",
+  "tags": [
+    "ticket"
+  ]
+}

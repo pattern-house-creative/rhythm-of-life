@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "not_offered",
+  "error": "That memory was not offered as a possible contradiction of this one, so nothing changed: name one a write answered (contradiction_candidates), or get or list_contradictions names"
+}

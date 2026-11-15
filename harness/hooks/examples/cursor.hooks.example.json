@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterAgentResponse": [
+      {
+        "command": "node /path/to/rhythm/harness/hooks/rhythm-hook.mjs --agent cursor",
+        "timeout": 10
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "node /path/to/rhythm/harness/hooks/rhythm-hook.mjs --agent cursor",
+        "timeout": 10
+      }
+    ]
+  }
+}

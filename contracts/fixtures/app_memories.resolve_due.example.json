@@ -1,0 +1,34 @@
+{
+  "ok": true,
+  "op": "resolve_due",
+  "id": "6d3c2a10-0000-4000-8000-00000000a042",
+  "revision": 2,
+  "to": null,
+  "scope": "private",
+  "owner": "alex",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "changed": [
+    "due"
+  ],
+  "unchanged": false,
+  "replayed": false,
+  "droppedTags": [],
+  "held": null,
+  "action": "snooze",
+  "due": {
+    "at": "2026-11-12T09:00:00+00:00",
+    "local": "2026-11-12 09:00",
+    "zone": "Europe/London",
+    "kind": "due",
+    "source": "explicit"
+  },
+  "before": {
+    "at": "2026-11-03T00:00:00+00:00",
+    "local": "2026-11-03 00:00",
+    "zone": "Europe/London",
+    "kind": "due",
+    "source": "text"
+  }
+}

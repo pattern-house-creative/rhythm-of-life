@@ -1,0 +1,11 @@
+# Only what the build needs goes into the image's build context.
+node_modules
+dist
+build
+coverage
+test-results
+.vercel
+tests
+*.local
+.env
+.env.*

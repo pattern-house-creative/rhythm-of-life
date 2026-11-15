@@ -1,0 +1,17 @@
+# Used with engine/Dockerfile (the build context is the repository root): send only what the engine image needs.
+*
+!engine/global.json
+!engine/rhythm-engine
+!engine/src/**
+!engine/migrations/**
+!demo/engine/**
+!LICENSE
+!NOTICE
+!docs/licenses/**
+!contracts/adapters/**
+!contracts/rhythm.schema.json
+!deploy/compose/rhythm.example.yaml
+!deploy/compose/.env.example
+**/bin
+**/obj
+**/secrets

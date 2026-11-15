@@ -1,0 +1,31 @@
+{
+  "ok": true,
+  "op": "resolve",
+  "queue": "duplicates",
+  "action": "keep_copy",
+  "id": "6d3c2a10-0000-4000-8000-00000000a001",
+  "unchanged": false,
+  "waiting": true,
+  "stillCounted": true,
+  "revision": 1,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "changed": [
+    "duplicate_of"
+  ],
+  "held": null,
+  "target": null,
+  "decision": null,
+  "review": null,
+  "view": null,
+  "reviewedAt": null,
+  "candidate": null,
+  "decidedAt": null,
+  "note": null,
+  "insight": null,
+  "checkedAt": null,
+  "was": null,
+  "retracted": []
+}

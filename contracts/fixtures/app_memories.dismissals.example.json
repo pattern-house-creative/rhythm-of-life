@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "dismissals": [
+    {
+      "id": "stars:6d3c2a10-0000-4000-8000-00000000d001:6d3c2a10-0000-4000-8000-00000000d002:similar_to",
+      "kind": "stars",
+      "type": "similar_to",
+      "stars": [
+        { "id": "rhythm:documents:household%3Aquarry-bus.txt", "title": "DEMO: the Quarry Lane bus stop moved" },
+        { "id": "rhythm:documents:household%3Aquarry-path.txt", "title": "DEMO: the Quarry Lane footpath is closed" }
+      ],
+      "dismissedAt": "2026-11-04T09:12:00+00:00",
+      "by": "person",
+      "mine": true,
+      "mayRestore": true
+    },
+    {
+      "id": "memories:6d3c2a10-0000-4000-8000-00000000a001:6d3c2a10-0000-4000-8000-00000000a002:similar_to",
+      "kind": "memories",
+      "type": "similar_to",
+      "stars": [
+        { "id": "memory:memory:6d3c2a10-0000-4000-8000-00000000a001", "title": "DEMO: the Pellingham heron nests by the weir" },
+        { "id": "memory:memory:6d3c2a10-0000-4000-8000-00000000a002", "title": "DEMO: the Pellingham heron fishes at dawn" }
+      ],
+      "dismissedAt": "2026-11-03T18:40:00+00:00",
+      "by": "ai_client",
+      "mine": false,
+      "mayRestore": true
+    }
+  ],
+  "truncated": false
+}

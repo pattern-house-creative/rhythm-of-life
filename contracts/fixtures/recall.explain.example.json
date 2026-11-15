@@ -1,0 +1,92 @@
+{
+  "query": "HP-2291",
+  "results": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a103",
+      "subject_id": "household",
+      "provider": "documents",
+      "external_id": "installer-quote.pdf",
+      "domain": "household",
+      "kind": "document",
+      "title": "DEMO · Installer quote HP-2291",
+      "source_url": null,
+      "revision": "sha256-demo-quote-1",
+      "source_updated_at": "2026-10-02T09:00:00+00:00",
+      "indexed_at": "2026-10-28T11:45:00.5+00:00",
+      "local_date": null,
+      "timezone": null,
+      "metadata": "{\"semanticIndex\": \"true\"}",
+      "stale": false,
+      "excerpt": "DEMO: The installer quoted HP-2291 for the Brindle pump.",
+      "truncated": false,
+      "length": 55,
+      "score": 0.112345,
+      "why": {
+        "rank": 1,
+        "keyword": { "rank": 1, "weight": 5.991465, "terms": ["hp-2291"], "exact": 2 },
+        "meaning": { "rank": 1, "similarity": 0.734512, "passage": 0 },
+        "imputed": false,
+        "link": null
+      }
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a104",
+      "subject_id": "alex",
+      "provider": "csv",
+      "external_id": "readings-2026-10.csv",
+      "domain": "health",
+      "kind": "glucose-readings",
+      "title": "DEMO · Readings HP-2291 trial",
+      "source_url": null,
+      "revision": "sha256-demo-readings-1",
+      "source_updated_at": "2026-10-27T23:55:00+00:00",
+      "indexed_at": "2026-10-28T11:45:00.5+00:00",
+      "local_date": "2026-10-27",
+      "timezone": "Europe/London",
+      "metadata": "{}",
+      "stale": false,
+      "excerpt": "DEMO readings",
+      "truncated": false,
+      "length": 13,
+      "score": 0.098361,
+      "why": {
+        "rank": 2,
+        "keyword": { "rank": 2, "weight": 5.991465, "terms": ["hp-2291"], "exact": 1 },
+        "meaning": null,
+        "imputed": true,
+        "link": null
+      }
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a105",
+      "subject_id": "household",
+      "provider": "documents",
+      "external_id": "brindle-pump-manual.pdf",
+      "domain": "household",
+      "kind": "document",
+      "title": "DEMO · Brindle pump manual",
+      "source_url": null,
+      "revision": "sha256-demo-manual-3",
+      "source_updated_at": "2026-08-14T12:00:00+00:00",
+      "indexed_at": "2026-10-28T11:45:00.5+00:00",
+      "local_date": null,
+      "timezone": null,
+      "metadata": "{\"semanticIndex\": \"true\"}",
+      "stale": false,
+      "excerpt": "DEMO: Brindle pump, model BP-4. Keep the outdoor unit clear of leaves.",
+      "truncated": true,
+      "length": 9120,
+      "score": 0.067405,
+      "why": {
+        "rank": 3,
+        "keyword": null,
+        "meaning": null,
+        "imputed": false,
+        "link": { "hop": 1, "type": "references", "from": "6d3c2a10-0000-4000-8000-00000000a103", "direction": "outgoing" }
+      }
+    }
+  ],
+  "notices": [],
+  "semanticSkipped": false,
+  "receipt": "rc1-a07c55e1903bd264"
+}

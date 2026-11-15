@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a043",
+  "revision": 3,
+  "scope": "private",
+  "owner": "alex",
+  "status": "draft",
+  "scopes": "on",
+  "project": null,
+  "action": "clear_date",
+  "due": null,
+  "before": {
+    "at": "2026-11-05T09:30:00+00:00",
+    "local": "2026-11-05 09:30",
+    "zone": "Europe/London",
+    "kind": "wake",
+    "source": "explicit"
+  },
+  "changed": ["due"],
+  "unchanged": false,
+  "message": "Its due date came off: it leaves list_due. Its date before is kept as a version (revision 3 now), history records it (due_changed), and undo(id) puts it back."
+}

@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_standing.output.schema.json",
+  "title": "list_standing answer",
+  "description": "The memory tool list_standing's answer (SB-P5-12, migration 065): the standing instructions the caller reads, oldest first (the oldest of a scope are those that may fire), each with where it came from and whether it fires, and total, firing, held and over_limit, the whole list's length and how many of it are each, read in the same statement as the page (one predicate, 065's memory_standing_rows, so each count is the length of its part of the list; held counts both reasons a hold gives). A held one comes without its words, tags or project, and never fires; so does one a held project keeps from firing, with its words. One forgotten, stopped, marked wrong or ended is not listed. threshold is the score a question must reach; model the live model that scores them, null while it is off or recall is (engine.recall), when none fires. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "total",
+        "firing",
+        "held",
+        "over_limit",
+        "max_in_scope",
+        "max_fires",
+        "threshold",
+        "model",
+        "standing",
+        "next",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "firing": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "held": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "over_limit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_in_scope": {
+          "const": 50
+        },
+        "max_fires": {
+          "const": 2
+        },
+        "threshold": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "standing": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/standingItem"
+          }
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z0-9_-]{1,200}$",
+          "description": "Pass as cursor for the next page; null at the end."
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ],
+  "$defs": {
+    "standingItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "author",
+        "source",
+        "status",
+        "project",
+        "created_at",
+        "content",
+        "held",
+        "fires",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "author": {
+          "$ref": "memory.defs.schema.json#/$defs/person"
+        },
+        "source": {
+          "$ref": "memory.defs.schema.json#/$defs/source"
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ]
+        },
+        "project": {
+          "$ref": "memory.defs.schema.json#/$defs/writtenProject"
+        },
+        "created_at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant"
+        },
+        "content": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 500
+        },
+        "held": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeHeld"
+        },
+        "fires": {
+          "type": "boolean"
+        },
+        "reason": {
+          "enum": [
+            "held",
+            "project_held",
+            "over_limit",
+            null
+          ],
+          "description": "Why it does not fire: held for review, in a project held for review that no question can name, or past the oldest 50 of its scope; null when it may."
+        }
+      },
+      "anyOf": [
+        {
+          "description": "It may fire.",
+          "properties": {
+            "held": {
+              "type": "null"
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fires": {
+              "const": true
+            },
+            "reason": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "description": "Past the oldest 50 of its scope.",
+          "properties": {
+            "held": {
+              "type": "null"
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fires": {
+              "const": false
+            },
+            "reason": {
+              "const": "over_limit"
+            }
+          }
+        },
+        {
+          "description": "In a project held for review, which claims nothing until a person lets it in: its own words kept.",
+          "properties": {
+            "held": {
+              "type": "null"
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fires": {
+              "const": false
+            },
+            "reason": {
+              "const": "project_held"
+            }
+          }
+        },
+        {
+          "description": "Held for review: without its words or project, until a person releases it.",
+          "properties": {
+            "held": {
+              "type": "object"
+            },
+            "content": {
+              "type": "null"
+            },
+            "project": {
+              "type": "null"
+            },
+            "fires": {
+              "const": false
+            },
+            "reason": {
+              "const": "held"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

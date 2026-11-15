@@ -1,0 +1,10 @@
+{
+  "text": "Claude Code session, 2026-10-12\n\nDEMO: The flaky garden-app build was caused by a clock read in the seed step, because the fixture compared local time with UTC. Fixed by reading UTC in both places, and all tests pass now. Keep in mind that the seed step must not read the wall clock; the next step is to do the same in the import step. The token for the test site was [redacted], so nothing secret is in this note.",
+  "source": "claude-code",
+  "tags": [
+    "session",
+    "claude-code"
+  ],
+  "project": "demo-garden-app",
+  "idempotencyKey": "hook.claude-code.0123456789abcdef0123456789abcdef01234567"
+}

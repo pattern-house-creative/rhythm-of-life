@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "action": "restored",
+  "id": "6d3c2a10-0000-4000-8000-00000000a001",
+  "revision": 4,
+  "to": null,
+  "scope": "shared",
+  "owner": "household",
+  "status": "canonical",
+  "scopes": "off",
+  "changed": [],
+  "unchanged": true,
+  "held": null,
+  "restored": null,
+  "group": null,
+  "message": "Nothing changed: this memory is back from the trash already, and its newest change is that restore, which undo(id) does not reverse. To go back to an earlier revision pass to_version (history lists them); forget(id) puts it in the trash again."
+}

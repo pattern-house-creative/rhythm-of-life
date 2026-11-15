@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "op": "resolve_loop",
+  "id": "6d3c2a10-0000-4000-8000-00000000a030",
+  "revision": 3,
+  "to": null,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": null,
+  "changed": [
+    "tags"
+  ],
+  "unchanged": false,
+  "replayed": false,
+  "droppedTags": [],
+  "held": null,
+  "action": "done",
+  "direction": "out",
+  "counterparty": "Pellow Choir"
+}

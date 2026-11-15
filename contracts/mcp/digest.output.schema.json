@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/digest.output.schema.json",
+  "title": "digest answer",
+  "description": "The memory tool digest's answer (SB-P5-13, migration 054; upstream's digest): the newest digest of one project or one topic tag that the caller reads, in the scope named or in any scope it reads, served as get serves a memory (source always system: the engine's label on a digest), or null when there is none; sources counts the memories it was drawn from (its drawn_from links). Only a live digest is read: in the catalog, not in the trash, not marked wrong, its window open, and not held for review (a key that selected a held one would tell what it holds). It never writes a digest, and reading it writes nothing (D-034). Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "digest",
+        "sources",
+        "message",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "digest": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "memory.defs.schema.json#/$defs/memory"
+                },
+                {
+                  "properties": {
+                    "source": {
+                      "const": "system"
+                    },
+                    "status": {
+                      "enum": [
+                        "canonical",
+                        "draft"
+                      ]
+                    },
+                    "held": {
+                      "type": "null"
+                    },
+                    "state": {
+                      "const": "current"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "sources": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        },
+        "edited": {
+          "const": true,
+          "description": "Only when someone changed its words or tags since it was written (SB-P5-04, migration 063: a person's or a client's edit marks it theirs, as upstream's user-edited tag does), so it is no longer the engine's line and the client's paragraph alone; an untouched digest answers without it."
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "digest": {
+              "type": "null"
+            },
+            "sources": {
+              "const": 0
+            }
+          }
+        },
+        {
+          "properties": {
+            "digest": {
+              "type": "object"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}
