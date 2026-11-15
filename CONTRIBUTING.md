@@ -20,6 +20,7 @@ Please read the [Code of Conduct](CODE_OF_CONDUCT.md) first; security problems g
 | the app (`app/`) | Node 24 |
 | the engine (`engine/`) | the .NET SDK named in `engine/global.json` |
 | the engine's database tests, and running a stack | Docker with Compose 2.20 or later |
+| the Android launcher (`apps/android-launcher/`) | Java 17 or later and the Android SDK with API 36 |
 
 ## Where things live
 
@@ -27,6 +28,7 @@ Please read the [Code of Conduct](CODE_OF_CONDUCT.md) first; security problems g
 |---|---|
 | `app/` | the web app (React, Vite, TypeScript) and `app/server/`, its server |
 | `engine/` | the .NET engine: catalog, graph, dashboards, insights, retrieval, MCP server, adapters, migrations, tests |
+| `apps/android-launcher/` | the Android launcher (Kotlin, Compose): a phone's Home screen with dashboard previews. A development build |
 | `contracts/` | the agreement between app, engine, adapters and plugins: JSON Schemas and fictional fixtures. Change it with every side in mind |
 | `deploy/` | the compose files and the install and exposure recipes |
 | `harness/` | connecting AI clients over MCP, prompt templates, session hooks |
@@ -49,6 +51,7 @@ runs them again.
 | Engine: tests without a database | `dotnet test engine/Engine.slnx` (the database tests are skipped, each saying so) |
 | Engine: every test, with a throwaway database | `sh engine/test-db.sh` (or `.\engine\test-db.ps1`); needs Docker, removes its container after |
 | Compose files | `docker compose -f deploy/compose/compose.yaml config` |
+| Android launcher: unit tests, lint and a debug build | in `apps/android-launcher`: `./gradlew :launcher:checkDependencyList :launcher:testDebugUnitTest :launcher:lintDebug :launcher:assembleDebug` |
 | The `rhythm` command on a real stack | `sh cli/e2e.sh` (see [cli/README.md](cli/README.md#testing)); give it its own project name, never an install's |
 
 ## Rules for what goes in the repository

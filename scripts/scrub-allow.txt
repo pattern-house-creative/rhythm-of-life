@@ -8,3 +8,4 @@
 #
 # Private-pattern matches cannot be listed here. Fix the content instead.
 # Keep this list short. Every entry is a place a reviewer must trust.
+secret:url-credentials apps/android-launcher/launcher/src/test/java/**/LayoutTest.kt -- a made-up address with a user name and password, which the test checks the launcher refuses (the file was under another package name in earlier commits)

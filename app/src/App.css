@@ -2883,7 +2883,7 @@ span.dashboard-full {
 .full-screen:has(.parts:not(.plain)) > .full-screen-wake {
   display: none;
 }
-.full-screen:not(.awake)
+.full-screen:not(.awake):not(.native-reader)
   .parts:not(.plain)
   > .parts-part:is([data-kind="page"], [data-kind="card"])::after {
   content: "";

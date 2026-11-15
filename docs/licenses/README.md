@@ -2,7 +2,8 @@
 
 Inventory checked 9 November 2026 against `main` at `f360a541`. Rhythm's own code remains Apache-2.0;
 each dependency and asset retains its own terms. This inventory covers the core repository, not the
-separate CareLink plugin, a user's data, or software a user chooses to add.
+separate CareLink plugin, a user's data, or software a user chooses to add. The Android launcher's
+packages were added on 15 November 2026.
 
 ## Packages and distributed notices
 
@@ -10,6 +11,7 @@ separate CareLink plugin, a user's data, or software a user chooses to add.
 |---|---|---|
 | [npm.json](npm.json) | all 593 lockfile entries, including optional platform variants; `dev` is npm's installation classification, not a statement that code never reaches the browser | `app/dist/assets/THIRD-PARTY-NOTICES.txt` and `third-party-packages.json`, generated from the browser module graph, the two unbundled server packages and a conservative set of Workbox packages |
 | [nuget.json](nuget.json) | all 57 unique name/version pairs in both lockfiles; 12 runtime packages, 45 additional test-only packages | `licenses/nuget/` and `licenses/nuget.json` in the engine's publish output and final image |
+| [gradle.json](gradle.json) | the Android launcher (`apps/android-launcher`): all 110 packages in its `launcher/dependencies.txt`, with the licence each declares in its POM. 88 go into the APK, all Apache-2.0; 22 more are used by its tests only (18 Apache-2.0, three BSD-3-Clause, one EPL-1.0) | none: the project publishes no APK. A build packages the two fonts' OFL texts as assets; an APK given to others would also need the packages' own licences and notices |
 | [models.json](models.json) | five exact model pins, their model-card URLs and hashes; original-model evidence recorded separately from an export's terms | no model weights are bundled by this change; redistribution of weights needs their own accompanying licences and notices |
 
 The app emits Rhythm's `LICENSE` and `NOTICE`, too, as `assets/LICENSE-rhythm.txt` and
@@ -36,7 +38,9 @@ content hash recorded separately. The old abstractions tag itself has no standal
 | ONNX Runtime's native-component notices | the top-level package is MIT; its vendor notice also lists Eigen under MPL-2.0, Intel MKL under the Intel Simplified Software License, and other components with their own terms | full original vendor notices and source-access information are preserved. The vendor list covers several build configurations; it does not prove which optional providers are in every native binary. Reconcile the actual runtime/image SBOM before claiming all shipped native components are permissive or publishing binary images |
 | `caniuse-lite` compatibility data | CC-BY-4.0 | build tooling only; retain its attribution if redistributing the database; absent from the emitted app package list |
 | Other npm packages | MIT, MIT-0, ISC, BSD, Apache-2.0, BlueOak-1.0.0, CC0-1.0, 0BSD and the compound expressions in `npm.json` | preserve each component's terms; do not relabel them all Apache-2.0 |
-| `app/public/` icons and `demo/import/documents/DEMO Boiler manual.pdf` | repository assets covered by the repository licence; imported with the app or fictional demo | no separately licensed media or model binaries are checked into this repository; this is a repository provenance check, not a new ownership certification |
+| `app/public/` icons and `demo/import/documents/DEMO Boiler manual.pdf` | repository assets covered by the repository licence; imported with the app or fictional demo | no separately licensed media or model binaries are checked into this repository (the Gradle wrapper below is the one third-party binary); this is a repository provenance check, not a new ownership certification |
+| Manrope and DM Sans in the Android launcher | SIL OFL-1.1, as for the web app's fonts | not in the repository: each build fetches the unchanged TTF files from a pinned commit of google/fonts and checks their SHA-256 (`apps/android-launcher/licenses/font-sources.json`). Both OFL texts are in `apps/android-launcher/licenses/` and are packaged in the APK |
+| The Gradle wrapper in `apps/android-launcher/` (`gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar`) | Apache-2.0 | Gradle's own files, unchanged. The jar's SHA-256 is in Gradle's published list of wrapper checksums (the wrapper of Gradle 8.14), and CI validates it on every run |
 | Second Brain adaptations | MIT; the existing detailed credit to Rahil Pirani in root `NOTICE` | retained and included with app and engine distributions |
 
 Mozilla's [MPL FAQ](https://www.mozilla.org/en-US/MPL/2.0/FAQ/) explains the distinction between using
@@ -87,6 +91,11 @@ npm run licenses:check
 npm --prefix app run build
 npm --prefix app run smoke
 ```
+
+For the Android launcher, in `apps/android-launcher`: `./gradlew :launcher:writeDependencyList` rewrites
+`launcher/dependencies.txt`, and `node scripts/collect-gradle-licenses.mjs` (public network reads) then reads
+each package's declared licence from its POM into `gradle.json`. `licenses:check` compares the two offline,
+and CI's Android job checks the list against the build.
 
 `--write` refreshes the npm inventory and copies root `LICENSE`/`NOTICE` into the app's Docker context.
 It does not invent NuGet licence declarations. After changing a NuGet version or model pin, restore

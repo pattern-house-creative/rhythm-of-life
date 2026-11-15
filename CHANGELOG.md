@@ -4,6 +4,13 @@ What changed in each version, newest first. Versions follow [Semantic Versioning
 while the project is in alpha, any version may change settings or need a step from the operator, and
 each entry says so under **Upgrading**.
 
+## Unreleased
+
+- **The Android launcher's source** is in `apps/android-launcher`: a phone's Home screen with dashboard
+  previews beside your apps, the sky and the day's insight. It is a development build that you compile
+  yourself; there is no released APK. Opened from the launcher, a dashboard fills the screen with no exit
+  bar, since Android's Back already leaves it.
+
 ## 0.1.0-alpha.1 (15 November 2026)
 
 The first public version.

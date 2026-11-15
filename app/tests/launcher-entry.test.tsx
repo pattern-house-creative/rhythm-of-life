@@ -100,6 +100,15 @@ it("opens a dashboard entry through the existing full-screen sandbox", async () 
   render(<App launcher />);
   const frame = await screen.findByTitle("Sample training week dashboard");
   expect(frame.getAttribute("sandbox")).toBe("allow-scripts allow-forms");
+  expect(frame.closest(".full-screen")).toHaveClass("native-reader");
+  expect(
+    screen.queryByRole("button", { name: "Exit full screen" }),
+  ).not.toBeInTheDocument();
+  expect(document.querySelector(".full-screen-wake")).toBeNull();
+  // Touch/focus must not bring back a control that covers the dashboard.
+  window.dispatchEvent(new Event("pointerdown"));
+  window.dispatchEvent(new Event("blur"));
+  expect(document.querySelector(".full-screen-bar")).toBeNull();
 }, 30000);
 
 it("keeps ordinary web screen behavior outside the native entry", async () => {

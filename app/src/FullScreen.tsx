@@ -26,6 +26,7 @@ export function FullScreen({
   exit,
   onOpenStar,
   parts,
+  nativeReader = false,
 }: {
   id: string;
   title: string;
@@ -34,10 +35,13 @@ export function FullScreen({
   onOpenStar: (graphId: string) => void;
   // Its native parts: the map, the tiles and the cards (App.tsx).
   parts?: DashboardParts;
+  // Android provides Back/Home and safe-area sizing for this reader.
+  nativeReader?: boolean;
 }) {
   const [awake, setAwake] = useState(false);
   const ref = useRef<HTMLElement>(null);
   useEffect(() => {
+    if (nativeReader) return;
     let timer = 0,
       last = 0;
     const framed = () => {
@@ -75,7 +79,7 @@ export function FullScreen({
       window.removeEventListener("blur", wake);
       window.removeEventListener("focus", wake);
     };
-  }, []);
+  }, [nativeReader]);
   // Focus comes here, out of the content now covered, and goes back once it is shown again.
   useEffect(() => {
     const before = document.activeElement as HTMLElement | null;
@@ -88,9 +92,10 @@ export function FullScreen({
     <section
       ref={ref}
       tabIndex={-1}
-      className={`full-screen${awake ? " awake" : ""}`}
+      className={`full-screen${nativeReader ? " native-reader" : awake ? " awake" : ""}`}
       aria-label={`${title}, full screen`}
     >
+      {nativeReader && <h1 className="sr-only">{title}</h1>}
       <Suspense
         fallback={
           <p className="dashboard-status" aria-busy="true">
@@ -107,13 +112,17 @@ export function FullScreen({
           {...parts}
         />
       </Suspense>
-      {!awake && <div className="full-screen-wake" aria-hidden="true" />}
-      <div className="full-screen-bar">
-        <span>{title}</span>
-        <button onClick={exit}>
-          <Minimize2 size={15} aria-hidden="true" /> Exit full screen
-        </button>
-      </div>
+      {!nativeReader && !awake && (
+        <div className="full-screen-wake" aria-hidden="true" />
+      )}
+      {!nativeReader && (
+        <div className="full-screen-bar">
+          <span>{title}</span>
+          <button onClick={exit}>
+            <Minimize2 size={15} aria-hidden="true" /> Exit full screen
+          </button>
+        </div>
+      )}
     </section>
   );
 }

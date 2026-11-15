@@ -40,3 +40,12 @@
   margin: 0 -20px;
   padding: 12px 20px 8px;
 }
+
+/* The WebView is already inside Android's safe drawing area. A native reader
+   has no second exit bar or first-touch wake shield over the authored page. */
+.launcher-entry .full-screen.native-reader {
+  padding: 0;
+}
+.launcher-entry .full-screen.native-reader .dashboard-frame {
+  border-radius: 0;
+}

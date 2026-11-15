@@ -1769,6 +1769,7 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
               title={titleOf(full.id) ?? "Dashboard"}
               session={session}
               exit={leaveFull}
+              nativeReader={launcher}
               // A mark on the page leads into the sky, to a star on the map.
               onOpenStar={(id) => {
                 if (node(id)) selectNode(id);

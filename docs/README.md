@@ -30,6 +30,8 @@ the two commands that install it.
   ChatGPT](../deploy/exposure/openai-tunnel/README.md)).
 - [../deploy/truenas/README.md](../deploy/truenas/README.md): TrueNAS SCALE as a custom app.
 - [../deploy/vercel/README.md](../deploy/vercel/README.md): the app on a hosted front end (optional).
+- [../apps/android-launcher/README.md](../apps/android-launcher/README.md): an Android Home screen with dashboard
+  previews beside your apps (optional; a development build you compile yourself).
 
 ## Adapters
 

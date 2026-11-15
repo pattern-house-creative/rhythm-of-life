@@ -20,3 +20,6 @@
 # Preserve original vendor legal documents byte for byte, including their line
 # endings, so the source hashes in docs/licenses/nuget.json survive a checkout.
 docs/licenses/nuget/** -text -whitespace
+
+# Windows batch files need CRLF: cmd can lose a label in a file with LF endings.
+*.bat text eol=crlf

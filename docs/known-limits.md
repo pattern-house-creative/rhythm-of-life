@@ -73,6 +73,8 @@ Only with `memory.tools: on`.
 
 ## Not in this release
 
-- **The Android launcher** is a separate piece of work and is not included.
+- **A release of the Android launcher.** Its source is in [apps/android-launcher](../apps/android-launcher/README.md)
+  as a development build: you build a debug APK yourself, it has been used on one phone, and it cannot
+  sign in through a front door that sends you to another site.
 - **Per-person private memories in the app** (`app.viewers`) are built but refused by this version;
   `memory.scopes` is off by default.

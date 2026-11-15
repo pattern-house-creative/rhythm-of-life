@@ -312,6 +312,7 @@ starting point and check what it exposes yourself.
 
 ```
 app/         the web app and its server
+apps/        the Android launcher, a development build (apps/android-launcher)
 engine/      the knowledge engine, adapters, migrations, tests
 contracts/   app to engine contract, MCP tools, adapter and plugin contracts, JSON Schemas
 deploy/      compose (the only required deployment), TrueNAS, Vercel and exposure recipes

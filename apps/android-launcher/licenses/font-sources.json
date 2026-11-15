@@ -1,0 +1,30 @@
+[
+  {
+    "family": "manrope",
+    "resource": "font/manrope.ttf",
+    "url": "https://raw.githubusercontent.com/google/fonts/cc39c4c2c304bc368c9b7c311ea2bcc6013299fe/ofl/manrope/Manrope%5Bwght%5D.ttf",
+    "sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6",
+    "bytes": 164700
+  },
+  {
+    "family": "manrope",
+    "licence": "manrope-OFL.txt",
+    "url": "https://raw.githubusercontent.com/google/fonts/cc39c4c2c304bc368c9b7c311ea2bcc6013299fe/ofl/manrope/OFL.txt",
+    "sha256": "58172e0c0fac2cda8a37b348164bb55e44b0e69051e557e92b1d3f6910141f7b",
+    "bytes": 4387
+  },
+  {
+    "family": "dmsans",
+    "resource": "font/dmsans.ttf",
+    "url": "https://raw.githubusercontent.com/google/fonts/cc39c4c2c304bc368c9b7c311ea2bcc6013299fe/ofl/dmsans/DMSans%5Bopsz%2Cwght%5D.ttf",
+    "sha256": "8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d",
+    "bytes": 240164
+  },
+  {
+    "family": "dmsans",
+    "licence": "dmsans-OFL.txt",
+    "url": "https://raw.githubusercontent.com/google/fonts/cc39c4c2c304bc368c9b7c311ea2bcc6013299fe/ofl/dmsans/OFL.txt",
+    "sha256": "9af36190332437f5ecd09974de43c1f7c77a310a996cdd8ceb25628b458840e1",
+    "bytes": 4482
+  }
+]

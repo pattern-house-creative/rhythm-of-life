@@ -1,0 +1,8 @@
+<network-security-config>
+  <base-config cleartextTrafficPermitted="false"><trust-anchors><certificates src="system" /></trust-anchors></base-config>
+  <!-- Disposable emulator variant only. No trust change in debug/release APKs. -->
+  <domain-config cleartextTrafficPermitted="false">
+    <domain>10.0.2.2</domain>
+    <trust-anchors><certificates src="@raw/fixture_cert" /></trust-anchors>
+  </domain-config>
+</network-security-config>

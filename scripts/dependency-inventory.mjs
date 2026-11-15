@@ -120,8 +120,36 @@ for (const model of json("docs/licenses/models.json").models) {
     `Unclassified model: ${model.name}`,
   );
 }
+// The Android launcher: the inventory names exactly the packages Gradle listed in dependencies.txt
+// (./gradlew :launcher:writeDependencyList), each with its role and the licence its POM declares
+// (node scripts/collect-gradle-licenses.mjs).
+const listed = new Map(
+  read("apps/android-launcher/launcher/dependencies.txt")
+    .toString()
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => line.split(" ").reverse()),
+);
+const gradle = json("docs/licenses/gradle.json").packages;
+assert.equal(
+  gradle.length,
+  listed.size,
+  "Gradle inventory package count differs",
+);
+for (const p of gradle) {
+  const id = `${p.name}:${p.version}`;
+  assert.equal(
+    p.role,
+    listed.get(id),
+    `Unrecognized Gradle package or role: ${id}`,
+  );
+  listed.delete(id);
+  assert.ok(p.license, `Missing Gradle licence: ${id}`);
+}
+assert.equal(listed.size, 0);
+
 console.log(
-  `Licences: ${npm.packages.length} npm entries, ${nuget.length} NuGet packages; legal files and model pins match.`,
+  `Licences: ${npm.packages.length} npm entries, ${nuget.length} NuGet packages, ${gradle.length} Gradle packages; legal files and model pins match.`,
 );
 console.log(
   "BGE-small export licensing remains unresolved; see docs/licenses/README.md.",
