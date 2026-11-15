@@ -515,6 +515,21 @@ public sealed partial class HarnessTools(Retrieval reader, IHttpContextAccessor 
     public static bool Open(string tool, IServiceProvider services) =>
         tool != "semantic_search" || services.GetService<Embeddings>()?.Model is not null;
 
+    // The order tools/list gives the harness tools in: the order the pinned listing has always had
+    // (contracts/fixtures/harness_tools.listing.json), written down here. The server keeps its tools in a table whose
+    // order is the runtime's own and differs from one runtime to the next, so Filter puts every listing in this order:
+    // an old name beside the tool it names, and any other tool (the memory tools, an adapter's) after these, by name.
+    static readonly string[] Listed =
+    [
+        "list_screens", "recall", "control_screen", "search_resources", "discover_health_sources", "log_insight_run",
+        "invoke_dashboard_action", "query_health_metrics", "list_dashboards", "get_resource", "list_insights", "studio_dashboard",
+        "compare_health_trends", "evaluate_health_hypothesis", "save_dashboard", "dashboard_data", "delete_dashboard", "save_document",
+        "get_related_resources", "search_knowledge", "get_relationship_graph", "investigate_health", "get_prompt_capsule",
+        "dashboard_history", "graph_changes", "get_sync_status", "explore_graph", "read_health_source", "save_insight",
+        "discover_dashboard_controls", "semantic_search",
+    ];
+    static int Place(string tool) => Array.IndexOf(Listed, Aliases.GetValueOrDefault(tool, tool)) is var at and >= 0 ? at : int.MaxValue;
+
     // Every harness tool, with its description filled from the install's settings, plus aliases and enabled adapters' tools,
     // each with its arguments checked against its schema first (CheckedTool).
     public static IReadOnlyList<McpServerTool> Create(RhythmConfig config, IEnumerable<McpServerTool> adapterTools)
@@ -552,7 +567,8 @@ public sealed partial class HarnessTools(Retrieval reader, IHttpContextAccessor 
             && (t.Name != RecallTool || RecallSettings.From(config).Tool)
             && (t.Name != CapsuleTool || MemorySettings.CapsulesOn(config))
             && (!MemoryTools.Names.Contains(t.Name) || MemorySettings.ToolsOn(config))
-            && (t.Name != MemoryTools.ShareTool || MemorySettings.ShareOn(config))).ToList();
+            && (t.Name != MemoryTools.ShareTool || MemorySettings.ShareOn(config)))
+            .OrderBy(t => Place(t.Name)).ThenBy(t => Aliases.ContainsKey(t.Name)).ThenBy(t => t.Name, StringComparer.Ordinal).ToList();
         return result;
     }
 }

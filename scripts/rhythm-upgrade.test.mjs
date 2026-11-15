@@ -58,6 +58,8 @@ function install(t, wrapper) {
     `#!/bin/sh\necho "$*" >> "$(dirname "$0")/calls.log"\n` +
       'echo "${RHYTHM_VERSION:-}|${RHYTHM_BIND:-}|${RHYTHM_APP_PORT:-}|${RHYTHM_MCP_PORT:-}|${COMPOSE_PROFILES:-}|$*" >> "$(dirname "$0")/seen.log"\n' +
       'if [ -n "${FAKE_FAIL:-}" ] && [ ! -e "$(dirname "$0")/failed" ]; then case "$*" in *"$FAKE_FAIL"*) : > "$(dirname "$0")/failed"; exit 1 ;; esac; fi\n' +
+      // `image ls` answers here as in docker.ps1 below: off Windows, PowerShell finds this file for `docker`, not that one.
+      'case "$*" in "image ls"*) echo sha256:0123456789ab ;; esac\n' +
       `case "$*" in *"config --images"*) printf '%s\\n' ${images.join(" ")} ;; esac\nexit 0\n`,
     { mode: 0o755 },
   );
