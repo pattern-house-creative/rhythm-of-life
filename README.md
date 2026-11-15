@@ -202,6 +202,7 @@ DEMO insight.
 |---|---|
 | Claude Code, and editors that take a URL and headers | directly ([harness/generic-mcp/](harness/generic-mcp/README.md)) |
 | Claude Desktop | through a small stdio bridge ([the same page](harness/generic-mcp/README.md#3-claude-desktop-and-other-clients)) |
+| Claude on the web, desktop or mobile, as a custom connector | from Anthropic's servers, so it needs a public HTTPS route in, and an account that offers request headers ([claude-hosted.md](harness/generic-mcp/claude-hosted.md)) |
 | ChatGPT | from OpenAI's servers, so it needs a route in: OpenAI's Secure MCP Tunnel or Cloudflare ([harness/chatgpt/](harness/chatgpt/README.md)) |
 
 Rhythm has bearer tokens only for now, so a hosted connector that accepts only OAuth cannot connect

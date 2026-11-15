@@ -65,6 +65,9 @@ fills from your environment:
 and start Claude Code with `RHYTHM_MCP_TOKEN="$(cat deploy/compose/secrets/harness_claude-code_token)" claude`.
 Inside Claude Code, `/mcp` shows whether it connected and how many tools it found.
 
+For two Claude accounts on one computer, such as a personal and a work one, see
+[claude-code-profiles.md](claude-code-profiles.md).
+
 ## 3. Claude Desktop and other clients
 
 - **Clients that take a URL and headers** (Claude Code, VS Code, Cursor, most editors): use the URL,
@@ -89,7 +92,9 @@ Inside Claude Code, `/mcp` shows whether it connected and how many tools it foun
   example for a non-HTTPS address that is not `localhost`).
 - **Connectors added by URL in a hosted app** (custom connectors in Claude Desktop or on the web, and
   ChatGPT) connect from the provider's servers, so they need a public HTTPS URL (the Cloudflare
-  recipe). Some accept only OAuth; Rhythm has bearer tokens only for now (open question Q-016).
+  recipe). A Claude custom connector can send a bearer token where the account offers request
+  headers, which not every account does: see [claude-hosted.md](claude-hosted.md). A connector that
+  accepts only OAuth cannot connect; Rhythm has bearer tokens only for now (open question Q-016).
 
 ## 4. The dashboard guide
 

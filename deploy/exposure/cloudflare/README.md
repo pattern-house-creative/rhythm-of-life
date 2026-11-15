@@ -11,7 +11,7 @@ other hosted AI services reach `/mcp` (ChatGPT can also use the [OpenAI tunnel](
 | Protects the app | Cloudflare Access: only the people you list can sign in (one-time PIN by email, or your identity provider) |
 | Protects `/mcp` | each AI client's bearer token, checked by the engine, and the engine's `Host` allow-list; optionally an Access service token for clients that can send extra headers |
 | Never exposed | Postgres, the engine's `/health` and its other paths, the host's own ports (they stay on `127.0.0.1`) |
-| Checked | by `docker compose config` only: the tunnel and Access need a Cloudflare account, which these docs were not tested with |
+| Checked | by `docker compose config` only: the tunnel and Access need a Cloudflare account, which these docs were not tested with. One MCP-only route with a bearer token was tried by hand, once, with a Claude custom connector ([what was and was not checked](../../../harness/generic-mcp/claude-hosted.md#how-far-this-is-tested)) |
 
 Use your own names; `rhythm` and `rhythm-mcp` are examples. Keep both one level below your domain
 (`rhythm-mcp.example.invalid`, not `mcp.rhythm.example.invalid`): Cloudflare's free certificate
