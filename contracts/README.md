@@ -139,6 +139,12 @@ The browser never talks to the engine and never sees a token. It calls the app's
   The facade MUST treat a JSON-RPC `error` member, a non-object `structuredContent`, an `id` mismatch
   or a non-JSON response as `unavailable`.
 
+When `engine.oauth.enabled` is true, a harness may also use an OAuth access token at the same `/mcp`.
+The existing bearer lookup takes precedence; OAuth resolves to an existing enabled harness principal
+with the same scope and role checks. A 401 includes protected-resource discovery. Only the optional
+OAuth protocol routes permit browser consent; the no-Origin rule on `/mcp` remains in force.
+See [OAuth setup and lifecycle](../harness/chatgpt/oauth.md).
+
 ### 1.5 A document's original file
 
 A document someone added as a file (`app_upload_document`, or the documents folder) keeps its original in the

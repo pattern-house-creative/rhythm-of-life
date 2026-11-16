@@ -38,6 +38,7 @@ public sealed partial class RhythmConfig
         public string Url { get; init; } = "http://engine:8080";
         public List<string> AllowedHosts { get; init; } = ["localhost", "127.0.0.1", "[::1]", "engine"];
         public string? PublicMcpUrl { get; init; }
+        public OAuthSettings? Oauth { get; init; }
         public bool LegacyToolNames { get; init; }
         // search_knowledge and search_resources as before ranking: every word required, newest first (LexicalSearch).
         // Absent means true, so an install whose settings predate ranking keeps the search it had; `rhythm init` and the
@@ -207,6 +208,7 @@ public sealed partial class RhythmConfig
 
     public void Validate()
     {
+        _ = OAuthSettings.From(this);
         if (Version != 1) throw new ConfigException("version must be 1");
         if (string.IsNullOrWhiteSpace(Instance.Name) || Instance.Name.Length > 60) throw new ConfigException("instance.name is 1-60 characters");
         if (!TimezonePattern().IsMatch(Timezone ?? "")) throw new ConfigException("timezone must be an IANA name such as Europe/London, or UTC");

@@ -6,6 +6,19 @@ each entry says so under **Upgrading**.
 
 ## Unreleased
 
+- **Optional OAuth on the MCP endpoint** (off by default). With `engine.oauth.enabled: true` the engine
+  takes an OAuth sign-in (authorization code with PKCE, one predefined public client) beside bearer
+  tokens on the same `/mcp`, for clients that connect that way; it needs a canonical HTTPS
+  `engine.publicMcpUrl` and an exact `engine.oauth.redirectUris` list
+  ([setup](harness/chatgpt/oauth.md)). Bearer clients work as before. **Upgrading:** migration 077
+  applies at the next start.
+- **The memory instructions say how to keep a task.** The block the engine gives an AI client when it
+  connects (and `harness/memory.md`) now says that something the person means to do is saved with the
+  `task` tag, `owed_to` or `owed_by`, with no special phrase; that a memory has one date, which a snooze
+  moves, so a deadline is never pushed back for a later reminder without saying so; that `append` and
+  `update` read no date from their words; and that "what needs doing" walks `list_loops` and `list_due`
+  to the end, not `brief` alone. No tool changed. A client reads the block when it connects, so
+  reconnect it after upgrading.
 - **The Android launcher's source** is in `apps/android-launcher`: a phone's Home screen with dashboard
   previews beside your apps, the sky and the day's insight. It is a development build that you compile
   yourself; there is no released APK. Opened from the launcher, a dashboard fills the screen with no exit

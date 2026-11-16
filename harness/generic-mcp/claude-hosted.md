@@ -38,8 +38,9 @@ Request-header authentication is in beta for a limited set of accounts: if the d
 
 The label No sign-in selects the absence of OAuth in Claude; Rhythm still requires the bearer
 credential. Anthropic retains the saved header and sends it with requests. An account without
-Request headers cannot use this particular setup. Do not substitute an OAuth flow that Rhythm
-does not implement, or try to use Authorization for two different authentication schemes.
+Request headers cannot use this particular setup. The optional [OAuth setup](../chatgpt/oauth.md)
+is verified with ChatGPT; this Claude guide uses the existing bearer header. Do not use Authorization
+for two authentication schemes at once.
 
 Review tool permissions before use. In the one account this was tried with, every tool needed
 approval at first. Claude's UI also said its Auto mode could permit actions after automated checks, so a

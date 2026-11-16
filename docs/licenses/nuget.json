@@ -54,6 +54,38 @@
       "notices": []
     },
     {
+      "name": "Microsoft.Bcl.Cryptography",
+      "version": "10.0.2",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "LG9Yll3B5aNpxv0+D47g6LiOiKBIlodhcHdQwcYzo8VeexFLGqx5ymetmA2aBRyo9cCcWsQWrFsdbsr8LvmWDw==",
+      "licenseType": "expression",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "repository": "https://github.com/dotnet/dotnet",
+      "commit": "44525024595742ebe09023abe709df51de65009b",
+      "notices": [
+        {
+          "file": "nuget/Microsoft.Bcl.Cryptography-10.0.2/THIRD-PARTY-NOTICES.TXT",
+          "source": "NuGet Microsoft.Bcl.Cryptography@10.0.2/THIRD-PARTY-NOTICES.TXT",
+          "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21"
+        },
+        {
+          "file": "nuget/Microsoft.Bcl.Cryptography-10.0.2/LICENSE.TXT",
+          "source": "https://raw.githubusercontent.com/dotnet/dotnet/44525024595742ebe09023abe709df51de65009b/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        },
+        {
+          "file": "nuget/Microsoft.Bcl.Cryptography-10.0.2/SOURCE-THIRD-PARTY-NOTICES.txt",
+          "source": "https://raw.githubusercontent.com/dotnet/dotnet/44525024595742ebe09023abe709df51de65009b/THIRD-PARTY-NOTICES.txt",
+          "sha256": "4bef6a7e7b359869d751c9ff70274a80a0f626927afa5a0681583c1b1861267b"
+        }
+      ]
+    },
+    {
       "name": "Microsoft.CodeCoverage",
       "version": "17.14.1",
       "roles": [
@@ -67,6 +99,114 @@
       "repository": "https://github.com/microsoft/vstest",
       "commit": "490850ae3fdc1b470e3804ceab4f6a41cf89ae51",
       "notices": []
+    },
+    {
+      "name": "Microsoft.EntityFrameworkCore.Abstractions",
+      "version": "10.0.15",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "aLHlTnngp1CcWF5gWbqNwcfROjINCaQVKoySCFpl8O/EQaCdvtW+miv9KoSpKDtWIN+W7lZ8yr4KnbK3hp9oYQ==",
+      "licenseType": "expression",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "repository": "https://github.com/dotnet/dotnet",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
+      "notices": [
+        {
+          "file": "nuget/Microsoft.EntityFrameworkCore.Abstractions-10.0.15/LICENSE.TXT",
+          "source": "https://raw.githubusercontent.com/dotnet/dotnet/8e0f8ed2312954727f8919d7d1c2f78b483b4ee7/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        },
+        {
+          "file": "nuget/Microsoft.EntityFrameworkCore.Abstractions-10.0.15/THIRD-PARTY-NOTICES.txt",
+          "source": "https://raw.githubusercontent.com/dotnet/dotnet/8e0f8ed2312954727f8919d7d1c2f78b483b4ee7/THIRD-PARTY-NOTICES.txt",
+          "sha256": "5a90be9000b5c2f928dead74be4e86952420d1160fa38f6f2d34526eeee49ff6"
+        }
+      ]
+    },
+    {
+      "name": "Microsoft.EntityFrameworkCore.Analyzers",
+      "version": "10.0.15",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "13C007jEmO1JVsoJ+Vvn0AzOaR5bpGsDsaOB9nQt6denQR8hmv1eWmQ0qGarvz+1Zu5b511uF74A90BQigdYHA==",
+      "licenseType": "expression",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "repository": "https://github.com/dotnet/dotnet",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
+      "notices": [
+        {
+          "file": "nuget/Microsoft.EntityFrameworkCore.Analyzers-10.0.15/LICENSE.TXT",
+          "source": "https://raw.githubusercontent.com/dotnet/dotnet/8e0f8ed2312954727f8919d7d1c2f78b483b4ee7/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        },
+        {
+          "file": "nuget/Microsoft.EntityFrameworkCore.Analyzers-10.0.15/THIRD-PARTY-NOTICES.txt",
+          "source": "https://raw.githubusercontent.com/dotnet/dotnet/8e0f8ed2312954727f8919d7d1c2f78b483b4ee7/THIRD-PARTY-NOTICES.txt",
+          "sha256": "5a90be9000b5c2f928dead74be4e86952420d1160fa38f6f2d34526eeee49ff6"
+        }
+      ]
+    },
+    {
+      "name": "Microsoft.EntityFrameworkCore.Relational",
+      "version": "10.0.15",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "8rEj7IN4+cW1fXkENqCsHeqDrty3izIvWIw6YlXA3sYLPpie1S1MMAWrF3/QjPSI9AWL3sXT6tQqBeNeX6QWEw==",
+      "licenseType": "expression",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "repository": "https://github.com/dotnet/dotnet",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
+      "notices": [
+        {
+          "file": "nuget/Microsoft.EntityFrameworkCore.Relational-10.0.15/LICENSE.TXT",
+          "source": "https://raw.githubusercontent.com/dotnet/dotnet/8e0f8ed2312954727f8919d7d1c2f78b483b4ee7/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        },
+        {
+          "file": "nuget/Microsoft.EntityFrameworkCore.Relational-10.0.15/THIRD-PARTY-NOTICES.txt",
+          "source": "https://raw.githubusercontent.com/dotnet/dotnet/8e0f8ed2312954727f8919d7d1c2f78b483b4ee7/THIRD-PARTY-NOTICES.txt",
+          "sha256": "5a90be9000b5c2f928dead74be4e86952420d1160fa38f6f2d34526eeee49ff6"
+        }
+      ]
+    },
+    {
+      "name": "Microsoft.EntityFrameworkCore",
+      "version": "10.0.15",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "cp0ocqFrk6SXPy5xAI4gf2RlTk7jO4LcybDGWKp5F5zjPKyn2fEulElXIrCWreQFe8/4u01xoVhscrabhOOnhw==",
+      "licenseType": "expression",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "repository": "https://github.com/dotnet/dotnet",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
+      "notices": [
+        {
+          "file": "nuget/Microsoft.EntityFrameworkCore-10.0.15/LICENSE.TXT",
+          "source": "https://raw.githubusercontent.com/dotnet/dotnet/8e0f8ed2312954727f8919d7d1c2f78b483b4ee7/LICENSE.TXT",
+          "sha256": "ae48df11a335dc1a615f4f938b69cba73bcf4485c4f97af49b38efb0f216353b"
+        },
+        {
+          "file": "nuget/Microsoft.EntityFrameworkCore-10.0.15/THIRD-PARTY-NOTICES.txt",
+          "source": "https://raw.githubusercontent.com/dotnet/dotnet/8e0f8ed2312954727f8919d7d1c2f78b483b4ee7/THIRD-PARTY-NOTICES.txt",
+          "sha256": "5a90be9000b5c2f928dead74be4e86952420d1160fa38f6f2d34526eeee49ff6"
+        }
+      ]
     },
     {
       "name": "Microsoft.Extensions.AI.Abstractions",
@@ -97,32 +237,47 @@
     },
     {
       "name": "Microsoft.Extensions.Caching.Abstractions",
-      "version": "10.0.10",
+      "version": "10.0.15",
       "roles": [
         "test"
       ],
-      "contentHash": "4ZFBNE+jzR+CrWWlhOesnmywCW7pYKT0dxyAQRdL11yJwxe4jvcAu31eorFtEkoFeCDcUTeNssgPv2yaRRptaQ==",
+      "contentHash": "hzquYYxIDAOh5DZjqfWhm9jUILFguywE8KCBg+Sp4WYY1wND67qWllGXY5h2DrKneSGlqdFa0njngVT6sT+Brg==",
       "licenseType": "expression",
       "license": "MIT",
       "licenseUrl": "https://licenses.nuget.org/MIT",
       "copyright": "© Microsoft Corporation. All rights reserved.",
       "repository": "https://github.com/dotnet/dotnet",
-      "commit": "f7d90799ce4ef09a0bb257852a57248d2a8fb8dd",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
+      "notices": []
+    },
+    {
+      "name": "Microsoft.Extensions.Caching.Memory",
+      "version": "10.0.15",
+      "roles": [
+        "test"
+      ],
+      "contentHash": "uTfEHyTAxSqly3dCfqG5jVh5LZBU3pdipc5I1XLjPB7tjPV6ZejQjdiARt40X6B2yvf/4/v7hNT5D/veuf6zRA==",
+      "licenseType": "expression",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "repository": "https://github.com/dotnet/dotnet",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
       "notices": []
     },
     {
       "name": "Microsoft.Extensions.Configuration.Abstractions",
-      "version": "10.0.14",
+      "version": "10.0.15",
       "roles": [
         "test"
       ],
-      "contentHash": "4YdfvaoWn3tB1xQQHGrhRTFWJ8fGOqxThxduynSZy9ZFTiSaUi3vX4EK/kj8h2HQMwTlks9MWV1fv2WRBv5/1w==",
+      "contentHash": "0vztB/x4zuR/KT82cgTiiw9DqigfT1FjBgq9FjEFvJUgeacjTG4e7hWD2PCRXzL2kWWl/vBAwtXddIRV3AIU6Q==",
       "licenseType": "expression",
       "license": "MIT",
       "licenseUrl": "https://licenses.nuget.org/MIT",
       "copyright": "© Microsoft Corporation. All rights reserved.",
       "repository": "https://github.com/dotnet/dotnet",
-      "commit": "0427b9abbead3fa64c6655eb4290c537397131fa",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
       "notices": []
     },
     {
@@ -232,32 +387,32 @@
     },
     {
       "name": "Microsoft.Extensions.DependencyInjection.Abstractions",
-      "version": "10.0.14",
+      "version": "10.0.15",
       "roles": [
         "test"
       ],
-      "contentHash": "QtpQzuSZVyTPCuHW058yCs9Nj0394uUkNyFHS813nOmK9UgUdBdaprJ5PPsBgsQIpxADTsTkbaMMonykem6qdw==",
+      "contentHash": "KczR2nV7ooeimtZxAawPht/FJUHnX+uoWy7y4pba+iaRQBwUM2NwtiqZg+/FpZDHUf2RkkzveGkhMTWDNzmDUA==",
       "licenseType": "expression",
       "license": "MIT",
       "licenseUrl": "https://licenses.nuget.org/MIT",
       "copyright": "© Microsoft Corporation. All rights reserved.",
       "repository": "https://github.com/dotnet/dotnet",
-      "commit": "0427b9abbead3fa64c6655eb4290c537397131fa",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
       "notices": []
     },
     {
       "name": "Microsoft.Extensions.DependencyInjection",
-      "version": "10.0.14",
+      "version": "10.0.15",
       "roles": [
         "test"
       ],
-      "contentHash": "2LzcuVjemeXR+WdY9wGIr8iGb7fYsDAit+IScxXX2XJnX0b++mWcE/WO6fEGIqhdMfSQM2ZS5JGMHYZix7YXZg==",
+      "contentHash": "7DUIgHeJpBs1RG0hYwWDOImXP03+uPrV5KtyUPxrZsiWadlg95aYijNKCZ2j2UmufQAmN6XEQfx4B/J6TuE7lg==",
       "licenseType": "expression",
       "license": "MIT",
       "licenseUrl": "https://licenses.nuget.org/MIT",
       "copyright": "© Microsoft Corporation. All rights reserved.",
       "repository": "https://github.com/dotnet/dotnet",
-      "commit": "0427b9abbead3fa64c6655eb4290c537397131fa",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
       "notices": []
     },
     {
@@ -382,17 +537,17 @@
     },
     {
       "name": "Microsoft.Extensions.Logging.Abstractions",
-      "version": "10.0.14",
+      "version": "10.0.15",
       "roles": [
         "test"
       ],
-      "contentHash": "SwcbEBtkECq3D2oywvHkm46fyrX9Dd2JPWphDnHUc2+cUWR1Mdo41atAjh/9iZjgQxuvbKfZKXqostT/LZfefA==",
+      "contentHash": "s5xzXGWqqlmmThMnQ1rnmL7QLwbluB2JqX9NaK8C9HPuHzN7kfmiddTRbwts5rQssATkh2B18RrofjeUD8g14A==",
       "licenseType": "expression",
       "license": "MIT",
       "licenseUrl": "https://licenses.nuget.org/MIT",
       "copyright": "© Microsoft Corporation. All rights reserved.",
       "repository": "https://github.com/dotnet/dotnet",
-      "commit": "0427b9abbead3fa64c6655eb4290c537397131fa",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
       "notices": []
     },
     {
@@ -472,17 +627,17 @@
     },
     {
       "name": "Microsoft.Extensions.Logging",
-      "version": "10.0.14",
+      "version": "10.0.15",
       "roles": [
         "test"
       ],
-      "contentHash": "O2fXL6JmtkFwkigxS8fPTQpLXxGDjgZco5D+h88s++Cl0bDCs023PVkpNoifciJ+f30I82jnp8tpwF0wCLdFtA==",
+      "contentHash": "Vya6t+hqCLeoZsbsJo5FzrEoOTK7syIeuaxLl3F8QagD3sXVxAQgmVEq5+jaA4gQ4yreg27fZ8gJH96bWtxoBQ==",
       "licenseType": "expression",
       "license": "MIT",
       "licenseUrl": "https://licenses.nuget.org/MIT",
       "copyright": "© Microsoft Corporation. All rights reserved.",
       "repository": "https://github.com/dotnet/dotnet",
-      "commit": "0427b9abbead3fa64c6655eb4290c537397131fa",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
       "notices": []
     },
     {
@@ -502,33 +657,193 @@
     },
     {
       "name": "Microsoft.Extensions.Options",
-      "version": "10.0.14",
+      "version": "10.0.15",
       "roles": [
         "test"
       ],
-      "contentHash": "EeN/33S418m9oWEaZY4N5T+BNxtOqNTIFoFbIgBKwylh4OJPKIWFAzbIhpTdNbwUs26MhkmbLCAbdY+YCJ1dIQ==",
+      "contentHash": "vF3ghTChyyX3BDqRFUurk+fn8vZySFmWHm4vIeeOQbBrjnPqWrr5ceyCb1jrGpMasYdcK9IuJskLVQZWBfNxCg==",
       "licenseType": "expression",
       "license": "MIT",
       "licenseUrl": "https://licenses.nuget.org/MIT",
       "copyright": "© Microsoft Corporation. All rights reserved.",
       "repository": "https://github.com/dotnet/dotnet",
-      "commit": "0427b9abbead3fa64c6655eb4290c537397131fa",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
       "notices": []
     },
     {
       "name": "Microsoft.Extensions.Primitives",
-      "version": "10.0.14",
+      "version": "10.0.15",
       "roles": [
         "test"
       ],
-      "contentHash": "1bbZqqCJTPba3inTADExbp/9PsGVyvGOX3zr6tFr7ySCgVkX9Lpw7BV0TizktNItd3SsbUu1sQfSAYm1GZMoNw==",
+      "contentHash": "NjzLiZ1/bYx8VwLqHxNnCfDTQQbCY7P1dwT7JM5FiANiaSfI6UKHi0/sla+jyRbOIbPAMJkhWQ/9pH3tMf+IrQ==",
       "licenseType": "expression",
       "license": "MIT",
       "licenseUrl": "https://licenses.nuget.org/MIT",
       "copyright": "© Microsoft Corporation. All rights reserved.",
       "repository": "https://github.com/dotnet/dotnet",
-      "commit": "0427b9abbead3fa64c6655eb4290c537397131fa",
+      "commit": "8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
       "notices": []
+    },
+    {
+      "name": "Microsoft.IdentityModel.Abstractions",
+      "version": "8.23.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "JjiBkKj12OKvuWr+kB5sQwb7fmWW5bi03Mq/rd2Fu/7YwZ1RWQO9KhI9lBxki4o1VvY0wzqny8c7nwx1uuZzVg==",
+      "licenseType": "expression",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "repository": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
+      "commit": "8b16f418b3d587416d293e9ba34c5d310781cdb3",
+      "notices": [
+        {
+          "file": "nuget/Microsoft.IdentityModel.Abstractions-8.23.0/LICENSE.txt",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/LICENSE.txt",
+          "sha256": "b09ac0e46520eec4ee7b16af87d4ccbf8180551f3b2ff0f6c9b4f3ddcd585640"
+        },
+        {
+          "file": "nuget/Microsoft.IdentityModel.Abstractions-8.23.0/NOTICE.html",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/NOTICE.html",
+          "sha256": "d9f0289a2c38b4eedf5f22a045b6b37212d0989afb5f416a5f9ace59958136f7"
+        },
+        {
+          "file": "nuget/Microsoft.IdentityModel.Abstractions-8.23.0/ThirdPartyNotice.txt",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/ThirdPartyNotice.txt",
+          "sha256": "8d53e3a82ef34420b78b856dc5199ebed5ad854fc586014526ac17224fbbbc5e"
+        }
+      ]
+    },
+    {
+      "name": "Microsoft.IdentityModel.JsonWebTokens",
+      "version": "8.23.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "ePEm+mv5iswzckE3mygh52uFUeQpVlHa1B10nS4jpEyNV5tL1mLgRS9U5sMaRlhsPRsZ1DJP0+FhxSrOIfMGIg==",
+      "licenseType": "expression",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "repository": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
+      "commit": "8b16f418b3d587416d293e9ba34c5d310781cdb3",
+      "notices": [
+        {
+          "file": "nuget/Microsoft.IdentityModel.JsonWebTokens-8.23.0/LICENSE.txt",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/LICENSE.txt",
+          "sha256": "b09ac0e46520eec4ee7b16af87d4ccbf8180551f3b2ff0f6c9b4f3ddcd585640"
+        },
+        {
+          "file": "nuget/Microsoft.IdentityModel.JsonWebTokens-8.23.0/NOTICE.html",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/NOTICE.html",
+          "sha256": "d9f0289a2c38b4eedf5f22a045b6b37212d0989afb5f416a5f9ace59958136f7"
+        },
+        {
+          "file": "nuget/Microsoft.IdentityModel.JsonWebTokens-8.23.0/ThirdPartyNotice.txt",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/ThirdPartyNotice.txt",
+          "sha256": "8d53e3a82ef34420b78b856dc5199ebed5ad854fc586014526ac17224fbbbc5e"
+        }
+      ]
+    },
+    {
+      "name": "Microsoft.IdentityModel.Logging",
+      "version": "8.23.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "wSXXOoV4b4hhRcC492jyNBZkO0LWrcWtWP5Cl5ujrON3vTMlufXDT39gTZfBhFAZCV2XJtNU6DLHMDR6E9YpUg==",
+      "licenseType": "expression",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "repository": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
+      "commit": "8b16f418b3d587416d293e9ba34c5d310781cdb3",
+      "notices": [
+        {
+          "file": "nuget/Microsoft.IdentityModel.Logging-8.23.0/LICENSE.txt",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/LICENSE.txt",
+          "sha256": "b09ac0e46520eec4ee7b16af87d4ccbf8180551f3b2ff0f6c9b4f3ddcd585640"
+        },
+        {
+          "file": "nuget/Microsoft.IdentityModel.Logging-8.23.0/NOTICE.html",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/NOTICE.html",
+          "sha256": "d9f0289a2c38b4eedf5f22a045b6b37212d0989afb5f416a5f9ace59958136f7"
+        },
+        {
+          "file": "nuget/Microsoft.IdentityModel.Logging-8.23.0/ThirdPartyNotice.txt",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/ThirdPartyNotice.txt",
+          "sha256": "8d53e3a82ef34420b78b856dc5199ebed5ad854fc586014526ac17224fbbbc5e"
+        }
+      ]
+    },
+    {
+      "name": "Microsoft.IdentityModel.Protocols",
+      "version": "8.23.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "wQxyMdH/9Q25/kF7B56YgyqEaUBXJEQ5IY0TEKNH3oAPewNxVOl0ENuaKu0sazR0kw4owQDDSF+AvWcEFEvo2g==",
+      "licenseType": "expression",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "repository": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
+      "commit": "8b16f418b3d587416d293e9ba34c5d310781cdb3",
+      "notices": [
+        {
+          "file": "nuget/Microsoft.IdentityModel.Protocols-8.23.0/LICENSE.txt",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/LICENSE.txt",
+          "sha256": "b09ac0e46520eec4ee7b16af87d4ccbf8180551f3b2ff0f6c9b4f3ddcd585640"
+        },
+        {
+          "file": "nuget/Microsoft.IdentityModel.Protocols-8.23.0/NOTICE.html",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/NOTICE.html",
+          "sha256": "d9f0289a2c38b4eedf5f22a045b6b37212d0989afb5f416a5f9ace59958136f7"
+        },
+        {
+          "file": "nuget/Microsoft.IdentityModel.Protocols-8.23.0/ThirdPartyNotice.txt",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/ThirdPartyNotice.txt",
+          "sha256": "8d53e3a82ef34420b78b856dc5199ebed5ad854fc586014526ac17224fbbbc5e"
+        }
+      ]
+    },
+    {
+      "name": "Microsoft.IdentityModel.Tokens",
+      "version": "8.23.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "PUowLq8gqICt+oepHWmKBOJmnVmWoQ5dOVn2CgwFMBZZOAEMHgCQLWs8ONYdsjAyjhDHaFy+AAx0OMG/oV06Zw==",
+      "licenseType": "expression",
+      "license": "MIT",
+      "licenseUrl": "https://licenses.nuget.org/MIT",
+      "copyright": "© Microsoft Corporation. All rights reserved.",
+      "repository": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
+      "commit": "8b16f418b3d587416d293e9ba34c5d310781cdb3",
+      "notices": [
+        {
+          "file": "nuget/Microsoft.IdentityModel.Tokens-8.23.0/LICENSE.txt",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/LICENSE.txt",
+          "sha256": "b09ac0e46520eec4ee7b16af87d4ccbf8180551f3b2ff0f6c9b4f3ddcd585640"
+        },
+        {
+          "file": "nuget/Microsoft.IdentityModel.Tokens-8.23.0/NOTICE.html",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/NOTICE.html",
+          "sha256": "d9f0289a2c38b4eedf5f22a045b6b37212d0989afb5f416a5f9ace59958136f7"
+        },
+        {
+          "file": "nuget/Microsoft.IdentityModel.Tokens-8.23.0/ThirdPartyNotice.txt",
+          "source": "https://raw.githubusercontent.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/8b16f418b3d587416d293e9ba34c5d310781cdb3/ThirdPartyNotice.txt",
+          "sha256": "8d53e3a82ef34420b78b856dc5199ebed5ad854fc586014526ac17224fbbbc5e"
+        }
+      ]
     },
     {
       "name": "Microsoft.ML.OnnxRuntime.Managed",
@@ -753,6 +1068,28 @@
       "notices": []
     },
     {
+      "name": "Npgsql.EntityFrameworkCore.PostgreSQL",
+      "version": "10.0.2",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "PsNYgPOSW41Xx19gin7y4EdZAPteWr9Cb01XkdObxOsPzi+mgBupBEN7J7+erXFsROPOILM7MlIoO9QzL8+LGQ==",
+      "licenseType": "expression",
+      "license": "PostgreSQL",
+      "licenseUrl": "https://licenses.nuget.org/PostgreSQL",
+      "copyright": "Copyright 2025 © The Npgsql Development Team",
+      "repository": "https://github.com/npgsql/efcore.pg",
+      "commit": "c46789c136fa63fe5a97577f79c54e1c0ec0e9ef",
+      "notices": [
+        {
+          "file": "nuget/Npgsql.EntityFrameworkCore.PostgreSQL-10.0.2/LICENSE",
+          "source": "https://raw.githubusercontent.com/npgsql/efcore.pg/c46789c136fa63fe5a97577f79c54e1c0ec0e9ef/LICENSE",
+          "sha256": "bc2fdab8551ca4022196dbbd3dc582ca65211209196a3459b1bab60cb71a9979"
+        }
+      ]
+    },
+    {
       "name": "Npgsql",
       "version": "10.0.3",
       "roles": [
@@ -771,6 +1108,204 @@
           "file": "nuget/Npgsql-10.0.3/LICENSE",
           "source": "https://raw.githubusercontent.com/npgsql/npgsql/d3768398c17877b3a916c3c4d87e8e11698991fc/LICENSE",
           "sha256": "2e1d9cc6ed4eb7fe6fa82091846c06b4f58571a2c3b54777db6baeca10dd2d74"
+        }
+      ]
+    },
+    {
+      "name": "OpenIddict.Abstractions",
+      "version": "7.9.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "6Y2tUNZp1dpsdNqrEA9kumCuR+OzY2xtXQcwV81IaR+WPgLELnORiVp4kFr0IIa1hsCZS5MjnIL85UJcKZxtTQ==",
+      "licenseType": "expression",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "© Kévin Chalet. All rights reserved.",
+      "repository": "https://github.com/openiddict/openiddict-core.git",
+      "commit": "31893c74ca8d216a380de954171a3795f955dc96",
+      "notices": [
+        {
+          "file": "nuget/OpenIddict.Abstractions-7.9.0/LICENSE.md",
+          "source": "https://raw.githubusercontent.com/openiddict/openiddict-core/31893c74ca8d216a380de954171a3795f955dc96/LICENSE.md",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "name": "OpenIddict.Core",
+      "version": "7.9.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "lG6zJU5ofZVl7Pck1BdR3Gn3YqgA13RCd8n7G7SEELgQhBjn6H4IUHB/Th35fRB21saOfL73+AVTGv5p+60qWQ==",
+      "licenseType": "expression",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "© Kévin Chalet. All rights reserved.",
+      "repository": "https://github.com/openiddict/openiddict-core.git",
+      "commit": "31893c74ca8d216a380de954171a3795f955dc96",
+      "notices": [
+        {
+          "file": "nuget/OpenIddict.Core-7.9.0/LICENSE.md",
+          "source": "https://raw.githubusercontent.com/openiddict/openiddict-core/31893c74ca8d216a380de954171a3795f955dc96/LICENSE.md",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "name": "OpenIddict.EntityFrameworkCore.Models",
+      "version": "7.9.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "OyBBGAy2PoRK8v4imAfTUtd/qxXTIMwaxBQTtIF+ORH2GY1ejTTUu0pFC8b6gflRAgSrfYI+yKmURrPgq4FjWg==",
+      "licenseType": "expression",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "© Kévin Chalet. All rights reserved.",
+      "repository": "https://github.com/openiddict/openiddict-core.git",
+      "commit": "31893c74ca8d216a380de954171a3795f955dc96",
+      "notices": [
+        {
+          "file": "nuget/OpenIddict.EntityFrameworkCore.Models-7.9.0/LICENSE.md",
+          "source": "https://raw.githubusercontent.com/openiddict/openiddict-core/31893c74ca8d216a380de954171a3795f955dc96/LICENSE.md",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "name": "OpenIddict.EntityFrameworkCore",
+      "version": "7.9.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "21aUo9NccXZuc7rfrizj6u5py9dKAjeH8S3uTT7aC0hZ6ab/p+i9vk+NhjqUlYNkhVW7ORAphzn9yieIm4EolQ==",
+      "licenseType": "expression",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "© Kévin Chalet. All rights reserved.",
+      "repository": "https://github.com/openiddict/openiddict-core.git",
+      "commit": "31893c74ca8d216a380de954171a3795f955dc96",
+      "notices": [
+        {
+          "file": "nuget/OpenIddict.EntityFrameworkCore-7.9.0/LICENSE.md",
+          "source": "https://raw.githubusercontent.com/openiddict/openiddict-core/31893c74ca8d216a380de954171a3795f955dc96/LICENSE.md",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "name": "OpenIddict.Server.AspNetCore",
+      "version": "7.9.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "yJAurwPRCel+FgObtbi+vlhEBxh5OcZEsHAnMLLLKwoT5T2uK9biaVEOAHtvw2hrg7jONDhUs9xW+AIuUsWj6A==",
+      "licenseType": "expression",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "© Kévin Chalet. All rights reserved.",
+      "repository": "https://github.com/openiddict/openiddict-core.git",
+      "commit": "31893c74ca8d216a380de954171a3795f955dc96",
+      "notices": [
+        {
+          "file": "nuget/OpenIddict.Server.AspNetCore-7.9.0/LICENSE.md",
+          "source": "https://raw.githubusercontent.com/openiddict/openiddict-core/31893c74ca8d216a380de954171a3795f955dc96/LICENSE.md",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "name": "OpenIddict.Server",
+      "version": "7.9.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "anz/rGydfPvQ3GYF+Gj8YNRecnf51o2nnneTDAEDgKbwJlNcC2yIkRWnhOfSQeKek6x2W7yGgzOCXz/222reWA==",
+      "licenseType": "expression",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "© Kévin Chalet. All rights reserved.",
+      "repository": "https://github.com/openiddict/openiddict-core.git",
+      "commit": "31893c74ca8d216a380de954171a3795f955dc96",
+      "notices": [
+        {
+          "file": "nuget/OpenIddict.Server-7.9.0/LICENSE.md",
+          "source": "https://raw.githubusercontent.com/openiddict/openiddict-core/31893c74ca8d216a380de954171a3795f955dc96/LICENSE.md",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "name": "OpenIddict.Validation.AspNetCore",
+      "version": "7.9.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "aJb42L8vQW5nWC3Lx82YUPm3pn5J60siQQua7tZJQjurYYIEHfZV/bEz7Dqt4BITFZ9F0RPr7Et/HmGy2CzHmg==",
+      "licenseType": "expression",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "© Kévin Chalet. All rights reserved.",
+      "repository": "https://github.com/openiddict/openiddict-core.git",
+      "commit": "31893c74ca8d216a380de954171a3795f955dc96",
+      "notices": [
+        {
+          "file": "nuget/OpenIddict.Validation.AspNetCore-7.9.0/LICENSE.md",
+          "source": "https://raw.githubusercontent.com/openiddict/openiddict-core/31893c74ca8d216a380de954171a3795f955dc96/LICENSE.md",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "name": "OpenIddict.Validation.ServerIntegration",
+      "version": "7.9.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "F3Q93iDMNFJB3GLxy+/trYiVsxM9YocAT1RSUaBP3Lm3vacXknV89U+S+HXowV8gw3050cjCR3IRwcZNdAjisQ==",
+      "licenseType": "expression",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "© Kévin Chalet. All rights reserved.",
+      "repository": "https://github.com/openiddict/openiddict-core.git",
+      "commit": "31893c74ca8d216a380de954171a3795f955dc96",
+      "notices": [
+        {
+          "file": "nuget/OpenIddict.Validation.ServerIntegration-7.9.0/LICENSE.md",
+          "source": "https://raw.githubusercontent.com/openiddict/openiddict-core/31893c74ca8d216a380de954171a3795f955dc96/LICENSE.md",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "name": "OpenIddict.Validation",
+      "version": "7.9.0",
+      "roles": [
+        "runtime",
+        "test"
+      ],
+      "contentHash": "7fXLCCQ/cX861SuaC2urJuTsQpjSkaO67Pt8WNp+6eb6vu2WffDtjjraolepBvv9o8VnoXE3jqBuYc1ziBGpMw==",
+      "licenseType": "expression",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://licenses.nuget.org/Apache-2.0",
+      "copyright": "© Kévin Chalet. All rights reserved.",
+      "repository": "https://github.com/openiddict/openiddict-core.git",
+      "commit": "31893c74ca8d216a380de954171a3795f955dc96",
+      "notices": [
+        {
+          "file": "nuget/OpenIddict.Validation-7.9.0/LICENSE.md",
+          "source": "https://raw.githubusercontent.com/openiddict/openiddict-core/31893c74ca8d216a380de954171a3795f955dc96/LICENSE.md",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
         }
       ]
     },

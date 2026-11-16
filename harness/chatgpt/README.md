@@ -70,8 +70,8 @@ this needs developer mode turned on first):
 | MCP server URL | your MCP URL from step 1, ending in `/mcp` |
 | Authentication | the bearer token or API key option; paste the token from step 2 |
 
-If your ChatGPT account offers only OAuth for custom connectors, it cannot use a Rhythm token yet:
-Rhythm has bearer tokens only (open question Q-016).
+If your ChatGPT account offers OAuth and no fixed-header option, enable the optional
+[OAuth connection](oauth.md) on this same URL. Existing bearer clients continue to work.
 
 Check it: in a new chat with the connector on, ask "List the tools you have from Rhythm of Life", then
 "Call list_insights". You should see 29 tools (28 while the local semantic model is off) and the

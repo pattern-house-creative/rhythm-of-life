@@ -354,6 +354,15 @@ public sealed class MemoryRestoreTests(DatabaseFixture fixture) : IClassFixture<
                   'RetrievedAt','2026-10-20T08:00:00+00:00','Title',title,'Url','https://example.invalid/demo','References','[]'::jsonb,'Status','current')
                 WHERE id=ANY(@rows)
                 """, ("rows", new[] { star, drive }));
+            // OAuth protocol state is backed up too; its subject still depends on the quarantined principal.
+            await MemoryRows.Run(source, """
+                INSERT INTO oauth_applications("Id","ClientId","ClientType") VALUES('demo-client','demo-client','public');
+                INSERT INTO oauth_scopes("Id","Name") VALUES('demo-scope','rhythm');
+                INSERT INTO oauth_authorizations("Id","ApplicationId","Subject","Status","Type")
+                  VALUES('demo-grant','demo-client',@p::text,'valid','permanent');
+                INSERT INTO oauth_tokens("Id","ApplicationId","AuthorizationId","Subject","Status","Type","Payload")
+                  VALUES('demo-token','demo-client','demo-grant',@p::text,'valid','access_token','DEMO encrypted state');
+                """, ("p", harness));
             var before = await Tables(source);
             var goneTrashed = await MemoryRows.Scalar(source, "SELECT trashed_at::text FROM memory_trash WHERE memory_id=@id", ("id", gone));
             Assert.Equal(LeftEmpty, before.Where(t => t.Value == "[]").Select(t => t.Key).ToArray());
@@ -399,15 +408,20 @@ public sealed class MemoryRestoreTests(DatabaseFixture fixture) : IClassFixture<
                 Assert.Equal("failed restore_requires_review", await MemoryRows.Scalar(restored, "SELECT status||' '||last_error FROM sync_jobs"));
                 // The memory forgotten 20 days before the backup, its retention passed then, is in the trash for the trash's
                 // 14 days from the restore, so the daily purge deletes nothing of what the restore brought back.
-                Assert.Equal(true, await MemoryRows.Scalar(restored,
-                    "SELECT purge_after>now()+interval '13 days' AND purge_after<=now()+interval '14 days' FROM memory_trash WHERE memory_id=@id", ("id", gone)));
+                // Compare with the recorded restore transaction, not a later wall-clock sample that can move
+                // backwards while a VM's clock synchronizes during the suite.
+                Assert.Equal(true, await MemoryRows.Scalar(restored, """
+                    SELECT purge_after=(SELECT min(at) FROM admin_events WHERE job='restore')+interval '14 days'
+                    FROM memory_trash WHERE memory_id=@id
+                    """, ("id", gone)));
                 // Trashed 20 days before the backup, it keeps its date.
                 Assert.Equal(goneTrashed, await MemoryRows.Scalar(restored, "SELECT trashed_at::text FROM memory_trash WHERE memory_id=@id", ("id", gone)));
                 // The one trashed 400 days before has its 14 days too: 025 keeps a retention within 365 days of the trash
                 // row's date, so the row is dated 351 days before the restore; when it was trashed stays on its audit row.
                 Assert.Equal(true, await MemoryRows.Scalar(restored, """
-                    SELECT purge_after>now()+interval '13 days' AND purge_after<=now()+interval '14 days'
-                      AND trashed_at>now()-interval '352 days' AND trashed_at<=now()-interval '351 days' FROM memory_trash WHERE memory_id=@id
+                    WITH restored AS (SELECT min(at) AS at FROM admin_events WHERE job='restore')
+                    SELECT purge_after=restored.at+interval '14 days' AND trashed_at=restored.at-interval '351 days'
+                    FROM memory_trash CROSS JOIN restored WHERE memory_id=@id
                     """, ("id", longAgo)));
                 Assert.Equal(true, await MemoryRows.Scalar(restored,
                     "SELECT at<now()-interval '399 days' FROM memory_events WHERE memory_id=@id AND event='trashed'", ("id", longAgo)));

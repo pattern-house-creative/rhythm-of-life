@@ -205,9 +205,9 @@ DEMO insight.
 | Claude on the web, desktop or mobile, as a custom connector | from Anthropic's servers, so it needs a public HTTPS route in, and an account that offers request headers ([claude-hosted.md](harness/generic-mcp/claude-hosted.md)) |
 | ChatGPT | from OpenAI's servers, so it needs a route in: OpenAI's Secure MCP Tunnel or Cloudflare ([harness/chatgpt/](harness/chatgpt/README.md)) |
 
-Rhythm has bearer tokens only for now, so a hosted connector that accepts only OAuth cannot connect
-yet. Give each client a token of its own with `./rhythm token create <name>`, so you can revoke one
-without touching the others.
+Rhythm supports bearer tokens and optional [OAuth for hosted ChatGPT](harness/chatgpt/oauth.md) on
+the same MCP URL. Give each client a token of its own with `./rhythm token create <name>`, so you can
+revoke one without touching the others. OAuth consent uses its own harness token too.
 
 ## Your own stars
 

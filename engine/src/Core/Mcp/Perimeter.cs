@@ -9,7 +9,7 @@ namespace Knowledge.Mcp;
 // writes a line in the log naming why (RequestLog) and, but for a 405, has a JSON-RPC body. Tests drive it with fake
 // routes and tokens (PerimeterTests).
 public sealed class Perimeter(IEnumerable<string> allowedHosts, Func<bool> ready,
-    Func<string, CancellationToken, Task<Caller?>> authenticate, Perimeter.Routes routes, RequestLog? log = null)
+    Func<string, CancellationToken, Task<Caller?>> authenticate, Perimeter.Routes routes, RequestLog? log = null, OAuthServer? oauth = null)
 {
     // Where an authenticated call goes: the app's and ingest's endpoints, the app's document originals, and the capture
     // endpoint when the settings open it (MemorySettings.CaptureOn).
@@ -22,6 +22,11 @@ public sealed class Perimeter(IEnumerable<string> allowedHosts, Func<bool> ready
     public async Task Handle(HttpContext context, RequestDelegate next)
     {
         context.Response.Headers.CacheControl = "no-store";
+        if (oauth is not null && OAuthServer.ProtocolPath(context.Request.Path))
+        {
+            if (!ready()) { context.Response.StatusCode = 503; return; }
+            await oauth.ProtocolGate(context, next); return;
+        }
         if (context.Request.Headers.ContainsKey("Origin")) { await Refuse(context, 403, "origin_present", "Browser calls are not accepted."); return; }
         if (!allowed.Contains(context.Request.Host.Host) && !allowed.Contains(context.Request.Host.Value ?? ""))
         { await Refuse(context, 403, "host_not_allowed", "The engine does not answer to this host name (engine.allowedHosts)."); return; }
@@ -34,6 +39,7 @@ public sealed class Perimeter(IEnumerable<string> allowedHosts, Func<bool> ready
         if (!auth.StartsWith("Bearer ", StringComparison.Ordinal) || auth.Length > MaxAuthorization)
         { await Refuse(context, 401, "no_token", "Token missing or unknown."); return; }
         var caller = await authenticate(auth[7..].Trim(), context.RequestAborted);
+        if (caller is null && oauth is not null && context.Request.Path == "/mcp") caller = await oauth.Authenticate(context);
         if (caller is null) { await Refuse(context, 401, "unknown_token", "Token missing or unknown."); return; }
         context.Items["principal"] = caller.Id;
         // A document's original file is the app's alone, read with GET; everything else is POST /mcp.
@@ -59,6 +65,7 @@ public sealed class Perimeter(IEnumerable<string> allowedHosts, Func<bool> ready
     Task Refuse(HttpContext context, int status, string reason, string message, string? role = null)
     {
         log?.Refused(status, reason, role);
+        if (status == 401 && oauth is not null && context.Request.Path == "/mcp") context.Response.Headers.WWWAuthenticate = oauth.Challenge;
         return JsonRpc.Refuse(context, status, null, JsonRpc.Code(status), message);
     }
 }

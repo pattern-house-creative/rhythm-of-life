@@ -94,7 +94,12 @@ for (const p of [...all.values()].sort((a, b) =>
       )) {
         const text = await get(base + item.name);
         if (text)
-          docs.push({ file: item.name, text, source: base + item.name });
+          docs.push({
+            // Package and repository notices can differ only in case. Keep both on Windows too.
+            file: docs.some((d) => d.file.toLowerCase() === item.name.toLowerCase())
+              ? "SOURCE-" + item.name : item.name,
+            text, source: base + item.name,
+          });
       }
     }
     if (!docs.some((d) => /^licen[cs]e/i.test(d.file)))

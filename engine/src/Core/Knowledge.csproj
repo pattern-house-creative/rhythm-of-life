@@ -16,6 +16,11 @@
     <PackageReference Include="Microsoft.ML.Tokenizers" Version="2.0.1" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
+    <PackageReference Include="OpenIddict.Server.AspNetCore" Version="7.9.0" />
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" Version="7.9.0" />
+    <PackageReference Include="OpenIddict.Validation.ServerIntegration" Version="7.9.0" />
+    <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="7.9.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
     <!-- PDF text for the documents adapter. Apache-2.0 (docs/adapters/documents.md). -->
     <PackageReference Include="PdfPig" Version="0.1.16" />

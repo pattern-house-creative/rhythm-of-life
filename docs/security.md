@@ -5,7 +5,7 @@ in alpha and has had no outside security review ([known-limits.md](known-limits.
 
 ## The model: no login, the network is the gate
 
-- **There is no login inside Rhythm of Life.** No accounts, passwords, sessions or cookies. Whoever
+- **The app has no built-in login.** Whoever
   reaches the app sees everything in the install, and can give insight feedback, ask for a map
   refresh, change what the household's other open screens show ([below](#screens)) and, on dashboards
   where edits are allowed, make their declared writes.
@@ -80,8 +80,10 @@ one.
   good since is back, in the trash or out of it as the backup held it. Do those steps
   again after a restore ([backups.md](backups.md#when-a-restore-stops-and-what-it-undoes)). `./rhythm restore` removes
   the restored folder, a plain copy of the database, once it has loaded or failed.
-- Some MCP clients accept only OAuth for remote servers. Rhythm has bearer tokens only for now (open
-  question Q-016).
+- Hosted clients that require OAuth can use the optional [OAuth connection](../harness/chatgpt/oauth.md)
+  on the same MCP URL. It is off by default and preserves existing bearer credentials. Its consent page
+  uses a secure antiforgery cookie and a dedicated harness token; the client receives separate, expiring
+  OAuth tokens. Every access and refresh checks that the underlying principal is still enabled.
 
 ## The OpenAI tunnel
 
@@ -108,7 +110,10 @@ works the other way round from the rest: nothing listens for the internet, and t
   token alone) and, with `memory.capture` on beside `memory.tools`, `POST /capture` (for a capture token alone) exist;
   the `Host` header must be in `engine.allowedHosts` (default `localhost`, `127.0.0.1`, `[::1]`, `engine`), which stops
   DNS rebinding and names you did not plan for; any request with an `Origin` header is refused, so no web page can call
-  the engine from a browser; request bodies are capped. Tool results are data: tool
+  the engine's data routes from a browser; request bodies are capped. With `engine.oauth.enabled`,
+  discovery and OAuth protocol routes also exist on the configured HTTPS host. Only the authorization
+  form accepts a same-origin browser POST, with antiforgery protection. Keep the engine port private
+  behind the TLS proxy; it uses the configured public scheme, not forwarded headers. Tool results are data: tool
   descriptions tell models that source text is untrusted, never instructions.
 - **The engine's database login** reads and writes the install's tables (the role checks inside its database
   functions limit callers, not the login), cannot change the schema or make temporary tables, and changes the memory

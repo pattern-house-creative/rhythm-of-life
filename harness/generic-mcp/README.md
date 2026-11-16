@@ -93,8 +93,8 @@ For two Claude accounts on one computer, such as a personal and a work one, see
 - **Connectors added by URL in a hosted app** (custom connectors in Claude Desktop or on the web, and
   ChatGPT) connect from the provider's servers, so they need a public HTTPS URL (the Cloudflare
   recipe). A Claude custom connector can send a bearer token where the account offers request
-  headers, which not every account does: see [claude-hosted.md](claude-hosted.md). A connector that
-  accepts only OAuth cannot connect; Rhythm has bearer tokens only for now (open question Q-016).
+  headers, which not every account does: see [claude-hosted.md](claude-hosted.md). Hosted ChatGPT can
+  use the optional [OAuth setup](../chatgpt/oauth.md) on the same URL; it is off by default.
 
 ## 4. The dashboard guide
 
@@ -142,7 +142,7 @@ The engine's answers (`docs/dev/engine.md`), from the outside:
 | You see | Cause | Fix |
 |---|---|---|
 | connection refused | nothing listens there: the stack is down, the port differs (`RHYTHM_MCP_PORT`), or the engine is bound to `127.0.0.1` and you are on another computer | `docker compose ps`; use an exposure recipe for other computers |
-| `401`, `unauthorized` | no `Authorization: Bearer` header (the word `Bearer` exactly so, then a space), a token that was revoked or never created, or extra text pasted with it. A revoked token is refused on its very next call, even mid-conversation | check the header; `token list`; create a new token. The engine offers no OAuth sign-in (Q-016), so a client that looks for one finds nothing and needs the header |
+| `401`, `unauthorized` | no `Authorization: Bearer` header (the word `Bearer` exactly so, then a space), a token that was revoked or never created, or extra text pasted with it. A revoked token is refused on its very next call, even mid-conversation | check the header; `token list`; create a new token. OAuth clients need the optional [OAuth setup](../chatgpt/oauth.md) enabled by the operator |
 | `403`, "does not answer to this host name" or "Browser calls are not accepted" | the `Host` the engine received is not in `engine.allowedHosts`, or the request carried an `Origin` header (a browser, or a web page calling the engine directly) | add the public host name to `engine.allowedHosts` and restart the engine; call from a client, not a page |
 | `403`, `forbidden` | the token is not a harness token (the app's or a plugin's token), or the tool is not in this role. A plugin's token connects but lists only its two ingest tools | use a token made with `token create <name>` |
 | `404` | the path is not exactly `/mcp`: a trailing slash, or the base URL without `/mcp` | end the URL in `/mcp` |

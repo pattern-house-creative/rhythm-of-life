@@ -73,10 +73,12 @@ static async Task Serve(RhythmConfig config, string data, string[] args, Cancell
     builder.Logging.ClearProviders();
     builder.Logging.AddSimpleConsole(o => { o.SingleLine = true; o.TimestampFormat = "yyyy-MM-ddTHH:mm:ssZ "; o.UseUtcTimestamp = true; });
     builder.Logging.AddFilter("Microsoft", LogLevel.Warning).AddFilter("System", LogLevel.Warning).AddFilter("ModelContextProtocol", LogLevel.Warning);
+    builder.Logging.AddFilter("OpenIddict", LogLevel.Warning);
     var archive = new Archive(Environment.GetEnvironmentVariable("RHYTHM_ARCHIVE") ?? Path.Combine(data, "archive"));
     // One database and pool, whose provider policies include every enabled adapter's, for the adapters and everything else.
     var registry = AdapterRegistry.For(config);
     var db = Engine.Database(config, registry);
+    if (OAuthSettings.From(config) is not null) OAuthServer.Add(builder.Services, config, db, data);
     registry.Configure(config, db, archive);
     var state = new EngineState(data);
     var embeddings = new Embeddings(EmbeddingSettings.From(config).Model);
@@ -111,13 +113,16 @@ static async Task Serve(RhythmConfig config, string data, string[] args, Cancell
     Engine.Mcp(builder.Services, config, registry.Enabled.SelectMany(a => a.HarnessTools()));
 
     var app = builder.Build();
+    var oauth = app.Services.GetService<OAuthServer>();
+    if (oauth is not null) { await oauth.Initialize(app.Services, stopping); oauth.Use(app, () => state.Ready); }
     // Origin, Host, readiness, the bearer token and its role, before any route (Mcp/Perimeter.cs); refusals are logged.
     app.Use(new Perimeter(config.Engine.AllowedHosts, () => state.Ready, Engine.Door(db, config), new(
         App: (context, caller) => AppEndpoint.Handle(context, caller, host, context.RequestServices.GetRequiredService<AppHealth>(), registry),
         Ingest: (context, caller) => IngestEndpoint.Handle(context, caller, context.RequestServices.GetRequiredService<Ingest>(), config),
         Document: (context, caller, document) => AppFiles.Handle(context, caller.Id, document, db, archive, config),
         Capture: Engine.CaptureRoute(config, db)),
-        app.Services.GetRequiredService<RequestLog>()).Handle);
+        app.Services.GetRequiredService<RequestLog>(), oauth).Handle);
+    if (oauth is not null) oauth.Map(app);
     app.MapGet("/health", async (HttpContext context) =>
     {
         try
