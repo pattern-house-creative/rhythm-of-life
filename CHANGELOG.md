@@ -6,6 +6,9 @@ each entry says so under **Upgrading**.
 
 ## Unreleased
 
+- **Fixed: a map rebuild that slowed with the square of the map.** The step that retires old links
+  searched the links once for every current record, so with a few thousand records it could pass the
+  rebuild's four-second statement limit and fail. It now checks only the links it would retire.
 - **Optional OAuth on the MCP endpoint** (off by default). With `engine.oauth.enabled: true` the engine
   takes an OAuth sign-in (authorization code with PKCE, one predefined public client) beside bearer
   tokens on the same `/mcp`, for clients that connect that way; it needs a canonical HTTPS

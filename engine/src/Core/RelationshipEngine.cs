@@ -106,10 +106,13 @@ public sealed class RelationshipEngine(Database db, IRelationshipSource source,
         var complete = batch.Records.Where(r => r.Status == "current" && r.ReferencesComplete)
             .Where(r => allowed.Any(s => s.Record.Key == r.Key && s.Record.RetrievedAt == r.RetrievedAt))
             .Select(r => ids[r.Key]).ToArray();
+        // OFFSET 0 keeps the visibility check a per-link check. Without it the planner turns it into a join that starts
+        // from every current resource and searches the links once for each, with both id lists in the search: time
+        // that grows with the square of the map, and past the writer's statement budget at a few thousand records.
         await using (var retire = Database.Command(commitConnection, commit, $"""
             UPDATE relationships l SET lifecycle='retired',evidence='',details=jsonb_build_object()
             WHERE l.engine=@engine AND l.source_id=ANY(@ids) AND l.target_id=ANY(@stable)
-              AND EXISTS(SELECT 1 FROM resources r WHERE r.id=l.source_id AND {Database.Visible()})
+              AND EXISTS(SELECT 1 FROM resources r WHERE r.id=l.source_id AND {Database.Visible()} OFFSET 0)
             """, ("engine", Owner), ("ids", complete), ("stable", ids.Values.ToArray()), ("principal", principal))) await retire.ExecuteNonQueryAsync(commitToken);
         foreach (var link in links.Where(l => ids.ContainsKey(l.Source) && ids.ContainsKey(l.Target)))
         {
