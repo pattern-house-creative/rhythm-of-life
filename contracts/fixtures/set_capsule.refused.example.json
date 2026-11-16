@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "invalid",
+  "error": "That capsule slot is filled by memory 6d3c2a10-0000-4000-8000-00000000a001: take that one out of its slot first, then set this one"
+}

@@ -1291,7 +1291,15 @@ a change like any other under section 5's author lock; a person calls it from th
 `capsule`) or the terminal (`rhythm capsule`), both only with `memory.tools` on (SB-P3-22). A slot is a person's step (since run 10's
 final review, D-172): the writer refuses an AI client's channel (`mcp`, `42501`) before it reads anything, a slot taken
 out included, and an undo through that channel that would change a slot is refused too (041), so an AI client alone
-never puts its own words into a capsule. What is not enforced: confirming a slotted draft is anyone's who may change the
+never puts its own words into a capsule. **Unless `memory.capsuleWrites` is on** (migration 078; off by default, and
+only with `memory.tools` and `memory.capsules` on): the engine then makes `set_capsule`, which calls the same writer
+with `p_clients` true, the one thing that opens the `mcp` channel. The engine passes it from that tool alone, so
+`update`'s capsule tags, and every install without the setting, are answered as before. Through that channel a slot
+another memory of the scope fills (not in the trash, marked wrong or past its validity; a draft or held one counts) is
+refused, naming it; the change is a version and a `capsule_changed` audit row like a person's, listed among the changes
+by AI clients (`MemoryStore.Undoable`), which a person undoes from the app or the terminal; and 041's refusal of an
+undo through `mcp` that would change a slot stands. The engine records which client changed a slot and cannot tell
+whether a person asked ([../security.md](../security.md#capsule-slots-set-by-an-ai-client)). What is not enforced: confirming a slotted draft is anyone's who may change the
 memory, an AI client included (D-145), and an AI client may edit the words of a memory a person has slotted, screened by
 036 like any change's; upstream's capsule hold signal is SB-P5-01's.
 

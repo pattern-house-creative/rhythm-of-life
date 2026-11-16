@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/set_capsule.output.schema.json",
+  "title": "set_capsule answer",
+  "description": "The memory tool set_capsule's answer (migration 078): a memory put into a capsule slot or taken out of one, or unchanged when it is there already. A write's shape: no memory's words, only where it is now; changed names capsule, replayed is always false and dropped_tags empty. A slot another memory fills, a slot name the capsule does not have, or a project slot for a memory in no project is refused (invalid); a stale expected_revision is refused (conflict). Listed and answered only with memory.tools, memory.capsules and memory.capsuleWrites on, and refused (off) with the last one off (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "$ref": "memory.defs.schema.json#/$defs/written"
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

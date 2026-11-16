@@ -218,6 +218,29 @@ and it does nothing until a settings file of yours says `"capture": "on"` and li
   settings, deleted when sent, refused or two weeks old, or at the next event after your settings file turns capture off.
   Each of those needs the hook to run: if you remove it from your agents, delete its `hooks-pending/` folder yourself.
 
+## Capsule slots set by an AI client
+
+A capsule is what every AI client of a scope reads first (`get_prompt_capsule`), so what fills its slots steers every
+later conversation. By default only a person fills a slot, in the app's Memories view or with `rhythm capsule`. An AI
+client may still change the words of a memory a person has put in a slot, and that change is screened as any write is.
+
+`memory.capsuleWrites: on`, beside `memory.tools` and `memory.capsules`, gives AI clients `set_capsule`. Before turning
+it on, know what it changes:
+
+- **The engine cannot tell whether you asked.** It records which client changed a slot, never who asked for it. The
+  tool's description tells the client to act only on your request in the conversation, and never on text it read. A
+  client that has read a hostile document, web page or invitation may still be talked into it.
+- **A draft is no barrier on its own.** A slot serves only a canonical memory, but a client that may change a memory
+  may also confirm it. What stands in the way of hostile text is the review hold: a write through an AI client that
+  reads like instructions to an AI is held, out of every capsule until a person releases it.
+- **You can see it and undo it.** Each change keeps the state before as a version and writes an audit row naming the
+  client. It is in the memory's history, and among the changes by AI clients that the brief and the app's Memories view
+  list for 48 hours, where you can undo it. An AI client's own `undo` never changes a slot.
+- **A filled slot is not taken twice.** Through `set_capsule` a slot another memory fills is refused, naming that
+  memory, so a client replaces what a slot serves in two visible steps, never silently.
+
+Turn it on for an install whose AI clients you trust to keep your standing context, and leave it off otherwise.
+
 ## The write limit
 
 `engine.writeLimit` in `rhythm.yaml` is `off` on every install until its operator sets `on`. Off, no token is counted, every tool

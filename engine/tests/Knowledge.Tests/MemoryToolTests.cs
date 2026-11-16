@@ -777,7 +777,7 @@ public sealed class MemoryInstructionsTests
     {
         TestSettings.Use();
         var all = RhythmConfig.Parse(TestSettings.Yaml.Replace("engine: { legacySearch: false }", "engine: { legacySearch: false, recall: on }")
-            + "\nmemory: { tools: on, capsules: on }\n");
+            + "\nmemory: { tools: on, capsules: on, capsuleWrites: on }\n");
         return HarnessTools.Create(all, []).ToDictionary(t => t.ProtocolTool.Name,
             t => t.ProtocolTool.InputSchema.GetProperty("properties").EnumerateObject().Select(p => p.Name).ToArray());
     }

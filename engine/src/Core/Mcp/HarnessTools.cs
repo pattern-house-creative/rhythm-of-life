@@ -559,15 +559,16 @@ public sealed partial class HarnessTools(Retrieval reader, IHttpContextAccessor 
     }
 
     // tools/list: aliases only with engine.legacyToolNames, gated tools only while open, recall only with engine.recall on,
-    // get_prompt_capsule only with memory.capsules on, the memory tools only with memory.tools on, and share only with
-    // memory.share on as well (SB-P3-10).
+    // get_prompt_capsule only with memory.capsules on, the memory tools only with memory.tools on, share only with
+    // memory.share on as well (SB-P3-10), and set_capsule only with memory.capsuleWrites and memory.capsules on as well.
     public static ListToolsResult Filter(ListToolsResult result, IServiceProvider services, RhythmConfig config)
     {
         result.Tools = result.Tools.Where(t => (config.Engine.LegacyToolNames || !Aliases.ContainsKey(t.Name)) && Open(t.Name, services)
             && (t.Name != RecallTool || RecallSettings.From(config).Tool)
             && (t.Name != CapsuleTool || MemorySettings.CapsulesOn(config))
             && (!MemoryTools.Names.Contains(t.Name) || MemorySettings.ToolsOn(config))
-            && (t.Name != MemoryTools.ShareTool || MemorySettings.ShareOn(config)))
+            && (t.Name != MemoryTools.ShareTool || MemorySettings.ShareOn(config))
+            && (t.Name != MemoryTools.CapsuleWriteTool || MemorySettings.CapsuleWritesOn(config)))
             .OrderBy(t => Place(t.Name)).ThenBy(t => Aliases.ContainsKey(t.Name)).ThenBy(t => t.Name, StringComparer.Ordinal).ToList();
         return result;
     }

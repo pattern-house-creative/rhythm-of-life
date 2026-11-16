@@ -6,6 +6,14 @@ each entry says so under **Upgrading**.
 
 ## Unreleased
 
+- **AI clients can keep capsule slots, where you let them** (off by default). `memory.capsuleWrites: on`,
+  beside `memory.tools` and `memory.capsules`, gives them `set_capsule`: one memory into a capsule slot,
+  or out of it, as a change with a version and an audit row naming the client. A client's capsule
+  changes are listed with its other changes in the brief and the app's Memories view, where a person can
+  undo them; a slot another memory fills is refused. Without the setting a slot stays a person's step,
+  as before. The engine cannot tell whether a person asked for a change, so read
+  [security.md](docs/security.md#capsule-slots-set-by-an-ai-client) before turning it on.
+  **Upgrading:** migration 078 applies at the next start.
 - **Fixed: a map rebuild that slowed with the square of the map.** The step that retires old links
   searched the links once for every current record, so with a few thousand records it could pass the
   rebuild's four-second statement limit and fail. It now checks only the links it would retire.

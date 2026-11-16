@@ -284,6 +284,7 @@ yet.
 | memory | `list_standing` | R | `memory.tools` on | the standing instructions the caller reads, oldest first, each with where it came from and whether it fires, with the list's `total` and how many may fire, are held and are over the limit |
 | memory | `stop_standing` | W | `memory.tools` on | a standing instruction stopped: it fires no more and stays a memory, as a change kept as a version that `undo` starts again |
 | memory | `share` | W | `memory.tools` and `memory.share` on | move one memory between its owner's private scope and Family, or take it back; refused while `memory.scopes` is off |
+| memory | `set_capsule` | W | `memory.tools`, `memory.capsules` and `memory.capsuleWrites` on | put one memory into a capsule slot, or take it out; a slot another memory fills is refused |
 | health | `discover_health_sources` | R | core | inventory of health sources and metrics for `subject`, `from`, `until` |
 | health | `read_health_source` | R | core | a bounded projection of one original record (`resourceId`, `pointer`, paging) |
 | health | `investigate_health` | R | core | deterministic discovery across one subject's data |
@@ -374,6 +375,19 @@ Memory tools (SB-P3-09, `docs/dev/memory.md` sections 5 to 7; upstream's names a
 
 - Made and listed only with `memory.tools` on. Off (absent, as in every `rhythm.yaml` written before it), none of them
   exists: `tools/list` and every answer are as before, and a call naming one is answered as a call naming no tool.
+- `set_capsule` (migration 078) is made and listed only with `memory.capsuleWrites` on beside `memory.tools` and
+  `memory.capsules`, off by default: off, absent or empty (every `rhythm.yaml` written before it), or with either of the
+  other two off, it does not exist, a call naming it is answered as a call naming no tool, and a capsule slot is a
+  person's step, as before. It takes `id`, `capsule` (`core` or `project`; `none`, the default, takes the memory out of
+  its slot), `slot` (core: `identity`, `preferences`, `constraints` or `principles`; project: `current-state`,
+  `decisions` or `open-questions`, for a memory in a project) and `expected_revision`; there is no idempotency key (a
+  repeat answers `unchanged`). It answers a write's shape with `changed` naming `capsule`. Through it a slot another
+  memory of the scope fills (one not in the trash, marked wrong or past its validity; a draft or a held one counts) is
+  refused (`invalid`), naming that memory, so the client takes that one out first. The change keeps the state before as
+  a version and writes a `capsule_changed` audit row naming the client: it is in `history`, and among the changes by AI
+  clients that `brief` and the app's Memories view list. `undo` through an AI client still never changes a slot: the
+  client sets the slot as it was, and a person undoes it from the app or the terminal. The engine cannot tell whether a
+  person asked for the change; the tool's description tells the client to act only on the person's request.
 - `share` (SB-P3-10, Q-157) is made and listed only with `memory.share` on as well, off by default: off, absent or
   empty (every `rhythm.yaml` written before it), or with `memory.tools` off, it does not exist, and a call naming it is
   answered as a call naming no tool. It takes `id`, `workspace` (`shared`, the default, or `private`; upstream's

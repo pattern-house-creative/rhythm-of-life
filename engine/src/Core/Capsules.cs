@@ -413,11 +413,15 @@ public sealed partial class MemoryStore
     // project's capsule). Only a canonical memory fills its slot when the capsule is read. A change like any other
     // (migration 039): the author lock, an expected revision, a version and an audit row; no idempotency key, since
     // setting the slot a memory has answers unchanged. A person's step: through an AI client's channel (mcp) it is
-    // refused (forbidden) before anything is read; the app or the terminal sets or clears a slot.
-    public Task<MemoryWrite> SetCapsule(Guid principal, Guid memory, string? capsule, string? slot, int? expected, MemoryCall call, CancellationToken ct) =>
+    // refused (forbidden) before anything is read; the app or the terminal sets or clears a slot. Only `clients` opens
+    // that channel (migration 078): the set_capsule tool passes it, and exists only with memory.capsuleWrites on. Through
+    // it a slot another memory of the scope fills is refused (invalid), naming that memory.
+    public Task<MemoryWrite> SetCapsule(Guid principal, Guid memory, string? capsule, string? slot, int? expected, MemoryCall call, CancellationToken ct,
+        bool clients = false) =>
         call.Key is not null
             ? throw new MemoryRefused("invalid", "A capsule slot takes no idempotency key: setting it again answers unchanged")
-            : Write("SELECT set_memory_capsule(@principal,@id,@capsule,@slot,@expected,@channel,@client)::text", principal, call, [], ct,
+            : Write("SELECT set_memory_capsule(@principal,@id,@capsule,@slot,@expected,@channel,@client,@clients)::text", principal, call, [], ct,
                 ("id", NpgsqlDbType.Uuid, memory), ("capsule", NpgsqlDbType.Text, capsule?.Trim().ToLowerInvariant()),
-                ("slot", NpgsqlDbType.Text, slot?.Trim().ToLowerInvariant()), ("expected", NpgsqlDbType.Integer, expected));
+                ("slot", NpgsqlDbType.Text, slot?.Trim().ToLowerInvariant()), ("expected", NpgsqlDbType.Integer, expected),
+                ("clients", NpgsqlDbType.Boolean, clients));
 }

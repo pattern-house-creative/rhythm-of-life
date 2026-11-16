@@ -346,7 +346,7 @@ test("the memory tools' answers never carry a held memory's words and never offe
   // project, a history change of a held state with a preview, a trash row offering delete forever, a refusal with a code
   // the contract doesn't name, and a get answering both a memory and a version are all refused.
   const tools = ["remember", "append", "update", "get", "list_recent", "set_status", "forget", "undo", "history", "list_projects", "list_teams",
-    "get_prompt_capsule", "share", "supersede", "list_stale", "still_true", "digest_sources", "save_digest", "digest", "cite", "revalidate",
+    "get_prompt_capsule", "share", "set_capsule", "supersede", "list_stale", "still_true", "digest_sources", "save_digest", "digest", "cite", "revalidate",
     "list_loops", "resolve_loop", "list_decisions", "record_outcome", "decision_calibration", "list_due", "resolve_due", "list_duplicates",
     "list_insight_candidates", "resolve_insight_candidate", "list_insight_stream", "review_insight", "insight_history",
     "list_standing", "stop_standing", "list_contradictions", "propose_contradiction", "brief", "resolve"];

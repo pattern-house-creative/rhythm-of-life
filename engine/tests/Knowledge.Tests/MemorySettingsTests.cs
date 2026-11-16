@@ -115,7 +115,7 @@ public sealed class MemorySettingsTests
         // The keys the engine takes under memory (MemorySettings.Keys, which its refusal lists), each off, on or empty, off
         // by default: a key the schema leaves out would be flagged in a file the engine takes.
         var keys = memory.GetProperty("properties").EnumerateObject().Select(p => p.Name).ToArray();
-        Assert.Equal(["scopes", "capsules", "tools", "share", "secondBrainImport", "capture"], keys);
+        Assert.Equal(["scopes", "capsules", "tools", "share", "secondBrainImport", "capture", "capsuleWrites"], keys);
         var refused = Assert.Throws<ConfigException>(() => MemorySettings.From(RhythmConfig.Parse(TestSettings.Yaml + "\nmemory: { nosuch: on }\n")));
         Assert.EndsWith("memory takes " + string.Join(", ", keys), refused.Message);
         foreach (var name in keys)

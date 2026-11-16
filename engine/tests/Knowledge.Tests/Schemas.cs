@@ -258,6 +258,9 @@ public sealed class SchemaTests
     [InlineData("list_teams.example.json", "list_teams.output.schema.json")]
     [InlineData("share.example.json", "share.output.schema.json")]
     [InlineData("share.refused.example.json", "share.output.schema.json")]
+    // set_capsule (migration 078, with memory.capsuleWrites on): a project slot set, and a slot another memory fills.
+    [InlineData("set_capsule.example.json", "set_capsule.output.schema.json")]
+    [InlineData("set_capsule.refused.example.json", "set_capsule.output.schema.json")]
     // supersede (SB-P4-06): the plan with its confirmation, the plan applied, and a confirmed memory protected.
     [InlineData("supersede.plan.example.json", "supersede.output.schema.json")]
     [InlineData("supersede.example.json", "supersede.output.schema.json")]

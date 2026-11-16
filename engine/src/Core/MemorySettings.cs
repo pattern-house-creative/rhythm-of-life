@@ -1,7 +1,7 @@
 namespace Knowledge;
 
 // The memory section of rhythm.yaml and the defaults native memories take (docs/dev/memory.md section 6; SB-P1-09,
-// D-021 and D-048). Five settings so far. memory.scopes: off, the default and what every existing install
+// D-021 and D-048). Seven settings so far. memory.scopes: off, the default and what every existing install
 // has (a rhythm.yaml without the key), or on. memory.capsules (SB-P3-08): off, the same default, or on, which lists the
 // get_prompt_capsule tool and the capsule resources to AI clients (CapsulesOn). memory.tools (SB-P3-09): off, the same
 // default, or on, which lists the memory tools to AI clients and answers them (ToolsOn, Mcp/MemoryTools.cs), and lists
@@ -10,7 +10,9 @@ namespace Knowledge;
 // moves a memory between its owner's private scope and Family only while memory.scopes is on, and real use waits for the
 // owner's per-person scopes (D-013). memory.secondBrainImport (SB-P8-01): off, the same default, or on, which offers the
 // operator the Second Brain export importer at the terminal (SecondBrainImportOn). memory.capture (SB-P7-01): off, the
-// same default, or on, which with memory.tools on as well opens the /capture route and rhythm capture (CaptureOn). Any
+// same default, or on, which with memory.tools on as well opens the /capture route and rhythm capture (CaptureOn).
+// memory.capsuleWrites: off, the same default, or on, which with memory.tools and memory.capsules on as well lists the
+// set_capsule tool, through which an AI client puts a memory into a capsule slot or takes it out (CapsuleWritesOn). Any
 // other value, or any other key under memory, fails at start naming it.
 //
 // On is accepted since phase 1's exit (section 6.4, D-131): every read path filters by scope and the
@@ -34,7 +36,7 @@ public sealed record MemorySettings(bool Scopes)
     public const string NewStatus = "draft";
 
     public static readonly MemorySettings Off = new(false);
-    static readonly string[] Keys = ["scopes", "capsules", "tools", "share", "secondBrainImport", "capture"];
+    static readonly string[] Keys = ["scopes", "capsules", "tools", "share", "secondBrainImport", "capture", "capsuleWrites"];
 
     public static MemorySettings From(RhythmConfig config)
     {
@@ -53,6 +55,8 @@ public sealed record MemorySettings(bool Scopes)
             throw new ConfigException("memory.secondBrainImport is off or on (docs/configuration.md)");
         if (section.TryGetValue("capture", out var capture) && capture is not (null or "off" or "on"))
             throw new ConfigException("memory.capture is off or on (docs/configuration.md)");
+        if (section.TryGetValue("capsuleWrites", out var writes) && writes is not (null or "off" or "on"))
+            throw new ConfigException("memory.capsuleWrites is off or on (docs/configuration.md)");
         var scopes = section.TryGetValue("scopes", out var value) ? value : null;
         return scopes switch
         {
@@ -84,6 +88,15 @@ public sealed record MemorySettings(bool Scopes)
     // is the household's already). Its value is checked by From at start.
     public static bool ShareOn(RhythmConfig config) =>
         ToolsOn(config) && config.Memory is IDictionary<object, object?> section && section.TryGetValue("share", out var value) && value is "on";
+
+    // memory.capsuleWrites: on, with memory.tools and memory.capsules on too, makes and lists the set_capsule tool
+    // (MemoryTools.CapsuleWriteTool), through which an AI client puts a memory into a capsule slot or takes it out, as a
+    // change with a version and an audit row (migration 078); off, absent (every rhythm.yaml written before it), empty, or
+    // with either of the other two off, the tool is not made at all, a call naming it is an unknown tool, and a slot stays
+    // a person's step, taken in the app or at the terminal (D-172). Its value is checked by From at start.
+    public static bool CapsuleWritesOn(RhythmConfig config) =>
+        ToolsOn(config) && CapsulesOn(config) && config.Memory is IDictionary<object, object?> section
+        && section.TryGetValue("capsuleWrites", out var value) && value is "on";
 
     // memory.capture (SB-P7-01): on, with memory.tools on too (what it saves waits in the review queue those serve), opens
     // the engine's /capture route to capture tokens (Mcp/CaptureEndpoint.cs) and offers the operator rhythm capture; off,

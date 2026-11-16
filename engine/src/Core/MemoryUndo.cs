@@ -64,9 +64,11 @@ public sealed partial class MemoryStore
     // the trash's, SB-P3-06), and neither is a share (SB-P3-10). A loop's resolve (058, SB-P5-09) is one, and so is a
     // decision's outcome (060, SB-P5-11), and a snooze or clear of a due date (061, SB-P5-10); a due date written with its
     // memory (due_set) is part of its writing; and so is a standing instruction's mark (standing_set), whose stop (065,
-    // SB-P5-12) is a change.
+    // SB-P5-12) is a change. A capsule slot set or cleared (039) is one too: through an AI client's channel there is one
+    // only with memory.capsuleWrites on (078), and it is listed among that client's changes so a person sees it and can
+    // undo it; an AI client's own undo of it stays refused (041).
     public static readonly IReadOnlyList<string> Undoable =
-        ["appended", "updated", "status_changed", "released", "reverted", "resolved", "outcome", "due_changed", "standing_stopped"];
+        ["appended", "updated", "status_changed", "released", "reverted", "resolved", "outcome", "due_changed", "standing_stopped", "capsule_changed"];
 
     public static string Family(string change) => change switch
     {
@@ -78,6 +80,7 @@ public sealed partial class MemoryStore
         "outcome" => "outcome",
         "due_changed" => "due",
         "standing_stopped" => "standing",
+        "capsule_changed" => "capsule",
         _ => change,
     };
 

@@ -71,6 +71,11 @@
           "description": "The capture endpoint. off: POST /capture answers as an unknown route does and rhythm capture as a command the engine does not know, as before; on, with tools on too: a capture token (rhythm capture connect) saves memories there as drafts or held for review, into its one scope, and reads nothing (contracts/README.md section 6). Absent or empty means off.",
           "enum": ["off", "on", null],
           "default": "off"
+        },
+        "capsuleWrites": {
+          "description": "The set_capsule tool. off: a capsule slot is a person's step, taken in the app or at the terminal, AI clients are offered no set_capsule tool, and a call naming it is answered as an unknown tool, as before; on, with tools and capsules on too: they get set_capsule (contracts/README.md 2.1), which puts one memory into a capsule slot or takes it out, as a change with a version and an audit row naming the client (docs/dev/memory.md section 7.1). Absent or empty means off.",
+          "enum": ["off", "on", null],
+          "default": "off"
         }
       }
     },
