@@ -1319,7 +1319,10 @@ select {
 .constellation :is(.graph-node, .graph-label).label-secondary text {
   fill: #b3c5ce;
 }
-.constellation :is(.graph-node, .graph-label).loose-node text {
+/* A dashboard with no links sits on that ring too, named as dashboards are. */
+.constellation
+  :is(.graph-node, .graph-label).loose-node:not(.dashboard-star)
+  text {
   fill: #7f939f;
 }
 .constellation :is(.graph-node, .graph-label):hover text,

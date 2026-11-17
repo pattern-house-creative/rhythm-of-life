@@ -187,6 +187,8 @@ public sealed class MemoryMatchTests
         }
         Assert.Contains("needs no star of its own", ToolText.Describe("save_dashboard", MemoryToolSettings.On));
         Assert.Contains("## Memories feeds", ToolText.DashboardGuide);
+        // Where such a board shows on the sky (docs/dev/screens.md 10.12), so a client knows a project filter places it.
+        Assert.Contains("sits on the sky beside the projects its project filter names", ToolText.DashboardGuide);
     }
 }
 
@@ -563,5 +565,61 @@ public sealed class MemoryFeedTests(DatabaseFixture fixture) : IClassFixture<Dat
         var (_, restored) = await store.Save(who.Alex, id, 1, null, [], "Back to the first.", default);
         Assert.Equal(2, restored);
         Assert.Empty(JsonNode.Parse((await store.Get(who.Alex, id, 2, true, default))!)!["stars"]!.AsArray());
+    }
+
+    // Where the app places a dashboard that names no star (docs/dev/screens.md 10.12): the app's list gives it the project
+    // stars its memories feeds name, found as the feed finds them, and the app sets it beside them on the sky; one that
+    // names no project gets none and is a star of its own. A dashboard that names stars is listed as before.
+    [PostgresFact] public async Task The_apps_list_gives_a_dashboard_that_names_no_star_the_project_stars_its_feeds_name()
+    {
+        var s = fixture.Source;
+        await Scoped.Mode(s, "off");
+        var who = await MemoryLogins.Make(s, "feed-place");
+        async Task<MemoryProject> Project(string name, string slug, params string[] aliases) =>
+            (await Store.CreateProject(who.Alex, new(name, slug, Aliases: aliases, Scope: "shared"), Mcp, default)).Project;
+        var porch = await Project("DEMO Porch", "feed-place-porch", "feed-place-stoop");
+        var shed = await Project("DEMO Shed", "feed-place-shed");
+        await Project("DEMO Attic", "feed-place-attic");
+        var store = new DashboardStore(fixture.Source);
+        IServiceProvider Services(RhythmConfig config) =>
+            new ServiceCollection().AddSingleton(store).AddSingleton(Feeds(config)).AddSingleton(config).BuildServiceProvider();
+        var tools = new HarnessTools(new Retrieval(fixture.Db), new HarnessLogin(who.Alex));
+        async Task<Guid> Saved(string title, params DashboardFeed[] feeds)
+        {
+            using var saved = JsonDocument.Parse(await tools.SaveDashboard(Services(All), "First version.", title: title, html: "<p>DEMO</p>", feeds: feeds));
+            return saved.RootElement.GetProperty("id").GetGuid();
+        }
+        static DashboardFeed Memories(string name, string where) => new(name, "memories", null!, Where: Where(where));
+        // Two projects across two feeds, one named by its alias and both by their slugs; every project; every project but
+        // one; and a dashboard that names a star.
+        var both = await Saved("DEMO Porch and shed", Memories("stoop", """{"project":"feed-place-stoop"}"""),
+            Memories("jobs", """{"project":["feed-place-shed","feed-place-porch"],"work":true}"""));
+        var every = await Saved("DEMO Every project", Memories("open", """{"work":true,"state":{"not":["done","cancelled"]}}"""));
+        var others = await Saved("DEMO Not the attic", Memories("open", """{"project":{"not":["feed-place-attic"]}}"""));
+        const string Walks = "notes:notes:feed-place-walks.md";
+        var (starred, _) = await store.Save(who.Alex, null, null,
+            new DashboardDraft("DEMO Walks", "", "<p>DEMO</p>", [new("walks", "contents", Walks)], "First version."), [new(Walks, "Walks")], "First version.", default);
+
+        async Task<IReadOnlyDictionary<Guid, JsonObject>> Listed(RhythmConfig config)
+        {
+            var (status, content) = await AppMemoryCalls.CallTool(Services(config), who.App, AppMemoryCalls.Body(AppEndpoint.Dashboards, new { }));
+            Assert.Equal(200, status);
+            Schemas.Valid(Schemas.Folder("mcp"), "app_dashboards.output.schema.json", content);
+            return content!["dashboards"]!.AsArray().Select(d => d!.AsObject()).ToDictionary(d => Guid.Parse((string)d["id"]!));
+        }
+        static (string?, string?)[] Projects(JsonObject listed) =>
+            [.. listed["projects"]!.AsArray().Select(p => ((string?)p!["graphId"], (string?)p["title"]))];
+        var listed = await Listed(All);
+        // Each project once, by name, its star the one the map shows for it.
+        Assert.Equal([(MemoryStars.ProjectKey("household", porch.Id).GraphId, "DEMO Porch"), ($"memory:project:{shed.Id}", "DEMO Shed")],
+            Projects(listed[both]));
+        Assert.Empty(Projects(listed[every]));
+        // A negated filter says what the board is not about, so it names no project to sit beside.
+        Assert.Empty(Projects(listed[others]));
+        // A dashboard that names stars is listed as before, with no projects.
+        Assert.Equal(Walks, (string?)listed[starred]["stars"]![0]!["graphId"]);
+        Assert.False(listed[starred].ContainsKey("projects"));
+        // With the memory tools off a memories feed reads nothing, so it names no project either.
+        Assert.Empty(Projects((await Listed(MemoryToolSettings.With("tools: off")))[both]));
     }
 }

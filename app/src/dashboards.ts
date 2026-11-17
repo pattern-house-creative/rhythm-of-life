@@ -11,7 +11,8 @@ import { assertGraphPage, object } from "./validation.js";
 // it as a star linked to every star it reads, runs the page in a sandboxed
 // frame and hands it fresh feed data. Every field is untrusted source data.
 // A dashboard whose feeds read memories by filter (a memories feed) may name
-// no star; it joins the sky only when a screen is asked to open it.
+// no star; it sits beside the project stars those feeds name, or, naming none,
+// is a star of its own (withDashboards, docs/dev/screens.md 10.12).
 export interface DashboardStarRef {
   graphId: string;
   title: string;
@@ -83,6 +84,10 @@ export interface DashboardSummary extends DashboardArrangement {
   title: string;
   description: string;
   stars: DashboardStarRef[];
+  // Only for a version that names no star, from the engine's list: the project
+  // stars its memories feeds name, which it sits beside on the sky (none: an
+  // engine from before, or feeds that name no project).
+  projects?: DashboardStarRef[];
   note: string;
   restoredFrom: number | null;
   savedAt: string;
@@ -233,13 +238,17 @@ export function cleanSummary(v: unknown): DashboardSummary | null {
     v.versions.length > 100
   )
     return null;
-  const stars = v.stars.flatMap((s) =>
-    object(s) && text(s.graphId, 1000, 1) && text(s.title, 1000)
-      ? [{ graphId: s.graphId, title: s.title }]
-      : [],
-  );
+  const stars = cleanStarRefs(v.stars);
+  // A version that names no star may come with the project stars it sits
+  // beside (an engine from before sends none); one that names stars never does.
+  const projects =
+    v.projects === undefined
+      ? undefined
+      : v.stars.length === 0
+        ? cleanStarRefs(v.projects)
+        : null;
   const versions = v.versions.map(cleanNote);
-  if (stars.length !== v.stars.length || versions.some((n) => !n)) return null;
+  if (!stars || projects === null || versions.some((n) => !n)) return null;
   // Before the engine knew writes and cards, a dashboard had neither.
   const writes = v.writes === undefined ? [] : cleanWrites(v.writes);
   const shown =
@@ -262,6 +271,7 @@ export function cleanSummary(v: unknown): DashboardSummary | null {
     title: v.title,
     description: v.description,
     stars,
+    ...(projects ? { projects } : {}),
     note: v.note,
     restoredFrom: v.restoredFrom,
     savedAt: v.savedAt,
@@ -273,6 +283,16 @@ export function cleanSummary(v: unknown): DashboardSummary | null {
     corners: shown,
     ...cleanArrangement(v, v.id.toLowerCase()),
   };
+}
+// At most 12 stars, each with its graph id and title, or null.
+function cleanStarRefs(value: unknown): DashboardStarRef[] | null {
+  if (!Array.isArray(value) || value.length > 12) return null;
+  const refs = value.flatMap((s) =>
+    object(s) && text(s.graphId, 1000, 1) && text(s.title, 1000)
+      ? [{ graphId: s.graphId, title: s.title }]
+      : [],
+  );
+  return refs.length === value.length ? refs : null;
 }
 function cleanWrites(value: unknown): DashboardWrite[] | null {
   if (!Array.isArray(value) || value.length > 12) return null;
@@ -602,8 +622,11 @@ export function cleanWriteAnswer(value: unknown): DashboardWriteAnswer | null {
 }
 
 // A dashboard on the sky: its own star, linked to every star it reads that is
-// on the map. It takes the engine's catalog provider id, like the engine's other
-// stars.
+// on the map. One that names no star reads memories by filter: it is linked to
+// the project stars its feeds name instead, and with none on the map it is a
+// star with no links, which the sky sets on its outer ring as it does every
+// such star (graph.ts createGraph). It takes the engine's catalog provider id,
+// like the engine's other stars.
 export const dashboardStarId = (id: string) =>
   `${catalogProvider()}:dashboard:${id}`;
 // The sky sees only a star's id, type and source.
@@ -630,12 +653,20 @@ export function withDashboards(
   const edges: GraphEdge[] = [];
   for (const d of dashboards) {
     const id = dashboardStarId(d.id);
-    // A dashboard joins the sky beside what it reads, so not before (or
-    // after) any of its stars is on the map; one a screen was asked to open
-    // (`kept`) joins whatever is on the map.
+    if (known.has(id)) continue;
+    // What it reads on the map: the stars it names, or for one that names
+    // none, the project stars its memories feeds name.
+    const named = d.stars.length > 0;
+    const beside = (named ? d.stars : (d.projects ?? [])).filter((s) =>
+      known.has(s.graphId),
+    );
+    // A dashboard that names stars joins the sky beside what it reads, so not
+    // before (or after) any of its stars is on the map. One that names none
+    // waits only for the map, so it never shows alone while the sky loads. One
+    // a screen was asked to open (`kept`) joins whatever is on the map.
     if (
-      known.has(id) ||
-      (d.id !== kept && !d.stars.some((s) => known.has(s.graphId)))
+      d.id !== kept &&
+      (named ? beside.length === 0 : page.nodes.length === 0)
     )
       continue;
     nodes.push({
@@ -667,13 +698,14 @@ export function withDashboards(
         representation: "original",
       },
     });
-    for (const star of d.stars) {
-      if (!known.has(star.graphId)) continue;
+    for (const star of beside) {
       edges.push({
         id: `dashboard:${d.id}:${star.graphId}`,
         source: id,
         target: star.graphId,
-        relationship: `The dashboard “${d.title}” reads this star.`,
+        relationship: named
+          ? `The dashboard “${d.title}” reads this star.`
+          : `The dashboard “${d.title}” reads this project's memories.`,
         strength: 0.8,
         type: "draws_on",
         origin: { provider, account: "dashboard", externalId: d.id },
@@ -682,7 +714,9 @@ export function withDashboards(
         evidence: [
           {
             resourceId: id,
-            excerpt: `Version ${d.version} of the dashboard reads this star.`,
+            excerpt: named
+              ? `Version ${d.version} of the dashboard reads this star.`
+              : `Version ${d.version} of the dashboard reads this project's memories by filter.`,
             locator: "Dashboard feeds",
             retrievedAt: retrieved,
           },

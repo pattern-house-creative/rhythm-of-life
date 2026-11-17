@@ -6,6 +6,14 @@ each entry says so under **Upgrading**.
 
 ## Unreleased
 
+- **Fixed: a dashboard that reads memories by filter and names no star never showed on the sky**, so a
+  board like a Projects board could only be opened by its link. It now sits beside the project stars its
+  memories feeds filter on, as a dashboard sits beside the stars it reads; one that names no project (a
+  board over every project) is a star of its own, on the sky's quieter outer ring where every star with no
+  links goes, named and drawn as a dashboard and kept on a full sky. It opens as any dashboard star does,
+  and the explorer's search finds it by its title. The app's dashboard list gives such a dashboard the
+  project stars it sits beside (`projects`), found for each reader as its feed finds them. Dashboards that
+  name stars are placed as before, and nothing else is added to Home.
 - **Dashboards can read memories by filter** (with `memory.tools` on). A new feed kind, `memories`, gives a
   dashboard the memories its reader reads that match the Memories view's own filters: words, status, kind,
   project and tag, and with `memory.work` on work, type, state and priority. Within one filter any of

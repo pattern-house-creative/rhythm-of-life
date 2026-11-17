@@ -485,6 +485,18 @@ export function graphWindow(
   };
   required.forEach(add);
   pins.forEach(add);
+  // A dashboard's star with no link here (one that reads memories by filter
+  // and names no project star on this map: dashboards.ts withDashboards) is
+  // kept as a pinned star is: no link brings it into a full sky, and it is
+  // there to be seen. A dashboard beside its stars is ranked as before.
+  const linked = new Set(page.edges.flatMap((e) => [e.source, e.target]));
+  for (const n of ranked)
+    if (
+      n.resource.identity.provider === catalogProvider() &&
+      n.resource.identity.account === "dashboard" &&
+      !linked.has(n.id)
+    )
+      add(n.id);
   if (!required.length) {
     const groups = clusterGraph(ranked, page.edges).groups;
     const represented = new Set<string>();

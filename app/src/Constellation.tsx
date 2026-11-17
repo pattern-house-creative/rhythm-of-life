@@ -1457,10 +1457,12 @@ export function Constellation({
                         : finished
                           ? 0.6
                           : 1,
-                    // Unlinked records are quieter than the clusters they orbit.
-                    color: graph.loose.has(n.id)
-                      ? "#6f8796"
-                      : clusterColor(graph.clusters.groups.get(n.id)),
+                    // Unlinked records are quieter than the clusters they orbit;
+                    // a dashboard with no links keeps a dashboard's look.
+                    color:
+                      graph.loose.has(n.id) && !dashboard
+                        ? "#6f8796"
+                        : clusterColor(graph.clusters.groups.get(n.id)),
                   }}
                 >
                   <title>

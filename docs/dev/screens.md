@@ -1074,8 +1074,35 @@ on as well. It is what a project board is built on.
   would be decoration that, with `memory.scopes` on, would narrow who sees the dashboard. A version that names no star
   cites none: with scopes on it lands in Family unless its logs or its earlier version narrow it, and each reader's
   feed still serves only what that reader reads. The app lists such a dashboard, shows it on a screen and as a card,
-  and joins it to the sky only when a screen is asked to open it (`withDashboards`), since the sky places a dashboard
-  beside a star it reads.
+  and puts it on the sky as below.
+- **On the sky.** A dashboard is a star beside the stars it reads (`withDashboards`), and one that names no star
+  reads memories by filter, so it sits beside the projects its feeds filter on:
+  - **Its projects.** The app's dashboard list (`app_dashboards {}`, not the harness's `list_dashboards`) gives a
+    version that names no star `projects`: the project stars its memories feeds name in a `project` filter that is
+    not negated, `[{graphId, title}]`, at most 12, by name (`DashboardFeeds.ProjectStars`). They are found for the
+    list's reader as the feed finds them (`MemoryStore.NamedProjects`, the same `ProjectsNamed` and `ProjectListed`
+    predicates), so a slug or an alias stands for its project in each scope that reader reads and never for a held
+    one, and the list never names a project the feed wouldn't read. None with `memory.tools` off, and none for a
+    filter of `{"not": [...]}`, which says what a board is not about. A version that names stars has no `projects`,
+    and an engine from before sends none.
+  - **Beside them.** The app links the dashboard's star to each of those project stars that is on the map, with the
+    same `draws_on` link, strength and look as a dashboard beside a star it reads ("reads this project's memories"),
+    so the sky draws it in that project's cluster, its panel lists the projects it "reads", and each project's panel
+    offers it one tap away, as a star's panel offers the dashboards that read it.
+  - **A star of its own.** With none of them on the map (a board over every project, like a Projects board, or one
+    whose projects have no star now), it is a star with no links, labelled with its title and drawn as dashboards
+    are (the panel glyph, the DASHBOARD tag, always named). The sky places it as it places every star with no links
+    and no cluster mates (`createGraph`): on the quieter outer ring, its place there ordered by a hash of its id
+    among the ring's other stars, so it stays put while they do and never crowds the clusters; only its colour and
+    name are a dashboard's, not the ring's grey. It waits for the map to have a star, so it never shows alone while the sky loads.
+  - **Always drawn.** A sky draws at most 300 stars, and a star with no links ranks low, so a dashboard's star with no
+    link is kept in every sky's window as a pinned star is (`graphWindow`), without a pin's ring; a dashboard beside
+    its stars is ranked as before. Being a star on the sky, it opens as any dashboard star does, and the explorer's
+    search finds it by its title.
+
+  Nothing is added to Home but the star, and a dashboard that names stars is placed as before. The dashboard guide
+  (`rhythm://guides/dashboards`, under Memories feeds) says where such a board shows, so a client filters on a project
+  when a board is about one.
 
 ## 11. Studio
 

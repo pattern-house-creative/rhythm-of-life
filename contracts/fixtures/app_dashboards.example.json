@@ -23,6 +23,28 @@
       "layoutRevision": 0,
       "layoutNote": null,
       "layoutSavedAt": null
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-0000000d0004",
+      "version": 1,
+      "latest": 1,
+      "title": "DEMO Porch board",
+      "description": "Fictional: the porch project's open work by state.",
+      "stars": [],
+      "note": "First version.",
+      "restoredFrom": null,
+      "savedAt": "2026-10-26T09:00:00+00:00",
+      "createdAt": "2026-10-26T09:00:00+00:00",
+      "updatedAt": "2026-10-26T09:00:00+00:00",
+      "writes": [],
+      "editsAllowed": false,
+      "corners": [],
+      "versions": [{ "version": 1, "note": "First version.", "restoredFrom": null, "savedAt": "2026-10-26T09:00:00+00:00" }],
+      "layout": null,
+      "layoutRevision": 0,
+      "layoutNote": null,
+      "layoutSavedAt": null,
+      "projects": [{ "graphId": "memory:project:6d3c2a10-0000-4000-8000-0000000f0001", "title": "DEMO Porch" }]
     }
   ]
 }

@@ -346,6 +346,28 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
         return null;
     }
 
+    // The most project stars a dashboard is placed beside, as many as the stars one may name.
+    public const int MaxProjectStars = 12;
+    // The project stars a version that names no star is placed beside on the sky (docs/dev/screens.md 10.12): the
+    // projects its memories feeds name in a project filter that is not negated, among those `principal` reads, found as
+    // the feed finds them (MemoryStore.NamedProjects), at most MaxProjectStars, by name: `[{graphId, title}]`. None with
+    // memory.tools off, where such a feed reads nothing, and none for a filter that leaves projects out, which says what a
+    // board is not about.
+    public async Task<JsonArray> ProjectStars(Guid principal, IReadOnlyList<DashboardFeed> feeds, CancellationToken ct)
+    {
+        string[] named = MemorySettings.ToolsOn(Settings)
+            ? [.. feeds.Where(f => f.Kind == "memories").Select(f => f.Matched().Project).OfType<MemoryAny<string>>().Where(p => !p.Not)
+                .SelectMany(p => p.Values).Distinct(StringComparer.Ordinal)]
+            : [];
+        var projects = await new MemoryStore(db.Source).NamedProjects(principal, named, ct);
+        return new JsonArray([.. projects.Take(MaxProjectStars).Select(p => (JsonNode)new JsonObject
+        {
+            ["graphId"] = MemoryStars.ProjectKey(p.Subject, p.Id).GraphId,
+            // Its star's title (MemoryStars), which the map shows.
+            ["title"] = p.Name.Length <= 1000 ? p.Name : p.Name[..999] + "…",
+        })]);
+    }
+
     // A memory's current text (read from its source now) or a saved record's text, through the graph's content read.
     async Task<JsonObject> Text(Guid principal, DashboardFeed feed, DiscoveryRecord record, CancellationToken ct)
     {

@@ -1210,7 +1210,10 @@ The screen tools (`docs/dev/screens.md` 3.5 and 8):
   is how the facade learns the engine has piece 3. Shapes: `mcp/app_dashboards.output.schema.json`.
 - Memories feeds (`docs/dev/screens.md` 10.12). A version's feed may be kind `memories`, with `where` (the Memories
   view's filters, as stored: each a list of values or `{not: [...]}`, `work` a boolean) and `limit`, and no star; a
-  version whose feeds include one may name no star (`stars` empty). Its payload in the feed read names no star and is
+  version whose feeds include one may name no star (`stars` empty). In the list (`{}`) such a version also has
+  `projects`, the project stars it is placed beside on the sky: those its memories feeds name in a project filter
+  that is not negated, among the projects the reader reads, `[{graphId, title}]`, at most 12, by name, empty when
+  they name none; a version that names stars has none. Its payload in the feed read names no star and is
   `{kind: "memories", status, asOf, where, limit, count, memories, truncated}`, or with status `unavailable` a
   `reason` instead of the last three; each memory is a fixed shape (`feed-memory`), its `preview` stored words the page
   shows as text. Fixtures `app_dashboards.memories.example.json` and `app_dashboards.memories.version.example.json`.

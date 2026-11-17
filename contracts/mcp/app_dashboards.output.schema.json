@@ -95,7 +95,15 @@
       "properties": {
         "id": true, "version": true, "latest": true, "title": true, "description": true, "stars": true, "note": true, "restoredFrom": true,
         "savedAt": true, "createdAt": true, "updatedAt": true, "writes": true, "editsAllowed": true, "corners": true, "versions": true,
-        "layout": true, "layoutRevision": true, "layoutNote": true, "layoutSavedAt": true
+        "layout": true, "layoutRevision": true, "layoutNote": true, "layoutSavedAt": true,
+        "projects": {
+          "description": "Only on a version that names no star: the project stars it is placed beside on the sky, those its memories feeds name in a project filter that is not negated, among the projects the reader reads, by name; empty when they name none (docs/dev/screens.md 10.12).",
+          "type": "array", "maxItems": 12,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["graphId", "title"],
+            "properties": { "graphId": { "type": "string", "minLength": 1, "maxLength": 1000 }, "title": { "type": "string", "maxLength": 1000 } }
+          }
+        }
       }
     },
     "version": {

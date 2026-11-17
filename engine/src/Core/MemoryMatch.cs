@@ -229,6 +229,24 @@ public sealed partial class MemoryStore
         return unknown;
     }
 
+    // The projects `names` name (a slug or an alias each) that the caller reads, as a feed's project filter finds them: the
+    // same predicates, so a name may stand for a project in each scope the caller reads, and never a held one. Each with
+    // its subject (for its star, MemoryStars.ProjectKey) and name, by name.
+    public async Task<IReadOnlyList<(Guid Id, string Subject, string Name)>> NamedProjects(Guid principal, IReadOnlyList<string> names,
+        CancellationToken ct)
+    {
+        if (names.Count == 0) return [];
+        await using var c = await source.OpenConnectionAsync(ct);
+        await using var cmd = Database.Command(c, null, $"""
+            SELECT p.id,p.subject_id,p.name FROM memory_projects p WHERE {ProjectsNamed("@names")} AND {ProjectListed()}
+            ORDER BY lower(p.name),p.slug,p.subject_id
+            """, ("principal", principal), ("names", names.ToArray()));
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        var named = new List<(Guid, string, string)>();
+        while (await reader.ReadAsync(ct)) named.Add((reader.GetGuid(0), reader.GetString(1), reader.GetString(2)));
+        return named;
+    }
+
     // A dashboard's memories feed (DashboardFeeds): the memories the caller reads that match, through the list's own
     // predicates (Filtered) and never one held for review, newest first as the list orders them, at most `limit` with a
     // preview of `previewChars` as the list cuts it, and how many match in all, in one statement. A project the caller

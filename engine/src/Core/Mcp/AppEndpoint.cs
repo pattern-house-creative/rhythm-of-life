@@ -435,8 +435,16 @@ public static class AppEndpoint
             }
             if (!args.TryGetProperty("id", out var given))
             {
-                var dashboards = Parsed(await store.List(principal, ct));
-                return Answer($"{dashboards.GetArrayLength()} dashboards; they are in structuredContent.", new { dashboards });
+                var dashboards = JsonNode.Parse(await store.List(principal, ct))!.AsArray();
+                // A version that names no star reads memories by filter, and the app places it beside the project stars its
+                // feeds name (docs/dev/screens.md 10.12), which it gets as `projects`; with none it is a star of its own.
+                DashboardFeeds? feeds = null;
+                foreach (var listed in dashboards.OfType<JsonObject>())
+                    if (listed["stars"] is JsonArray { Count: 0 }
+                        && await store.Feeds(principal, Guid.Parse((string)listed["id"]!), (int)listed["version"]!, ct) is { } saved)
+                        listed["projects"] = await (feeds ??= context.RequestServices.GetRequiredService<DashboardFeeds>())
+                            .ProjectStars(principal, saved.Feeds, ct);
+                return Answer($"{dashboards.Count} dashboards; they are in structuredContent.", new { dashboards });
             }
             var id = Guid.Parse(given.GetString()!);
             int? version = args.TryGetProperty("version", out var v) ? v.GetInt32() : null;
