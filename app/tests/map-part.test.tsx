@@ -1,8 +1,10 @@
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { expect, it, vi } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ambientWindow } from "../src/graphView";
+import { catalogProvider, demoInstance, setInstance } from "../src/instance";
 import type { GraphPage } from "../src/knowledge";
 import type { FocusedPage } from "../src/mapFocus";
 import type { MapFocus } from "../src/parts";
@@ -218,6 +220,66 @@ it("says when a source couldn't be read, and draws the rest", async () => {
     await screen.findByText("A source couldn’t be read · the rest is shown"),
   ).toBeInTheDocument();
   expect(stars(container)).toHaveLength(3);
+});
+
+it("says nothing of the engine's own note on what it read", async () => {
+  // The engine's focused read, as the contract fixture has it: one star of
+  // two, and its note on the snapshot under the catalog provider, which is no
+  // source that failed.
+  const answer = JSON.parse(
+    readFileSync(
+      resolve(
+        process.cwd(),
+        "../contracts/fixtures/app_dashboards.map.example.json",
+      ),
+      "utf8",
+    ),
+  ).map as FocusedPage & { part: string; focus: MapFocus };
+  expect(answer.issues).toEqual([
+    expect.objectContaining({ provider: catalogProvider() }),
+  ]);
+  const { container } = drawMap({
+    sky: sky({ demo: false }),
+    focus: answer.focus,
+    read: async () => answer,
+  });
+  expect(await screen.findByText(/1 of 2 stars/)).toBeInTheDocument();
+  expect(stars(container)).toEqual([answer.nodes[0].id]);
+  expect(screen.queryByRole("status")).toBe(null);
+});
+
+it("tells the engine's note from a source's under an install's own catalog provider", async () => {
+  // An install that kept an older engine's star ids notes under that id.
+  setInstance({ ...demoInstance, catalogProvider: "truenas" });
+  try {
+    const note = {
+      provider: "truenas",
+      reason:
+        "Scheduled-refresh snapshot, each record confirmed within the last 35 minutes.",
+    };
+    const quiet = drawMap({
+      sky: sky({ demo: false }),
+      focus: { providers: ["drive"] },
+      read: async () => ({ ...page(map.nodes.slice(0, 3), 3), issues: [note] }),
+    });
+    expect(await screen.findByText(/3 stars/)).toBeInTheDocument();
+    expect(screen.queryByRole("status")).toBe(null);
+    quiet.unmount();
+    // Beside a source that couldn't be read, it still says so.
+    drawMap({
+      sky: sky({ demo: false }),
+      focus: { providers: ["drive"] },
+      read: async () => ({
+        ...page(map.nodes.slice(0, 3), 3),
+        issues: [note, { provider: "drive", reason: "Fictional" }],
+      }),
+    });
+    expect(
+      await screen.findByText("A source couldn’t be read · the rest is shown"),
+    ).toBeInTheDocument();
+  } finally {
+    setInstance(demoInstance);
+  }
 });
 
 it("adds the dashboard stars linked to a shown star", () => {

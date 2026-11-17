@@ -531,7 +531,9 @@ values:
   overview ranks stars (memories and what they cite first, then documents, then themes, then the rest; within each,
   most linked, then newest, then by graphId), `graph.nodeLimit` stars per page with an `o:N` cursor, plus `matched`,
   the count of every match. The part draws the first page as Home's sky draws its overview, adds the dashboard stars
-  linked to a shown star, and says when a source couldn't be read (`issues`), as Home's sky does. Its caption names the
+  linked to a shown star, and says when a source couldn't be read: an issue a source gave. The engine's own note on
+  what it read (every map read it answers has one, under its catalog provider: a scheduled-refresh snapshot, and how
+  much of it is shown) is no failure, and the part says nothing of it. Its caption names the
   focus in the words `showing.parts` uses (10.8) and the count: "near Training plan · 42 stars", or "near Training
   plan · 300 of 1,240 stars" when there are more pages.
 - **Explore.** The caption's "Explore" adds the stars of the part's page to the screen's map (kept until Home, as a

@@ -4,6 +4,7 @@ import { Constellation } from "../Constellation";
 import { isDashboardStar } from "../dashboards";
 import { displayTitle } from "../graph";
 import { ambientWindow, clusterGraph } from "../graphView";
+import { catalogProvider } from "../instance";
 import type { GraphPage } from "../knowledge";
 import { focusSummary, focusedPage } from "../mapFocus";
 import type { FocusedPage } from "../mapFocus";
@@ -172,6 +173,13 @@ export function MapPart({
       : undefined;
   const failed = !!wanted && focused === null;
   const waiting = !!wanted && focused === undefined;
+  // A source that couldn't be read: an issue a source gave. The engine notes on
+  // every map read it answers what it read (a scheduled-refresh snapshot, and
+  // how much of it is shown), under its own catalog provider; that note is no
+  // failure, so it says nothing here.
+  const unread =
+    !!focused &&
+    focused.issues.some((issue) => issue.provider !== catalogProvider());
   const drawn = useMemo(
     () =>
       wanted
@@ -272,7 +280,7 @@ export function MapPart({
             Knowledge graph unavailable · health sources are independent
           </p>
         )}
-        {focused && focused.issues.length > 0 && (
+        {unread && (
           <p role="status">A source couldn’t be read · the rest is shown</p>
         )}
         {!wanted && drawn.nodes.length > 0 && (

@@ -6,6 +6,10 @@ each entry says so under **Upgrading**.
 
 ## Unreleased
 
+- **Fixed: a dashboard's focused map always said "A source couldn't be read"** when nothing had failed. The
+  engine notes on every map read it answers what it read (a scheduled-refresh snapshot, and how much of it
+  is shown), under its own catalog provider, and the map part took that note for a source it couldn't
+  read. It now says so only for an issue a source gave.
 - **Fixed: a dashboard that reads memories by filter and names no star never showed on the sky**, so a
   board like a Projects board could only be opened by its link. It now sits beside the project stars its
   memories feeds filter on, as a dashboard sits beside the stars it reads; one that names no project (a
