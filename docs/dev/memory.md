@@ -1011,6 +1011,13 @@ upstream's author lock (ledger SEC-04), with its gaps closed (below).
   undo reverses it; `unlink` removes it. The trash keeps a trashed item's links (038) and an export carries them (043)
   as every made link's; an import's counts as one made here. On the map a `depends_on` link is drawn as every made link,
   read in the app as "waits on" from the item that waits and "needed by" from the other.
+  **Milestones** (migration 084). A step of a project's roadmap that takes several pieces is a work item of its own
+  (a feature, by convention) that `depends_on` each piece; nothing else marks it. 084 adds `memory_work_depends`, the
+  one definition of what an item depends on (080's rule, whatever the target's state), and replaces
+  `memory_work_waiting` to read the unfinished ones from it, with the same answer. `list_work` and a memories feed count
+  them at each read (`dependencies`: `total`, `done`, `cancelled`), so a milestone says how many pieces are done
+  although a finished piece leaves `blocked_by`. Nothing is stored and no table changes. The served instructions tell
+  an AI client to make a milestone this way and to move it to review when it finishes the last piece.
   **Assignment and claims** (migration 081). The assignee is two nullable columns on `memory_work` and on each
   `memory_work_states` row (`assignee_person`, a current person's subject id; `assignee_label`, any other name, 1 to 120
   characters on one line, screened by 036's `memory_screen`; never both): `memory_work_assignee` reads a word as a

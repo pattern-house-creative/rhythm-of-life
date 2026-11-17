@@ -138,5 +138,8 @@ public static class MemoryInstructions
             claim_work(id: ..., label: "<session title> - <agent>") and keep the claim_id it answers: pass it to update_work as
             you move the item, renew it with claim_work(id: ..., claim_id: ...) while you work, and if you stop before it is done,
             release_work(id: ..., claim_id: ...). An item another session holds (claimed) is not yours to move: pick another.
+            A step of a project's roadmap that takes several pieces is a milestone: a work item of its own (a feature) that
+            depends_on each piece, so it stays blocked until every piece is done or cancelled, and list_work's dependencies
+            say how many pieces are done. When you finish its last piece, move the milestone to review for the person.
         """.ReplaceLineEndings("\n") + "\n";
 }

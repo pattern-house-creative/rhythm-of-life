@@ -58,6 +58,11 @@
         "label": "Allotment gauge - claude-code",
         "claimed_at": "2026-11-08T10:15:00Z",
         "expires_at": "2026-11-08T12:15:00Z"
+      },
+      "dependencies": {
+        "total": 2,
+        "done": 1,
+        "cancelled": 0
       }
     },
     {
@@ -89,7 +94,12 @@
       "blocked": false,
       "blocked_by": [],
       "assignee": null,
-      "claim": null
+      "claim": null,
+      "dependencies": {
+        "total": 0,
+        "done": 0,
+        "cancelled": 0
+      }
     },
     {
       "id": "6d3c2a10-0000-4000-8000-00000000a064",
@@ -121,7 +131,12 @@
         "kind": "person",
         "name": "sam"
       },
-      "claim": null
+      "claim": null,
+      "dependencies": {
+        "total": 0,
+        "done": 0,
+        "cancelled": 0
+      }
     }
   ],
   "next": "dzEuMi42Mzg5NzgxMTIwMDAwMDAwMDAuNmQzYzJhMTAwMDAwNDAwMDgwMDAwMDAwMDAwMGEwNjQ",

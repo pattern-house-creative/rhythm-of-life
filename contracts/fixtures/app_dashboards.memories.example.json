@@ -33,7 +33,8 @@
             "blocked": true,
             "blockedBy": [
               { "id": "6d3c2a10-0000-4000-8000-0000000e0001", "graphId": "memory:memory:6d3c2a10-0000-4000-8000-0000000e0001", "type": "task", "state": "ready", "priority": 1 }
-            ]
+            ],
+            "dependencies": { "total": 1, "done": 0, "cancelled": 0 }
           }
         },
         {
@@ -51,7 +52,7 @@
           "due": null,
           "preview": "DEMO: fit the new hinges on the shed door.",
           "truncated": false,
-          "work": { "type": "task", "state": "ready", "priority": 1, "assignee": null, "claim": null, "blocked": false, "blockedBy": [] }
+          "work": { "type": "task", "state": "ready", "priority": 1, "assignee": null, "claim": null, "blocked": false, "blockedBy": [], "dependencies": { "total": 0, "done": 0, "cancelled": 0 } }
         }
       ],
       "truncated": false

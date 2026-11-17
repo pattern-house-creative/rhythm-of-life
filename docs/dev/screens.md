@@ -1058,10 +1058,12 @@ on as well. It is what a project board is built on.
   the list says it: the list shows a replaced or ended memory, so the feed does too), `createdAt`, `updatedAt`, `due`
   (`{at, local, kind}`) or null, `preview` (its first 300 characters, as the Memories list cuts them) and `truncated`,
   and `work`: null for an ordinary memory and with `memory.work` off, else `{type, state, priority, assignee, claim,
-  blocked, blockedBy}`, where
+  blocked, blockedBy, dependencies}`, where
   `claim` is `{label, claimedAt, expiresAt}`, who holds it and until when, never the claim's id, and `blockedBy` the
   unfinished items it waits on (080's `memory_work_waiting`), first by priority, at most 20, each `{id, graphId, type,
-  state, priority}` with no words. `blocked` is true when the item is open and waits on any. `dashboard_data`'s
+  state, priority}` with no words. `blocked` is true when the item is open and waits on any. `dependencies` (migration
+  084) is `{total, done, cancelled}`: every work item it depends on, whatever its state, and how many of those are
+  finished each way, so a milestone that depends on each piece of a step says how many are done. `dashboard_data`'s
   preview keeps the newest 20, with `previewOf`; a feed past the dashboard's 3 MB is unavailable ("ask for fewer
   memories (limit) or narrow the filters").
 - **Off.** With `memory.tools` off, `save_dashboard`, `dashboard_data` and Studio refuse a memories feed, and a saved

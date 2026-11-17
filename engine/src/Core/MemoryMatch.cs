@@ -192,8 +192,9 @@ public sealed record MemoryMatch(MemoryAny<string>? Words = null, MemoryAny<stri
 
 // One memory a match found for a feed: as a list serves it (MemoryStore.Select, with its preview), and for a work item
 // whether it is blocked and the unfinished work items it waits on (080's memory_work_waiting), first by priority, at most
-// MemoryStore.BlockedByMax.
-public sealed record MemoryMatched(MemoryRecord Memory, bool Blocked, IReadOnlyList<MemoryWorkDependency> BlockedBy);
+// MemoryStore.BlockedByMax, and how far all the work items it depends on have come (084's memory_work_depends).
+public sealed record MemoryMatched(MemoryRecord Memory, bool Blocked, IReadOnlyList<MemoryWorkDependency> BlockedBy,
+    MemoryWorkDepends? Depends = null);
 
 // What a feed's match found: how many memories match in all, the newest `limit` of them, newest first; or, when it names
 // a project the reader doesn't read, those projects and nothing else.
@@ -270,18 +271,19 @@ public sealed partial class MemoryStore
         while (await reader.ReadAsync(ct))
         {
             total = (int)reader.GetInt64(32);
-            items.Add(new(Record(reader), reader.GetBoolean(33), Dependencies(reader.GetString(34))));
+            items.Add(new(Record(reader), reader.GetBoolean(33), Dependencies(reader.GetString(34)), MemoryWorkDepends.From(reader.GetString(35))));
         }
         return new(total, items, []);
     }
 
-    // The columns Matching adds after Select's: the whole count, whether the item is blocked (open and waiting on any) and
-    // what it waits on.
-    const string Blocking = """
+    // The columns Matching adds after Select's: the whole count, whether the item is blocked (open and waiting on any),
+    // what it waits on, and how far what it depends on has come.
+    const string Blocking = $"""
         ,h.total,
           coalesce((SELECT k.state NOT IN ('done','cancelled') FROM memory_work k WHERE k.memory_id=m.id),false) AND EXISTS(SELECT 1 FROM memory_work_waiting(m.id)),
           (SELECT coalesce(jsonb_agg(jsonb_build_object('id',d.id,'type',d.work_type,'state',d.state,'priority',d.priority)
             ORDER BY coalesce(d.priority,5),d.created_at,d.id),'[]'::jsonb)::text
-           FROM (SELECT * FROM memory_work_waiting(m.id) x ORDER BY coalesce(x.priority,5),x.created_at,x.id LIMIT @blockedMax) d)
+           FROM (SELECT * FROM memory_work_waiting(m.id) x ORDER BY coalesce(x.priority,5),x.created_at,x.id LIMIT @blockedMax) d),
+          {DependsCounted}
         """;
 }

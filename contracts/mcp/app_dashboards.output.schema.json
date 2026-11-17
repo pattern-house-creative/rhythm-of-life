@@ -475,7 +475,7 @@
             { "type": "null" },
             {
               "type": "object", "additionalProperties": false,
-              "required": ["type", "state", "priority", "assignee", "claim", "blocked", "blockedBy"],
+              "required": ["type", "state", "priority", "assignee", "claim", "blocked", "blockedBy", "dependencies"],
               "properties": {
                 "type": { "enum": ["task", "bug", "feature", "improvement"] },
                 "state": { "enum": ["backlog", "ready", "active", "review", "done", "cancelled"] },
@@ -505,6 +505,16 @@
                   ]
                 },
                 "blocked": { "type": "boolean" },
+                "dependencies": {
+                  "description": "How far the work items it depends on have come (migration 084): every one in all (total), whatever its state, and how many are done and cancelled; the rest are blockedBy's. All 0 when it depends on none.",
+                  "type": "object", "additionalProperties": false,
+                  "required": ["total", "done", "cancelled"],
+                  "properties": {
+                    "total": { "type": "integer", "minimum": 0 },
+                    "done": { "type": "integer", "minimum": 0 },
+                    "cancelled": { "type": "integer", "minimum": 0 }
+                  }
+                },
                 "blockedBy": {
                   "type": "array", "maxItems": 20,
                   "items": {

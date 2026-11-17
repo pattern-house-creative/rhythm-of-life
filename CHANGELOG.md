@@ -6,6 +6,14 @@ each entry says so under **Upgrading**.
 
 ## Unreleased
 
+- **Milestones for the project backlog** (with `memory.work` on). A step of a project's roadmap that takes
+  several pieces can be a work item of its own that depends on each piece: it stays blocked until every
+  piece is done or cancelled, and now says how far they have come. `list_work` and a dashboard's memories
+  feed give each work item `dependencies`: how many work items it depends on in all, whatever their state,
+  and how many of those are done and cancelled, so a board can show a milestone's progress. The served
+  instructions tell AI clients to make milestones this way and to move one to review when its last piece
+  is done. **Upgrading:** migration 084 applies at the next start; it adds one read-only function and
+  changes no table.
 - **Fixed: the explorer said "A source returned incomplete or unavailable results"** each time it loaded a
   star's connections, though nothing had failed. The engine's note on the snapshot it read came through
   as an issue on every search and neighbours read. The app's server now leaves that note out of a read

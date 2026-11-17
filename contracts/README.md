@@ -407,7 +407,10 @@ Memory tools (SB-P3-09, `docs/dev/memory.md` sections 5 to 7; upstream's names a
   at most 20, first by priority, each `{id, work_type, state, priority}`, and `blocked` is true when the item is open
   itself and waits on any. `list_work`'s `blocked` filter (`true`, `false`) keeps those, or the others, and `total` and
   `states` count under it. Nothing stores either; a link an import brought in counts as one made here, and one to a
-  memory that is no work item counts for nothing.
+  memory that is no work item counts for nothing. `dependencies` (migration 084) counts every work item the item
+  depends on by the same rule whatever its state (084's `memory_work_depends`, which `memory_work_waiting` now reads):
+  `total`, and how many of those are `done` and `cancelled`; the rest are the ones it waits on. A milestone, a work item
+  that depends on each piece of a step, says with it how many pieces are done.
 - Assignment and claims (migration 081), with `memory.work` on. A work item's assignee says whose it is: a person of
   the install by their id, or else an agent's label (1 to 120 characters on one line; one that reads like instructions
   to an AI client is refused, `invalid`, as 079's summary is), given to `create_work` or `update_work` as `assignee`

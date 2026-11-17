@@ -290,7 +290,8 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
     // status, what it is now (current, replaced, ended or retracted: MemoryRecord.State, as the Memories list says it), when
     // it was written and last changed, its due date, a preview of its words as the Memories list cuts it, and
     // for a work item (with memory.work on) its type, state, priority, assignee, claim (who holds it and until when; never
-    // the claim's id), whether it is blocked and what it waits on. Never a hold: a feed gives no held memory.
+    // the claim's id), whether it is blocked, what it waits on and how far all it depends on has come (how many, and how
+    // many of those are done and cancelled). Never a hold: a feed gives no held memory.
     static JsonObject Memory(MemoryMatched found, bool work)
     {
         var m = found.Memory;
@@ -311,9 +312,12 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
                 ["blocked"] = found.Blocked,
                 ["blockedBy"] = new JsonArray([.. found.BlockedBy.Select(b => (JsonNode)new JsonObject { ["id"] = b.Id.ToString(),
                     ["graphId"] = MemoryStars.Key(m.Subject, b.Id).GraphId, ["type"] = b.Type, ["state"] = b.State, ["priority"] = b.Priority })]),
+                ["dependencies"] = Counted(found.Depends ?? MemoryWorkDepends.None),
             } : null,
         };
     }
+
+    static JsonObject Counted(MemoryWorkDepends d) => new() { ["total"] = d.Total, ["done"] = d.Done, ["cancelled"] = d.Cancelled };
 
     // Why feeds a harness gives can't be served in this install, or null: a memories feed with memory.tools off, or one
     // with a work filter with memory.work off. save_dashboard, dashboard_data and Studio refuse them; a saved feed read

@@ -460,8 +460,11 @@ public sealed class MemoryFeedTests(DatabaseFixture fixture) : IClassFixture<Dat
         var blocker = Assert.Single(work["blockedBy"]!.AsArray())!;
         Assert.Equal((hinges.Id.ToString(), $"memory:memory:{hinges.Id}", "task", "ready", 1),
             ((string?)blocker["id"], (string?)blocker["graphId"], (string?)blocker["type"], (string?)blocker["state"], (int)blocker["priority"]!));
+        // It depends on one item in all, none of them finished yet.
+        Assert.Equal("""{"total":1,"done":0,"cancelled":0}""", work["dependencies"]!.ToJsonString());
         var hinged = rows[hinges.Id.ToString()]["work"]!;
         Assert.Equal((false, 0), ((bool)hinged["blocked"]!, hinged["blockedBy"]!.AsArray().Count));
+        Assert.Equal("""{"total":0,"done":0,"cancelled":0}""", hinged["dependencies"]!.ToJsonString());
         Assert.Null(hinged["assignee"]);
         Assert.Null(hinged["claim"]);
         Assert.Null(rows[note.ToString()]["work"]);
@@ -478,6 +481,8 @@ public sealed class MemoryFeedTests(DatabaseFixture fixture) : IClassFixture<Dat
         await Store.UpdateWork(who.Alex, hinges.Id, null, "done", null, false, "DEMO: hinges fitted.", null, Mcp, default);
         var after = (await Feed(who.App, $$$$"""{"project":"{{{{Project}}}}","work":true}"""))["memories"]!.AsArray().Single(m => (string)m!["id"]! == paint.Id.ToString())!;
         Assert.Equal((false, 0), ((bool)after["work"]!["blocked"]!, after["work"]!["blockedBy"]!.AsArray().Count));
+        // And it is counted done.
+        Assert.Equal("""{"total":1,"done":1,"cancelled":0}""", after["work"]!["dependencies"]!.ToJsonString());
 
         // With work items off, no work filter is served and no memory carries work; with the memory tools off, nothing.
         var off = await Feed(who.App, $$$$"""{"project":"{{{{Project}}}}"}""", config: MemoryToolSettings.On);

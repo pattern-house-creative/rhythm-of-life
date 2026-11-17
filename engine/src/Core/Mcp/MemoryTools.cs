@@ -1401,7 +1401,8 @@ public sealed class MemoryTools(IHttpContextAccessor accessor)
         i.Hold is null ? Due(i.Due) : null, i.Hold is null ? i.Summary : null, i.Hold is null ? i.Tags : [], i.Hold is null ? ProjectOf(i.Project) : null,
         i.CreatedAt, i.UpdatedAt, i.Hold is null ? i.Content : null, i.Hold is null && i.Truncated, i.Hold is { } reason ? Held(reason) : null,
         i.Blocked, [.. (i.BlockedBy ?? []).Select(d => new MemoryToolWorkDependency(d.Id, d.Type, d.State, d.Priority))],
-        Assignee(i.Work.Assignee), Claim(i.Work.Claim));
+        Assignee(i.Work.Assignee), Claim(i.Work.Claim),
+        i.Depends is { } n ? new(n.Total, n.Done, n.Cancelled) : new(0, 0, 0));
 
     static string WorkSaid(MemoryWorkProps w) => $"{w.Type}, {w.State}, {(w.Priority is { } p ? $"priority {p}" : "unranked")}"
         + (w.Assignee is { } a ? $", assigned to {a.Name}" : "");
@@ -2270,13 +2271,17 @@ public sealed record MemoryToolWorkWritten(bool Ok, Guid Id, int Revision, strin
 // last changed, and a preview of its words, Truncated when cut. Summary: what was said when it became done or cancelled.
 // One held for review comes with Held and without its words, tags, project, due date and summary. Blocked (migration 080):
 // it is open and waits on unfinished work; BlockedBy: those work items, first by priority, at most 20, each without words.
+// Dependencies (migration 084): how many work items it depends on in all, and how many of those are done and cancelled.
 public sealed record MemoryToolWorkItem(Guid Id, int Revision, string Scope, string Owner, string? Author, string Status, string WorkType, string State,
     int? Priority, MemoryToolDue? Due, string? Summary, IReadOnlyList<string> Tags, MemoryToolProject? Project, DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt, string? Content, bool Truncated, MemoryToolHold? Held, bool Blocked, IReadOnlyList<MemoryToolWorkDependency> BlockedBy,
-    MemoryToolAssignee? Assignee, MemoryToolClaim? Claim);
+    MemoryToolAssignee? Assignee, MemoryToolClaim? Claim, MemoryToolWorkDependencies Dependencies);
 
 // A work item another waits on (migration 080): its id and its properties now, never its words.
 public sealed record MemoryToolWorkDependency(Guid Id, string WorkType, string State, int? Priority);
+
+// How far the work items one depends on have come (migration 084): in all, done and cancelled; the rest it waits on.
+public sealed record MemoryToolWorkDependencies(int Total, int Done, int Cancelled);
 
 // How many work items each state holds under list_work's other filters (project, work_type, priority and workspace).
 public sealed record MemoryToolWorkCounts(int Backlog, int Ready, int Active, int Review, int Done, int Cancelled);

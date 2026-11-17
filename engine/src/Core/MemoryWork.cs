@@ -63,15 +63,33 @@ public sealed record MemoryWorkProps(string Type, string State, int? Priority, M
 // A work item another waits on, by a depends_on link (migration 080): its id and its properties now. No words.
 public sealed record MemoryWorkDependency(Guid Id, string Type, string State, int? Priority);
 
+// How far the work items one depends on have come (migration 084's memory_work_depends): how many in all, whatever their
+// state, and how many of those are done and cancelled; the rest are the ones it waits on. A milestone that depends on
+// each piece of a step says with it how many pieces are done. Read at each read; nothing stores it.
+public sealed record MemoryWorkDepends(int Total, int Done, int Cancelled)
+{
+    public static readonly MemoryWorkDepends None = new(0, 0, 0);
+
+    // The counts as MemoryStore.DependsCounted answers them.
+    public static MemoryWorkDepends From(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var e = doc.RootElement;
+        return new(e.GetProperty("total").GetInt32(), e.GetProperty("done").GetInt32(), e.GetProperty("cancelled").GetInt32());
+    }
+}
+
 // One work item as its reader is served it. Due: the memory's own due date (061), or none. Summary: what was said when
 // it became done or cancelled, only while it is one of those and that change is its newest change of work properties.
 // Content: a preview of at most the asked characters (Truncated when longer). One held for review (Hold says why) comes
 // without its words, tags, project, due date and summary, as a list serves any held memory. BlockedBy: the unfinished work
 // items it waits on (080's memory_work_waiting), first by priority, at most MemoryStore.BlockedByMax; Blocked: it is open
-// (neither done nor cancelled) and waits on any. Both are read at each read; nothing stores them.
+// (neither done nor cancelled) and waits on any. Depends (migration 084): how many work items it depends on in all, and how
+// many of those are done and cancelled. All are read at each read; nothing stores them.
 public sealed record MemoryWorkItem(Guid Id, int Revision, string Subject, string Scope, string? Author, string Status, MemoryWorkProps Work,
     MemoryDue? Due, string? Summary, IReadOnlyList<string> Tags, MemoryProjectRef? Project, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt,
-    string? Content, bool Truncated, string? Hold, bool Blocked = false, IReadOnlyList<MemoryWorkDependency>? BlockedBy = null);
+    string? Content, bool Truncated, string? Hold, bool Blocked = false, IReadOnlyList<MemoryWorkDependency>? BlockedBy = null,
+    MemoryWorkDepends? Depends = null);
 
 // A page's place: its last item's priority as the list orders it (none after 4), when it was written and its id.
 public sealed record MemoryWorkCursor(int Rank, DateTimeOffset CreatedAt, Guid Id);
@@ -133,6 +151,13 @@ public static class MemoryWork
 public sealed partial class MemoryStore
 {
     public const int WorkMax = 50, BlockedByMax = 20;
+
+    // How far the work items memory m depends on have come (084's memory_work_depends), as JSON text: {total, done,
+    // cancelled}, all 0 for an item that depends on none. list_work and a memories feed read it alike.
+    internal const string DependsCounted = """
+        (SELECT jsonb_build_object('total',count(*),'done',count(*) FILTER (WHERE d.state='done'),
+          'cancelled',count(*) FILTER (WHERE d.state='cancelled'))::text FROM memory_work_depends(m.id) d)
+        """;
 
     // One page of the work list under a filter, with its whole length and each state's count, in one statement (one
     // snapshot). After continues from a page's Next.
@@ -217,7 +242,8 @@ public sealed partial class MemoryStore
                 m.hold IS NULL AND length(m.content)>@chars,m.hold,q.rank,q.blocked,
                 (SELECT coalesce(jsonb_agg(jsonb_build_object('id',d.id,'type',d.work_type,'state',d.state,'priority',d.priority)
                   ORDER BY coalesce(d.priority,5),d.created_at,d.id),'[]'::jsonb)::text
-                 FROM (SELECT * FROM memory_work_waiting(m.id) x ORDER BY coalesce(x.priority,5),x.created_at,x.id LIMIT @blockedMax) d)
+                 FROM (SELECT * FROM memory_work_waiting(m.id) x ORDER BY coalesce(x.priority,5),x.created_at,x.id LIMIT @blockedMax) d),
+                {DependsCounted}
               FROM q JOIN memories m ON m.id=q.id LEFT JOIN memory_projects pr ON pr.id=m.project_id
               WHERE {Asked} AND (@afterRank::int IS NULL OR (q.rank,q.created_at,q.id)>(@afterRank,@afterAt,@afterId))
               ORDER BY q.rank,q.created_at,q.id LIMIT @limit) x ON true
@@ -238,7 +264,7 @@ public sealed partial class MemoryStore
                 items.Add(new(r.GetGuid(7), r.GetInt32(8), r.GetString(9), r.GetString(10), Text(11), r.GetString(12), MemoryWorkProps.From(r.GetString(13))!,
                     MemoryDue.From(Text(14)), Text(15), r.GetFieldValue<string[]>(16), r.IsDBNull(17) ? null : new(r.GetGuid(17), r.GetString(18)),
                     r.GetFieldValue<DateTimeOffset>(19), r.GetFieldValue<DateTimeOffset>(20), Text(21), r.GetBoolean(22), Text(23),
-                    r.GetBoolean(25), Dependencies(r.GetString(26))));
+                    r.GetBoolean(25), Dependencies(r.GetString(26)), MemoryWorkDepends.From(r.GetString(27))));
                 ranks.Add(r.GetInt32(24));
             }
         var next = items.Count > limit ? new MemoryWorkCursor(ranks[limit - 1], items[limit - 1].CreatedAt, items[limit - 1].Id) : null;

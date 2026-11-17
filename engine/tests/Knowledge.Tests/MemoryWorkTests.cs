@@ -672,6 +672,56 @@ public sealed class MemoryWorkDependencyTests(DatabaseFixture fixture) : IClassF
         Assert.Equal("verified", (await new MemoryStore(s).Link((await MemoryLogins.Terminals(s)).Alex, paint, buy, "depends_on", null, Cli, default, work: true)).Verification);
     }
 
+    static string Counted(JsonNode item) =>
+        $"{item["dependencies"]!["total"]}/{item["dependencies"]!["done"]}/{item["dependencies"]!["cancelled"]}";
+
+    [PostgresFact] public async Task A_milestone_counts_its_pieces_as_they_finish()
+    {
+        var s = fixture.Source;
+        await Scoped.Mode(s, "off");
+        var who = await MemoryLogins.Make(s, "work-milestone");
+        await using var alex = await As(who.Alex);
+        async Task<Guid> Work(string type, string text) =>
+            Id(await alex.Ok("create_work", new { work_type = type, content = text, project = "work-milestone-shed" }));
+        Task<JsonObject> List() => alex.Ok("list_work", new { project = "work-milestone-shed" });
+        // A step of the roadmap: the milestone, a feature, waits on each piece.
+        var step = await Work("feature", "DEMO: the Pellow shed is weatherproof. Done when its three pieces are.");
+        var roof = await Work("task", "DEMO: felt the Pellow shed roof.");
+        var door = await Work("task", "DEMO: seal the Pellow shed door.");
+        var vent = await Work("task", "DEMO: fit a Pellow shed vent.");
+        foreach (var piece in new[] { roof, door, vent }) await alex.Ok("link", new { source_id = step, target_id = piece, type = "depends_on" });
+
+        var list = await List();
+        Assert.Equal(("3/0/0", 3, true), (Counted(Item(list, step)), Waits(Item(list, step)).Length, (bool)Item(list, step)["blocked"]!));
+        // A piece depends on nothing.
+        Assert.All(new[] { roof, door, vent }, piece => Assert.Equal("0/0/0", Counted(Item(list, piece))));
+
+        // A finished piece leaves what it waits on, and is counted.
+        await alex.Ok("update_work", new { id = roof, state = "done", summary = "DEMO: felted." });
+        list = await List();
+        Assert.Equal(("3/1/0", 2), (Counted(Item(list, step)), Waits(Item(list, step)).Length));
+        // A dropped one is counted apart.
+        await alex.Ok("update_work", new { id = vent, state = "cancelled", summary = "DEMO: the window will do." });
+        Assert.Equal("3/1/1", Counted(Item(await List(), step)));
+        // In the trash or marked wrong, a piece counts for nothing, as it holds nothing up; back, it counts again.
+        var nonce = (string)(await alex.Ok("forget", new { id = door }))["trash"]!["nonce"]!;
+        var trashed = Item(await List(), step);
+        Assert.Equal(("2/1/1", false), (Counted(trashed), (bool)trashed["blocked"]!));
+        await alex.Ok("undo", new { id = door, nonce });
+        await alex.Ok("set_status", new { id = door, status = "deprecated" });
+        Assert.Equal("2/1/1", Counted(Item(await List(), step)));
+        await alex.Ok("set_status", new { id = door, status = "draft" });
+        Assert.Equal("3/1/1", Counted(Item(await List(), step)));
+
+        // The last piece done: the milestone waits on nothing and can be closed, and it still counts all three.
+        await alex.Ok("update_work", new { id = door, state = "done", summary = "DEMO: sealed." });
+        var ready = Item(await List(), step);
+        Assert.Equal(("3/2/1", false, 0), (Counted(ready), (bool)ready["blocked"]!, Waits(ready).Length));
+        // Unlinked, a piece is no longer counted.
+        await alex.Ok("unlink", new { source_id = step, target_id = vent, type = "depends_on" });
+        Assert.Equal("2/2/0", Counted(Item(await List(), step)));
+    }
+
     [PostgresFact] public async Task A_dependency_joins_two_work_items_of_one_scope_closes_no_loop_and_needs_the_setting()
     {
         var s = fixture.Source;

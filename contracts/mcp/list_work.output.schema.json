@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_work.output.schema.json",
   "title": "list_work answer",
-  "description": "The memory tool list_work's answer (migration 079): the work items the caller reads, a project's backlog. A work item is a memory with work properties that is live, not marked wrong and with its window open (079's memory_work_listed, one predicate); every reader of the memory is served it. state is the list asked: one state, open (every state but done and cancelled) or all. total is that list's whole length for this caller, and states how many items each state holds under the other filters (project, work_type, priority and workspace), all read in the same statement as the page, so each count is the length of its list. items are ordered by priority, 1 first and the unranked last, then oldest first. blocked says an open item waits, through a depends_on link (migration 080), on a work item that is neither done nor cancelled, and blocked_by names those, at most 20; assignee says whose it is and claim the live claim on it (migration 081: its label and when it ends, never its id), and the filters assignee (exact) and claimed keep those; the filter blocked true lists only those, false only what can go ahead, and total and states count under it. due is the memory's own due date; summary what was said when it became done or cancelled; content a preview of up to 500 characters, truncated when longer. One held for review is listed with held and without its words, tags, project, due date and summary, and no project filter selects it. Listed and answered only with memory.tools and memory.work on, and refused (off) with the second off (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "description": "The memory tool list_work's answer (migration 079): the work items the caller reads, a project's backlog. A work item is a memory with work properties that is live, not marked wrong and with its window open (079's memory_work_listed, one predicate); every reader of the memory is served it. state is the list asked: one state, open (every state but done and cancelled) or all. total is that list's whole length for this caller, and states how many items each state holds under the other filters (project, work_type, priority and workspace), all read in the same statement as the page, so each count is the length of its list. items are ordered by priority, 1 first and the unranked last, then oldest first. blocked says an open item waits, through a depends_on link (migration 080), on a work item that is neither done nor cancelled, and blocked_by names those, at most 20; dependencies counts every work item it depends on, and how many of those are done and cancelled (migration 084); assignee says whose it is and claim the live claim on it (migration 081: its label and when it ends, never its id), and the filters assignee (exact) and claimed keep those; the filter blocked true lists only those, false only what can go ahead, and total and states count under it. due is the memory's own due date; summary what was said when it became done or cancelled; content a preview of up to 500 characters, truncated when longer. One held for review is listed with held and without its words, tags, project, due date and summary, and no project filter selects it. Listed and answered only with memory.tools and memory.work on, and refused (off) with the second off (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
   "anyOf": [
     {
       "type": "object",
@@ -125,7 +125,8 @@
         "blocked",
         "blocked_by",
         "assignee",
-        "claim"
+        "claim",
+        "dependencies"
       ],
       "properties": {
         "id": {
@@ -219,6 +220,30 @@
         "blocked": {
           "type": "boolean",
           "description": "It is open (neither done nor cancelled) and waits, through a depends_on link (migration 080), on a work item that is neither done nor cancelled. Read at each read; nothing stores it."
+        },
+        "dependencies": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "How far the work items it depends on have come (migration 084): total, every work item it depends on through an active depends_on link, as blocked_by reads them but whatever their state; done and cancelled, how many of those are finished each way. The rest are the ones it waits on. A milestone that depends on each piece of a step says with it how many pieces are done. All 0 when it depends on none. Read at each read; nothing stores it.",
+          "required": [
+            "total",
+            "done",
+            "cancelled"
+          ],
+          "properties": {
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "done": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cancelled": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
         },
         "blocked_by": {
           "type": "array",
