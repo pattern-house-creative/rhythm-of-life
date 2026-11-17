@@ -6,6 +6,9 @@ each entry says so under **Upgrading**.
 
 ## Unreleased
 
+- AI clients now keep related feedback and acceptance criteria on the existing project item and file a new
+  item when an outcome needs independent follow-up. The shared instructions also explain which decisions
+  agents can settle and which need the person's approval.
 - **Milestones for the project backlog** (with `memory.work` on). A step of a project's roadmap that takes
   several pieces can be a work item of its own that depends on each piece: it stays blocked until every
   piece is done or cancelled, and now says how far they have come. `list_work` and a dashboard's memories
