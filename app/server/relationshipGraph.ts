@@ -1,6 +1,7 @@
 import { emptyGraph } from "../src/liveGraph.js";
 import { readable } from "../src/knowledge.js";
 import { assertGraphPage } from "../src/validation.js";
+import { catalogProvider } from "./config.js";
 import { answerRejected, callTool, EngineError } from "./engine.js";
 
 // The engine refuses a request body over 32 KiB, and a refused refresh empties
@@ -83,6 +84,17 @@ export async function readRelationshipGraph(
       (edge) => allowed.has(edge.source) && allowed.has(edge.target),
     );
     read = true;
+    // A search or neighbours read the engine answered: its only issue is the
+    // engine's own note on the snapshot it read (under its catalog provider),
+    // which is no source that failed, and with no page left it holds every
+    // match the reader may see. So the explorer says a source couldn't be read
+    // only when the read failed, and that every match came when none is left.
+    if (query) {
+      const engine = catalogProvider();
+      page.issues = page.issues.filter((i) => i.provider !== engine);
+      page.completeness =
+        page.nextCursor || page.issues.length ? "partial" : "complete";
+    }
     if (!query)
       page.issues = [
         ...page.issues,

@@ -135,5 +135,10 @@ endDate, coverageComplete, lastSyncedAt, activityCount}` with Garmin's metric na
 - **The engine's own records** use the provider id `rhythm` (data stars
   `rhythm:data%3A<provider>:<subject>%3A<group>`, saved documents, dashboards), or the one the
   engine's `RHYTHM_CATALOG_PROVIDER` names, which the app is given too.
+- **`app_graph`'s note on its snapshot.** Every map read the engine answers is `partial`, with an issue
+  under that provider saying what it read (a scheduled-refresh snapshot, and how much is shown). It is
+  no failure: on a `search` or `neighbors` read the engine answered, `/api/graph` leaves it out and says
+  the read is `complete` when no page is left, so the explorer says a source couldn't be read only when
+  the read failed. The overview keeps it.
 - Insights may name a source of kind `rhythm` (or the older `nas`), and `generatedBy` is any short
   label (`harness-daily` by default).

@@ -191,6 +191,73 @@ it("lists the other open screens in the panel and says how showing went", async 
   ).toBeInTheDocument();
 });
 
+it("says a source couldn't be read only when the engine's read failed", async () => {
+  const user = userEvent.setup();
+  const s = sky();
+  const props = {
+    onSelect: vi.fn(),
+    close: vi.fn(),
+    paused: true,
+    state: "ready" as const,
+    onState: vi.fn(),
+  };
+  // What the app's server answers for a neighbours read the engine answered:
+  // the engine's note on its snapshot left out, every match there.
+  const answered = controller(s.page);
+  vi.mocked(answered.session!.retrieve).mockResolvedValueOnce({
+    ...s.page,
+    completeness: "complete",
+    issues: [],
+    cursors: { rhythm: null },
+  });
+  const view = render(
+    <Explorer
+      {...props}
+      knowledge={answered}
+      selected={s.plan.id}
+      request={null}
+    />,
+  );
+  await user.click(
+    within(panel()).getByRole("button", { name: "Explore more connections" }),
+  );
+  expect(
+    await within(panel()).findByText(
+      "Available neighbors within the authorized source view have been retrieved.",
+    ),
+  ).toBeInTheDocument();
+  view.unmount();
+  // And for one it couldn't read: its own note, and no continuation.
+  const failed = controller(s.page);
+  vi.mocked(failed.session!.retrieve).mockResolvedValueOnce({
+    ...emptyGraph(),
+    issues: [
+      {
+        provider: "rhythm",
+        reason:
+          "Knowledge map unavailable. Health sources refresh independently.",
+      },
+    ],
+    cursors: {},
+  });
+  render(
+    <Explorer
+      {...props}
+      knowledge={failed}
+      selected={s.plan.id}
+      request={null}
+    />,
+  );
+  await user.click(
+    within(panel()).getByRole("button", { name: "Explore more connections" }),
+  );
+  expect(
+    await within(panel()).findByText(
+      /A source returned incomplete or unavailable results/,
+    ),
+  ).toBeInTheDocument();
+});
+
 it("offers no Show on where screens are off", () => {
   const s = sky();
   show(s.page, s.plan.id, null);

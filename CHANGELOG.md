@@ -6,6 +6,11 @@ each entry says so under **Upgrading**.
 
 ## Unreleased
 
+- **Fixed: the explorer said "A source returned incomplete or unavailable results"** each time it loaded a
+  star's connections, though nothing had failed. The engine's note on the snapshot it read came through
+  as an issue on every search and neighbours read. The app's server now leaves that note out of a read
+  the engine answered, and says the read is complete when no page is left, so the explorer says the
+  neighbours were retrieved, and that a source couldn't be read only when the read failed.
 - **Fixed: a dashboard's focused map always said "A source couldn't be read"** when nothing had failed. The
   engine notes on every map read it answers what it read (a scheduled-refresh snapshot, and how much of it
   is shown), under its own catalog provider, and the map part took that note for a source it couldn't

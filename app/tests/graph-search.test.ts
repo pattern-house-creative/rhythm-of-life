@@ -24,8 +24,11 @@ const links = [
   relation(stars[399], stars[350]),
 ];
 const sent: Record<string, unknown>[] = [];
+// An issue the fictional engine gives beside its note, when a test sets one.
+let besides: GraphPage["issues"] = [];
 
 function engine() {
+  besides = [];
   withEngine();
   vi.mocked(fetch).mockImplementation(async (_url, init) => {
     const args = JSON.parse(String(init?.body)).params.arguments;
@@ -47,12 +50,22 @@ function engine() {
           : stars;
     const shown = selected.slice(offset, offset + limit);
     const ids = new Set(shown.map((s) => s.id));
+    // Every read the engine answers is "partial", with its note on the
+    // snapshot it read under its catalog provider, and maybe one besides.
     const page: GraphPage = {
       ...emptyGraph(),
       nodes: shown,
       edges: links.filter((l) => ids.has(l.source) && ids.has(l.target)),
       nextCursor:
         offset + limit < selected.length ? `o:${offset + limit}` : null,
+      completeness: "partial",
+      issues: [
+        {
+          provider: process.env.RHYTHM_CATALOG_PROVIDER || "rhythm",
+          reason: `Scheduled-refresh snapshot, each record confirmed within the last 35 minutes. Showing ${shown.length} of ${selected.length} records matching '${args.operation}'.`,
+        },
+        ...besides,
+      ],
     };
     return new Response(
       JSON.stringify({
@@ -141,5 +154,43 @@ it("claims no continuation when the engine can't be read", async () => {
   const failed = await graph({ operation: "search", value: "star-1" });
   expect(failed.nodes).toEqual([]);
   expect(failed.cursors).toEqual({});
-  expect(failed.issues.length).toBeGreaterThan(0);
+  expect(failed.issues).toEqual([
+    expect.objectContaining({ reason: expect.stringMatching(/unavailable/) }),
+  ]);
+  expect(failed.completeness).toBe("partial");
+});
+
+it("says nothing failed when the engine answered, and that every match came when no page is left", async () => {
+  engine();
+  // The engine's note on its snapshot is no failure: a search or neighbours
+  // read it answered has no issue, complete with no page left.
+  const found = await graph({ operation: "search", value: "star-399" });
+  expect(found.issues).toEqual([]);
+  expect(found.completeness).toBe("complete");
+  const around = await graph({ operation: "neighbors", value: stars[399].id });
+  expect(around.issues).toEqual([]);
+  expect(around.completeness).toBe("complete");
+  const first = await graph({ operation: "search", value: "Fictional idea" });
+  expect(first.issues).toEqual([]);
+  expect(first.completeness).toBe("partial");
+  // The overview keeps the engine's note, and says it is the bounded map.
+  const overview = await graph({ operation: "discover" });
+  expect(overview.issues.map((i) => i.reason)).toEqual([
+    expect.stringMatching(/^Scheduled-refresh snapshot/),
+    expect.stringMatching(/^Bounded map/),
+  ]);
+});
+
+it("tells the engine's note from another under an install's own catalog provider", async () => {
+  // An install that kept an older engine's star ids: the engine notes under it.
+  vi.stubEnv("RHYTHM_CATALOG_PROVIDER", "truenas");
+  engine();
+  const found = await graph({ operation: "search", value: "star-399" });
+  expect(found.issues).toEqual([]);
+  expect(found.completeness).toBe("complete");
+  // Any other issue the engine gives still says so, and the read is partial.
+  besides = [{ provider: "drive", reason: "Fictional" }];
+  const other = await graph({ operation: "search", value: "star-399" });
+  expect(other.issues).toEqual([{ provider: "drive", reason: "Fictional" }]);
+  expect(other.completeness).toBe("partial");
 });
