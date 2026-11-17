@@ -710,6 +710,42 @@
                         "null"
                       ],
                       "default": null
+                    },
+                    "where": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "properties": {
+                        "words": {
+                          "default": null
+                        },
+                        "status": {
+                          "default": null
+                        },
+                        "kind": {
+                          "default": null
+                        },
+                        "project": {
+                          "default": null
+                        },
+                        "tag": {
+                          "default": null
+                        },
+                        "work": {
+                          "default": null
+                        },
+                        "workType": {
+                          "default": null
+                        },
+                        "state": {
+                          "default": null
+                        },
+                        "priority": {
+                          "default": null
+                        }
+                      },
+                      "default": null
                     }
                   },
                   "required": [
@@ -1304,6 +1340,42 @@
                     "null"
                   ],
                   "default": null
+                },
+                "where": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "words": {
+                      "default": null
+                    },
+                    "status": {
+                      "default": null
+                    },
+                    "kind": {
+                      "default": null
+                    },
+                    "project": {
+                      "default": null
+                    },
+                    "tag": {
+                      "default": null
+                    },
+                    "work": {
+                      "default": null
+                    },
+                    "workType": {
+                      "default": null
+                    },
+                    "state": {
+                      "default": null
+                    },
+                    "priority": {
+                      "default": null
+                    }
+                  },
+                  "default": null
                 }
               },
               "required": [
@@ -1706,6 +1778,42 @@
                     "string",
                     "null"
                   ],
+                  "default": null
+                },
+                "where": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "words": {
+                      "default": null
+                    },
+                    "status": {
+                      "default": null
+                    },
+                    "kind": {
+                      "default": null
+                    },
+                    "project": {
+                      "default": null
+                    },
+                    "tag": {
+                      "default": null
+                    },
+                    "work": {
+                      "default": null
+                    },
+                    "workType": {
+                      "default": null
+                    },
+                    "state": {
+                      "default": null
+                    },
+                    "priority": {
+                      "default": null
+                    }
+                  },
                   "default": null
                 }
               },
@@ -3111,6 +3219,42 @@
                         "null"
                       ],
                       "default": null
+                    },
+                    "where": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "properties": {
+                        "words": {
+                          "default": null
+                        },
+                        "status": {
+                          "default": null
+                        },
+                        "kind": {
+                          "default": null
+                        },
+                        "project": {
+                          "default": null
+                        },
+                        "tag": {
+                          "default": null
+                        },
+                        "work": {
+                          "default": null
+                        },
+                        "workType": {
+                          "default": null
+                        },
+                        "state": {
+                          "default": null
+                        },
+                        "priority": {
+                          "default": null
+                        }
+                      },
+                      "default": null
                     }
                   },
                   "required": [
@@ -3705,6 +3849,42 @@
                     "null"
                   ],
                   "default": null
+                },
+                "where": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "words": {
+                      "default": null
+                    },
+                    "status": {
+                      "default": null
+                    },
+                    "kind": {
+                      "default": null
+                    },
+                    "project": {
+                      "default": null
+                    },
+                    "tag": {
+                      "default": null
+                    },
+                    "work": {
+                      "default": null
+                    },
+                    "workType": {
+                      "default": null
+                    },
+                    "state": {
+                      "default": null
+                    },
+                    "priority": {
+                      "default": null
+                    }
+                  },
+                  "default": null
                 }
               },
               "required": [
@@ -4107,6 +4287,42 @@
                     "string",
                     "null"
                   ],
+                  "default": null
+                },
+                "where": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "words": {
+                      "default": null
+                    },
+                    "status": {
+                      "default": null
+                    },
+                    "kind": {
+                      "default": null
+                    },
+                    "project": {
+                      "default": null
+                    },
+                    "tag": {
+                      "default": null
+                    },
+                    "work": {
+                      "default": null
+                    },
+                    "workType": {
+                      "default": null
+                    },
+                    "state": {
+                      "default": null
+                    },
+                    "priority": {
+                      "default": null
+                    }
+                  },
                   "default": null
                 }
               },

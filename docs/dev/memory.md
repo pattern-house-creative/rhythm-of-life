@@ -516,7 +516,10 @@ upstream's author lock (ledger SEC-04), with its gaps closed (below).
   (section 9). A memory's volatility is the caller's word (D-033; no model or heuristic sets it): a `state` memory may
   be out of date once 90 days pass with no change and no confirmation, a `volatile` one after 14, a `durable` one and
   one with no volatility never by age. Every memory saved without one has none, so none of them goes stale; one saved
-  with a volatility goes stale by the time since its last change, as upstream's does. The clock is the newer of its last
+  with a volatility goes stale by the time since its last change, as upstream's does. A change keeps the volatility
+  unless it names it: 033's `update_memory` emptied it whenever new text replaced the words, as upstream's verdict on the
+  old text went with them, and since 082 new text alone changes the text and adds its hashtags and nothing else
+  (`New_text_alone_keeps_every_field_the_change_does_not_name`). The clock is the newer of its last
   change (`updated_at`, which every change moves; a flag moves nothing) and its last confirmation. The pass marks a
   memory whose time has passed at the revision it has (`memory_checks`), and a mark counts only at that revision, so any
   change takes it out of the queue at once. It locks the memory's row before writing a mark, in the order every writer
@@ -985,7 +988,9 @@ upstream's author lock (ledger SEC-04), with its gaps closed (below).
   burst (045); a new work item is a memory's writing and is. The engine records what a client says about the work and
   cannot tell whether it was done. **In the app** the Memories list is the backlog: `app_memories` ops `list` and `tags`
   take `work`, `workType` and `workPriority` (`MemoryFilter`, the list's own predicates, so the count beside the list is
-  its length), a work item's memory carries `work`, and `settings` says whether the install has work items on; the app
+  its length; a dashboard's memories feed reads the same filters through the same `MemoryMatch`, so a project board
+  shows the list's work items, [screens.md](screens.md) 10.12), a work item's memory carries `work`, and `settings`
+  says whether the install has work items on; the app
   changes no work property. **On the map** a work item is a star like any memory's, and with `memory.work` on its star
   says `work` `{type, state, priority}`, read at each read as a replaced fact's `truth` is (`MemoryStars.Work`,
   `RelationshipEngine.Work`; never stored in the star's snapshot), so the app draws it as a small box and a screen can
@@ -1386,7 +1391,8 @@ memory, an AI client included (D-145), and an AI client may edit the words of a 
 predicate on the memory's own row first, then the history rule of section 5 on each state and audit row; a count and a
 tag vocabulary (`MemoryStore.Count`, `Tags`, SB-P3-17) take a list's own predicates (`Filtered`), so each count is the
 length of the list it summarises, a tag comes only from a memory the reader reads, and a held memory's tags are none of
-it. The `history` tool and `get`'s `version` serve the first two (below); the app's Memories view serves a count and the
+it. A dashboard's memories feed (`MemoryStore.Matching`, [screens.md](screens.md) 10.12) takes them too, its filters
+(`MemoryMatch`) the list's own defined once, and never a held memory. The `history` tool and `get`'s `version` serve the first two (below); the app's Memories view serves a count and the
 tag vocabulary (`app_memories`' `tags`, SB-P6-01); the brief takes each count from the statement that reads its own list
 instead.
 

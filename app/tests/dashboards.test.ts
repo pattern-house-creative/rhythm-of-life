@@ -31,7 +31,13 @@ it("keeps only dashboards that match the contract, failing closed", () => {
     { ...summary, id: "not-a-uuid" },
     { ...summary, title: "" },
     { ...summary, version: 3 },
-    { ...summary, stars: [] },
+    {
+      ...summary,
+      stars: Array.from({ length: 13 }, (_, i) => ({
+        graphId: `notes:notes:${i}.md`,
+        title: "x",
+      })),
+    },
     { ...summary, stars: [{ graphId: "", title: "x" }] },
     {
       ...summary,
@@ -86,6 +92,58 @@ it("keeps only dashboards that match the contract, failing closed", () => {
   ).toBeNull();
   expect(
     cleanDashboardData({ ...data, dashboard: { id: "x", version: 1 } }),
+  ).toBeNull();
+});
+
+it("keeps a dashboard that reads memories by filter, which may name no star", () => {
+  // A memories feed names no star, and a dashboard whose feeds read memories may
+  // name none of its own; its filters pass through as the engine stored them.
+  const starless = { ...summary, stars: [] };
+  expect(cleanSummaries({ dashboards: [starless] })).toEqual([starless]);
+  const dashboard = boards.get(id)!;
+  const memories = {
+    name: "items",
+    kind: "memories",
+    where: { project: ["demo-garden"], state: { not: ["done", "cancelled"] } },
+    limit: 500,
+  };
+  expect(
+    cleanDashboard({ dashboard: { ...dashboard, feeds: [memories] } })?.feeds,
+  ).toEqual([memories]);
+  expect(
+    cleanDashboard({
+      dashboard: { ...dashboard, feeds: [{ name: "items", kind: "memories" }] },
+    })?.feeds,
+  ).toEqual([{ name: "items", kind: "memories" }]);
+  for (const broken of [
+    { ...memories, star: "memory:memory:x" },
+    { ...memories, where: "project" },
+    { ...memories, limit: 1001 },
+  ])
+    expect(
+      cleanDashboard({ dashboard: { ...dashboard, feeds: [broken] } }),
+    ).toBeNull();
+  // Its payload has no star, as a log's has none.
+  const data = boards.data(id)!;
+  const read = {
+    kind: "memories",
+    status: "ok",
+    asOf: data.asOf,
+    where: memories.where,
+    limit: 500,
+    count: 0,
+    memories: [],
+    truncated: false,
+  };
+  expect(cleanDashboardData({ ...data, feeds: { items: read } })).toEqual({
+    ...data,
+    feeds: { items: read },
+  });
+  expect(
+    cleanDashboardData({
+      ...data,
+      feeds: { items: { ...read, star: { graphId: "x", title: null } } },
+    }),
   ).toBeNull();
 });
 

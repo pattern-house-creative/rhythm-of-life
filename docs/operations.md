@@ -215,7 +215,10 @@ rest at its next run ([dev/engine.md](dev/engine.md)).
 - **The map** is rebuilt every `graph.refreshSeconds` and shows as stale once it is older than `graph.freshnessSeconds`
   (2100 seconds, 35 minutes).
 - **Sources & settings** shows, for each source, when its newest reading was observed, its last successful sync and when
-  the app retrieved it. A reading that is missing stays missing: it is never replaced with demo data.
+  the app retrieved it. A reading that is missing stays missing: it is never replaced with demo data. The Rhythm engine's
+  row is connected by its own stars on the map (data, saved documents and dashboards, under the catalog provider id:
+  `rhythm`, unless an install kept an older engine's with `RHYTHM_CATALOG_PROVIDER`), observed at the newest of them;
+  with none of them on the map, by the engine's answer to the map, retrieved when it answered.
 - **A glucose reading** reads as stale 20 minutes after it was observed.
 - **Search** serves a note's or a Drive file's passages only while the map would show its star (seen by a rebuild within
   `graph.freshnessSeconds`), and a Drive file's only while Drive still holds the version they were read from.

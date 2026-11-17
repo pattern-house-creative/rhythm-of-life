@@ -1,0 +1,27 @@
+{
+  "dashboard": {
+    "id": "6d3c2a10-0000-4000-8000-0000000d0003",
+    "version": 1,
+    "latest": 1,
+    "title": "DEMO Projects",
+    "description": "Fictional: every project's open work by state.",
+    "stars": [],
+    "note": "First version.",
+    "restoredFrom": null,
+    "savedAt": "2026-11-17T09:00:00+00:00",
+    "createdAt": "2026-11-17T09:00:00+00:00",
+    "updatedAt": "2026-11-17T09:00:00+00:00",
+    "writes": [],
+    "editsAllowed": false,
+    "corners": [],
+    "versions": [{ "version": 1, "note": "First version.", "restoredFrom": null, "savedAt": "2026-11-17T09:00:00+00:00" }],
+    "layout": null,
+    "layoutRevision": 0,
+    "layoutNote": null,
+    "layoutSavedAt": null,
+    "feeds": [
+      { "name": "open", "kind": "memories", "limit": 500, "where": { "status": { "not": ["deprecated"] }, "work": true, "state": { "not": ["done", "cancelled"] } } }
+    ],
+    "html": "<div class=\"w\">Fictional projects board</div><script>rhythm.onData(function(d){document.querySelector('.w').textContent=String(d.feeds.open.count)});</script>"
+  }
+}

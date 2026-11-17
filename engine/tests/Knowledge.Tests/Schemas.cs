@@ -161,6 +161,8 @@ public sealed class SchemaTests
     [InlineData("app_dashboards.dashboard.example.json", "app_dashboards.output.schema.json")]
     [InlineData("app_dashboards.layout.example.json", "app_dashboards.output.schema.json")]
     [InlineData("app_dashboards.map.example.json", "app_dashboards.output.schema.json")]
+    [InlineData("app_dashboards.memories.example.json", "app_dashboards.output.schema.json")]
+    [InlineData("app_dashboards.memories.version.example.json", "app_dashboards.output.schema.json")]
     [InlineData("app_request_refresh.example.json", "app_request_refresh.output.schema.json")]
     [InlineData("app_garmin_summary.example.json", "app_garmin_summary.output.schema.json")]
     [InlineData("app_request_garmin_sync.example.json", "app_request_garmin_sync.output.schema.json")]

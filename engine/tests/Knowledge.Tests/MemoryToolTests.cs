@@ -220,10 +220,12 @@ public sealed class MemoryToolTests
 
         // Every tool that was there before lists exactly what it did with them off, the memory tools on or not, but for
         // recall's and get_prompt_capsule's descriptions, which say how they go with the memory tools only while those are on,
-        // and the map's reads', which say then what a replaced fact's star is (SB-P4-11).
+        // the map's reads', which say then what a replaced fact's star is (SB-P4-11), and the dashboard tools', which say then
+        // what a memories feed is (docs/dev/screens.md 10.12).
         string Listing(McpServerTool t) => JsonSerializer.Serialize(t.ProtocolTool);
         var before = HarnessTools.Create(off, []).ToDictionary(t => t.ProtocolTool.Name, Listing);
-        string[] extended = [HarnessTools.RecallTool, HarnessTools.CapsuleTool, "get_relationship_graph", "explore_graph", "graph_changes"];
+        string[] extended = [HarnessTools.RecallTool, HarnessTools.CapsuleTool, "get_relationship_graph", "explore_graph", "graph_changes",
+            "save_dashboard", "dashboard_data"];
         foreach (var tool in made.Where(t => before.ContainsKey(t.ProtocolTool.Name)))
             if (extended.Contains(tool.ProtocolTool.Name))
             {
@@ -473,6 +475,24 @@ public sealed class MemoryToolDatabaseTests(DatabaseFixture fixture) : IClassFix
         Assert.Equal("invalid", (string)(await ai.Refused("undo", new { }))["code"]!);
         Assert.Equal("invalid", (string)(await ai.Refused("undo", new { id, group = "abc" }))["code"]!);
         Assert.Equal("unknown", (string)(await ai.Refused("undo", new { group = "not-a-group" }))["code"]!);
+    }
+
+    // update changes only what it names: new text alone left a durable memory with no volatility (033, as upstream);
+    // now its volatility, kind, importance, project and tags all stay (082).
+    [PostgresFact] public async Task Update_with_new_text_alone_keeps_the_memorys_other_fields()
+    {
+        var s = fixture.Source;
+        await Scoped.Mode(s, "off");
+        var who = await MemoryLogins.Make(s, "tools-keep");
+        await using var ai = await As(who.Alex);
+        var id = Id(await ai.Ok("remember", new { content = "DEMO: the Brindle shed roof was felted in May.", tags = new[] { "shed" },
+            project = "brindle-shed", kind = "semantic", importance = 4, volatility = "durable" }));
+        var edited = await ai.Ok("update", new { id, content = "DEMO: the Brindle shed roof was felted in June.", expected_revision = 1 });
+        Assert.Equal(["content"], edited["changed"]!.AsArray().Select(c => (string)c!));
+        var memory = (await ai.Ok("get", new { id }))["memory"]!;
+        Assert.Equal(("DEMO: the Brindle shed roof was felted in June.", "durable", "semantic", 4, "brindle-shed", "shed"),
+            ((string)memory["content"]!, (string?)memory["volatility"], (string?)memory["kind"], (int?)memory["importance"],
+            (string?)memory["project"]?["slug"], string.Join(",", memory["tags"]!.AsArray().Select(t => (string)t!))));
     }
 
     // A write's answer has no notice, so it names a memory's project by id and slug only, never by its name (stored

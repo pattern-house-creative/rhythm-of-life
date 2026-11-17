@@ -7,18 +7,29 @@ using Npgsql;
 namespace Knowledge;
 
 // Living dashboards. A dashboard is one page a harness writes, plus the feeds it reads: data (a
-// data star's measurement rows), contents (what a star holds) or links (the stars around one). `Name` is the key the
-// page receives the feed under. Text and pages are untrusted data wherever they are shown; the app runs a page in a
-// sandboxed frame and the engine never runs it.
+// data star's measurement rows), contents (what a star holds), links (the stars around one), log (a log's entries) or
+// memories (the native memories that match a filter, docs/dev/screens.md 10.12). `Name` is the key the page receives the
+// feed under. Text and pages are untrusted data wherever they are shown; the app runs a page in a sandboxed frame and the
+// engine never runs it.
 public sealed partial record DashboardFeed(string Name, string Kind, string Star, int? Days = null, string? By = null,
-    string[]? Metrics = null, int? Limit = null, string? Log = null, string? Subject = null)
+    string[]? Metrics = null, int? Limit = null, string? Log = null, string? Subject = null, MemoryWhere? Where = null)
 {
-    public const int MaxDays = 3650, MaxLinks = 60;
+    public const int MaxDays = 3650, MaxLinks = 60, DefaultMemories = 200;
     // The first problem with feed `i`, in words a harness can act on; null when it is valid.
     public string? Problem(int i)
     {
         if (Name is null || !FeedName().IsMatch(Name)) return $"feeds[{i}].name is a letter then up to 39 letters, digits or underscores";
-        if (Kind is not ("data" or "contents" or "links" or "log")) return $"feeds[{i}].kind must be data, contents, links or log";
+        if (Kind is not ("data" or "contents" or "links" or "log" or "memories")) return $"feeds[{i}].kind must be data, contents, links, log or memories";
+        // A memories feed reads memories by filter (MemoryMatch), not a star: where (none is every memory its reader
+        // reads) and limit, how many of the newest it gives.
+        if (Kind == "memories")
+        {
+            if (Star is not null || Days is not null || By is not null || Metrics is not null || Log is not null || Subject is not null)
+                return $"feeds[{i}]: a memories feed takes only where and limit";
+            if (Limit is < 1 or > MemoryStore.MatchMax) return $"feeds[{i}].limit is 1–{MemoryStore.MatchMax} for a memories feed";
+            return MemoryMatch.Read(Where, $"feeds[{i}].where", out _);
+        }
+        if (Where is not null) return $"feeds[{i}]: where is for memories feeds";
         // A log feed reads a log by name, the one a log write adds to, even before it has entries or a star.
         if (Kind == "log")
         {
@@ -30,7 +41,7 @@ public sealed partial record DashboardFeed(string Name, string Kind, string Star
         if (Log is not null || Subject is not null) return $"feeds[{i}]: log and subject are for log feeds";
         if (string.IsNullOrWhiteSpace(Star) || Star.Length > 1000) return $"feeds[{i}].star is a graphId from explore_graph";
         if (Kind != "data" && (Days is not null || By is not null || Metrics is not null)) return $"feeds[{i}]: days, by and metrics are for data feeds";
-        if (Kind != "links" && Limit is not null) return $"feeds[{i}]: limit is for links feeds";
+        if (Kind != "links" && Limit is not null) return $"feeds[{i}]: limit is for links and memories feeds";
         if (Days is < 1 or > MaxDays) return $"feeds[{i}].days is 1–{MaxDays}";
         if (By is not null and not ("reading" or "day")) return $"feeds[{i}].by must be reading or day";
         if (Metrics is not null && (Metrics.Length is < 1 or > 40 || Metrics.Any(m => m is null || !Metric().IsMatch(m))))
@@ -40,14 +51,23 @@ public sealed partial record DashboardFeed(string Name, string Kind, string Star
     }
     // As stored: the defaults written out, so a saved feed reads the same after the defaults change. A log feed that names
     // no subject reads `subject`'s log when given (with memory.scopes on, the caller's own: DerivedScopes.LogSubject),
-    // else the first person's.
+    // else the first person's. A memories feed's where is written as MemoryMatch.ToJson writes it, and one that names no
+    // status leaves out the memories marked wrong ({"not": ["deprecated"]}), so it asks for them only by naming them.
     public DashboardFeed Normalized(string? subject = null) => Kind switch
     {
         "data" => this with { Days = Days ?? 30, By = By ?? "day" },
         "links" => this with { Limit = Limit ?? 40 },
         "log" => this with { Days = Days ?? 30, Subject = Subject ?? subject ?? DashboardWrite.DefaultSubject },
+        "memories" => this with { Limit = Limit ?? DefaultMemories, Where = Matched().ToWhere() },
         _ => this
     };
+    // A memories feed's match as it reads, the default status written in; an invalid where (refused before it is saved)
+    // as no filter.
+    public MemoryMatch Matched()
+    {
+        MemoryMatch.Read(Where, "where", out var match);
+        return match.Status is null ? match with { Status = new([MemoryStore.Deprecated], true) } : match;
+    }
     [GeneratedRegex("^[a-z][a-z0-9-]{0,39}$")] private static partial Regex LogName();
     [GeneratedRegex("^[a-z][A-Za-z0-9_]{0,39}$")] private static partial Regex FeedName();
     [GeneratedRegex("^[a-z0-9_]{1,100}$")] private static partial Regex Metric();
@@ -391,6 +411,12 @@ public sealed record DashboardDraft(string Title, string Description, string Htm
             else if (feeds[i].Problem(i) is { } problem) return problem;
         return feeds.Select(f => f.Name).Distinct().Count() == feeds.Count ? null : "feeds need distinct names";
     }
+    // A dashboard names at least one star across its feeds and writes (`named`), which its star on the map is linked to and,
+    // with memory.scopes on, whose scopes it lands in; unless a feed reads memories (kind memories), which reads by filter
+    // for each reader as that reader reads them, and needs no star to say what the dashboard is about. Null when it holds.
+    public static string? Unanchored(IReadOnlyList<DashboardFeed> feeds, IReadOnlyCollection<string> named) =>
+        named.Count > 0 || feeds.Any(f => f.Kind == "memories") ? null
+            : "At least one feed or write names a star; add a feed for a star the dashboard is about";
     public static string? WritesProblem(IReadOnlyList<DashboardWrite>? writes)
     {
         if (writes is null) return null;

@@ -122,7 +122,8 @@
         "title": { "type": "string", "minLength": 1, "maxLength": 120 },
         "description": { "type": "string", "maxLength": 600 },
         "stars": {
-          "type": "array", "minItems": 1, "maxItems": 12,
+          "description": "The stars its feeds and writes name: 1-12, or none when a feed reads memories (kind memories, docs/dev/screens.md 10.12).",
+          "type": "array", "maxItems": 12,
           "items": {
             "type": "object", "additionalProperties": false, "required": ["graphId", "title"],
             "properties": { "graphId": { "type": "string", "minLength": 1, "maxLength": 1000 }, "title": { "type": "string", "maxLength": 1000 } }
@@ -160,14 +161,15 @@
       "required": ["name", "kind"],
       "properties": {
         "name": { "$ref": "#/$defs/name" },
-        "kind": { "enum": ["data", "contents", "links", "log"] },
+        "kind": { "enum": ["data", "contents", "links", "log", "memories"] },
         "star": { "type": "string", "maxLength": 1000 },
         "days": { "type": "integer", "minimum": 1, "maximum": 3650 },
         "by": { "enum": ["reading", "day"] },
         "metrics": { "type": "array", "maxItems": 40, "items": { "type": "string", "minLength": 1, "maxLength": 100 } },
-        "limit": { "type": "integer", "minimum": 1, "maximum": 60 },
+        "limit": { "description": "1-60 for a links feed, 1-1000 for a memories feed.", "type": "integer", "minimum": 1, "maximum": 1000 },
         "log": { "$ref": "#/$defs/log" },
-        "subject": { "$ref": "#/$defs/subject" }
+        "subject": { "$ref": "#/$defs/subject" },
+        "where": { "$ref": "#/$defs/memory-where" }
       }
     },
     "declared": {
@@ -198,19 +200,10 @@
           "maxProperties": 12,
           "propertyNames": { "$ref": "#/$defs/name" },
           "additionalProperties": {
-            "type": "object",
-            "required": ["kind", "status", "asOf"],
-            "properties": {
-              "kind": { "enum": ["data", "contents", "links", "log"] },
-              "status": { "enum": ["ok", "unavailable"] },
-              "asOf": { "$ref": "#/$defs/instant" },
-              "reason": { "type": "string", "maxLength": 300 },
-              "star": {
-                "type": "object", "required": ["graphId", "title"],
-                "properties": { "graphId": { "type": "string", "minLength": 1, "maxLength": 1000 }, "title": { "type": ["string", "null"], "maxLength": 1000 } }
-              },
-              "log": { "$ref": "#/$defs/log" }
-            }
+            "oneOf": [
+              { "$ref": "#/$defs/memories-payload" },
+              { "$ref": "#/$defs/payload" }
+            ]
           }
         },
         "dashboard": {
@@ -299,6 +292,230 @@
     "layout-note": {
       "description": "The last arrangement's note, in plain words; null for the layout the version was saved with.",
       "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1, "maxLength": 500 }]
+    },
+    "payload": {
+      "description": "Any other feed's envelope: its kind, status, when it was read and why it is unavailable, and the star it reads (none for a log). The rest passes to the page as the engine read it.",
+      "type": "object",
+      "required": ["kind", "status", "asOf"],
+      "properties": {
+        "kind": { "enum": ["data", "contents", "links", "log"] },
+        "status": { "enum": ["ok", "unavailable"] },
+        "asOf": { "$ref": "#/$defs/instant" },
+        "reason": { "type": "string", "maxLength": 300 },
+        "star": {
+          "type": "object",
+          "required": ["graphId", "title"],
+          "properties": { "graphId": { "type": "string", "minLength": 1, "maxLength": 1000 }, "title": { "type": ["string", "null"], "maxLength": 1000 } }
+        },
+        "log": { "$ref": "#/$defs/log" }
+      }
+    },
+    "memory-where": {
+      "description": "A memories feed's filters as stored and read (MemoryMatch, docs/dev/screens.md 10.12): each a list of values (any of them) or {not: list} (none of them), work a boolean; every filter given must match. A harness may also give a filter one value alone, which is stored as a list.",
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "words": {
+          "oneOf": [
+            { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 200 } },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["not"],
+              "properties": { "not": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 200 } } }
+            }
+          ]
+        },
+        "status": {
+          "oneOf": [
+            { "type": "array", "minItems": 1, "maxItems": 20, "items": { "enum": ["canonical", "draft", "deprecated"] } },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["not"],
+              "properties": { "not": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "enum": ["canonical", "draft", "deprecated"] } } }
+            }
+          ]
+        },
+        "kind": {
+          "oneOf": [
+            { "type": "array", "minItems": 1, "maxItems": 20, "items": { "enum": ["episodic", "semantic"] } },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["not"],
+              "properties": { "not": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "enum": ["episodic", "semantic"] } } }
+            }
+          ]
+        },
+        "project": {
+          "oneOf": [
+            { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["not"],
+              "properties": { "not": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 128 } } }
+            }
+          ]
+        },
+        "tag": {
+          "oneOf": [
+            { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["not"],
+              "properties": { "not": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 128 } } }
+            }
+          ]
+        },
+        "work": { "type": "boolean" },
+        "workType": {
+          "oneOf": [
+            { "type": "array", "minItems": 1, "maxItems": 20, "items": { "enum": ["task", "bug", "feature", "improvement"] } },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["not"],
+              "properties": { "not": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "enum": ["task", "bug", "feature", "improvement"] } } }
+            }
+          ]
+        },
+        "state": {
+          "oneOf": [
+            { "type": "array", "minItems": 1, "maxItems": 20, "items": { "enum": ["backlog", "ready", "active", "review", "done", "cancelled"] } },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["not"],
+              "properties": {
+                "not": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "enum": ["backlog", "ready", "active", "review", "done", "cancelled"] } }
+              }
+            }
+          ]
+        },
+        "priority": {
+          "oneOf": [
+            { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "integer", "minimum": 0, "maximum": 4 } },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["not"],
+              "properties": { "not": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "integer", "minimum": 0, "maximum": 4 } } }
+            }
+          ]
+        }
+      }
+    },
+    "memories-payload": {
+      "description": "A memories feed's payload: no star; its filters as it reads them and its limit; ok adds count (how many match in all), memories (newest first, at most limit; a preview keeps the first 20, previewOf the full number) and truncated (more match than it gives); unavailable adds a reason. Never a memory held for review or in the trash. A preview is stored words: untrusted data.",
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "status", "asOf", "where", "limit"],
+      "properties": {
+        "kind": { "const": "memories" },
+        "status": { "enum": ["ok", "unavailable"] },
+        "asOf": { "$ref": "#/$defs/instant" },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "where": { "$ref": "#/$defs/memory-where" },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "count": { "type": "integer", "minimum": 0 },
+        "memories": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/feed-memory" } },
+        "truncated": { "type": "boolean" },
+        "previewOf": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "feed-memory": {
+      "description": "One memory in a memories feed: its id and its star's graphId, scope, owner, project (with its star) or null, tags, kind, status, state (current, replaced, ended or retracted), when it was written and last changed, its due date, the first 300 characters of its words (truncated when cut) and, for a work item with memory.work on, its work properties; null otherwise.",
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "graphId", "scope", "owner", "project", "tags", "kind", "status", "state", "createdAt", "updatedAt", "due", "preview", "truncated", "work"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "graphId": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "scope": { "enum": ["private", "shared"] },
+        "owner": { "$ref": "#/$defs/subject" },
+        "project": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["id", "slug", "name", "graphId"],
+              "properties": {
+                "id": { "$ref": "#/$defs/uuid" },
+                "slug": { "type": "string", "minLength": 1, "maxLength": 64 },
+                "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+                "graphId": { "type": "string", "minLength": 1, "maxLength": 1000 }
+              }
+            }
+          ]
+        },
+        "tags": { "type": "array", "maxItems": 64, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+        "kind": { "oneOf": [{ "type": "null" }, { "enum": ["episodic", "semantic"] }] },
+        "status": { "enum": ["canonical", "draft", "deprecated"] },
+        "state": { "description": "What it is now: current, replaced (a newer memory of its scope replaced it), ended (its end has passed) or retracted (marked wrong).", "enum": ["current", "replaced", "ended", "retracted"] },
+        "createdAt": { "$ref": "#/$defs/instant" },
+        "updatedAt": { "$ref": "#/$defs/instant" },
+        "due": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["at", "local", "kind"],
+              "properties": {
+                "at": { "$ref": "#/$defs/instant" },
+                "local": { "type": "string", "minLength": 1, "maxLength": 40 },
+                "kind": { "enum": ["due", "event", "wake"] }
+              }
+            }
+          ]
+        },
+        "preview": { "type": "string", "maxLength": 300 },
+        "truncated": { "type": "boolean" },
+        "work": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["type", "state", "priority", "assignee", "claim", "blocked", "blockedBy"],
+              "properties": {
+                "type": { "enum": ["task", "bug", "feature", "improvement"] },
+                "state": { "enum": ["backlog", "ready", "active", "review", "done", "cancelled"] },
+                "priority": { "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 1, "maximum": 4 }] },
+                "assignee": {
+                  "oneOf": [
+                    { "type": "null" },
+                    {
+                      "type": "object", "additionalProperties": false,
+                      "required": ["kind", "name"],
+                      "properties": { "kind": { "enum": ["person", "agent"] }, "name": { "type": "string", "minLength": 1, "maxLength": 120 } }
+                    }
+                  ]
+                },
+                "claim": {
+                  "oneOf": [
+                    { "type": "null" },
+                    {
+                      "description": "Who holds it and until when; never the claim's id.", "type": "object", "additionalProperties": false,
+                      "required": ["label", "claimedAt", "expiresAt"],
+                      "properties": {
+                        "label": { "type": "string", "minLength": 1, "maxLength": 120 },
+                        "claimedAt": { "$ref": "#/$defs/instant" },
+                        "expiresAt": { "$ref": "#/$defs/instant" }
+                      }
+                    }
+                  ]
+                },
+                "blocked": { "type": "boolean" },
+                "blockedBy": {
+                  "type": "array", "maxItems": 20,
+                  "items": {
+                    "type": "object", "additionalProperties": false,
+                    "required": ["id", "graphId", "type", "state", "priority"],
+                    "properties": {
+                      "id": { "$ref": "#/$defs/uuid" },
+                      "graphId": { "type": "string", "minLength": 1, "maxLength": 1000 },
+                      "type": { "enum": ["task", "bug", "feature", "improvement"] },
+                      "state": { "enum": ["backlog", "ready", "active", "review", "done", "cancelled"] },
+                      "priority": { "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 1, "maximum": 4 }] }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
     },
     "corner": { "enum": ["main", "recovery", "training", "changed"] },
     "name": { "type": "string", "pattern": "^[a-z][A-Za-z0-9_]{0,39}$" },

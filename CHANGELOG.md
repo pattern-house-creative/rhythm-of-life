@@ -6,6 +6,17 @@ each entry says so under **Upgrading**.
 
 ## Unreleased
 
+- **Dashboards can read memories by filter** (with `memory.tools` on). A new feed kind, `memories`, gives a
+  dashboard the memories its reader reads that match the Memories view's own filters: words, status, kind,
+  project and tag, and with `memory.work` on work, type, state and priority. Within one filter any of
+  several values matches, every filter given must match, and each can be turned round ("any state except
+  done and cancelled"). Each memory comes with its project, tags, dates and a preview of its words, and a
+  work item with its state, type, priority, assignee, who holds its claim and until when, and what blocks
+  it, so an AI client can build a project board on it. A memory held for review, one in the trash and,
+  unless the filter asks for them, those marked wrong are never in it; a feed gives at most 1,000, newest
+  first, and says when there are more. The Memories view and the feed share one definition of the filters,
+  so they show the same memories. A dashboard with a memories feed needs no star of its own. **Upgrading:**
+  migration 083 applies at the next start.
 - **A project backlog for AI clients, kept as memories** (off by default). `memory.work: on`, beside
   `memory.tools`, gives them `create_work`, `list_work` and `update_work`. A work item is a memory in a
   project with a type (task, bug, feature or improvement), a state (backlog, ready, active, review, done or
@@ -24,6 +35,17 @@ each entry says so under **Upgrading**.
   for 2 hours, renewed while it works, only that session moves the item's state, and another session is
   told who holds it and until when; `release_work` lets it go, and a person can release any claim from
   the item in the Memories view. **Upgrading:** migrations 079, 080 and 081 apply at the next start.
+- **Fixed: Sources & settings said the Rhythm engine was not connected** on an install that kept an
+  older engine's star ids (`RHYTHM_CATALOG_PROVIDER`), while the engine answered every read. Its row
+  looked for the engine's own stars under `rhythm` alone; it now reads them under the catalog provider
+  id the install uses, and with none of them on the map it says the engine is connected once it has
+  answered the map.
+- **Fixed: `update` cleared a memory's volatility when it changed only the words.** Saving new text
+  through `update`, or editing the words in the Memories view, emptied the memory's volatility (durable,
+  state or volatile), though only what a change names should change; a memory left with none drops out
+  of the stale queue. New text now keeps it, as it keeps the kind, importance, project and tags. A memory
+  that already lost its volatility keeps none until it is set again. **Upgrading:** migration 082
+  applies at the next start.
 - **AI clients can keep capsule slots, where you let them** (off by default). `memory.capsuleWrites: on`,
   beside `memory.tools` and `memory.capsules`, gives them `set_capsule`: one memory into a capsule slot,
   or out of it, as a change with a version and an audit row naming the client. A client's capsule

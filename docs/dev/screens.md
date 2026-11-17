@@ -1024,6 +1024,59 @@ as before (`MemoryDashboardTests`).
 (the same parts, moved, resized or refocused; never added or removed), as it already sets corner cards, and only the
 app's own controls can do that, never a page.
 
+### 10.12 Memories feeds
+
+A dashboard can read native memories by filter rather than by star: a feed of kind `memories` (`DashboardFeed`,
+`MemoryMatch`, `DashboardFeeds`), only with `memory.tools` on, and its work filters and fields only with `memory.work`
+on as well. It is what a project board is built on.
+
+- **Filters.** `where` holds the filters of the app's Memories view, defined once in `MemoryMatch`, which both the
+  view's list (`MemoryStore.Filtered`, through `MemoryMatch.Of` for its one-value arguments) and the feed
+  (`MemoryStore.Matching`) turn into the same SQL, so the two give the same memories for the same filters
+  (`MemoryFeedTests`): `words` (text its words hold, case aside, 1-200 characters), `status` (canonical, draft or
+  deprecated), `kind` (episodic or semantic), `project` (a slug or an alias), `tag`, `work` (true: work items only;
+  false: no work items), `workType`, `state` and `priority` (1 to 4, or 0 for the unranked). Each filter but `work` is
+  one value, a list of 1-20 values (any of them) or `{"not": values}` (none of them); every filter given must match,
+  and there is no nesting, so two unrelated sets are two feeds. Any of `workType`, `state` and `priority` keeps work
+  items only, negated or not, and `work: false` beside any of them is refused. A held memory's words, tags and project
+  never select it, by a filter or by its negation. A member it doesn't know is refused.
+- **As stored** (`DashboardFeed.Normalized`): each filter a list or `{"not": [...]}`, and a feed that names no status
+  gets `{"not": ["deprecated"]}`, so it leaves out the memories marked wrong unless its status filter names them.
+  `limit` is 1-1000, default 200.
+- **What it serves.** The memories the dashboard's reader reads (the one read predicate on each memory's own row,
+  `Database.Visible`, as every memory read), so each reader of the same dashboard gets only their own; never one held
+  for review (not even without its words, as the list shows one) and never one in the trash, which has its own view.
+  Every project it names must be one the reader reads, or the feed is `unavailable`, naming them; `save_dashboard` and
+  Studio refuse a project the saver doesn't read, with the projects it does.
+- **Payload** (`memories-payload` in `app_dashboards.output.schema.json`, fixture `app_dashboards.memories.example.json`):
+  `{kind: "memories", status, asOf, where, limit, count, memories, truncated}`, no star: `count` is how many match in
+  all, `memories` the newest `limit` of them, newest first as the list orders them, and `truncated` that more match.
+  Each memory has `id`, `graphId` (its star, for `rhythm.openStar`), `scope`, `owner`, `project` (`{id, slug, name,
+  graphId}`, the project's star) or null, `tags`, `kind`, `status`, `state` (current, replaced, ended or retracted, as
+  the list says it: the list shows a replaced or ended memory, so the feed does too), `createdAt`, `updatedAt`, `due`
+  (`{at, local, kind}`) or null, `preview` (its first 300 characters, as the Memories list cuts them) and `truncated`,
+  and `work`: null for an ordinary memory and with `memory.work` off, else `{type, state, priority, assignee, claim,
+  blocked, blockedBy}`, where
+  `claim` is `{label, claimedAt, expiresAt}`, who holds it and until when, never the claim's id, and `blockedBy` the
+  unfinished items it waits on (080's `memory_work_waiting`), first by priority, at most 20, each `{id, graphId, type,
+  state, priority}` with no words. `blocked` is true when the item is open and waits on any. `dashboard_data`'s
+  preview keeps the newest 20, with `previewOf`; a feed past the dashboard's 3 MB is unavailable ("ask for fewer
+  memories (limit) or narrow the filters").
+- **Off.** With `memory.tools` off, `save_dashboard`, `dashboard_data` and Studio refuse a memories feed, and a saved
+  one is `unavailable` ("Memories are off in this install (memory.tools)."); with `memory.work` off, a work filter is
+  refused the same way, a saved one is unavailable, and every `work` is null. The tool descriptions name the feed only
+  with `memory.tools` on, its work filters and fields only with `memory.work` on, so with them off every description
+  is as before; the tools' input schema gains `where` on a feed in every install.
+- **The star rule.** A dashboard names 1-12 stars across its feeds and writes, unless one of its feeds is a memories
+  feed, when it may name none (`DashboardDraft.Unanchored`, in `save_dashboard` and Studio; migration 083 relaxes 013's
+  check on `dashboard_versions.stars` to the same rule, which a restore keeps since it copies feeds and stars
+  together). A memories feed reads by filter, so a board over every project has no star to name, and an anchor star
+  would be decoration that, with `memory.scopes` on, would narrow who sees the dashboard. A version that names no star
+  cites none: with scopes on it lands in Family unless its logs or its earlier version narrow it, and each reader's
+  feed still serves only what that reader reads. The app lists such a dashboard, shows it on a screen and as a card,
+  and joins it to the sky only when a screen is asked to open it (`withDashboards`), since the sky places a dashboard
+  beside a star it reads.
+
 ## 11. Studio
 
 [Studio](studio.md) adds persisted full-screen drafts and host-owned typed selections. `open_studio`, `dashboard_controls` and `dashboard_action` are internal commands sent by the new tools through the same screen queue and acknowledged by the active browser. They are not arbitrary new `control_screen` actions. Studio follows the tab already holding `rhythm-of-life.screen:<id>`, so background tabs do not compete to validate drafts. The app facade multiplexes `app_studio` through `POST /api/screens?studio=1`, preserving the existing origin, authentication and viewer boundary and the hosted function count. Existing screen actions and saved dashboards keep their behaviour.

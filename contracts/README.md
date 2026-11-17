@@ -297,7 +297,7 @@ yet.
 | health | `query_health_metrics` | R | core | one metric for one subject, max 365 days, 500 samples |
 | health | `compare_health_trends` | R | core | daily statistics for two metrics |
 | health | `get_sync_status` | R | core | connector jobs and freshness, including each plugin's last accepted ingest |
-| dashboards | `dashboard_data` | R | core | exactly what a dashboard page receives, for given `feeds` or a saved `dashboardId` |
+| dashboards | `dashboard_data` | R | core | exactly what a dashboard page receives, for given `feeds` or a saved `dashboardId`; a `memories` feed with `memory.tools` on |
 | dashboards | `save_dashboard` | W | core | a new dashboard or its next version (page, feeds, declared writes, layout), or the newest version arranged in place |
 | dashboards | `list_dashboards` | R | core | saved dashboards with their layouts; one with its page for revising |
 | dashboards | `delete_dashboard` | W, D | core | delete one dashboard for good; needs the exact current `title` |
@@ -1208,6 +1208,12 @@ The screen tools (`docs/dev/screens.md` 3.5 and 8):
   `matched` the count of every match; 404 when the version has no such part, 400 when it isn't a map with a focus.
   It only reads, so it may be tried again. The listed input schema names `layout` and `map` among the arguments, which
   is how the facade learns the engine has piece 3. Shapes: `mcp/app_dashboards.output.schema.json`.
+- Memories feeds (`docs/dev/screens.md` 10.12). A version's feed may be kind `memories`, with `where` (the Memories
+  view's filters, as stored: each a list of values or `{not: [...]}`, `work` a boolean) and `limit`, and no star; a
+  version whose feeds include one may name no star (`stars` empty). Its payload in the feed read names no star and is
+  `{kind: "memories", status, asOf, where, limit, count, memories, truncated}`, or with status `unavailable` a
+  `reason` instead of the last three; each memory is a fixed shape (`feed-memory`), its `preview` stored words the page
+  shows as text. Fixtures `app_dashboards.memories.example.json` and `app_dashboards.memories.version.example.json`.
 - `app_screens` is the screens' side of live screens, pinned by `docs/dev/screens.md` (3.4) and
   `mcp/app_screens.output.schema.json`. `screen` is always the calling screen's own id (16-64 characters of
   `A-Za-z0-9_-`), because every screen shares the app principal. `listen` records the screen as open, expires its

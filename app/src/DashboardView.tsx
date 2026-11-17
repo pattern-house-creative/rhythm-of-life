@@ -541,7 +541,9 @@ export default function DashboardView({
               {name} (
               {f.kind === "log"
                 ? `the ${String(f.log)} log`
-                : (f.star?.title ?? "a star")}
+                : f.kind === "memories"
+                  ? "its memories"
+                  : (f.star?.title ?? "a star")}
               ) unavailable: {f.reason ?? "no reason given"}
             </p>
           ))}

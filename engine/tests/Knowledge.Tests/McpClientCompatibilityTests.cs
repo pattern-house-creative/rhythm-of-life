@@ -175,7 +175,8 @@ public sealed class McpClientCompatibilityTests
             // tools/list: today's tools, each listed byte for byte as before; on, the memory tools besides.
             var tools = await client.ListToolsAsync();
             Assert.Equal((on ? Today.Concat(MemoryTools.Names) : Today).Order(), tools.Select(t => t.Name).Order());
-            // On, the map's reads add what a replaced fact's star is to their descriptions, and nothing else.
+            // On, the map's reads add what a replaced fact's star is to their descriptions, and the dashboard tools what a
+            // memories feed is, and nothing else.
             foreach (var tool in tools.Where(t => Today.Contains(t.Name)))
                 if (on && MapAware.Contains(tool.Name))
                 {
@@ -233,8 +234,9 @@ public sealed class McpClientCompatibilityTests
     // instead of comparing.
     const string ListingFile = "harness_tools.listing.json";
     static readonly string[] MemoryAware = ["recall", "get_prompt_capsule"];
-    // The map's reads, which with the memory tools on say what a replaced fact's star is (SB-P4-11), and only then.
-    static readonly string[] MapAware = ["get_relationship_graph", "explore_graph", "graph_changes"];
+    // The map's reads, which with the memory tools on say what a replaced fact's star is (SB-P4-11), and the dashboard tools,
+    // which say what a memories feed is (docs/dev/screens.md 10.12), and only then.
+    static readonly string[] MapAware = ["get_relationship_graph", "explore_graph", "graph_changes", "save_dashboard", "dashboard_data"];
     static RhythmConfig Listed(string listing, string memory) => listing == "defaults" ? Settings(memory)
         : RhythmConfig.Parse(TestSettings.Yaml.Replace("engine: { legacySearch: false }", "engine: { legacySearch: false, recall: on }")
             + "\nmemory: { capsules: on" + (memory == "" ? "" : ", " + memory) + " }\n");

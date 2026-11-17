@@ -188,7 +188,9 @@ public sealed record MemoryRecord(Guid Id, string Subject, string Scope, string?
 public sealed record MemoryCursor(DateTimeOffset CreatedAt, Guid Id);
 
 // A list's filters, every one narrowing what the caller reads already (memory.md section 2: a filter that names a scope
-// never widens). Tags: memories holding all of them. Project: a slug or alias the caller reads, else unknown_project.
+// never widens). Tags: memories holding all of them (a list names one; a tag vocabulary's check more). Project: a slug or
+// alias the caller reads, else unknown_project. Words, status, kind, project, a tag and the three work filters are matched
+// as MemoryMatch.Of reads them, the one definition a dashboard's memories feed reads too (MemoryMatch.cs).
 // Since and Before bound when it was written. Newest first, Limit at most 50; After continues from a page's Next. Query (the app's
 // Memories list, SB-P6-01): memories whose words hold it, whatever the case; the store trims it and takes 1 to MemoryStore.QueryMax
 // characters, and app_memories' door, its one caller, takes at most QueryMax as sent and something besides spaces. A held memory's
@@ -357,10 +359,13 @@ public sealed partial class MemoryStore(NpgsqlDataSource source, RecallLog? foll
         return new(items.Take(filter.Limit).ToList(), next);
     }
 
-    // The predicates a list, a count and a tag vocabulary share (SB-P3-17), over From: the read predicate on the memory's
-    // own resources row, then each filter, every one narrowing. So a count is the length of the list it summarises, and
-    // a tag's count the length of the list that filters by it too. Limit and PreviewChars are a list's own.
-    async Task<(List<string> Where, List<(string, object?)> Args)> Filtered(NpgsqlConnection c, Guid principal, MemoryFilter filter, CancellationToken ct)
+    // The predicates a list, a count, a tag vocabulary and a dashboard's memories feed share (SB-P3-17), over From: the read
+    // predicate on the memory's own resources row, then each filter, every one narrowing. So a count is the length of the
+    // list it summarises, and a tag's count the length of the list that filters by it too. Words, status, kind, project, tags
+    // and work are `match` (MemoryMatch.Clauses), else the list's own filters as MemoryMatch.Of reads them; scope, author,
+    // source, when and the cursor are a list's alone, and Limit and PreviewChars a list's own.
+    async Task<(List<string> Where, List<(string, object?)> Args)> Filtered(NpgsqlConnection c, Guid principal, MemoryFilter filter, CancellationToken ct,
+        MemoryMatch? match = null)
     {
         var where = new List<string> { Database.Visible("r") };
         var args = new List<(string, object?)> { ("principal", principal) };
@@ -372,33 +377,24 @@ public sealed partial class MemoryStore(NpgsqlDataSource source, RecallLog? foll
             catch (ArgumentException e) { throw new MemoryRefused("invalid", e.Message); }
             if (scope is not null) Add("m.scope=@scope", "scope", scope);
         }
-        // A held memory is listed without its tags and project (Select), so they never select it either: a filter that
-        // matched one would tell the caller what it holds (D-149).
-        if (filter.Tags is { Count: > 0 } tags) Add("(m.hold IS NULL AND m.tags @> @tags)", "tags", tags.Select(t => t.Trim().ToLowerInvariant()).ToArray());
-        // Words a memory holds (SB-P6-01): a plain match of the trimmed query anywhere in its text, case aside, with no wildcards, so what
-        // a person types is what is looked for. A held memory is listed without its words, so they never select it either (D-149).
-        if (filter.Query is { } query)
+        // Words a memory holds (SB-P6-01): a plain match of the trimmed query anywhere in its text, case aside, with no
+        // wildcards, so what a person types is what is looked for. A held memory is listed without its words, tags and
+        // project (Select), so they never select it either: a filter that matched one would tell the caller what it holds
+        // (D-149). Work items (079) by the properties they have now: exact, as list_work's filters are.
+        var listed = match is null;
+        match ??= MemoryMatch.Of(filter);
+        // A list naming more than one tag holds memories with all of them, its own filter beside the match's.
+        if (listed && filter.Tags is { Count: > 1 } tags)
+            Add("(m.hold IS NULL AND m.tags @> @tags)", "tags", tags.Select(t => t.Trim().ToLowerInvariant()).ToArray());
+        // A project counts only in a scope the caller reads, through the same predicate as the memories in it, and never
+        // while it is held (SB-P3-21). One it does not know is answered with up to 10 it does (CTX-07).
+        if (await UnknownProjects(c, principal, match.Projects, ct) is { Count: > 0 })
         {
-            var words = query.Trim();
-            if (words.Length is 0 or > QueryMax) throw new MemoryRefused("invalid", $"A search is 1 to {QueryMax} characters");
-            Add("(m.hold IS NULL AND strpos(lower(m.content),lower(@query))>0)", "query", words);
+            var names = await KnownProjects(c, principal, 10, ct);
+            throw new MemoryRefused("unknown_project", names.Count == 0 ? "No project by that name"
+                : $"No project by that name; known projects: {string.Join(", ", names)}", known: names);
         }
-        // Work items only (079), by the properties they have now: exact, as list_work's filters are.
-        if (filter.Work is not null || filter.WorkType is not null || filter.WorkPriority is not null)
-        {
-            var state = MemoryWork.Listed(filter.Work);
-            var type = filter.WorkType is null ? null : MemoryWork.Type(filter.WorkType);
-            if (filter.WorkPriority is { } rank && rank != 0) MemoryWork.Priority(rank);
-            Add("""
-                EXISTS(SELECT 1 FROM memory_work w WHERE w.memory_id=m.id
-                  AND (@workState::text IS NULL OR w.state=@workState OR @workState='open' AND w.state NOT IN ('done','cancelled'))
-                  AND (@workType::text IS NULL OR w.work_type=@workType) AND (@workPriority::int IS NULL OR coalesce(w.priority,0)=@workPriority))
-                """, "workState", state);
-            args.Add(("workType", type));
-            args.Add(("workPriority", filter.WorkPriority));
-        }
-        if (filter.Kind is not null) Add("m.kind=@kind", "kind", filter.Kind);
-        if (filter.Status is not null) Add("m.status=@status", "status", filter.Status);
+        match.Clauses(where, args);
         if (filter.Author is not null) Add("m.author_id=@author", "author", filter.Author);
         if (filter.Source is not null) Add("m.source=@source", "source", filter.Source);
         if (filter.Since is { } since) Add("m.created_at>=@since", "since", since.ToUniversalTime());
@@ -407,26 +403,6 @@ public sealed partial class MemoryStore(NpgsqlDataSource source, RecallLog? foll
         {
             Add("(m.created_at,m.id)<(@afterAt,@afterId)", "afterAt", after.CreatedAt.ToUniversalTime());
             args.Add(("afterId", after.Id));
-        }
-        if (MemoryInput.Project(filter.Project) is { } project)
-        {
-            // A project counts only in a scope the caller reads, through the same predicate as the memories in it, and
-            // never while it is held (SB-P3-21). One it does not know is answered with up to 10 it does (CTX-07).
-            await using (var known = Database.Command(c, null, $"""
-                SELECT EXISTS(SELECT 1 FROM memory_projects p WHERE {ProjectNamed} AND {ProjectListed()})
-                """, ("principal", principal), ("name", project)))
-                if (await known.ExecuteScalarAsync(ct) is not true)
-                {
-                    var names = await KnownProjects(c, principal, 10, ct);
-                    throw new MemoryRefused("unknown_project", names.Count == 0 ? "No project by that name"
-                        : $"No project by that name; known projects: {string.Join(", ", names)}", known: names);
-                }
-            // Its members: the memories in it, and those of its scope tagged with one of its aliases, which a project claims
-            // without rewriting them (upstream's membership by tag, SB-P3-07).
-            Add($"""
-                (m.hold IS NULL AND EXISTS(SELECT 1 FROM memory_projects p WHERE {ProjectNamed} AND NOT p.held AND (p.id=m.project_id
-                  OR p.subject_id=m.subject_id AND m.tags && ARRAY(SELECT a.alias FROM memory_project_aliases a WHERE a.project_id=p.id))))
-                """, "name", project);
         }
         return (where, args);
     }
@@ -447,8 +423,8 @@ public sealed partial class MemoryStore(NpgsqlDataSource source, RecallLog? foll
     // its words (D-039): no text, and no tags or project either, since a caller's tags and the hashtags lifted from the
     // held text can carry the same words, nor its capsule slot. Get serves it whole, with its hold and slot.
     // Its retracted sources (049's flags) the oldest first, at most RetractedSourcesMax, which every answer's contract
-    // allows (app_memories' and the memory tools').
-    static string Select(string? chars) => $"""
+    // allows (app_memories' and the memory tools'). `extra`: columns a caller reads after Record's, from its own joins.
+    static string Select(string? chars, string extra = "") => $"""
         SELECT m.id,m.subject_id,m.scope,m.author_id,m.source,m.kind,m.importance,m.volatility,m.status,
           {(chars is null ? "m.tags" : "CASE WHEN m.hold IS NULL THEN m.tags ELSE '{}'::text[] END")},
           {(chars is null ? "m.content,false" : $"CASE WHEN m.hold IS NULL THEN left(m.content,{chars}) END,m.hold IS NULL AND length(m.content)>{chars}")},
@@ -465,7 +441,7 @@ public sealed partial class MemoryStore(NpgsqlDataSource source, RecallLog? foll
           {CandidatesColumn},
           (SELECT (memory_work_json(k.work_type,k.state,k.priority)||jsonb_strip_nulls(jsonb_build_object(
             'assignee',memory_work_assignee_json(k.assignee_person,k.assignee_label),'claim',memory_work_claim_json(memory_work_claim(k.memory_id)))))::text
-            FROM memory_work k WHERE k.memory_id=m.id)
+            FROM memory_work k WHERE k.memory_id=m.id){extra}
         {From}
         """;
 

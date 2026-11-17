@@ -82,10 +82,13 @@ public sealed class StudioStore(NpgsqlDataSource source, DashboardStore dashboar
             if (await layout!.ReferenceProblem(null, null, async stars => (await feeds.Stars(principal, stars, ct)).Keys.ToHashSet(), async d => await dashboards.Exists(principal, d, ct)) is { } bad)
                 throw new ArgumentException(bad);
         }
-        var named = draft.Feeds.Where(f => f.Kind != "log").Select(f => f.Star)
+        // As save_dashboard: a memories feed names no star, and a draft that has one needs none (DashboardDraft.Unanchored).
+        if (feeds.Unserved(draft.Feeds) is { } off) throw new ArgumentException(off);
+        var named = draft.Feeds.Where(f => f.Kind is not ("log" or "memories")).Select(f => f.Star)
             .Concat((draft.Writes ?? []).Where(w => w.Kind != "log").Select(w => w.Star!))
             .Concat((layout?.Parts ?? []).Select(p => p.Focus?.Near?.Star).OfType<string>()).Distinct().ToArray();
-        if (named.Length is < 1 or > 12) throw new ArgumentException("A draft names 1-12 readable stars");
+        if (named.Length > 12 || DashboardDraft.Unanchored(draft.Feeds, named) is not null) throw new ArgumentException("A draft names 1-12 readable stars");
+        if (await feeds.UnknownProjects(principal, draft.Feeds, ct) is { } unknown) throw new ArgumentException(unknown);
         var known = await feeds.Stars(principal, named, ct);
         if (named.Any(n => !known.ContainsKey(n))) throw new ArgumentException("A draft names a star you cannot read");
         var subject = await scopes.LogSubject(principal, ct);

@@ -29,12 +29,16 @@ public sealed class MemoryWorkToolTests
         Assert.True(MemorySettings.WorkOn(All));
         Assert.Equal(Made(Before).Concat(MemoryTools.WorkTools).Order(), Made(All).Order());
         Assert.Throws<ConfigException>(() => MemorySettings.From(MemoryToolSettings.With("work: yes")));
-        // It changes five descriptions and no other: history names its events, get its answer's member, remember says
-        // which tool project work goes to, the map's read what a star's work says, and link its depends_on (080).
+        // It changes seven descriptions and no other: history names its events, get its answer's member, remember says
+        // which tool project work goes to, the map's read what a star's work says, link its depends_on (080), and the
+        // dashboard tools a memories feed's work filters and fields (docs/dev/screens.md 10.12).
         var all = HarnessTools.Create(All, []).ToDictionary(t => t.ProtocolTool.Name, t => t.ProtocolTool);
         foreach (var tool in HarnessTools.Create(Before, []).Select(t => t.ProtocolTool))
-            if (tool.Name is "history" or "get" or "remember" or "get_relationship_graph" or "link") Assert.StartsWith(tool.Description!, all[tool.Name].Description);
+            if (tool.Name is "history" or "get" or "remember" or "get_relationship_graph" or "link" or "save_dashboard" or "dashboard_data")
+                Assert.StartsWith(tool.Description!, all[tool.Name].Description);
             else Assert.Equal(tool.Description, all[tool.Name].Description);
+        Assert.Contains("workType", all["save_dashboard"].Description);
+        Assert.DoesNotContain("workType", ToolText.Describe("save_dashboard", Before));
         Assert.All(MemoryToolSettings.WorkEvents, e => Assert.Contains(e, all["history"].Description));
         Assert.All(MemoryToolSettings.WorkEvents, e => Assert.DoesNotContain(e, ToolText.Describe("history", Before)));
         Assert.Contains("work_type, state and priority", all["get"].Description);

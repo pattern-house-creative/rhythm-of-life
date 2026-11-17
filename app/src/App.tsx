@@ -15,7 +15,7 @@ import { ChevronRight, Settings2, RefreshCw, WifiOff } from "lucide-react";
 import { isDemo, previewHealth, stamp, statusLabel } from "./health";
 import { createApiSession } from "./apiClient";
 import { reloadFromNetwork } from "./appUpdates";
-import { instance } from "./instance";
+import { catalogProvider, instance } from "./instance";
 import { launcherTarget } from "./launcherNavigation";
 import { useHealthRefresh } from "./useHealthRefresh";
 import { useKnowledge } from "./useKnowledge";
@@ -829,13 +829,30 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
     );
   };
   const demo = isDemo(data);
+  // A source is connected once its records are on the map. The Rhythm engine's row ("rhythm") is
+  // the engine's own stars, under its catalog provider id: "rhythm", or the older engine's id an
+  // install kept (RHYTHM_CATALOG_PROVIDER). With none of them on the map, a map the engine
+  // answered still says it is connected, retrieved when it answered, and stale, as the map's
+  // stars are, while a later read fails.
   const sources = data.sources.map((source) => {
     if (demo || source.id === glucoseSlot || source.id === "garmin")
       return source;
+    const engine = source.id === "rhythm";
+    const provider = engine ? catalogProvider() : source.id;
     const records = knowledge.page.nodes.filter(
-      (node) => node.provenance.sourceId === source.id,
+      (node) => node.provenance.sourceId === provider,
     );
-    if (!records.length) return source;
+    if (!records.length)
+      return engine && knowledge.lastRefresh
+        ? {
+            ...source,
+            connected: true,
+            status: knowledge.error
+              ? ("stale" as const)
+              : ("available" as const),
+            retrievedAt: knowledge.lastRefresh,
+          }
+        : source;
     return {
       ...source,
       connected: true,

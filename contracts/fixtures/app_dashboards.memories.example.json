@@ -1,0 +1,69 @@
+{
+  "asOf": "2026-11-17T09:30:00.000Z",
+  "feeds": {
+    "open": {
+      "kind": "memories",
+      "status": "ok",
+      "asOf": "2026-11-17T09:30:00.000Z",
+      "where": { "status": { "not": ["deprecated"] }, "project": ["demo-shed"], "work": true, "state": { "not": ["done", "cancelled"] } },
+      "limit": 500,
+      "count": 2,
+      "memories": [
+        {
+          "id": "6d3c2a10-0000-4000-8000-0000000e0002",
+          "graphId": "memory:memory:6d3c2a10-0000-4000-8000-0000000e0002",
+          "scope": "shared",
+          "owner": "household",
+          "project": { "id": "6d3c2a10-0000-4000-8000-0000000e0100", "slug": "demo-shed", "name": "DEMO Shed", "graphId": "memory:project:6d3c2a10-0000-4000-8000-0000000e0100" },
+          "tags": ["shed"],
+          "kind": null,
+          "status": "draft",
+          "state": "current",
+          "createdAt": "2026-11-16T18:00:00.000Z",
+          "updatedAt": "2026-11-17T08:45:00.000Z",
+          "due": { "at": "2026-11-29T00:00:00.000Z", "local": "2026-11-29 00:00", "kind": "due" },
+          "preview": "DEMO: paint the shed door once the new hinges are on.",
+          "truncated": false,
+          "work": {
+            "type": "task",
+            "state": "active",
+            "priority": 2,
+            "assignee": { "kind": "agent", "name": "Shed jobs - claude-code" },
+            "claim": { "label": "Shed jobs - claude-code", "claimedAt": "2026-11-17T08:45:00.000Z", "expiresAt": "2026-11-17T10:45:00.000Z" },
+            "blocked": true,
+            "blockedBy": [
+              { "id": "6d3c2a10-0000-4000-8000-0000000e0001", "graphId": "memory:memory:6d3c2a10-0000-4000-8000-0000000e0001", "type": "task", "state": "ready", "priority": 1 }
+            ]
+          }
+        },
+        {
+          "id": "6d3c2a10-0000-4000-8000-0000000e0001",
+          "graphId": "memory:memory:6d3c2a10-0000-4000-8000-0000000e0001",
+          "scope": "shared",
+          "owner": "household",
+          "project": { "id": "6d3c2a10-0000-4000-8000-0000000e0100", "slug": "demo-shed", "name": "DEMO Shed", "graphId": "memory:project:6d3c2a10-0000-4000-8000-0000000e0100" },
+          "tags": [],
+          "kind": null,
+          "status": "draft",
+          "state": "current",
+          "createdAt": "2026-11-16T17:30:00.000Z",
+          "updatedAt": "2026-11-16T17:30:00.000Z",
+          "due": null,
+          "preview": "DEMO: fit the new hinges on the shed door.",
+          "truncated": false,
+          "work": { "type": "task", "state": "ready", "priority": 1, "assignee": null, "claim": null, "blocked": false, "blockedBy": [] }
+        }
+      ],
+      "truncated": false
+    },
+    "notes": {
+      "kind": "memories",
+      "status": "unavailable",
+      "asOf": "2026-11-17T09:30:00.000Z",
+      "where": { "status": { "not": ["deprecated"] }, "project": ["demo-attic"], "work": false },
+      "limit": 200,
+      "reason": "This feed names a project you don't read: demo-attic."
+    }
+  },
+  "dashboard": { "id": "6d3c2a10-0000-4000-8000-0000000d0003", "version": 1, "layout": null, "layoutRevision": 0, "layoutNote": null, "layoutSavedAt": null }
+}

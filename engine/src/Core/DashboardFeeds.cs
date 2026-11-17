@@ -12,11 +12,16 @@ namespace Knowledge.Relationships;
 // adapter reads from its source in that source's own structure), or the stars linked to one. A star the reader can't
 // see, a log of a subject the reader doesn't read, or a source that fails, gives that feed status "unavailable" with a
 // reason and leaves the others as they are. Rows are read through the one read predicate (Database.Visible,
-// docs/dev/memory.md section 7.3), as the reader.
-public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRegistry adapters)
+// docs/dev/memory.md section 7.3), as the reader. A memories feed names no star: it reads the native memories its reader
+// reads that match its filters, through the Memories view's own predicates (MemoryStore.Matching), only with memory.tools
+// on, and its work filters and fields only with memory.work on (`settings`, the install's, else the loaded ones).
+public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRegistry adapters, RhythmConfig? settings = null)
 {
     public const int MaxBytes = 3_000_000, MaxRows = 10_000, MaxDayRows = 20_000, MaxText = 200_000;
-    public const int PreviewRows = 200, PreviewText = 4_000, PreviewSheetRows = 30;
+    public const int PreviewRows = 200, PreviewText = 4_000, PreviewSheetRows = 30, PreviewMemories = 20;
+    RhythmConfig Settings => settings ?? RhythmConfig.Current;
+    // A memory's preview in a memories feed: the length the app's Memories list cuts it to.
+    public const int MemoryPreview = Mcp.AppMemories.ListPreview;
     static readonly string Own = $"{Database.Visible()} AND r.relationship_snapshot IS NULL";
     // Each data star's metrics and units, listed once per revision of the star for each reader: listing them reads the
     // provider's whole history, and a rebuild gives the star a new revision whenever they change. A metric first ingested
@@ -34,16 +39,23 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
     // `{asOf, feeds: {name: payload}}`. A preview keeps each payload's exact shape with fewer rows and less text.
     public async Task<JsonObject> Read(Guid principal, IReadOnlyList<DashboardFeed> feeds, bool preview, CancellationToken ct)
     {
-        var (view, config) = await host.Readable(principal, ct);
-        var records = Shown(view);
+        // The map is read only for feeds that name a star: a log and a memories feed read none.
+        RelationshipHostConfiguration? config = null;
+        var records = new Dictionary<string, DiscoveryRecord>(StringComparer.Ordinal);
+        if (feeds.Any(f => f.Kind is not ("log" or "memories")))
+        {
+            (var view, config) = await host.Readable(principal, ct);
+            records = Shown(view);
+        }
         var result = new JsonObject(); var used = 0;
         // Every feed is read at once; the size budget then applies in the dashboard's own order.
         var read = await Task.WhenAll(feeds.Select(f => f.Normalized()).Select(async feed =>
         {
-            var record = feed.Kind == "log" ? null : records.GetValueOrDefault(feed.Star);
+            var record = feed.Kind is "log" or "memories" ? null : records.GetValueOrDefault(feed.Star);
             var payload = feed.Kind == "log" ? await LogFeed(principal, feed, ct)
+                : feed.Kind == "memories" ? await MemoriesFeed(principal, feed, ct)
                 : record is null ? Unavailable(feed, null, "This star isn't on the map now.")
-                : await One(principal, feed, record, config, ct);
+                : await One(principal, feed, record, config!, ct);
             return (feed, record, payload: preview ? Preview(payload) : payload);
         }));
         foreach (var (feed, record, read1) in read)
@@ -52,7 +64,8 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
             var size = Encoding.UTF8.GetByteCount(payload.ToJsonString());
             if (used + size > MaxBytes)
             {
-                payload = Unavailable(feed, record, "Too much data for one dashboard: ask for by day, fewer days or fewer metrics.");
+                payload = feed.Kind == "memories" ? Memories(feed, "unavailable", "Too much data for one dashboard: ask for fewer memories (limit) or narrow the filters.")
+                    : Unavailable(feed, record, "Too much data for one dashboard: ask for by day, fewer days or fewer metrics.");
                 size = Encoding.UTF8.GetByteCount(payload.ToJsonString());
             }
             used += size;
@@ -239,6 +252,100 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
         }
     }
 
+    // The native memories its reader reads that match a memories feed's filters (MemoryMatch, as the app's Memories view
+    // lists them), newest first, never one held for review or in the trash, nor, unless its status filter names them, one
+    // marked wrong: count (how many match in all), memories (at most limit) and truncated (more match than it gives).
+    async Task<JsonObject> MemoriesFeed(Guid principal, DashboardFeed feed, CancellationToken ct)
+    {
+        if (!MemorySettings.ToolsOn(Settings)) return Memories(feed, "unavailable", "Memories are off in this install (memory.tools).");
+        var match = feed.Matched();
+        var work = MemorySettings.WorkOn(Settings);
+        if (match.Worked && !work) return Memories(feed, "unavailable", "Work items are off in this install (memory.work).");
+        try
+        {
+            var found = await new MemoryStore(db.Source).Matching(principal, match, feed.Limit!.Value, MemoryPreview, ct);
+            if (found.UnknownProjects.Count > 0)
+                return Memories(feed, "unavailable", Reason($"This feed names a project you don't read: {string.Join(", ", found.UnknownProjects)}."));
+            var payload = Memories(feed, "ok", null);
+            payload["count"] = found.Count;
+            payload["memories"] = new JsonArray([.. found.Items.Select(m => (JsonNode)Memory(m, work))]);
+            payload["truncated"] = found.Count > found.Items.Count;
+            return payload;
+        }
+        catch (MemoryRefused e) { return Memories(feed, "unavailable", Reason(e.Message)); }
+        catch (Exception e) when (e is not OperationCanceledException || !ct.IsCancellationRequested)
+        { return Memories(feed, "unavailable", "These memories can't be read right now."); }
+    }
+    // A memories feed's payload before its memories: its filters as it reads them and its limit.
+    static JsonObject Memories(DashboardFeed feed, string status, string? reason)
+    {
+        var payload = new JsonObject { ["kind"] = "memories", ["status"] = status, ["asOf"] = Instant(DateTimeOffset.UtcNow),
+            ["where"] = feed.Matched().ToJson(), ["limit"] = feed.Limit };
+        if (reason is not null) payload["reason"] = reason;
+        return payload;
+    }
+    static string Reason(string text) => text.Length <= 300 ? text : text[..299] + "…";
+
+    // One memory as a memories feed gives it: its id and its star's, scope and owner, project (with its star), tags, kind,
+    // status, what it is now (current, replaced, ended or retracted: MemoryRecord.State, as the Memories list says it), when
+    // it was written and last changed, its due date, a preview of its words as the Memories list cuts it, and
+    // for a work item (with memory.work on) its type, state, priority, assignee, claim (who holds it and until when; never
+    // the claim's id), whether it is blocked and what it waits on. Never a hold: a feed gives no held memory.
+    static JsonObject Memory(MemoryMatched found, bool work)
+    {
+        var m = found.Memory;
+        return new JsonObject
+        {
+            ["id"] = m.Id.ToString(), ["graphId"] = MemoryStars.Key(m.Subject, m.Id).GraphId, ["scope"] = m.Scope, ["owner"] = m.Subject,
+            ["project"] = m.Project is { } p ? new JsonObject { ["id"] = p.Id.ToString(), ["slug"] = p.Slug, ["name"] = p.Name,
+                ["graphId"] = MemoryStars.ProjectKey(m.Subject, p.Id).GraphId } : null,
+            ["tags"] = new JsonArray([.. m.Tags.Select(t => (JsonNode)t)]), ["kind"] = m.Kind, ["status"] = m.Status, ["state"] = m.State,
+            ["createdAt"] = Instant(m.CreatedAt), ["updatedAt"] = Instant(m.UpdatedAt),
+            ["due"] = m.Due is { } d ? new JsonObject { ["at"] = Instant(d.At), ["local"] = d.Local, ["kind"] = d.Kind } : null,
+            ["preview"] = m.Content, ["truncated"] = m.Truncated,
+            ["work"] = work && m.Work is { } w ? new JsonObject
+            {
+                ["type"] = w.Type, ["state"] = w.State, ["priority"] = w.Priority,
+                ["assignee"] = w.Assignee is { } a ? new JsonObject { ["kind"] = a.Kind, ["name"] = a.Name } : null,
+                ["claim"] = w.Claim is { } c ? new JsonObject { ["label"] = c.Label, ["claimedAt"] = Instant(c.ClaimedAt), ["expiresAt"] = Instant(c.ExpiresAt) } : null,
+                ["blocked"] = found.Blocked,
+                ["blockedBy"] = new JsonArray([.. found.BlockedBy.Select(b => (JsonNode)new JsonObject { ["id"] = b.Id.ToString(),
+                    ["graphId"] = MemoryStars.Key(m.Subject, b.Id).GraphId, ["type"] = b.Type, ["state"] = b.State, ["priority"] = b.Priority })]),
+            } : null,
+        };
+    }
+
+    // Why feeds a harness gives can't be served in this install, or null: a memories feed with memory.tools off, or one
+    // with a work filter with memory.work off. save_dashboard, dashboard_data and Studio refuse them; a saved feed read
+    // after the setting changed is unavailable instead.
+    public string? Unserved(IReadOnlyList<DashboardFeed> feeds)
+    {
+        for (var i = 0; i < feeds.Count; i++)
+        {
+            if (feeds[i].Kind != "memories") continue;
+            if (!MemorySettings.ToolsOn(Settings)) return $"feeds[{i}]: a memories feed reads native memories, which are off in this install (memory.tools)";
+            if (feeds[i].Matched().Worked && !MemorySettings.WorkOn(Settings)) return $"feeds[{i}].where: work items are off in this install (memory.work)";
+        }
+        return null;
+    }
+
+    // The first memories feed naming a project `principal` doesn't read, in words a save refuses it with, or null.
+    public async Task<string?> UnknownProjects(Guid principal, IReadOnlyList<DashboardFeed> feeds, CancellationToken ct)
+    {
+        var store = new MemoryStore(db.Source);
+        for (var i = 0; i < feeds.Count; i++)
+        {
+            if (feeds[i].Kind != "memories" || feeds[i].Matched().Projects is not { Count: > 0 } named) continue;
+            if (await store.UnknownProjects(principal, named, ct) is { Count: > 0 } unknown)
+            {
+                var known = await store.KnownProjects(principal, 10, ct);
+                return $"feeds[{i}].where.project names no project you read: {string.Join(", ", unknown)}"
+                    + (known.Count > 0 ? $"; known projects: {string.Join(", ", known)}" : "");
+            }
+        }
+        return null;
+    }
+
     // A memory's current text (read from its source now) or a saved record's text, through the graph's content read.
     async Task<JsonObject> Text(Guid principal, DashboardFeed feed, DiscoveryRecord record, CancellationToken ct)
     {
@@ -295,6 +402,12 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
                 var used = kept.Select(r => (string?)r!["record"]).ToHashSet(StringComparer.Ordinal);
                 foreach (var id in records.Select(r => r.Key).Where(id => !used.Contains(id)).ToArray()) records.Remove(id);
             }
+        }
+        // A memories feed's newest memories, the first it gives.
+        if (payload["memories"] is JsonArray memories && memories.Count > PreviewMemories)
+        {
+            payload["previewOf"] = memories.Count;
+            payload["memories"] = new JsonArray([.. memories.Take(PreviewMemories).Select(m => m!.DeepClone())]);
         }
         if (payload["text"] is JsonValue value && value.GetValue<string>() is { Length: > PreviewText } text)
         { payload["previewOf"] = text.Length; payload["text"] = text[..PreviewText]; }

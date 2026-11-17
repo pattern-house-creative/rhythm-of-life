@@ -126,6 +126,8 @@ public sealed partial class HarnessTools(Retrieval reader, IHttpContextAccessor 
             try { feeds = (await services.GetRequiredService<DashboardStore>().Feeds(principal, id, version, cancellationToken))?.Feeds.ToArray() ?? throw new McpException("dashboardId or version names no saved dashboard"); }
             catch (Npgsql.PostgresException e) when (e.SqlState == "42501") { throw new McpException("Dashboards are not available to this login"); }
         if (DashboardDraft.FeedsProblem(feeds) is { } problem) throw new McpException(problem);
+        // Feeds given here are refused when this install can't serve them; a saved dashboard's say so in their payload.
+        if (dashboardId is null && services.GetRequiredService<DashboardFeeds>().Unserved(feeds!) is { } off) throw new McpException(off);
         try { return (await services.GetRequiredService<DashboardFeeds>().Read(principal, feeds!, !full, cancellationToken)).ToJsonString(); }
         catch (Exception e) when (e is not OperationCanceledException and not McpException) { throw Unavailable(services, "dashboard_data", e); }
     }
@@ -155,15 +157,21 @@ public sealed partial class HarnessTools(Retrieval reader, IHttpContextAccessor 
         {
             draft = new(title?.Trim() ?? "", description?.Trim() ?? "", html ?? "", feeds ?? [], note.Trim(), writes);
             if (draft.Problem() is { } problem) throw new McpException(problem);
-            // The stars it reads and the sources it writes; a log has no star of its own until it has numbers.
-            var named = draft.Feeds.Where(f => f.Kind != "log").Select(f => f.Star).Concat((draft.Writes ?? []).Where(w => w.Kind != "log").Select(w => w.Star!)).Distinct().ToArray();
-            if (named.Length == 0) throw new McpException("At least one feed or write names a star; add a feed for a star the dashboard is about");
+            var dashboardFeeds = services.GetRequiredService<DashboardFeeds>();
+            if (dashboardFeeds.Unserved(draft.Feeds) is { } off) throw new McpException(off);
+            // The stars it reads and the sources it writes; a log has no star of its own until it has numbers, and a
+            // memories feed reads by filter, never a star. A dashboard names a star unless a feed reads memories
+            // (DashboardDraft.Unanchored), which reads them for every reader as that reader reads them.
+            var named = draft.Feeds.Where(f => f.Kind is not ("log" or "memories")).Select(f => f.Star)
+                .Concat((draft.Writes ?? []).Where(w => w.Kind != "log").Select(w => w.Star!)).Distinct().ToArray();
+            if (DashboardDraft.Unanchored(draft.Feeds, named) is { } unanchored) throw new McpException(unanchored);
             if (named.Length > 12) throw new McpException("A dashboard names at most 12 stars across its feeds and writes");
-            IReadOnlyDictionary<string, string> known;
-            try { known = await services.GetRequiredService<DashboardFeeds>().Stars(principal, named, cancellationToken); }
+            if (await dashboardFeeds.UnknownProjects(principal, draft.Feeds, cancellationToken) is { } unknown) throw new McpException(unknown);
+            IReadOnlyDictionary<string, string> known = new Dictionary<string, string>(StringComparer.Ordinal);
+            try { if (named.Length > 0) known = await dashboardFeeds.Stars(principal, named, cancellationToken); }
             catch (Exception e) when (e is not OperationCanceledException) { throw Unavailable(services, "save_dashboard", e, "Relationship graph unavailable; the dashboard was not saved"); }
             for (var i = 0; i < draft.Feeds.Count; i++)
-                if (draft.Feeds[i].Kind != "log" && !known.ContainsKey(draft.Feeds[i].Star)) throw new McpException($"feeds[{i}].star is not a star you can read; find stars with explore_graph");
+                if (draft.Feeds[i].Kind is not ("log" or "memories") && !known.ContainsKey(draft.Feeds[i].Star)) throw new McpException($"feeds[{i}].star is not a star you can read; find stars with explore_graph");
             for (var i = 0; i < (draft.Writes?.Count ?? 0); i++)
                 if (draft.Writes![i].Kind != "log" && !known.ContainsKey(draft.Writes[i].Star!)) throw new McpException($"writes[{i}].star is not a star you can read; find the document with explore_graph");
             stars = named.Select(s => new DashboardStar(s, known[s])).ToArray();

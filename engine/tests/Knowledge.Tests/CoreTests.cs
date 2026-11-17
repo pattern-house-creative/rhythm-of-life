@@ -385,12 +385,14 @@ public sealed class MigrationTests
     [Fact] public void Migrations_keep_their_recorded_names_and_order()
     {
         var names = Database.Migrations().Select(m => m.Version).ToArray();
-        Assert.Equal(81, names.Length);
+        Assert.Equal(83, names.Length);
         Assert.Equal("Knowledge.Migrations.077_oauth.sql", names[76]);
         Assert.Equal("Knowledge.Migrations.078_capsule_clients.sql", names[77]);
         Assert.Equal("Knowledge.Migrations.079_work.sql", names[78]);
         Assert.Equal("Knowledge.Migrations.080_work_dependencies.sql", names[79]);
         Assert.Equal("Knowledge.Migrations.081_work_claims.sql", names[80]);
+        Assert.Equal("Knowledge.Migrations.082_update_keeps_volatility.sql", names[81]);
+        Assert.Equal("Knowledge.Migrations.083_memory_feeds.sql", names[82]);
         Assert.Equal("Knowledge.Migrations.001_foundation.sql", names[0]);
         Assert.Equal("Knowledge.Migrations.021_lexical_search.sql", names[20]);
         Assert.Equal("Knowledge.Migrations.022_composable_layouts.sql", names[21]);

@@ -433,17 +433,18 @@ public sealed class MemoryChangeTests(DatabaseFixture fixture) : IClassFixture<D
         var who = await MemoryLogins.Make(s, "update");
         await Scoped.Mode(s, "off");
         var id = (await Store.Create(who.Alex, new("DEMO: old text.", ["a"], Kind: "episodic", Importance: 2, Volatility: "state"), MemoryLogins.Mcp, default)).Id;
-        // New text: its hashtags join the tags, and the volatility verdict goes with the old text (as upstream).
+        // New text: its hashtags join the tags, and the volatility, the caller's own word, stays (082; 033 emptied it, as
+        // upstream, whose volatility was a model's verdict on the old text).
         var text = await Store.Update(who.Alex, id, new(Content: "DEMO: new text #fresh"), 1, MemoryLogins.Mcp, default);
         Assert.Equal(2, text.Revision);
-        Assert.Equal(["content", "tags", "volatility"], text.Changed);
+        Assert.Equal(["content", "tags"], text.Changed);
         var now = (await Store.Get(who.Alex, id, default))!;
         Assert.Equal(["a", "fresh"], now.Tags);
-        Assert.Equal(("DEMO: new text #fresh", (string?)null, "episodic", (int?)2), (now.Content, now.Volatility, now.Kind, now.Importance));
+        Assert.Equal(("DEMO: new text #fresh", (string?)"state", "episodic", (int?)2), (now.Content, now.Volatility, now.Kind, now.Importance));
         Assert.Equal("1:draft:DEMO: old text.", await Versions(id));
         Assert.Equal("""{"kind": "episodic", "importance": 2, "volatility": "state"}""", await MemoryLogins.Scalar(s,
             "SELECT state::text FROM memory_versions WHERE memory_id=@id AND revision=1", ("id", id)));
-        Assert.Equal("""{"fields": ["content", "tags", "volatility"]}""", await MemoryLogins.Scalar(s,
+        Assert.Equal("""{"fields": ["content", "tags"]}""", await MemoryLogins.Scalar(s,
             "SELECT detail::text FROM memory_events WHERE memory_id=@id AND revision=2", ("id", id)));
         // A tag replacement, the engine's own namespaces left off and named.
         var tags = await Store.Update(who.Sam, id, new(Tags: ["b", "Kind:semantic"]), 2, MemoryLogins.Mcp, default);
@@ -469,6 +470,37 @@ public sealed class MemoryChangeTests(DatabaseFixture fixture) : IClassFixture<D
         Assert.Equal("invalid", await MemoryLogins.Refused(() => Store.Update(who.Alex, id, new(Kind: "procedural"), null, MemoryLogins.Mcp, default)));
         Assert.Equal("invalid", await MemoryLogins.Refused(() => Store.Update(who.Alex, id, new(Clear: new HashSet<string> { "content" }), null, MemoryLogins.Mcp, default)));
         Assert.Equal(7, (await Store.Get(who.Alex, id, default))!.Revision);
+    }
+
+    // New text alone changes the text and adds its hashtags, nothing else: a durable memory stays durable, and its kind,
+    // importance, project and tags stay as they were (082). Setting or clearing one beside the text still changes it.
+    [PostgresFact] public async Task New_text_alone_keeps_every_field_the_change_does_not_name()
+    {
+        var s = fixture.Source;
+        var who = await MemoryLogins.Make(s, "keepfields");
+        await Scoped.Mode(s, "off");
+        var id = (await Store.Create(who.Alex, new("DEMO: the boiler is serviced in March.", ["boiler", "house"], Kind: "semantic",
+            Importance: 4, Volatility: "durable", Project: "boiler-room"), MemoryLogins.Mcp, default)).Id;
+        (string?, string?, int?, string?, string) Fields(MemoryRecord m) => (m.Volatility, m.Kind, m.Importance, m.Project?.Slug, string.Join(",", m.Tags));
+        var before = Fields((await Store.Get(who.Alex, id, default))!);
+        Assert.Equal(((string?)"durable", (string?)"semantic", (int?)4, (string?)"boiler-room", "boiler,house"), before);
+
+        var text = await Store.Update(who.Sam, id, new(Content: "DEMO: the boiler is serviced in April now."), 1, MemoryLogins.Mcp, default);
+        Assert.Equal(2, text.Revision);
+        Assert.Equal(["content"], text.Changed);
+        var now = (await Store.Get(who.Alex, id, default))!;
+        Assert.Equal(("DEMO: the boiler is serviced in April now.", before), (now.Content, Fields(now)));
+        // Its hashtags join the tags, and only the tags change beside the text.
+        Assert.Equal(["content", "tags"], (await Store.Update(who.Alex, id, new(Content: "DEMO: serviced in April. #annual"), 2, MemoryLogins.Mcp, default)).Changed);
+        Assert.Equal(((string?)"durable", (string?)"semantic", (int?)4, (string?)"boiler-room", "boiler,house,annual"), Fields((await Store.Get(who.Alex, id, default))!));
+
+        // Named beside the text, a volatility is set or cleared as before.
+        Assert.Equal(["content", "volatility"], (await Store.Update(who.Alex, id, new(Content: "DEMO: serviced each April. #annual", Volatility: "state"),
+            3, MemoryLogins.Mcp, default)).Changed);
+        Assert.Equal("state", (await Store.Get(who.Alex, id, default))!.Volatility);
+        Assert.Equal(["content", "volatility"], (await Store.Update(who.Alex, id, new(Content: "DEMO: serviced in April. #annual",
+            Clear: new HashSet<string> { "volatility" }), 4, MemoryLogins.Mcp, default)).Changed);
+        Assert.Equal(((string?)null, (string?)"semantic", (int?)4, (string?)"boiler-room", "boiler,house,annual"), Fields((await Store.Get(who.Alex, id, default))!));
     }
 
     static async Task<(string, int?)> Refusal(Func<Task> act)

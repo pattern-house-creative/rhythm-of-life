@@ -10,6 +10,8 @@ import { assertGraphPage, object } from "./validation.js";
 // plus the feeds it reads, and the engine saves it in versions; the app shows
 // it as a star linked to every star it reads, runs the page in a sandboxed
 // frame and hands it fresh feed data. Every field is untrusted source data.
+// A dashboard whose feeds read memories by filter (a memories feed) may name
+// no star; it joins the sky only when a screen is asked to open it.
 export interface DashboardStarRef {
   graphId: string;
   title: string;
@@ -92,11 +94,11 @@ export interface DashboardSummary extends DashboardArrangement {
   editsAllowed: boolean;
   corners: Corner[];
 }
-export type FeedKind = "data" | "contents" | "links" | "log";
+export type FeedKind = "data" | "contents" | "links" | "log" | "memories";
 export interface DashboardFeed {
   name: string;
   kind: FeedKind;
-  // Every kind but log names a star.
+  // Every kind but log and memories names a star.
   star?: string;
   days?: number;
   by?: "reading" | "day";
@@ -104,6 +106,9 @@ export interface DashboardFeed {
   limit?: number;
   log?: string;
   subject?: string;
+  // A memories feed's filters, as the engine stored them; the app only
+  // passes them on.
+  where?: Record<string, unknown>;
 }
 // One version, with its page and the feeds it reads.
 export interface Dashboard extends DashboardSummary {
@@ -114,7 +119,7 @@ export interface Dashboard extends DashboardSummary {
 // only shows each feed's status beside the frame.
 export interface FeedPayload {
   kind: FeedKind;
-  // A log feed has none.
+  // A log or memories feed has none.
   star?: { graphId: string; title: string | null };
   status: "ok" | "unavailable";
   reason?: string;
@@ -153,7 +158,7 @@ const time = (v: unknown): v is string =>
   text(v, 40, 1) && Number.isFinite(Date.parse(v));
 const feedName = (v: unknown): v is string =>
   typeof v === "string" && /^[a-z][A-Za-z0-9_]{0,39}$/.test(v);
-const kinds: FeedKind[] = ["data", "contents", "links", "log"];
+const kinds: FeedKind[] = ["data", "contents", "links", "log", "memories"];
 const logName = (v: unknown): v is string =>
   typeof v === "string" && /^[a-z][a-z0-9-]{0,39}$/.test(v);
 // A log's subject: a person id from the install's settings, or "household". The engine
@@ -223,7 +228,6 @@ export function cleanSummary(v: unknown): DashboardSummary | null {
     !time(v.createdAt) ||
     !time(v.updatedAt) ||
     !Array.isArray(v.stars) ||
-    v.stars.length < 1 ||
     v.stars.length > 12 ||
     !Array.isArray(v.versions) ||
     v.versions.length > 100
@@ -351,6 +355,17 @@ function cleanFeed(v: unknown): DashboardFeed | null {
           ...(count(v.days, 3650) ? { days: v.days } : {}),
         }
       : null;
+  if (v.kind === "memories")
+    return v.star === undefined &&
+      (v.where === undefined || object(v.where)) &&
+      (v.limit === undefined || count(v.limit, 1000))
+      ? {
+          name: v.name,
+          kind: "memories",
+          ...(object(v.where) ? { where: v.where } : {}),
+          ...(count(v.limit, 1000) ? { limit: v.limit } : {}),
+        }
+      : null;
   if (!text(v.star, 1000, 1)) return null;
   return {
     name: v.name,
@@ -406,9 +421,11 @@ export function cleanDashboardData(value: unknown): DashboardData | null {
       (f.status !== "ok" && f.status !== "unavailable") ||
       (f.kind === "log"
         ? f.star !== undefined || !logName(f.log)
-        : !object(f.star) ||
-          !text(f.star.graphId, 1000, 1) ||
-          !(f.star.title === null || text(f.star.title, 1000))) ||
+        : f.kind === "memories"
+          ? f.star !== undefined
+          : !object(f.star) ||
+            !text(f.star.graphId, 1000, 1) ||
+            !(f.star.title === null || text(f.star.title, 1000))) ||
       !time(f.asOf) ||
       (f.reason !== undefined && !text(f.reason, 300))
     )

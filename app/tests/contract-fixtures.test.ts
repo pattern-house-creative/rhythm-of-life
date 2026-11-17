@@ -12,6 +12,7 @@ import { requestRebuild } from "../server/graphRefresh";
 import { cleanInsights, cleanRuns } from "../src/insights";
 import {
   cleanDashboard,
+  cleanDashboardData,
   cleanDashboardMap,
   cleanLayoutAnswer,
   cleanSummaries,
@@ -187,6 +188,15 @@ it("reads the graph, insights, dashboards and refresh examples", async () => {
   expect(
     cleanDashboard(fixture("app_dashboards.dashboard.example.json"))?.feeds,
   ).toHaveLength(2);
+  // A dashboard that reads memories by filter names no star, and its feed read
+  // passes to the page as it came.
+  const projects = cleanDashboard(
+    fixture("app_dashboards.memories.version.example.json"),
+  );
+  expect(projects?.stars).toEqual([]);
+  expect(projects?.feeds[0]).toMatchObject({ kind: "memories", limit: 500 });
+  const board = fixture("app_dashboards.memories.example.json");
+  expect(cleanDashboardData(board)?.feeds).toEqual(board.feeds);
 
   const refresh = await requestRebuild(
     page,
