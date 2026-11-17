@@ -13,6 +13,7 @@ import {
   statusNames,
   utf8Bytes,
   visibleText,
+  workWords,
 } from "./memories";
 import type {
   Memory,
@@ -68,6 +69,7 @@ import {
   volatilityWords,
   when,
   whose,
+  workWho,
 } from "./memoryScreen";
 import type {
   BriefTarget,
@@ -1258,6 +1260,22 @@ export default function MemoryView({
       "Flag taken off: it stands as you checked it.",
     );
 
+  // A work item's claim let go by its person (migration 081), whoever holds it: the session that held it no longer moves it, and
+  // another may claim it. The memory itself does not change.
+  async function claimReleased(m: Memory) {
+    const reply = await call<{ written: MemoryWritten }>({
+      op: "release_claim",
+      id: m.id,
+    });
+    if (!reply) return;
+    setNotice({
+      text: reply.written.unchanged
+        ? "Nothing changed: its claim had ended already."
+        : "Claim released: another session may claim it now.",
+    });
+    if (open) await read(open);
+  }
+
   // A memory's project and tags, what a person changes beside its words: the projects of its scope to choose from.
   async function startOrganising(m: Memory) {
     setOrganising({
@@ -2001,6 +2019,24 @@ export default function MemoryView({
                 {m.project && m.tags.length ? " · " : ""}
                 {m.tags.map((t) => `#${m.held ? visibleText(t) : t}`).join(" ")}
               </p>
+            )}
+            {m.work && (
+              <p className="memory-meta">
+                Work item: {workWords(m.work)}
+                {m.work.assignee && ` · ${workWho({ ...m.work, claim: null })}`}
+              </p>
+            )}
+            {m.work?.claim && (
+              <div className="memory-truth memory-claim" role="note">
+                <p>
+                  Claimed by {m.work.claim.label} until{" "}
+                  {when(m.work.claim.expiresAt)}: only that session moves its
+                  state until then, unless the claim is released.
+                </p>
+                <button type="button" onClick={() => void claimReleased(m)}>
+                  Release claim
+                </button>
+              </div>
             )}
             {(m.kind || m.importance || m.volatility) && (
               <p className="memory-meta">

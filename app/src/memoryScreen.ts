@@ -4,6 +4,7 @@ import type {
   MemoryCascade,
   MemoryReply,
   MemorySettingsRead,
+  MemoryWork,
 } from "./memories";
 
 // What every screen of the Memories view shares (SB-P6-01; MemoryView.tsx holds the sections): how it reaches the engine, how
@@ -76,6 +77,34 @@ export const when = (iso: string) => {
     return iso.slice(0, 16).replace("T", " ");
   }
 };
+
+// The time of day an instant falls at, as the install's clocks read it: "14:30".
+export const clock = (iso: string) => {
+  const at = new Date(iso);
+  if (!Number.isFinite(at.getTime())) return "";
+  try {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeStyle: "short",
+      timeZone: instanceTimeZone(),
+    }).format(at);
+  } catch {
+    return iso.slice(11, 16);
+  }
+};
+
+// Whose a work item is and who holds it now (migration 081), on one line beside its type and state: "for Sam · claimed by
+// Shed window - claude-code until 14:30". Empty for nobody's, unclaimed.
+export const workWho = (w: MemoryWork) =>
+  [
+    w.assignee
+      ? `for ${w.assignee.kind === "person" ? personName(w.assignee.name) : w.assignee.name}`
+      : "",
+    w.claim
+      ? `claimed by ${w.claim.label} until ${clock(w.claim.expiresAt)}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
 // The day `days` from today, as the install's clocks read it (YYYY-MM-DD): what a snooze names, at 09:00 there, as a review date is.
 // zone: the one the engine's page named, which it reads that day on; the app's own config only until there is a page.

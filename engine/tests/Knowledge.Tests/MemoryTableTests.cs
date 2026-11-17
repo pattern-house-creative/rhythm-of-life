@@ -133,7 +133,7 @@ public sealed class MemoryMigrationTests(DatabaseFixture fixture) : IClassFixtur
         var tables = await MemoryRows.CheckedTables(fixture.Source);
         Assert.Equal(["admin_events", "capsule_revisions", "insight_events", "made_links", "map_link_dismissals", "memories", "memory_checks", "memory_citations", "memory_commitments", "memory_contradictions", "memory_decision_states", "memory_decisions", "memory_duplicate_flags", "memory_events", "memory_insight_candidates", "memory_insight_events", "memory_link_dismissals", "memory_mirrors", "memory_origins",
             "memory_project_aliases", "memory_projects", "memory_requests", "memory_resurface_dismissals", "memory_retraction_flags", "memory_trash", "memory_upstream_tags", "memory_versions",
-            "offboardings", "recall_counts", "recall_log"], tables);
+            "memory_work", "memory_work_claims", "memory_work_states", "offboardings", "recall_counts", "recall_log"], tables);
         // Inert until phase 3's tools: a migrated, started install has no memory, project, version, event, trash row,
         // idempotency key, origin (043: an import's) or recall log row (042, off until engine.recallLog says on). Migration 033's checked writers exist, and nothing calls them yet (Core/Memories.cs). The admin
         // audit (037) holds only what the start did: the people it came to know.

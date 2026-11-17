@@ -195,6 +195,7 @@ public static partial class AppMemories
             ["scopes"] = r.GetBoolean(0) ? "on" : "off",
             ["person"] = r.IsDBNull(1) ? null : r.GetString(1),
             ["share"] = MemoryTools.ShareOn(services),
+            ["work"] = MemoryTools.WorkOn(services),
             ["capsules"] = CapsuleReply.On(services),
             ["capture"] = config is not null && MemorySettings.CaptureOn(config),
             ["secondBrainImport"] = config is not null && MemorySettings.SecondBrainImportOn(config),

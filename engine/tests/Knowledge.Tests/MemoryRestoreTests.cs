@@ -266,6 +266,12 @@ public sealed class MemoryRestoreTests(DatabaseFixture fixture) : IClassFixture<
                   VALUES('rhythm:00000000-0000-4000-8000-0000000000c1','memory',@walk::text,@walk,'alex','00000000-0000-4000-8000-0000000000c2',now());
                 -- The tags a Second Brain export gave the cafe in a namespace the engine sets itself, kept beside it (059).
                 INSERT INTO memory_upstream_tags(memory_id,origin,tags) VALUES(@cafe,'second-brain:default',ARRAY['standing:active','confidence:0.70']);
+                -- The bins a work item, active and ranked second (079), assigned to an agent's label and claimed by it (081):
+                -- its properties, their one state, and the claim, which a restore keeps as every row.
+                INSERT INTO memory_work(memory_id,work_type,state,priority,assignee_label) VALUES(@bins,'task','active',2,'Bins - codex');
+                INSERT INTO memory_work_states(memory_id,revision,work_type,state,priority,assignee_label) VALUES(@bins,1,'task','active',2,'Bins - codex');
+                INSERT INTO memory_work_claims(memory_id,claim_id,label,claimed_by,channel,client,expires_at)
+                  VALUES(@bins,'00000000-0000-4000-8000-0000000000c3','Bins - codex',@p,'mcp','DEMO client',now()+interval '2 hours');
                 -- Jo's offboarding, under way (072): a restore keeps it, so the next run goes on with it.
                 INSERT INTO offboardings(person_id,trashed) VALUES('jo',1)
                 """, ("walk", walk), ("cafe", cafe), ("bins", bins), ("gone", gone), ("long", longAgo), ("project", project), ("p", harness));

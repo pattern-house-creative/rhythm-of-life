@@ -79,6 +79,17 @@ export const happened = (c: MemoryChange) => {
       return "Its outcome was recorded";
     case "due_changed":
       return "Its date moved or came off";
+    // A work item's properties (migration 079): saved with it, and changed since.
+    case "work_set":
+      return "Saved as a work item";
+    case "work_changed":
+      return c.fields.includes("work")
+        ? "Made a work item"
+        : `Its work changed${
+            c.fields.length
+              ? ` (${c.fields.map((f) => f.replace(/^work_/, "")).join(", ")})`
+              : ""
+          }`;
     default:
       return c.event.replace(/_/g, " ");
   }

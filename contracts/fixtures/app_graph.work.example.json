@@ -1,0 +1,91 @@
+{
+  "nodes": [
+    {
+      "id": "memory:memory:6d3c2a10-0000-4000-8000-00000000a063",
+      "title": "DEMO: a rain gauge by the allotment shed. Done when a week of readings is on the shed door.",
+      "type": "memory",
+      "overview": "DEMO: a rain gauge by the allotment shed. Done when a week of readings is on the shed door.",
+      "provenance": {
+        "sourceId": "memory",
+        "recordId": "6d3c2a10-0000-4000-8000-00000000a063",
+        "observedAt": "2026-11-02T18:00:00+00:00",
+        "demo": false
+      },
+      "resource": {
+        "identity": {
+          "provider": "memory",
+          "account": "memory",
+          "externalId": "6d3c2a10-0000-4000-8000-00000000a063"
+        },
+        "canonicalUrl": null,
+        "sourceUrl": null,
+        "sourceModifiedAt": "2026-11-02T18:00:00+00:00",
+        "retrievedAt": "2026-11-02T18:10:00.5+00:00",
+        "revision": "memory-sha256:example-2",
+        "owner": "household",
+        "access": {
+          "scope": "shared",
+          "canRead": true,
+          "canOpen": false
+        },
+        "availability": "available",
+        "content": null,
+        "representation": "index"
+      },
+      "groups": [
+        {
+          "id": "memory:family",
+          "label": "Family"
+        }
+      ],
+      "work": {
+        "type": "feature",
+        "state": "active",
+        "priority": 1
+      }
+    },
+    {
+      "id": "memory:memory:6d3c2a10-0000-4000-8000-00000000c002",
+      "title": "DEMO: the Pellow choir rehearses on Wednesday evenings now.",
+      "type": "memory",
+      "overview": "DEMO: the Pellow choir rehearses on Wednesday evenings now.",
+      "provenance": {
+        "sourceId": "memory",
+        "recordId": "6d3c2a10-0000-4000-8000-00000000c002",
+        "observedAt": "2026-11-02T18:00:00+00:00",
+        "demo": false
+      },
+      "resource": {
+        "identity": {
+          "provider": "memory",
+          "account": "memory",
+          "externalId": "6d3c2a10-0000-4000-8000-00000000c002"
+        },
+        "canonicalUrl": null,
+        "sourceUrl": null,
+        "sourceModifiedAt": "2026-11-02T18:00:00+00:00",
+        "retrievedAt": "2026-11-02T18:10:00.5+00:00",
+        "revision": "memory-sha256:example-2",
+        "owner": "household",
+        "access": {
+          "scope": "shared",
+          "canRead": true,
+          "canOpen": false
+        },
+        "availability": "available",
+        "content": null,
+        "representation": "index"
+      },
+      "groups": [
+        {
+          "id": "memory:family",
+          "label": "Family"
+        }
+      ]
+    }
+  ],
+  "edges": [],
+  "nextCursor": null,
+  "completeness": "partial",
+  "issues": []
+}

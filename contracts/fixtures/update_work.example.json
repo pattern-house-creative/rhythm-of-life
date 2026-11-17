@@ -1,0 +1,34 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a061",
+  "revision": 3,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": {
+    "id": "6d3c2a10-0000-4000-8000-00000000e004",
+    "slug": "allotment",
+    "name": null,
+    "created": false
+  },
+  "work": {
+    "work_type": "bug",
+    "state": "done",
+    "priority": 2
+  },
+  "changed": [
+    "work_state"
+  ],
+  "unchanged": false,
+  "replayed": false,
+  "dropped_tags": [],
+  "held": null,
+  "message": "Marked done: it leaves the open work, and a due date it has leaves the due list. Its summary is kept with the change. Its state before is kept as a version (revision 3 now), history records it (work_changed), and undo(id) puts it back.",
+  "before": {
+    "work_type": "bug",
+    "state": "active",
+    "priority": 2
+  },
+  "summary": "DEMO: replaced the latch spring; the gate closes with one hand."
+}

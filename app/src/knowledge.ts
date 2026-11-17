@@ -31,6 +31,8 @@ export const linkTypes: Readonly<Record<string, LinkType>> = {
   similar_to: { directed: false },
   copy_of: { directed: false },
   contains: { directed: true },
+  // A work item that waits on another (migration 080, the engine's memory.work).
+  depends_on: { directed: true },
 };
 export const linkType = (type: string): LinkType | undefined =>
   Object.hasOwn(linkTypes, type) ? linkTypes[type] : undefined;
@@ -81,6 +83,15 @@ export interface GraphNode extends KnowledgeNode {
   // A native memory's star that a newer memory of its scope replaced (SB-P4-11), sent only while the engine's
   // memory.tools is on: drawn faded, never hidden, and never as the current fact (graphView.ts, replacedBy).
   truth?: GraphTruth;
+  // A native memory's star whose memory is a work item (migration 079), sent only while the engine's memory.work is
+  // on: drawn as work, and left off a sky while "Work items on the sky" is off (graphView.ts, workOf).
+  work?: GraphWork;
+}
+// A work item on the map: what kind of work it is, where it stands, and its priority, 1 first to 4 last, or none.
+export interface GraphWork {
+  type: "task" | "bug" | "feature" | "improvement";
+  state: "backlog" | "ready" | "active" | "review" | "done" | "cancelled";
+  priority: number | null;
 }
 // A replaced fact on the map: its state, and the star of the memory that replaced it.
 export interface GraphTruth {

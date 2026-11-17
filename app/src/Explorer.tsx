@@ -48,6 +48,8 @@ import {
   linkLabel,
   replacedBy,
   replacements,
+  workLabel,
+  workOf,
 } from "./graphView";
 import { Constellation } from "./Constellation";
 import { useMapPartShown } from "./parts/mapParts";
@@ -320,6 +322,7 @@ export default function Explorer({
   dashboardParts,
   behind = false,
   automaticLinks = true,
+  workItems = true,
 }: {
   knowledge: KnowledgeController;
   selected: string | null;
@@ -368,6 +371,8 @@ export default function Explorer({
   // Off, the star in focus still draws all of its own, Discover (which reviews them) draws them
   // all, and the panel lists them whatever it says.
   automaticLinks?: boolean;
+  // Whether the sky draws work items' stars ("Work items on the sky", Sources & settings).
+  workItems?: boolean;
 }) {
   const { page, accept, session } = knowledge;
   // The Memories view (SB-P3-13, MemoryView.tsx): only while the engine serves it (its memory.tools on). It opens where
@@ -1205,6 +1210,7 @@ export default function Explorer({
           nodes={visible}
           edges={graphEdges}
           automaticLinks={automaticDrawn}
+          workItems={workItems}
           // Focus is calm, as Home's sky is. Trace keeps every line (a thread
           // can run through a folder) and Discover reviews them all.
           calm={mode === "focus"}
@@ -1245,6 +1251,9 @@ export default function Explorer({
           )}
           {!automaticDrawn && (
             <span>Automatic links hidden · a chosen star shows its own</span>
+          )}
+          {!workItems && visible.some((n) => workOf(n)) && (
+            <span>Work items hidden · a chosen one still shows</span>
           )}
           <span>
             {session?.demo ? "Synthetic sources" : "Authorized source subset"} ·{" "}
@@ -1784,6 +1793,15 @@ export default function Explorer({
                   </h2>
                   {/* A replaced fact (SB-P4-11) says so before anything else, and leads to what replaced it. */}
                   <Truth node={node} nodes={page.nodes} choose={choose} />
+                  {/* A work item (migration 079) says what it is and where it stands. */}
+                  {workOf(node) && (
+                    <p className="quiet-note star-work" role="note">
+                      Work item: {workLabel(workOf(node)!)}
+                      {workOf(node)!.priority
+                        ? `, priority ${workOf(node)!.priority}`
+                        : ""}
+                    </p>
+                  )}
                   {/* One clear way to the thing itself, right under its name. */}
                   <div className="item-actions">
                     {isDashboardStar(node) ? (

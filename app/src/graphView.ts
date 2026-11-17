@@ -1,6 +1,6 @@
 import type { KnowledgeNode, KnowledgeEdge, SourceId } from "./model.js";
 import { identityKey, linkType, readable } from "./knowledge.js";
-import type { GraphNode, GraphPage } from "./knowledge.js";
+import type { GraphNode, GraphPage, GraphWork } from "./knowledge.js";
 import { catalogProvider } from "./instance.js";
 
 // Display names of the providers the app knows. A provider the table lacks reads as a known
@@ -329,6 +329,7 @@ export const linkWords: Readonly<
   similar_to: { source: "similar in meaning", target: "similar in meaning" },
   copy_of: { source: "copy of", target: "copy of" },
   contains: { source: "contains", target: "part of" },
+  depends_on: { source: "waits on", target: "needed by" },
 };
 // A type the table lacks is its source's own word, its underscores as spaces.
 export function linkName(type: string, fromSource = true) {
@@ -343,9 +344,11 @@ export function linkName(type: string, fromSource = true) {
 // eight types in their plain words, from the side the reader is on; Rhythm's
 // own types and a source's own word as the explorer has always named them, its
 // type with spaces for underscores (the explorer's membership links keep their
-// own words beside this).
+// own words beside this). A work item's dependency (migration 080) reads in
+// plain words too, since "depends on" read from the item waited on says the
+// opposite of what it means.
 export const linkLabel = (type: string, fromSource = true) =>
-  linkType(type)?.upstream
+  linkType(type)?.upstream || type === "depends_on"
     ? linkName(type, fromSource)
     : type.replaceAll("_", " ");
 
@@ -365,6 +368,68 @@ export function replacedBy(n: KnowledgeNode | GraphNode): string | null {
     by !== n.id
     ? by
     : null;
+}
+// Work items on the map (migration 079; contracts/README.md, "Work items on the
+// map"): while the engine's memory.work is on, a native memory's star whose
+// memory is a work item carries work: its type, state and priority. Such a star
+// is drawn as work, a small box in place of a memory's glyph, and is left off a
+// sky while "Work items on the sky" is off. Anything else, and every star from
+// an engine that sends none, reads as no work item.
+const workTypeWords = ["task", "bug", "feature", "improvement"];
+const workStateWords = [
+  "backlog",
+  "ready",
+  "active",
+  "review",
+  "done",
+  "cancelled",
+];
+export function workOf(n: KnowledgeNode | GraphNode): GraphWork | null {
+  const work = (n as Partial<GraphNode>).work as unknown;
+  if (!work || typeof work !== "object") return null;
+  const { type, state, priority } = work as Record<string, unknown>;
+  const ranked =
+    priority === null ||
+    priority === undefined ||
+    (typeof priority === "number" &&
+      Number.isInteger(priority) &&
+      priority >= 1 &&
+      priority <= 4);
+  return typeof type === "string" &&
+    workTypeWords.includes(type) &&
+    typeof state === "string" &&
+    workStateWords.includes(state) &&
+    ranked
+    ? ({ type, state, priority: priority ?? null } as GraphWork)
+    : null;
+}
+// Finished work: done or cancelled. Drawn quieter than work still to do.
+export const workFinished = (w: GraphWork) =>
+  w.state === "done" || w.state === "cancelled";
+// A work item in a few words, for a star's name and its panel: "bug, active".
+export const workLabel = (w: GraphWork) =>
+  `${w.type}, ${w.state === "review" ? "in review" : w.state}`;
+// The stars and links a sky draws of those it is given. With `work` off ("Work
+// items on the sky" in Sources & settings) no work item's star is drawn, nor a
+// link to one; a star in `keep` (the chosen one, a pinned one) is drawn all the
+// same, so what someone opens is on their sky. Display only: nothing is
+// deleted, and the Memories view, a search and a star's panel still read every
+// star. With nothing to leave out it answers the same arrays.
+export function withoutWork<N extends KnowledgeNode, E extends KnowledgeEdge>(
+  nodes: N[],
+  edges: E[],
+  work: boolean,
+  keep: ReadonlySet<string> = new Set(),
+): { nodes: N[]; edges: E[] } {
+  if (work) return { nodes, edges };
+  const hidden = new Set(
+    nodes.filter((n) => workOf(n) && !keep.has(n.id)).map((n) => n.id),
+  );
+  if (!hidden.size) return { nodes, edges };
+  return {
+    nodes: nodes.filter((n) => !hidden.has(n.id)),
+    edges: edges.filter((e) => !hidden.has(e.source) && !hidden.has(e.target)),
+  };
 }
 // The stars each star replaced, by the replacing star's id, in the order given.
 export function replacements(nodes: GraphNode[]) {

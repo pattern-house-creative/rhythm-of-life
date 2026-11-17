@@ -124,6 +124,7 @@ under its section, as step 6 of the walk does, and run `./rhythm up` (or `--forc
 | `memory.secondBrainImport` | `off` | `rhythm import-second-brain`: reads one file a Second Brain service exported and says what it would import, writing only with `--write` | the export file; it never reads the service itself |
 | `memory.capture` | `off` | `POST /capture` on the engine's own port, for a capture token (`rhythm capture connect <name>`), saving drafts or held memories into the token's one scope | `memory.tools: on` |
 | `memory.capsuleWrites` | `off` | `set_capsule` for AI clients: one memory into a capsule slot, or out of it, as a change with a version and an audit row; without it a slot is a person's step | `memory.tools: on` and `memory.capsules: on` |
+| `memory.work` | `off` | `create_work`, `list_work`, `update_work`, `claim_work` and `release_work` for AI clients: a project's backlog kept as memories with a type, a state, a priority and an assignee, each change a version and an audit row, and a 2-hour claim so one session works on an item at a time; never on the open loops or in a digest. The app's Memories list filters by them, and each is a star a screen can hide | `memory.tools: on` |
 | `engine.recall` | `off` | the `recall` tool (words and meaning in one ranked list, with reasons) and the explorer's combined search | the embeddings model for meaning; without it, keyword results that say so |
 | `engine.searchKnowledge` | `fulltext` | `combined`: `search_knowledge` answers in combined retrieval's order | `engine.legacySearch: false` (the engine refuses it otherwise) |
 | `engine.recallLog` | `off` | each question `recall` and the explorer's search answer is kept in its reader's scope, with what it found, for 30 days | `engine.recall: on` |
@@ -202,6 +203,7 @@ rest at its next run ([dev/engine.md](dev/engine.md)).
 | a memory's history | 20 earlier states kept, every audit row kept |
 | the trash | 14 days, then deleted for good by the daily purge |
 | standing instructions (`memory.tools: on`) | 500 characters each, 50 a scope |
+| a work item's summary (`memory.work: on`) | 280 characters on one line, given when it becomes done or cancelled |
 | the recall log (`engine.recallLog: on`) | 200 a day a scope, kept 30 days |
 | screens | a command not picked up within 30 seconds expires; at most 20 wait for a screen |
 | people | 20 in `people` |

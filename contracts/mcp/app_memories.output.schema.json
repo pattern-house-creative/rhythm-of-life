@@ -226,7 +226,8 @@
             "clear_flags",
             "keep_copy",
             "settle_contradiction",
-            "stop_standing"
+            "stop_standing",
+            "release_claim"
           ]
         },
         "id": {
@@ -1941,6 +1942,7 @@
         "scopes",
         "person",
         "share",
+        "work",
         "capsules",
         "capture",
         "secondBrainImport",
@@ -1971,6 +1973,10 @@
         },
         "share": {
           "type": "boolean"
+        },
+        "work": {
+          "type": "boolean",
+          "description": "Whether the install has work items on (memory.work beside memory.tools, migration 079): the list then takes its work filter, and a memory that is a work item says so."
         },
         "capsules": {
           "type": "boolean"
@@ -3364,7 +3370,8 @@
             "settled",
             "protected",
             "limit",
-            "not_due"
+            "not_due",
+            "claimed"
           ],
           "description": "unknown: no such memory the caller reads (one in the trash, of another scope or never made answer alike); forbidden: not this login's to change (the author lock); conflict: changed since expected (revision is the current one); pruned: revision is the oldest still kept; unknown_project: known lists the slugs the caller reads; scopes_off, held and no_author: a share's (with memory.share on), refused while memory scopes are off, for a memory held for review, and for taking back one no current person wrote; unavailable: the map did not answer just now (a dismissal op while the engine is starting), which is not the memory tools going off. retracted: still true's, for a memory marked wrong (deprecated), which is not confirmed as true. too_many_candidates: capsule_status, over 200 canonical memories in a capsule's slots. needs_person: only a person does this; never answered here, since the app is a person's channel, and the words an AI client's call gets. not_offered: the two are not queued as a possible contradiction, or one of them no longer stands. settled: a person settled the pair already. protected: a replacement its rules refuse, with why. limit: past the 50 standing instructions of a scope. not_due: a digest asked for before its time."
         },
@@ -3685,6 +3692,89 @@
         "contradictions": {
           "$ref": "#/$defs/candidates",
           "description": "The memories of its scope that stand against it as possible contradictions (SB-P5-03, migration 068): both live and no person has settled them, closest first, only when it has any; never for a held memory."
+        },
+        "work": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "state",
+            "priority"
+          ],
+          "description": "Its work properties (migration 079), only when the memory is a work item: what kind of work it is, where it stands, and its priority, 1 first to 4 last, or null when nobody ranked it. They hold no words, so a held memory in a list carries them too. Absent on every other memory, so each answers as before. With migration 081, whose it is and the live claim on it, each only when there is one.",
+          "properties": {
+            "type": {
+              "enum": [
+                "task",
+                "bug",
+                "feature",
+                "improvement"
+              ]
+            },
+            "state": {
+              "enum": [
+                "backlog",
+                "ready",
+                "active",
+                "review",
+                "done",
+                "cancelled"
+              ]
+            },
+            "priority": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "maximum": 4
+            },
+            "assignee": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "name"
+              ],
+              "description": "Whose it is (migration 081), only when it has an assignee: a person of the install (kind person, name their id) or an agent (kind agent, name its label).",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "person",
+                    "agent"
+                  ]
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              }
+            },
+            "claim": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "label",
+                "claimedAt",
+                "expiresAt"
+              ],
+              "description": "The live claim on it (migration 081), only when one holds it: who holds it, for people to read, and when it was made and ends; never its id. A person ends it with release_claim.",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "claimedAt": {
+                  "$ref": "#/$defs/instant"
+                },
+                "expiresAt": {
+                  "$ref": "#/$defs/instant"
+                }
+              }
+            }
+          }
         }
       },
       "not": {
@@ -4505,7 +4595,7 @@
     "linkType": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9_-]{0,63}$",
-      "description": "A link's type as the store names it: one of Second Brain's eight (relates_to, supersedes, caused_by, decided, about_person, part_of_project, follows, drawn_from) for a made link, or the map's own word (similar_to, ...) for its suggestion."
+      "description": "A link's type as the store names it: one of Second Brain's eight (relates_to, supersedes, caused_by, decided, about_person, part_of_project, follows, drawn_from) or, between two work items, Rhythm's depends_on (migration 080, with memory.work on) for a made link, or the map's own word (similar_to, ...) for its suggestion."
     },
     "linkRefs": {
       "type": "array",

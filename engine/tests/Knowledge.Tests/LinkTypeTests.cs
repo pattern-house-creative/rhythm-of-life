@@ -13,7 +13,7 @@ namespace Knowledge.Tests;
 public sealed class LinkTypeTests
 {
     static readonly string[] Upstream = ["relates_to", "supersedes", "caused_by", "decided", "about_person", "part_of_project", "follows", "drawn_from"];
-    static readonly string[] Rhythms = ["references", "in_project", "in_folder", "about", "similar_to", "copy_of", "contains"];
+    static readonly string[] Rhythms = ["references", "in_project", "in_folder", "about", "similar_to", "copy_of", "contains", "depends_on"];
     public static TheoryData<string> Types() => [.. LinkTypes.All.Select(t => t.Name)];
     static readonly DateTimeOffset Then = DateTimeOffset.UtcNow.AddMinutes(-5);
 

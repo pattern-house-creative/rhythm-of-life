@@ -14,7 +14,7 @@ namespace Knowledge;
 // their own newest changes. An undo never releases a hold for an AI client (D-039).
 //
 // A group (adapted from Second Brain's change groups, src/brief/changes.ts at the pinned commit): one login's changes of
-// one kind (edits, status changes, releases, undos, loops resolved, outcomes recorded or due dates moved) through one
+// one kind (edits, status changes, releases, undos, loops resolved, outcomes recorded, due dates moved or work items changed) through one
 // channel and client, each within ten minutes of the one before, as the reader sees them on the audit trail. Its key is
 // opaque to a client and names only what the reader
 // already reads: the memory and revision of its first and last change. UndoGroup finds the group's members again from
@@ -28,11 +28,11 @@ namespace Knowledge;
 // group (app_memories changes and undo_group, SB-P6-01), so with it off every existing answer is as it was.
 
 // One change in a group: the memory, the revision the change wrote, its kind (appended, updated, status_changed, released,
-// reverted, resolved, outcome, due_changed or standing_stopped) and when.
+// reverted, resolved, outcome, due_changed, standing_stopped, capsule_changed or work_changed) and when.
 public sealed record MemoryChangeItem(Guid Memory, int Revision, string Event, DateTimeOffset At);
 
 // A group as one reader sees it. Group: the key UndoGroup takes. Family: edit (appended, updated), status, release,
-// revert, resolve, outcome, due or standing. Person: who made them, the person the login is bound to, or none (a login with no person). Changes and
+// revert, resolve, outcome, due, standing, capsule or work. Person: who made them, the person the login is bound to, or none (a login with no person). Changes and
 // Memories: how many of each the reader sees; Capped: more memories than one group undo takes (GroupMax), so it undoes the
 // oldest GroupMax. Items newest first. No words of any memory: a held memory's change is listed as any other's.
 public sealed record MemoryChangeGroup(string Group, string Family, string? Person, string Channel, string? Client, int Changes,
@@ -66,9 +66,12 @@ public sealed partial class MemoryStore
     // memory (due_set) is part of its writing; and so is a standing instruction's mark (standing_set), whose stop (065,
     // SB-P5-12) is a change. A capsule slot set or cleared (039) is one too: through an AI client's channel there is one
     // only with memory.capsuleWrites on (078), and it is listed among that client's changes so a person sees it and can
-    // undo it; an AI client's own undo of it stays refused (041).
+    // undo it; an AI client's own undo of it stays refused (041). A work item's change (079, with memory.work on) is one:
+    // its state, type or priority changed, or an existing memory made a work item; properties written with a new memory
+    // (work_set) are part of its writing.
     public static readonly IReadOnlyList<string> Undoable =
-        ["appended", "updated", "status_changed", "released", "reverted", "resolved", "outcome", "due_changed", "standing_stopped", "capsule_changed"];
+        ["appended", "updated", "status_changed", "released", "reverted", "resolved", "outcome", "due_changed", "standing_stopped", "capsule_changed",
+         "work_changed"];
 
     public static string Family(string change) => change switch
     {
@@ -81,6 +84,7 @@ public sealed partial class MemoryStore
         "due_changed" => "due",
         "standing_stopped" => "standing",
         "capsule_changed" => "capsule",
+        "work_changed" => "work",
         _ => change,
     };
 

@@ -4,6 +4,7 @@ import {
   Check,
   Clock3,
   Download,
+  ListChecks,
   Pause,
   Play,
   Settings2,
@@ -59,6 +60,8 @@ export function Details({
   setIdleReturn,
   automaticLinks = true,
   setAutomaticLinks,
+  workItems = true,
+  setWorkItems,
   layout,
   setLayout,
   arranged = false,
@@ -87,6 +90,10 @@ export function Details({
   // Whether the skies draw the dashed links, and turning that on or off (display only).
   automaticLinks?: boolean;
   setAutomaticLinks?: (on: boolean) => void;
+  // Whether the skies draw work items' stars, and turning that on or off (display only). Offered only while the map has
+  // a work item, or while they are hidden here.
+  workItems?: boolean;
+  setWorkItems?: (on: boolean) => void;
   layout?: Layout;
   setLayout?: (layout: Layout) => void;
   // This screen's Home is arranged by hand (a Home grid, docs/dev/screens.md 10.5): choosing a
@@ -154,6 +161,7 @@ export function Details({
 }) {
   const ref = useRef<HTMLElement>(null);
   const automaticNote = useId();
+  const workNote = useId();
   const [installMessage, setInstallMessage] = useState("");
   useEffect(() => {
     const before = document.activeElement as HTMLElement | null;
@@ -569,6 +577,19 @@ export function Details({
                       : "Automatic links on the sky: off"}
                   </button>
                 )}
+                {/* Display only: off leaves work items' stars off the skies, never out of the map or the Memories view. */}
+                {setWorkItems && (
+                  <button
+                    aria-pressed={workItems}
+                    aria-describedby={workNote}
+                    onClick={() => setWorkItems(!workItems)}
+                  >
+                    <ListChecks size={16} aria-hidden="true" />{" "}
+                    {workItems
+                      ? "Work items on the sky: on"
+                      : "Work items on the sky: off"}
+                  </button>
+                )}
                 <button onClick={requestInstall}>
                   <Download size={16} /> Install Rhythm of Life
                 </button>
@@ -578,6 +599,13 @@ export function Details({
                   {automaticLinks
                     ? "Automatic links are the dashed lines nobody has confirmed: stars alike in meaning, topics, plugins' and Second Brain's links, and suggestions."
                     : "Automatic links are hidden on the sky. A star you choose still shows all of its own, and its panel still lists them."}
+                </p>
+              )}
+              {setWorkItems && (
+                <p className="chart-note" id={workNote}>
+                  {workItems
+                    ? "Work items are a project's tasks, bugs, features and improvements: stars drawn as a small box."
+                    : "Work items are hidden on the sky. Nothing is deleted: the Memories view still lists them, and one you choose still shows."}
                 </p>
               )}
               {installMessage && (

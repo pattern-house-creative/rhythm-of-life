@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { personName } from "./instance";
-import { maxQuery, releaseAllMax, stateNames, statusNames } from "./memories";
+import {
+  maxQuery,
+  releaseAllMax,
+  stateNames,
+  statusNames,
+  workStateNames,
+  workStates,
+  workTypeNames,
+  workTypes,
+  workWords,
+} from "./memories";
 import type {
   Memory,
   MemoryForgottenAll,
@@ -11,11 +21,20 @@ import type {
   MemorySharedAll,
   MemoryStatus,
   TagCount,
+  WorkListed,
+  WorkType,
 } from "./memories";
 import { cascadeWords } from "./memories";
 import { BulkBar, several, severalWords } from "./MemoryBulk";
 import type { BulkAction } from "./MemoryBulk";
-import { cascades, counted, kindNames, scopeName, when } from "./memoryScreen";
+import {
+  cascades,
+  counted,
+  kindNames,
+  scopeName,
+  when,
+  workWho,
+} from "./memoryScreen";
 import type { MemoryTools } from "./memoryScreen";
 
 // The list under the quick capture (SB-P6-01): its filters, each narrowing what this reader reads already, a count that is the
@@ -23,7 +42,9 @@ import type { MemoryTools } from "./memoryScreen";
 // for the steps that take several: forget, and with memory.share on share or make private. Each step says what it did, and a
 // forget of several can be undone at once. What it filters by and which rows are chosen live in MemoryView, so they survive
 // opening a memory and coming back. Since run 22 it also filters by kind and by words its memories hold (op list's and tags'
-// query), looked for once a person asks, never on each key, so its count is still the length of what it lists.
+// query), looked for once a person asks, never on each key, so its count is still the length of what it lists. With the
+// engine's memory.work on (migration 079) it is a project's backlog too: its work filter keeps work items only, by state, type
+// and priority, and a work item's row says what it is. The list is still the one list; nothing here changes a work item.
 
 export interface MemoryFilters {
   scope?: MemoryScope;
@@ -34,16 +55,26 @@ export interface MemoryFilters {
   query?: string;
   // A slug may be in each scope a reader reads, so a project is named with its scope.
   project?: { slug: string; scope: MemoryScope };
+  // Work items only (migration 079): all of them, the open ones or one state's; of one type; of one priority, 0 for those
+  // nobody ranked. Offered only while the install has work items on.
+  work?: WorkListed;
+  workType?: WorkType;
+  workPriority?: number;
 }
 
 // A filter as a list and its tags take it. A project's own scope is the one it is read in.
-export const filterArgs = (f: MemoryFilters): Record<string, string> => ({
+export const filterArgs = (
+  f: MemoryFilters,
+): Record<string, string | number> => ({
   ...(f.scope ? { scope: f.scope } : {}),
   ...(f.status ? { status: f.status } : {}),
   ...(f.kind ? { kind: f.kind } : {}),
   ...(f.tag ? { tag: f.tag } : {}),
   ...(f.query ? { query: f.query } : {}),
   ...(f.project ? { project: f.project.slug, scope: f.project.scope } : {}),
+  ...(f.work ? { work: f.work } : {}),
+  ...(f.workType ? { workType: f.workType } : {}),
+  ...(f.workPriority !== undefined ? { workPriority: f.workPriority } : {}),
 });
 
 export function MemoryList({
@@ -76,8 +107,17 @@ export function MemoryList({
     filters.kind ||
     filters.tag ||
     filters.project ||
-    filters.query,
+    filters.query ||
+    filters.work ||
+    filters.workType ||
+    filters.workPriority !== undefined,
   );
+  // The work filter, only while the install has work items on, or while the list filters by it already.
+  const working =
+    tools.settings?.work === true ||
+    Boolean(
+      filters.work || filters.workType || filters.workPriority !== undefined,
+    );
   // The words in the box, looked for once asked; what the list filters by is set back into it, and Clear filters empties it, words typed
   // but not yet looked for too.
   const [words, setWords] = useState(filters.query ?? "");
@@ -387,6 +427,77 @@ export function MemoryList({
             ))}
           </select>
         </label>
+        {working && (
+          <>
+            <label className="memory-status-pick">
+              <span>Work</span>
+              <select
+                value={filters.work ?? ""}
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    work: (e.target.value as WorkListed) || undefined,
+                  })
+                }
+              >
+                <option value="">Any memory</option>
+                <option value="all">Work items</option>
+                <option value="open">Open work</option>
+                {workStates.map((s) => (
+                  <option key={s} value={s}>
+                    {workStateNames[s]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="memory-status-pick">
+              <span>Work type</span>
+              <select
+                value={filters.workType ?? ""}
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    workType: (e.target.value as WorkType) || undefined,
+                  })
+                }
+              >
+                <option value="">Any</option>
+                {workTypes.map((t) => (
+                  <option key={t} value={t}>
+                    {workTypeNames[t]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="memory-status-pick">
+              <span>Priority</span>
+              <select
+                value={
+                  filters.workPriority === undefined
+                    ? ""
+                    : String(filters.workPriority)
+                }
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    workPriority:
+                      e.target.value === ""
+                        ? undefined
+                        : Number(e.target.value),
+                  })
+                }
+              >
+                <option value="">Any</option>
+                {[1, 2, 3, 4].map((p) => (
+                  <option key={p} value={p}>
+                    {p === 1 ? "1, first" : p === 4 ? "4, last" : String(p)}
+                  </option>
+                ))}
+                <option value="0">Not ranked</option>
+              </select>
+            </label>
+          </>
+        )}
         {filtered && (
           <button
             className="memory-filter-clear"
@@ -433,6 +544,9 @@ export function MemoryList({
                 {item.truncated ? "…" : ""}
               </span>
               <span className="memory-meta">
+                {item.work
+                  ? `${[workWords(item.work), workWho(item.work)].filter(Boolean).join(" · ")} · `
+                  : ""}
                 {statusNames[item.status]} · {scopeName(item)} ·{" "}
                 {when(item.updatedAt)}
                 {item.held ? " · held" : ""}

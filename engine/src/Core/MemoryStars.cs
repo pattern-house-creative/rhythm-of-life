@@ -83,6 +83,13 @@ public static class MemoryStars
             WHERE m.id={IdOf(alias, Account)} AND m.valid_until<=now() AND m.status<>'deprecated') END
         """;
 
+    // SQL: for the native memory star row `alias`, its memory's work properties now (migration 079's memory_work_json), else
+    // NULL; judged at each read, as ReplacedBy is, so a work item made or moved reaches the map with no pass between.
+    public static string Work(string alias) => $"""
+        CASE WHEN starts_with({alias}.external_id,'{Prefix(Account)}') THEN (SELECT memory_work_json(w.work_type,w.state,w.priority)::text
+            FROM memory_work w WHERE w.memory_id={IdOf(alias, Account)}) END
+        """;
+
     // A native memory's text when its star is opened: read from the memory tables at that moment through the reader's
     // own predicate on the memory's own row, never held, returned once and never stored (memory.md 8). Null when the
     // reader does not read it now. With `replaced` (as Served) a replaced memory's text opens too.

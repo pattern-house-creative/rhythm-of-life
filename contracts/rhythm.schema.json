@@ -76,6 +76,11 @@
           "description": "The set_capsule tool. off: a capsule slot is a person's step, taken in the app or at the terminal, AI clients are offered no set_capsule tool, and a call naming it is answered as an unknown tool, as before; on, with tools and capsules on too: they get set_capsule (contracts/README.md 2.1), which puts one memory into a capsule slot or takes it out, as a change with a version and an audit row naming the client (docs/dev/memory.md section 7.1). Absent or empty means off.",
           "enum": ["off", "on", null],
           "default": "off"
+        },
+        "work": {
+          "description": "The work tools. off: AI clients are offered no create_work, list_work or update_work, a call naming one is answered as an unknown tool and no memory has work properties, as before; on, with tools on too: they get the three (contracts/README.md 2.1), a project's backlog kept as memories with a type, a state and a priority, each change a version and an audit row naming the client (docs/dev/memory.md section 5). Absent or empty means off.",
+          "enum": ["off", "on", null],
+          "default": "off"
         }
       }
     },

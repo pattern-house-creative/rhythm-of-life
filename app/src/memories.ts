@@ -69,8 +69,45 @@ export interface Memory {
   state: MemoryState;
   replacedBy: string | null;
   retractedSources: string[];
+  // Its work properties, only when it is a work item (migration 079; the engine's memory.work): a piece of project work and
+  // where it stands. Absent on every other memory, and from an engine that sends none.
+  work?: MemoryWork;
 }
 export type MemoryState = "current" | "replaced" | "ended" | "retracted";
+// A work item's properties: what kind of work it is, where it stands, and its priority, 1 first to 4 last, or none.
+export const workTypes = ["task", "bug", "feature", "improvement"] as const;
+export const workStates = [
+  "backlog",
+  "ready",
+  "active",
+  "review",
+  "done",
+  "cancelled",
+] as const;
+export type WorkType = (typeof workTypes)[number];
+export type WorkState = (typeof workStates)[number];
+// What a list's work filter keeps: every work item, the open ones (not done or cancelled), or one state's.
+export type WorkListed = WorkState | "open" | "all";
+export interface MemoryWork {
+  type: WorkType;
+  state: WorkState;
+  priority: number | null;
+  // Whose it is (migration 081): a person of the install by their id, or an agent's label; left out for nobody's, and from
+  // an engine that doesn't say.
+  assignee?: WorkAssignee | null;
+  // The claim that holds it now: its label, for people to read, and until when; never its id, which only its holder has.
+  // Left out while none holds it.
+  claim?: WorkClaim | null;
+}
+export interface WorkAssignee {
+  kind: "person" | "agent";
+  name: string;
+}
+export interface WorkClaim {
+  label: string;
+  claimedAt: string;
+  expiresAt: string;
+}
 // What a change's retraction cascade did (SB-P4-08): memories of its scope it had replaced that are current again
 // (reopened) or replaced by it again (reclosed), and memories built on it flagged for a check or no longer.
 export interface MemoryCascade {
@@ -190,7 +227,8 @@ export interface MemoryWritten {
     | "resolve_loop"
     | "resolve_due"
     | "record_outcome"
-    | "stop_standing";
+    | "stop_standing"
+    | "release_claim";
   id: string;
   revision: number | null;
   to: number | null;
@@ -476,6 +514,9 @@ export interface MemorySettingsRead {
   scopes: "off" | "on";
   person: string | null;
   share: boolean;
+  // Whether the install has work items on (memory.work): the list then offers its work filter. False from an engine that
+  // doesn't say.
+  work?: boolean;
   capsules: boolean;
   capture: boolean;
   secondBrainImport: boolean;
@@ -1032,7 +1073,19 @@ export type MemoryReply<T> =
 const shapes: Record<MemoryOp, [string[], string[]]> = {
   list: [
     [],
-    ["scope", "tag", "kind", "status", "project", "query", "cursor", "limit"],
+    [
+      "scope",
+      "tag",
+      "kind",
+      "status",
+      "project",
+      "query",
+      "cursor",
+      "limit",
+      "work",
+      "workType",
+      "workPriority",
+    ],
   ],
   trash: [[], ["cursor", "limit"]],
   get: [["id"], ["version"]],
@@ -1097,7 +1150,20 @@ const shapes: Record<MemoryOp, [string[], string[]]> = {
   resurface_dismiss: [["id"], []],
   // The full memory UI's list (SB-P6-01): a list's tags and count, an AI client's changes and a group's undo, several at once,
   // a project's writes, a capsule's status and the settings to read.
-  tags: [[], ["scope", "tag", "kind", "status", "project", "query"]],
+  tags: [
+    [],
+    [
+      "scope",
+      "tag",
+      "kind",
+      "status",
+      "project",
+      "query",
+      "work",
+      "workType",
+      "workPriority",
+    ],
+  ],
   changes: [[], ["since", "scope", "notHeld"]],
   capsule_status: [["capsule"], ["project", "scope"]],
   settings: [[], []],
@@ -1141,6 +1207,8 @@ const shapes: Record<MemoryOp, [string[], string[]]> = {
   standing: [[], ["scope", "project", "cursor", "limit"]],
   stop_standing: [["id"], ["expected"]],
   resolve_all: [["action", "items"], []],
+  // A person's release of a work item's claim (migration 081), whoever holds it, which the engine takes only with memory.work on.
+  release_claim: [["id"], []],
 };
 // The ops of a person's link steps (run 17), the brief (SB-P5-08) and the old memory (SB-P5-17), which the app's server passes on
 // only while the engine serves the Memories view at all (memory.tools on); otherwise it refuses them as requests it does not know,
@@ -1184,6 +1252,7 @@ export const personLinkOps: readonly string[] = [
   "standing",
   "stop_standing",
   "resolve_all",
+  "release_claim",
 ];
 // The ops the facade passes on only while the engine's listing names a person's share (memory.share on, memory scopes on).
 export const personShareOps: readonly string[] = ["share", "share_all"];
@@ -1368,6 +1437,11 @@ const checks: Record<string, (v: unknown, op: string) => boolean> = {
   status: (v) => one(v, statuses),
   volatility: (v) => one(v, ["durable", "state", "volatile"]),
   importance: (v) => count(v, 1, 5),
+  // A list's work filter (migration 079): work items in one state, the open ones or all; of one type; of one priority, 0 for
+  // those nobody ranked.
+  work: (v) => one(v, [...workStates, "open", "all"]),
+  workType: (v) => one(v, workTypes),
+  workPriority: (v) => count(v, 0, 4),
   project: (v) => text(v, 64),
   archived: (v) => typeof v === "boolean",
   content: (v) => text(v, maxMemoryBytes),
@@ -1608,14 +1682,67 @@ function cleanCascade(v: unknown): MemoryCascade | null {
   };
 }
 
+// A work item's properties as the engine sends them: null for a memory that is none, undefined for anything else.
+export function cleanWork(v: unknown): MemoryWork | null | undefined {
+  if (v === undefined || v === null) return null;
+  if (
+    !object(v) ||
+    !one(v.type, workTypes) ||
+    !one(v.state, workStates) ||
+    !(v.priority === null || count(v.priority, 1, 4))
+  )
+    return undefined;
+  const assignee =
+    v.assignee === undefined || v.assignee === null
+      ? null
+      : object(v.assignee) &&
+          one(v.assignee.kind, ["person", "agent"]) &&
+          workLabel(v.assignee.name)
+        ? {
+            kind: v.assignee.kind as WorkAssignee["kind"],
+            name: v.assignee.name,
+          }
+        : undefined;
+  const claim =
+    v.claim === undefined || v.claim === null
+      ? null
+      : object(v.claim) &&
+          workLabel(v.claim.label) &&
+          instant(v.claim.claimedAt) &&
+          instant(v.claim.expiresAt)
+        ? {
+            label: v.claim.label,
+            claimedAt: v.claim.claimedAt,
+            expiresAt: v.claim.expiresAt,
+          }
+        : undefined;
+  if (assignee === undefined || claim === undefined) return undefined;
+  return {
+    type: v.type as WorkType,
+    state: v.state as WorkState,
+    priority: v.priority as number | null,
+    ...(assignee ? { assignee } : {}),
+    ...(claim ? { claim } : {}),
+  };
+}
+// An assignee's name or a claim's label as the engine keeps one (081): 1 to 120 characters on one line.
+const workLabel = (v: unknown): v is string =>
+  typeof v === "string" &&
+  v.length >= 1 &&
+  v.length <= 120 &&
+  // eslint-disable-next-line no-control-regex
+  !/[\u0000-\u001f\u007f]/.test(v);
+
 export function cleanMemory(v: unknown): Memory | null {
   if (!object(v)) return null;
   const held = cleanHold(v.held),
     project = projectRef(v.project),
     capsule = cleanCapsule(v.capsule),
-    truth = cleanTruth(v);
+    truth = cleanTruth(v),
+    work = cleanWork(v.work);
   if (
     truth === undefined ||
+    work === undefined ||
     capsule === undefined ||
     !id(v.id) ||
     !scope(v.scope) ||
@@ -1663,6 +1790,7 @@ export function cleanMemory(v: unknown): Memory | null {
     updatedAt: v.updatedAt,
     capsule,
     ...truth,
+    ...(work ? { work } : {}),
   };
 }
 
@@ -1866,6 +1994,7 @@ function cleanSettings(v: Record<string, unknown>): MemorySettingsRead | null {
     !one(v.scopes, ["off", "on"]) ||
     !(v.person === null || owner(v.person)) ||
     flags.some((f) => typeof v[f] !== "boolean") ||
+    !(v.work === undefined || typeof v.work === "boolean") ||
     !count(v.trashDays, 1, 3650) ||
     !count(v.versionsKept, 1, 100_000) ||
     !count(v.maxBytes, 1, 2_147_483_647)
@@ -1875,6 +2004,7 @@ function cleanSettings(v: Record<string, unknown>): MemorySettingsRead | null {
     scopes: v.scopes as "off" | "on",
     person: v.person as string | null,
     share: v.share as boolean,
+    work: v.work === true,
     capsules: v.capsules as boolean,
     capture: v.capture as boolean,
     secondBrainImport: v.secondBrainImport as boolean,
@@ -2788,6 +2918,8 @@ const codes = [
   "protected",
   "limit",
   "not_due",
+  // A work item another session's claim holds (migration 081): the store's answer to a change of its state without that claim.
+  "claimed",
 ];
 
 // A person's review queues' answers (SB-P6-01), each in the contract's shape; null when one doesn't check out.
@@ -3949,6 +4081,31 @@ export const statusNames: Record<MemoryStatus, string> = {
   draft: "Draft",
   deprecated: "Marked wrong",
 };
+
+// A work item's type and state in a person's words (migration 079).
+export const workTypeNames: Record<WorkType, string> = {
+  task: "Task",
+  bug: "Bug",
+  feature: "Feature",
+  improvement: "Improvement",
+};
+export const workStateNames: Record<WorkState, string> = {
+  backlog: "Backlog",
+  ready: "Ready",
+  active: "Active",
+  review: "In review",
+  done: "Done",
+  cancelled: "Cancelled",
+};
+// A work item on one line, where a memory shows its kind and importance: "Bug · active · priority 2".
+export const workWords = (w: MemoryWork) =>
+  [
+    workTypeNames[w.type],
+    workStateNames[w.state].toLowerCase(),
+    w.priority ? `priority ${w.priority}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
 // What a memory is now (SB-P4-11), in a person's words where it is not simply current; a retracted one's status already
 // reads "Marked wrong".

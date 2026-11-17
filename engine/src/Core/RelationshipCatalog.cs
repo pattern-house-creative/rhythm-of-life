@@ -45,6 +45,10 @@ public sealed partial record RelationshipCatalog(string[] Subjects, Relationship
     // rather than hides (SB-P4-11; RelationshipEngine.Replaced, MemoryStars.Served). Off, the default, only memories still
     // true are, as before.
     public bool Replaced { get; init; }
+    // With memory.work on (MemorySettings.WorkOn), the map's reads say of a native memory's star that it is a work item,
+    // with its type, state and priority (migration 079; RelationshipEngine.Work), so the app draws it as one and can
+    // leave it off a sky. Off, the default, no star says so, as before.
+    public bool Work { get; init; }
     // With memory.tools on, the map's reads serve the links a person or an AI client made (made_links, SB-P4-02;
     // RelationshipEngine.MadeLinks) beside its own. Off, the default, they are not read, as before run 15.
     public bool MadeLinks { get; init; }
@@ -99,7 +103,8 @@ public sealed partial record RelationshipCatalog(string[] Subjects, Relationship
         foreach (var (provider, label) in config.Graph.Catalog.Providers) labels[provider] = label;
         return new([.. config.Subjects, .. config.Demo.Enabled ? new[] { RhythmConfig.Synthetic } : []],
             [.. configured, .. DefaultGroups.Where(d => !configured.Any(g => g.Id == d.Id && g.Provider == d.Provider))], labels)
-            { Replaced = MemorySettings.ToolsOn(config), MadeLinks = MemorySettings.ToolsOn(config), PluginLinks = config.Graph.PluginLinks is "on" };
+            { Replaced = MemorySettings.ToolsOn(config), MadeLinks = MemorySettings.ToolsOn(config), PluginLinks = config.Graph.PluginLinks is "on",
+              Work = MemorySettings.WorkOn(config) };
     }
     // Provider ids that do not read well capitalized; any other reads as its id ("garmin" is "Garmin").
     public static Dictionary<string, string> DefaultLabels { get; } = new(StringComparer.Ordinal) { ["csv"] = "CSV import" };

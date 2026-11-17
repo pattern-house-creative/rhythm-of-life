@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a062",
+  "revision": 2,
+  "scope": "shared",
+  "owner": "household",
+  "status": "canonical",
+  "scopes": "off",
+  "project": {
+    "id": "6d3c2a10-0000-4000-8000-00000000e004",
+    "slug": "allotment",
+    "name": null,
+    "created": false
+  },
+  "work": {
+    "work_type": "task",
+    "state": "ready",
+    "priority": null
+  },
+  "changed": [
+    "work"
+  ],
+  "unchanged": false,
+  "replayed": false,
+  "dropped_tags": [],
+  "held": null,
+  "message": "Made a work item (task, ready, unranked): its words, tags, project and due date are as they were. Its state before is kept as a version (revision 2 now), history records it (work_changed), and undo(id) makes it an ordinary memory again."
+}

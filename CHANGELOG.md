@@ -6,6 +6,24 @@ each entry says so under **Upgrading**.
 
 ## Unreleased
 
+- **A project backlog for AI clients, kept as memories** (off by default). `memory.work: on`, beside
+  `memory.tools`, gives them `create_work`, `list_work` and `update_work`. A work item is a memory in a
+  project with a type (task, bug, feature or improvement), a state (backlog, ready, active, review, done or
+  cancelled) and maybe a priority, so recall finds it, links tie it to what it is about and its history
+  keeps every change; what it must do stays in its own words. Each change is a version with an audit row
+  naming the client, listed with the client's other changes in the brief, and `undo` puts it back; done
+  and cancelled take a short summary. A work item is never a personal task: it stays off the open loops
+  and out of digests, and your own commitments work as before. `rhythm export` and `import` carry work
+  items. In the app the Memories view's list filters by work, its state, type and priority, and a work
+  item says what it is on its row. On the sky a work item is a star drawn as a small box; "Work items
+  on the sky" in Sources & settings leaves them off that screen's skies, and deletes nothing. There is
+  no board, and nothing new on Home. One work item that waits on another says so with `link`'s
+  `depends_on`, and `list_work` says which items are blocked and on what, read each time it lists them;
+  a link that would close a loop is refused. A work item can be assigned to a person of the household
+  or to an agent's label, and an AI session claims an item with `claim_work` before it starts on it:
+  for 2 hours, renewed while it works, only that session moves the item's state, and another session is
+  told who holds it and until when; `release_work` lets it go, and a person can release any claim from
+  the item in the Memories view. **Upgrading:** migrations 079, 080 and 081 apply at the next start.
 - **AI clients can keep capsule slots, where you let them** (off by default). `memory.capsuleWrites: on`,
   beside `memory.tools` and `memory.capsules`, gives them `set_capsule`: one memory into a capsule slot,
   or out of it, as a change with a version and an audit row naming the client. A client's capsule

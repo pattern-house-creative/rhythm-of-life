@@ -124,6 +124,7 @@ const switches = [
   { key: "memory.secondBrainImport", off: "off", on: "on" },
   { key: "memory.capture", off: "off", on: "on" },
   { key: "memory.capsuleWrites", off: "off", on: "on" },
+  { key: "memory.work", off: "off", on: "on" },
   { key: "engine.recall", off: "off", on: "on" },
   { key: "engine.searchKnowledge", off: "fulltext", on: "combined" },
   { key: "engine.recallLog", off: "off", on: "on" },

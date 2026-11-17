@@ -54,15 +54,20 @@ public sealed partial class MemoryStore
 {
     public const int ConnectionsDefault = 20, ConnectionsMax = 50, NeighbourPreview = 120;
 
-    // Source links to Target. Type: one of Second Brain's types but supersedes (LinkTypes, upstream). Confidence: 0 to 1, or
-    // none. No idempotency key: linking again answers unchanged.
-    public async Task<MemoryLinked> Link(Guid principal, Guid source, Guid target, string type, double? confidence, MemoryCall call, CancellationToken ct)
+    // Source links to Target. Type: one of Second Brain's types but supersedes (LinkTypes, upstream), or with `work`
+    // (memory.work on, migration 080) depends_on, from a work item to one it waits on, both work items, closing no loop.
+    // Confidence: 0 to 1, or none. No idempotency key: linking again answers unchanged.
+    public async Task<MemoryLinked> Link(Guid principal, Guid source, Guid target, string type, double? confidence, MemoryCall call, CancellationToken ct,
+        bool work = false)
     {
         if (call.Key is not null) throw new MemoryRefused("invalid", "A link takes no idempotency key: linking again answers unchanged");
         if (confidence is { } c && (double.IsNaN(c) || c is < 0 or > 1)) throw new MemoryRefused("invalid", "A confidence is a number from 0 to 1");
-        using var o = await Call("SELECT link_memories(@principal,@source,@target,@type,@confidence,@channel,@client)::text", principal, call, ct,
-            ("source", NpgsqlDbType.Uuid, source), ("target", NpgsqlDbType.Uuid, target), ("type", NpgsqlDbType.Text, (type ?? "").Trim().ToLowerInvariant()),
-            ("confidence", NpgsqlDbType.Double, confidence));
+        var named = (type ?? "").Trim().ToLowerInvariant();
+        if (named == MemoryWork.DependsOn && !work)
+            throw new MemoryRefused("off", "depends_on joins two work items, and work items are off in this install (memory.work)");
+        using var o = await Call("SELECT link_memories(@principal,@source,@target,@type,@confidence,@channel,@client,@work)::text", principal, call, ct,
+            ("source", NpgsqlDbType.Uuid, source), ("target", NpgsqlDbType.Uuid, target), ("type", NpgsqlDbType.Text, named),
+            ("confidence", NpgsqlDbType.Double, confidence), ("work", NpgsqlDbType.Boolean, work));
         var r = o.RootElement;
         return new(r.GetProperty("id").GetGuid(), r.GetProperty("source").GetGuid(), r.GetProperty("target").GetGuid(), r.GetProperty("from").GetGuid(),
             r.GetProperty("to").GetGuid(), r.GetProperty("type").GetString()!, r.GetProperty("directed").GetBoolean(), r.GetProperty("verification").GetString()!,

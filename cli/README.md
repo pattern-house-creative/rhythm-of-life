@@ -353,7 +353,9 @@ status, importance, volatility, validity, project, capsule slot, hold, revision 
 reader's history shows them, its trash dates when it is in the trash, and for a digest the project or tag it sums up,
 with the list it was drawn from (as a hash) and how many, so it is still that project's or tag's digest after an
 import, and for a commitment (an open loop owed to or by the person) its direction and the other person's name as a
-slug, and for a decision how sure the person was and its outcomes and review dates from its reader's history on; each project with its id, slug, name,
+slug, and for a decision how sure the person was and its outcomes and review dates from its reader's history on, and for a
+work item its type, state and priority and how they changed over its reader's history (never the summary given when it
+was finished, which is the audit trail's); each project with its id, slug, name,
 description, status, author and aliases, and for a project a memory held for review made, its hold, so an import keeps
 it out of every list there too until a person releases a memory in it; and each person- or AI-made link between two of
 its memories. What it never

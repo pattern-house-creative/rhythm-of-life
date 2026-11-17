@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { linkKindsAllow, linkType, linkTypes } from "../src/knowledge";
 import { linkName, linkWords } from "../src/graphView";
@@ -6,13 +6,20 @@ import { linkName, linkWords } from "../src/graphView";
 // The link vocabulary (SB-P4-01, D-030): the app's table is the engine's,
 // word for word, and every type it lists has plain words.
 describe("link types", () => {
-  // Migration 051's link_types(), one type a line: its name, direction, kinds
-  // and whether it is upstream's.
+  // link_types() as the newest migration that makes it says (051's, and 080's
+  // with depends_on), one type a line: its name, direction, kinds and whether
+  // it is upstream's.
+  const newest = readdirSync("../engine/migrations")
+    .filter((f) => f.endsWith(".sql"))
+    .sort()
+    .filter((f) =>
+      readFileSync(`../engine/migrations/${f}`, "utf8").includes(
+        "FUNCTION link_types()",
+      ),
+    )
+    .at(-1)!;
   const listed = [
-    ...readFileSync(
-      "../engine/migrations/051_typed_links.sql",
-      "utf8",
-    ).matchAll(
+    ...readFileSync(`../engine/migrations/${newest}`, "utf8").matchAll(
       /^\s*\('([a-z_]+)',(true|false),(NULL(?:::text\[\])?|ARRAY\['episodic'\]),(true|false)\),?$/gm,
     ),
   ].map(([, name, directed, kinds, upstream]) => ({
@@ -23,7 +30,8 @@ describe("link types", () => {
   }));
 
   it("lists the engine's types, with their directions and kinds", () => {
-    expect(listed).toHaveLength(15);
+    expect(newest).toBe("080_work_dependencies.sql");
+    expect(listed).toHaveLength(16);
     expect(
       Object.entries(linkTypes).map(([name, t]) => ({
         name,
@@ -68,6 +76,11 @@ describe("link types", () => {
       "in this folder",
     ]);
     expect(linkName("copy_of")).toBe("copy of");
+    // A work item's dependency, from the item that waits and from the one it waits on.
+    expect([linkName("depends_on"), linkName("depends_on", false)]).toEqual([
+      "waits on",
+      "needed by",
+    ]);
     // A source's own word keeps its words.
     expect(linkName("draws_on")).toBe("draws on");
     expect(linkName("constructor")).toBe("constructor");

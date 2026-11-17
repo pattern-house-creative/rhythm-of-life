@@ -1,0 +1,375 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/list_work.output.schema.json",
+  "title": "list_work answer",
+  "description": "The memory tool list_work's answer (migration 079): the work items the caller reads, a project's backlog. A work item is a memory with work properties that is live, not marked wrong and with its window open (079's memory_work_listed, one predicate); every reader of the memory is served it. state is the list asked: one state, open (every state but done and cancelled) or all. total is that list's whole length for this caller, and states how many items each state holds under the other filters (project, work_type, priority and workspace), all read in the same statement as the page, so each count is the length of its list. items are ordered by priority, 1 first and the unranked last, then oldest first. blocked says an open item waits, through a depends_on link (migration 080), on a work item that is neither done nor cancelled, and blocked_by names those, at most 20; assignee says whose it is and claim the live claim on it (migration 081: its label and when it ends, never its id), and the filters assignee (exact) and claimed keep those; the filter blocked true lists only those, false only what can go ahead, and total and states count under it. due is the memory's own due date; summary what was said when it became done or cancelled; content a preview of up to 500 characters, truncated when longer. One held for review is listed with held and without its words, tags, project, due date and summary, and no project filter selects it. Listed and answered only with memory.tools and memory.work on, and refused (off) with the second off (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "state",
+        "total",
+        "states",
+        "items",
+        "next",
+        "notice"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "state": {
+          "enum": [
+            "backlog",
+            "ready",
+            "active",
+            "review",
+            "done",
+            "cancelled",
+            "open",
+            "all"
+          ]
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "states": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "backlog",
+            "ready",
+            "active",
+            "review",
+            "done",
+            "cancelled"
+          ],
+          "description": "How many work items each state holds, under the same filters but state.",
+          "properties": {
+            "backlog": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "ready": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "active": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "review": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "done": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cancelled": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/item"
+          }
+        },
+        "next": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z0-9_-]{1,200}$",
+          "description": "Pass as cursor for the next page; null at the end."
+        },
+        "notice": {
+          "$ref": "memory.defs.schema.json#/$defs/notice"
+        }
+      }
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ],
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "scope",
+        "owner",
+        "author",
+        "status",
+        "work_type",
+        "state",
+        "priority",
+        "due",
+        "summary",
+        "tags",
+        "project",
+        "created_at",
+        "updated_at",
+        "content",
+        "truncated",
+        "held",
+        "blocked",
+        "blocked_by",
+        "assignee",
+        "claim"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "memory.defs.schema.json#/$defs/uuid"
+        },
+        "revision": {
+          "$ref": "memory.defs.schema.json#/$defs/revision"
+        },
+        "scope": {
+          "$ref": "memory.defs.schema.json#/$defs/scope"
+        },
+        "owner": {
+          "$ref": "memory.defs.schema.json#/$defs/subject"
+        },
+        "author": {
+          "$ref": "memory.defs.schema.json#/$defs/person"
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "draft"
+          ]
+        },
+        "work_type": {
+          "enum": [
+            "task",
+            "bug",
+            "feature",
+            "improvement"
+          ]
+        },
+        "state": {
+          "enum": [
+            "backlog",
+            "ready",
+            "active",
+            "review",
+            "done",
+            "cancelled"
+          ]
+        },
+        "priority": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 4
+        },
+        "due": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeDue",
+          "description": "The memory's own due date (migration 061), or null; null for a held memory."
+        },
+        "summary": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 280,
+          "description": "What was said when it became done or cancelled, while that change is its newest change of work properties; else null."
+        },
+        "tags": {
+          "$ref": "memory.defs.schema.json#/$defs/tags"
+        },
+        "project": {
+          "$ref": "memory.defs.schema.json#/$defs/writtenProject"
+        },
+        "created_at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant",
+          "description": "When it was written."
+        },
+        "updated_at": {
+          "$ref": "memory.defs.schema.json#/$defs/instant",
+          "description": "When it last changed."
+        },
+        "content": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 500
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "content is a preview: get reads the whole text."
+        },
+        "held": {
+          "$ref": "memory.defs.schema.json#/$defs/maybeHeld"
+        },
+        "blocked": {
+          "type": "boolean",
+          "description": "It is open (neither done nor cancelled) and waits, through a depends_on link (migration 080), on a work item that is neither done nor cancelled. Read at each read; nothing stores it."
+        },
+        "blocked_by": {
+          "type": "array",
+          "maxItems": 20,
+          "description": "The unfinished work items it waits on, first by priority, at most 20: each its id and properties now, never its words (one held for review is named too, since it still holds the work up). Empty when it waits on none.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "work_type",
+              "state",
+              "priority"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "memory.defs.schema.json#/$defs/uuid"
+              },
+              "work_type": {
+                "enum": [
+                  "task",
+                  "bug",
+                  "feature",
+                  "improvement"
+                ]
+              },
+              "state": {
+                "enum": [
+                  "backlog",
+                  "ready",
+                  "active",
+                  "review"
+                ]
+              },
+              "priority": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "maximum": 4
+              }
+            }
+          }
+        },
+        "assignee": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/workAssignee"
+            }
+          ],
+          "description": "Whose it is (migration 081), or null."
+        },
+        "claim": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "memory.defs.schema.json#/$defs/workClaim"
+            }
+          ],
+          "description": "The live claim on it (migration 081): who holds it and until when, never its id; null when none holds it."
+        }
+      },
+      "allOf": [
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "state": {
+                  "enum": [
+                    "done",
+                    "cancelled"
+                  ]
+                }
+              }
+            },
+            {
+              "properties": {
+                "summary": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "state": {
+                  "enum": [
+                    "backlog",
+                    "ready",
+                    "active",
+                    "review"
+                  ]
+                }
+              }
+            },
+            {
+              "properties": {
+                "blocked": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "anyOf": [
+        {
+          "properties": {
+            "held": {
+              "type": "null"
+            },
+            "content": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "held": {
+              "type": "object"
+            },
+            "content": {
+              "type": "null"
+            },
+            "tags": {
+              "$ref": "memory.defs.schema.json#/$defs/noTags"
+            },
+            "project": {
+              "type": "null"
+            },
+            "truncated": {
+              "const": false
+            },
+            "due": {
+              "type": "null"
+            },
+            "summary": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

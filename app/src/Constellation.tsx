@@ -11,6 +11,7 @@ import { select } from "d3-selection";
 import { drag } from "d3-drag";
 import { zoom, zoomIdentity, zoomTransform } from "d3-zoom";
 import { Brain, Minus, Plus, Scan, Tags } from "lucide-react";
+import type { GraphWork } from "./knowledge";
 import {
   doubleTapMs,
   flickMin,
@@ -52,6 +53,10 @@ import {
   replacedBy,
   sourceName,
   structural,
+  withoutWork,
+  workFinished,
+  workLabel,
+  workOf,
 } from "./graphView";
 import type { GraphPoint, LabelBox, SkySeed } from "./graph";
 import type { KnowledgeEdge, KnowledgeNode } from "./model";
@@ -66,8 +71,8 @@ const settleMs = 400;
 // its name.
 const starParts = ".graph-node, .graph-label, .graph-hit";
 export function Constellation({
-  nodes,
-  edges,
+  nodes: givenNodes,
+  edges: givenEdges,
   selected,
   onSelect,
   interactive,
@@ -89,6 +94,7 @@ export function Constellation({
   own = false,
   still = false,
   automaticLinks = true,
+  workItems = true,
   calm = true,
 }: {
   nodes: KnowledgeNode[];
@@ -134,6 +140,10 @@ export function Constellation({
   // Off, only the selected star's own are drawn. Display only: the layout,
   // labels and every list still read all of `edges`, so it never moves a star.
   automaticLinks?: boolean;
+  // Work items' stars drawn ("Work items on the sky", Sources & settings). Off,
+  // none is, nor a link to one, but the selected star and the pinned ones.
+  // Display only: nothing is deleted, and every list still reads them.
+  workItems?: boolean;
   // A calm sky (the owner, 2026-11-09): folder and project lines only for the
   // selected star, quiet lines at rest and a bright focus, a hovered star's
   // included. The explorer's Trace and Discover keep the look they had.
@@ -175,6 +185,31 @@ export function Constellation({
   const positions = useRef(
     new Map<string, { x: number; y: number; height: number }>(),
   );
+  // Keyed by its contents, so a new array of the same pins draws nothing new.
+  const pinKey = pinnedIds.join("\n");
+  const pinnedSet = useMemo(
+    () => new Set(pinKey ? pinKey.split("\n") : []),
+    [pinKey],
+  );
+  // The stars this sky draws (graphView.ts withoutWork): every one given, or
+  // with work items off all but those, the selected star and the pinned ones
+  // kept. Everything below reads these, so a hidden star takes no room either.
+  const keptWork =
+    !workItems &&
+    selected !== null &&
+    givenNodes.some((n) => n.id === selected && workOf(n))
+      ? selected
+      : null;
+  const { nodes, edges } = useMemo(
+    () =>
+      withoutWork(
+        givenNodes,
+        givenEdges,
+        workItems,
+        new Set([...pinnedSet, ...(keptWork ? [keptWork] : [])]),
+      ),
+    [givenNodes, givenEdges, workItems, pinnedSet, keptWork],
+  );
   const labelPriorities = useMemo(
     () => graphLabelPriorities(nodes, edges),
     [nodes, edges],
@@ -182,12 +217,6 @@ export function Constellation({
   const reduced = useReducedMotion();
   const explainable = interactive && Boolean(onExplain);
   const id = useId().replace(/:/g, "");
-  // Keyed by its contents, so a new array of the same pins draws nothing new.
-  const pinKey = pinnedIds.join("\n");
-  const pinnedSet = useMemo(
-    () => new Set(pinKey ? pinKey.split("\n") : []),
-    [pinKey],
-  );
   const graph = useMemo(
     () =>
       createGraph(nodes, edges, laidOut, interactive ? ambientSky : undefined),
@@ -1396,6 +1425,10 @@ export function Constellation({
               // A fact a newer memory replaced (SB-P4-11): drawn faded, never
               // hidden, and never as the current fact.
               const replaced = replacedBy(n) !== null;
+              // A work item (migration 079): a small box in place of a
+              // memory's glyph, quieter once the work is finished.
+              const work: GraphWork | null = workOf(n);
+              const finished = work !== null && workFinished(work);
               const font = labelFontSize(theme, unit, compact);
               return (
                 <g
@@ -1404,7 +1437,7 @@ export function Constellation({
                   aria-hidden={label || hit || undefined}
                   role={label || hit ? undefined : "button"}
                   tabIndex={label || hit ? undefined : 0}
-                  aria-label={`Explore ${n.title}${replaced ? " (replaced by a newer memory)" : ""}`}
+                  aria-label={`Explore ${n.title}${replaced ? " (replaced by a newer memory)" : ""}${work ? ` (work item: ${workLabel(work)})` : ""}`}
                   aria-pressed={selected === n.id}
                   onClick={(e) => {
                     if (!e.defaultPrevented) onSelect(n.id);
@@ -1415,9 +1448,15 @@ export function Constellation({
                       onSelect(n.id);
                     }
                   }}
-                  className={`${label ? "graph-label" : hit ? "graph-hit" : "graph-node"} ${theme ? "theme-node" : ""} ${related ? "related-node" : ""} ${path?.includes(n.id) ? "path-node" : ""} ${labelPriorities.has(n.id) ? `label-${labelPriorities.get(n.id)}` : ""} ${graph.loose.has(n.id) ? "loose-node" : ""} ${folder ? "folder-node" : ""} ${project ? "project-star" : ""} ${dashboard ? "dashboard-star" : ""} ${pinnedSet.has(n.id) ? "pinned-star" : ""} ${memoryHubs.has(n.id) ? "memory-hub" : ""}${replaced ? " replaced-star" : ""}`}
+                  className={`${label ? "graph-label" : hit ? "graph-hit" : "graph-node"} ${theme ? "theme-node" : ""} ${related ? "related-node" : ""} ${path?.includes(n.id) ? "path-node" : ""} ${labelPriorities.has(n.id) ? `label-${labelPriorities.get(n.id)}` : ""} ${graph.loose.has(n.id) ? "loose-node" : ""} ${folder ? "folder-node" : ""} ${project ? "project-star" : ""} ${dashboard ? "dashboard-star" : ""} ${pinnedSet.has(n.id) ? "pinned-star" : ""} ${memoryHubs.has(n.id) ? "memory-hub" : ""}${replaced ? " replaced-star" : ""}${work ? ` work-star work-${work.state}` : ""}`}
                   style={{
-                    opacity: faded ? 0.22 : replaced ? 0.45 : 1,
+                    opacity: faded
+                      ? 0.22
+                      : replaced
+                        ? 0.45
+                        : finished
+                          ? 0.6
+                          : 1,
                     // Unlinked records are quieter than the clusters they orbit.
                     color: graph.loose.has(n.id)
                       ? "#6f8796"
@@ -1427,6 +1466,7 @@ export function Constellation({
                   <title>
                     {n.title} · {sourceName(n.provenance.sourceId)} · {n.type}
                     {replaced && " · replaced by a newer memory"}
+                    {work && ` · work item: ${workLabel(work)}`}
                   </title>
                   {hit && (
                     <circle
@@ -1521,6 +1561,45 @@ export function Constellation({
                           fill="none"
                           stroke="currentColor"
                         />
+                      ) : work ? (
+                        // A work item: a small box, a dot in it while the
+                        // work is open, a tick once done and a bar when
+                        // cancelled, so project work reads apart from a
+                        // memory at a glance, by shape and not colour alone.
+                        <>
+                          <rect
+                            className="work-glyph"
+                            x="-5.5"
+                            y="-5.5"
+                            width="11"
+                            height="11"
+                            rx="2.5"
+                            fill="currentColor"
+                            fillOpacity={finished ? ".08" : ".22"}
+                            stroke="currentColor"
+                            strokeWidth="1.2"
+                          />
+                          {work.state === "done" ? (
+                            <path
+                              d="M-2.8,0.2L-0.8,2.3L3,-2.2"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          ) : work.state === "cancelled" ? (
+                            <path
+                              d="M-2.6,0H2.6"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                            />
+                          ) : (
+                            <circle r="1.5" fill="currentColor" />
+                          )}
+                        </>
                       ) : n.type === "memory" ? (
                         // Memories are small brains; those that tie two or
                         // more records together glow a little more.

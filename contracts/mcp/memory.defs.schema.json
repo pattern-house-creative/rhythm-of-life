@@ -105,7 +105,8 @@
         "due": { "$ref": "#/$defs/due", "description": "Its due date (SB-P5-10, migration 061), only when it has one; never on a held memory, whose due date waits with it for a person." },
         "duplicate_of": { "$ref": "#/$defs/copies", "description": "The memories of its own scope it was flagged as a possible copy of when saved (SB-P5-02, migration 063) that stand now (both live: not held, marked wrong, ended or in the trash), closest first; only when there is one, so every other memory answers as before." },
         "standing": { "const": true, "description": "It is a standing instruction (SB-P5-12, migration 065), only when it is one; never on a held memory." },
-        "contradictions": { "$ref": "#/$defs/candidates", "description": "The memories of its own scope that stand against it as possible contradictions (SB-P5-03, migration 068): both live and no person has settled them, either way round, closest first, only when it has any; never on a held memory." }
+        "contradictions": { "$ref": "#/$defs/candidates", "description": "The memories of its own scope that stand against it as possible contradictions (SB-P5-03, migration 068): both live and no person has settled them, either way round, closest first, only when it has any; never on a held memory." },
+        "work": { "$ref": "#/$defs/work", "description": "Its work properties (migration 079), only when it is a work item; they hold no words, so a held memory keeps them." }
       },
       "allOf": [
         { "anyOf": [{ "properties": { "state": { "const": "replaced" }, "replaced_by": { "$ref": "#/$defs/uuid" } } },
@@ -150,6 +151,82 @@
         { "properties": { "held": { "type": "null" }, "content": { "type": "string" } } },
         { "properties": { "held": { "type": "object" }, "content": { "type": "null" }, "tags": { "$ref": "#/$defs/noTags" }, "project": { "type": "null" } } }
       ]
+    },
+    "work": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["work_type", "state", "priority"],
+      "description": "Work properties (migration 079): what kind of work a work item is, where it stands, and its priority, 1 first to 4 last, or null when nobody ranked it. A work item is a memory that has them.",
+      "properties": {
+        "work_type": { "enum": ["task", "bug", "feature", "improvement"] },
+        "state": { "enum": ["backlog", "ready", "active", "review", "done", "cancelled"] },
+        "priority": { "type": ["integer", "null"], "minimum": 1, "maximum": 4 },
+        "assignee": { "$ref": "#/$defs/workAssignee", "description": "Whose it is (migration 081), only when it has an assignee." },
+        "claim": { "$ref": "#/$defs/workClaim", "description": "The live claim on it (migration 081), only when one holds it and only on a memory get serves: who holds it and until when, never its id." }
+      }
+    },
+    "workAssignee": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name"],
+      "description": "Whose a work item is (migration 081): a person of the install (kind person, name their id) or an agent (kind agent, name its label, such as \"<session title> - <agent>\", which nothing checks).",
+      "properties": {
+        "kind": { "enum": ["person", "agent"] },
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 }
+      }
+    },
+    "workClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "claimed_at", "expires_at"],
+      "description": "A live claim on a work item (migration 081), as it is listed: who holds it, for people to read, when it was made and when it ends. Never its id.",
+      "properties": {
+        "label": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "claimed_at": { "$ref": "#/$defs/instant" },
+        "expires_at": { "$ref": "#/$defs/instant" }
+      }
+    },
+    "workWritten": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "id", "revision", "scope", "owner", "status", "scopes", "project", "work", "changed", "unchanged", "replayed", "dropped_tags", "held", "message"],
+      "description": "What a work write did (create_work, update_work, claim_work, release_work; migrations 079 and 081): a write's fields and the item's work properties after it. No memory's words and no project's name.",
+      "properties": {
+        "ok": { "const": true },
+        "id": { "$ref": "#/$defs/uuid" },
+        "revision": { "$ref": "#/$defs/revision" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "owner": { "$ref": "#/$defs/subject" },
+        "status": { "$ref": "#/$defs/status" },
+        "scopes": { "$ref": "#/$defs/scopes" },
+        "project": { "$ref": "#/$defs/writtenProject" },
+        "work": { "$ref": "#/$defs/work" },
+        "changed": { "type": "array", "maxItems": 16, "items": { "type": "string", "pattern": "^[a-z_]{1,40}$" } },
+        "unchanged": { "type": "boolean" },
+        "replayed": { "type": "boolean", "description": "The answer to an earlier call with the same idempotency key." },
+        "dropped_tags": { "$ref": "#/$defs/tags", "description": "Tags left off: the engine sets those namespaces itself." },
+        "held": { "$ref": "#/$defs/maybeHeld" },
+        "message": { "type": "string", "minLength": 1, "maxLength": 2000 },
+        "before": { "$ref": "#/$defs/work", "description": "Only on update_work's answer: the properties the item had before the call." },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 280, "description": "Only on update_work's answer when the state became done or cancelled: the summary the call gave, kept in the change's audit row." },
+        "due": { "$ref": "#/$defs/due", "description": "Only on create_work's answer for a new item saved with a deadline (when) and not held." },
+        "duplicates": { "$ref": "#/$defs/copies", "description": "Only on create_work's answer for a new item whose words were close to memories of its own scope: it was kept and flagged as a possible copy, naming these, closest first." },
+        "claim": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label", "claimed_at", "expires_at", "renewed"],
+          "description": "Only on claim_work's answer: the claim made or renewed, with its id, which only its holder keeps and which renews it, moves the item's state while it holds and releases it.",
+          "properties": {
+            "id": { "$ref": "#/$defs/uuid" },
+            "label": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "claimed_at": { "$ref": "#/$defs/instant" },
+            "expires_at": { "$ref": "#/$defs/instant" },
+            "renewed": { "type": "boolean" }
+          }
+        },
+        "released": { "$ref": "#/$defs/workClaim", "description": "Only on release_work's answer when it ended a claim: the claim it ended." },
+        "claim_ended": { "const": true, "description": "Only on update_work's answer when making the item done or cancelled ended its claim." }
+      }
     },
     "written": {
       "type": "object",
@@ -281,12 +358,12 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["ok", "code", "error"],
-      "description": "A call that changed nothing, with isError true: write_limit (with engine.writeLimit on, this token is past its writes in ten minutes; the error says how long to wait, contracts/README.md section 2), not_offered (propose_contradiction named a memory it was not offered for that one, whatever that id names; migration 068), settled (a person has settled that pair), needs_person (a contradiction is queued, so only a person may end the earlier memory, replace it or move either to another scope; or resolve named a person's step), unknown (no memory the caller reads by that id, one in the trash and one in another scope alike), forbidden (not this login's: the author lock, or a person's step such as a capsule slot), invalid, too_large, conflict (a stale expected_revision; revision is the current one), key_reused, unknown_project (known_projects lists up to 10 the caller reads, with notice), taken, nothing_to_undo, no_version, not_visible, pruned (revision is the oldest kept), moved, unavailable (the store did not answer), off (a tool called while its setting is off), and a share's: scopes_off (memory.scopes is off: every memory is the household's already), held (a memory held for review, shared only once a person releases it) and no_author (a Family memory no person wrote, which stays in Family); and a supersede's (migration 049): held (a memory held for review neither replaces nor is replaced), retracted (a memory marked wrong neither replaces nor is replaced) and protected (a confirmed memory is replaced only by a confirmed one); and a digest's (migration 054): not_due (a digest of the key in the scope was written within the day, or fewer than 10 memories are eligible; the conflict code says the list changed since digest_sources gave its basis); and a citation's (migration 055): held (a memory held for review cites nothing and is not revalidated), unknown_document (no Drive document by that id on the map for the caller, or none of the memory's citations) and source_unavailable (Drive could not give the document when it was checked, so nothing is cited); and a standing instruction's (migration 065): limit (a scope holds 50 already, so nothing was saved) and too_large (over its 500 characters).",
+      "description": "A call that changed nothing, with isError true: write_limit (with engine.writeLimit on, this token is past its writes in ten minutes; the error says how long to wait, contracts/README.md section 2), not_offered (propose_contradiction named a memory it was not offered for that one, whatever that id names; migration 068), settled (a person has settled that pair), needs_person (a contradiction is queued, so only a person may end the earlier memory, replace it or move either to another scope; or resolve named a person's step), unknown (no memory the caller reads by that id, one in the trash and one in another scope alike), forbidden (not this login's: the author lock, or a person's step such as a capsule slot), invalid, too_large, conflict (a stale expected_revision; revision is the current one), key_reused, unknown_project (known_projects lists up to 10 the caller reads, with notice), taken, nothing_to_undo, no_version, not_visible, pruned (revision is the oldest kept), moved, unavailable (the store did not answer), off (a tool called while its setting is off), and a share's: scopes_off (memory.scopes is off: every memory is the household's already), held (a memory held for review, shared only once a person releases it) and no_author (a Family memory no person wrote, which stays in Family); and a supersede's (migration 049): held (a memory held for review neither replaces nor is replaced), retracted (a memory marked wrong neither replaces nor is replaced) and protected (a confirmed memory is replaced only by a confirmed one); and a digest's (migration 054): not_due (a digest of the key in the scope was written within the day, or fewer than 10 memories are eligible; the conflict code says the list changed since digest_sources gave its basis); and a citation's (migration 055): held (a memory held for review cites nothing and is not revalidated), unknown_document (no Drive document by that id on the map for the caller, or none of the memory's citations) and source_unavailable (Drive could not give the document when it was checked, so nothing is cited); and a standing instruction's (migration 065): limit (a scope holds 50 already, so nothing was saved) and too_large (over its 500 characters).; and a work item's (migration 081): claimed (a live claim of another session holds it; the error names who and until when)",
       "properties": {
         "ok": { "const": false },
         "code": { "enum": ["unknown", "forbidden", "invalid", "too_large", "conflict", "key_reused", "unknown_project", "taken", "nothing_to_undo",
           "no_version", "not_visible", "pruned", "moved", "unavailable", "off", "scopes_off", "held", "no_author", "retracted", "protected",
-          "not_due", "unknown_document", "source_unavailable", "limit", "not_offered", "settled", "needs_person", "write_limit"] },
+          "not_due", "unknown_document", "source_unavailable", "limit", "not_offered", "settled", "needs_person", "write_limit", "claimed"] },
         "error": { "type": "string", "minLength": 1, "maxLength": 2000 },
         "revision": { "$ref": "#/$defs/revision" },
         "known_projects": { "type": "array", "maxItems": 10, "items": { "$ref": "#/$defs/slug" } },

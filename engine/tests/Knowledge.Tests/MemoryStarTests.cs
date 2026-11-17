@@ -275,6 +275,35 @@ public sealed class MemoryStarTests(DatabaseFixture fixture) : IClassFixture<Dat
         Assert.True(await map.Sees(who.Sam, Star(walk.Id)));
     }
 
+    // Migration 079: with memory.work on, a memory's star says its memory is a work item, with its type, state and
+    // priority, read at each read, so a change of state reaches the map with no pass between and an undo takes it off
+    // again. With memory.work off no star says so, whatever the tables hold.
+    [PostgresFact] public async Task With_memory_work_on_a_work_items_star_says_so_at_each_read()
+    {
+        var s = fixture.Source;
+        var who = await MemoryLogins.Make(s, "stars-work");
+        await Scoped.Mode(s, "off");
+        var item = (await Store.CreateWork(who.Alex, new("DEMO: mend the Pellow bus shelter roof.", Project: "stars-work-shelter"), "bug", null, 2, null,
+            MemoryLogins.Mcp, default)).Write.Id;
+        var note = (await Store.Create(who.Alex, new("DEMO: the Pellow bus shelter was built in 1987.", Project: "stars-work-shelter"), MemoryLogins.Mcp, default)).Id;
+
+        using (var off = await Rebuilt(MemoryToolSettings.On))
+            Assert.All(await off.Nodes(who.Sam), n => Assert.Null(n.work));
+
+        using var map = await Rebuilt(MemoryToolSettings.With("tools: on, work: on"));
+        var nodes = (await map.Nodes(who.Sam)).ToDictionary(n => n.id);
+        Assert.Equal(new GraphWork("bug", "backlog", 2), nodes[Star(item)].work);
+        Assert.Null(nodes[Star(note)].work);
+        Assert.Equal("backlog", (await map.Host.Read(who.Sam, null, null, default, new GraphQuery("get", Star(item)))).nodes.Single().work!.state);
+        // Moved, then made an ordinary memory again: each at the next read.
+        await Store.UpdateWork(who.Alex, item, null, "active", null, true, null, null, MemoryLogins.Mcp, default);
+        Assert.Equal(new GraphWork("bug", "active", null), (await map.Nodes(who.Sam)).Single(n => n.id == Star(item)).work);
+        await Store.MakeWork(who.Alex, note, "task", null, null, null, MemoryLogins.Mcp, default);
+        Assert.Equal(new GraphWork("task", "backlog", null), (await map.Nodes(who.Sam)).Single(n => n.id == Star(note)).work);
+        await Store.Undo(who.Alex, note, null, null, MemoryLogins.Mcp, default);
+        Assert.Null((await map.Nodes(who.Sam)).Single(n => n.id == Star(note)).work);
+    }
+
     // SB-P4-11: with memory.tools on, a fact a newer memory of its scope replaced stays a star, faded rather than hidden:
     // served with what replaced it (truth), judged at each read, its text opening, and named so in the harness's bounded
     // views; a retraction of its replacement makes it current again at once, and bringing that back replaces it again.

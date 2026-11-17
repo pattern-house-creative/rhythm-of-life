@@ -38,6 +38,7 @@ public static class LinkTypes
         new("similar_to", false, null, false), // two records alike in meaning (SimilaritySuggestions)
         new("copy_of", false, null, false),    // two near-identical files (SimilaritySuggestions)
         new("contains", true, null, false),    // a document and its pages (documents ingest, off the map)
+        new("depends_on", true, null, false),  // a work item that waits on another (migration 080, with memory.work on)
     ];
     static readonly Dictionary<string, LinkType> ByName = All.ToDictionary(t => t.Name, StringComparer.Ordinal);
 

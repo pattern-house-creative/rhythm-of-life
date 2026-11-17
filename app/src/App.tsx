@@ -30,7 +30,7 @@ import {
 } from "./dashboards";
 import type { Corner } from "./dashboards";
 import type { CardShape } from "./dashboardFrame";
-import { ambientWindow } from "./graphView";
+import { ambientWindow, workOf } from "./graphView";
 import { displayTitle } from "./graph";
 import { filterNodes } from "./model";
 import {
@@ -46,11 +46,13 @@ import {
   saveScreenName,
   saveAutomaticLinks,
   saveTiles,
+  saveWorkItems,
   savedGrid,
   savedHome,
   savedLayout,
   savedAutomaticLinks,
   savedTiles,
+  savedWorkItems,
   screenIdentity,
   settingsStored,
   takeNewScreenId,
@@ -578,6 +580,16 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
     setAutomaticState(on);
     saveAutomaticLinks(on);
   };
+  // Whether the skies draw work items' stars (Sources & settings), kept for this screen the same
+  // way. Display only: off, a chosen or pinned one still shows, and nothing is deleted.
+  const [workItems, setWorkState] = useState(savedWorkItems);
+  // The switch is offered while the map has a work item, and for the rest of a visit that began
+  // with them hidden, so turning them back on never takes the switch from under a finger.
+  const [workOffered] = useState(() => !savedWorkItems());
+  const setWorkItems = (on: boolean) => {
+    setWorkState(on);
+    saveWorkItems(on);
+  };
   // With an engine the tabs of one browser are one screen, so a layout, tiles
   // or Home chosen in another tab show here too (at Home, a new Home at once),
   // and whichever tab listens sends them on. Only a new Home touches what is
@@ -588,6 +600,7 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
       const next = savedHome();
       setLayoutState(savedLayout());
       setAutomaticState(savedAutomaticLinks());
+      setWorkState(savedWorkItems());
       setTilesState(savedTiles() ?? defaultTiles);
       setGridState(savedGrid());
       setHomeState(next);
@@ -1059,6 +1072,7 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
     loading: !knowledge.lastRefresh && !knowledge.error,
     readAt: knowledge.lastRefresh,
     automaticLinks,
+    workItems,
   };
   // A dashboard's native parts (parts/nativeParts.tsx) in each of its hosts:
   // the explorer's reader, the dashboard panel and full screen. They read
@@ -1537,6 +1551,7 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
                     dashboardParts={partsIn(full !== null)}
                     behind={full !== null}
                     automaticLinks={automaticLinks}
+                    workItems={workItems}
                   />
                 </Suspense>
               </FeatureBoundary>
@@ -1819,6 +1834,15 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
                   setIdleReturn={setIdleReturn}
                   automaticLinks={automaticLinks}
                   setAutomaticLinks={setAutomaticLinks}
+                  workItems={workItems}
+                  // Offered only while the map has a work item, or while they are hidden on this screen.
+                  setWorkItems={
+                    workOffered ||
+                    !workItems ||
+                    skyPage.nodes.some((n) => workOf(n))
+                      ? setWorkItems
+                      : undefined
+                  }
                   close={close}
                   selectNode={selectNode}
                   readData={session?.data}

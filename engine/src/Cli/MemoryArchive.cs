@@ -15,7 +15,8 @@ namespace Knowledge.Cli;
 // slot, hold, validity, revision and dates, its earlier versions as that reader's history shows them, its trash dates
 // when it is in the trash, and for a digest (054) the key it was drawn for, with its basis and source count, from its
 // audit trail, and for a commitment (058) its direction and counterparty, and for a decision (060) its confidence and
-// its states from that reader's history on, and for a memory with a due date (061) its moment, kind and source; and each
+// its states from that reader's history on, and for a memory with a due date (061) its moment, kind and source, and for
+// a work item (079) its type, state and priority and its states from that reader's history on; and each
 // person- or AI-made link between two of those memories, with its confidence,
 // source revision and checked time when it has them (051; a link with none reads as before). Never another
 // reader's records, the audit trail, the logins that wrote anything, idempotency keys, passages, vectors, the map's
@@ -71,8 +72,11 @@ public sealed class MemoryArchive(NpgsqlDataSource source)
     // decision (060), its confidence and source and its states (outcome, re-asks and review date) at each revision from the
     // reader's history floor on, the state at the floor written at the floor, so an import keeps its outcome and an undo
     // there goes back through it; and, only for a memory with a due date (061), its moment (UTC), kind and source, so an
-    // import keeps it due then; and, only for a standing instruction (065), standing true, so it fires there as here. Every
-    // other line is as before.
+    // import keeps it due then; and, only for a standing instruction (065), standing true, so it fires there as here; and,
+    // only for a work item (079), its type, state, priority and assignee (081: a person's id or an agent's label; no claim,
+    // which is this install's and short-lived) and its states (the properties from each revision on, none for a stretch it
+    // was no work item) from the reader's history floor on, the state at the floor written at the floor, so an
+    // import keeps where it stands and an undo there goes back through it. Every other line is as before.
     const string MemoryJson = """
         (jsonb_build_object('id',m.id,'subject',m.subject_id,'scope',m.scope,'author',m.author_id,'source',m.source,
           'content',m.content,'tags',to_jsonb(m.tags),'kind',m.kind,'status',m.status,'importance',m.importance,
@@ -98,7 +102,15 @@ public sealed class MemoryArchive(NpgsqlDataSource source)
             FROM memory_decisions d WHERE d.memory_id=m.id)))
           ||jsonb_strip_nulls(jsonb_build_object('due',CASE WHEN m.due_at IS NOT NULL THEN jsonb_build_object(
             'at',to_char(m.due_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS"Z"'),'kind',m.due_kind,'source',m.due_source) END))
-          ||jsonb_strip_nulls(jsonb_build_object('standing',CASE WHEN m.standing THEN true END)))
+          ||jsonb_strip_nulls(jsonb_build_object('standing',CASE WHEN m.standing THEN true END))
+          ||jsonb_strip_nulls(jsonb_build_object('work',(SELECT jsonb_build_object('type',k.work_type,'state',k.state,'priority',k.priority,
+              'assignee',memory_work_assignee_json(k.assignee_person,k.assignee_label),
+              'states',(SELECT jsonb_agg(jsonb_build_object('revision',x.revision,'type',x.work_type,'state',x.state,'priority',x.priority,
+                  'assignee',memory_work_assignee_json(x.assignee_person,x.assignee_label))
+                ORDER BY x.revision) FROM (SELECT greatest(s.revision,f.floor) AS revision,s.work_type,s.state,s.priority,s.assignee_person,s.assignee_label
+                FROM memory_work_states s WHERE s.memory_id=m.id AND (s.revision>=f.floor OR s.revision=(SELECT max(z.revision)
+                  FROM memory_work_states z WHERE z.memory_id=m.id AND z.revision<=f.floor))) x))
+            FROM memory_work k WHERE k.memory_id=m.id))))
         """;
 
     // Person- and AI-made links whose two ends are memories of the export in one scope: those in made_links, and those a
@@ -387,6 +399,15 @@ public sealed class MemoryArchive(NpgsqlDataSource source)
                 cmd.Parameters.Add(new NpgsqlParameter("record", NpgsqlDbType.Jsonb) { Value = m.GetRawText() });
                 using var answer = JsonDocument.Parse((string)(await cmd.ExecuteScalarAsync(ct))!);
                 Count("standing", Outcome(answer.RootElement));
+            }
+            // Work properties (079) likewise, after those, since a decision or a standing instruction is no work item.
+            if (Outcome(a) == "added" && m.TryGetProperty("work", out var work) && work.ValueKind == JsonValueKind.Object)
+            {
+                await using var cmd = Database.Command(c, tx, "SELECT import_memory_work(@origin,@record)::text");
+                cmd.Parameters.Add(new NpgsqlParameter("origin", NpgsqlDbType.Jsonb) { Value = originJson });
+                cmd.Parameters.Add(new NpgsqlParameter("record", NpgsqlDbType.Jsonb) { Value = m.GetRawText() });
+                using var answer = JsonDocument.Parse((string)(await cmd.ExecuteScalarAsync(ct))!);
+                Count("work", Outcome(answer.RootElement));
             }
         }
         foreach (var l in links.EnumerateArray())

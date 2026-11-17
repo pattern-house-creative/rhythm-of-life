@@ -961,10 +961,31 @@ export function saveAutomaticLinks(on: boolean) {
     // The choice still applies for this visit.
   }
 }
+// Work items on the sky (migration 079's work items, a project's backlog kept as memories), per
+// screen beside the layout, as the automatic links are: drawn unless someone turned them off in
+// Sources & settings here. Display only, so it stays on this browser: nothing is sent to the
+// engine, no work item is deleted or changed, and the Memories view lists them all the same.
+const workKey = "rhythm-of-life.work-items";
+export function savedWorkItems(): boolean {
+  try {
+    return localStorage.getItem(workKey) !== "off";
+  } catch {
+    return true;
+  }
+}
+export function saveWorkItems(on: boolean) {
+  try {
+    if (on) localStorage.removeItem(workKey);
+    else localStorage.setItem(workKey, "off");
+  } catch {
+    // The choice still applies for this visit.
+  }
+}
 // Calls back when another tab of this browser changes the settings they keep for their screen
-// (the layout, the tiles, the Home, the Home grid or the automatic links); answers how to stop.
+// (the layout, the tiles, the Home, the Home grid, the automatic links or the work items); answers
+// how to stop.
 export function watchSettings(changed: () => void) {
-  const keys = [layoutKey, tilesKey, homeKey, gridKey, similarKey];
+  const keys = [layoutKey, tilesKey, homeKey, gridKey, similarKey, workKey];
   const listener = (e: StorageEvent) => {
     if (e.key !== null && keys.includes(e.key)) changed();
   };

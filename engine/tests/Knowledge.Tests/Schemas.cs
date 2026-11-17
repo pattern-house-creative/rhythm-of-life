@@ -197,6 +197,9 @@ public sealed class SchemaTests
     [InlineData("app_memories.replaced.example.json", "app_memories.output.schema.json")]
     [InlineData("app_memories.cascade.example.json", "app_memories.output.schema.json")]
     [InlineData("app_graph.replaced.example.json", "app_graph.output.schema.json")]
+    // A work item's star, and a list filtered to a project's work (migration 079, with memory.work on).
+    [InlineData("app_graph.work.example.json", "app_graph.output.schema.json")]
+    [InlineData("app_memories.work.example.json", "app_memories.output.schema.json")]
     // Kept dismissals (SB-P4-05): the dismissals on a reader's map, Discover's Dismiss and taking one back.
     [InlineData("app_memories.dismissals.example.json", "app_memories.output.schema.json")]
     [InlineData("app_memories.dismiss.example.json", "app_memories.output.schema.json")]
@@ -261,6 +264,21 @@ public sealed class SchemaTests
     // set_capsule (migration 078, with memory.capsuleWrites on): a project slot set, and a slot another memory fills.
     [InlineData("set_capsule.example.json", "set_capsule.output.schema.json")]
     [InlineData("set_capsule.refused.example.json", "set_capsule.output.schema.json")]
+    // The work tools (migration 079, with memory.work on): a new work item, a memory made one, a personal task refused; a
+    // page of a project's work; a state changed to done with its summary, a repeat, and done with no summary; and a memory
+    // read whole that is a work item.
+    [InlineData("create_work.example.json", "create_work.output.schema.json")]
+    [InlineData("create_work.made.example.json", "create_work.output.schema.json")]
+    [InlineData("create_work.refused.example.json", "create_work.output.schema.json")]
+    [InlineData("list_work.example.json", "list_work.output.schema.json")]
+    [InlineData("update_work.example.json", "update_work.output.schema.json")]
+    [InlineData("update_work.unchanged.example.json", "update_work.output.schema.json")]
+    [InlineData("update_work.refused.example.json", "update_work.output.schema.json")]
+    [InlineData("get.work.example.json", "get.output.schema.json")]
+    // Claims (migration 081): a claim made, one another session holds, and a claim let go.
+    [InlineData("claim_work.example.json", "claim_work.output.schema.json")]
+    [InlineData("claim_work.refused.example.json", "claim_work.output.schema.json")]
+    [InlineData("release_work.example.json", "release_work.output.schema.json")]
     // supersede (SB-P4-06): the plan with its confirmation, the plan applied, and a confirmed memory protected.
     [InlineData("supersede.plan.example.json", "supersede.output.schema.json")]
     [InlineData("supersede.example.json", "supersede.output.schema.json")]
@@ -386,6 +404,8 @@ public sealed class SchemaTests
     // The memory UI's last pieces (SB-P6-01, run 22): the standing instructions, a person's stop of one, and a step for several.
     [InlineData("app_memories.standing.example.json", "app_memories.output.schema.json")]
     [InlineData("app_memories.stop_standing.example.json", "app_memories.output.schema.json")]
+    // A person's release of a work item's claim (migration 081).
+    [InlineData("app_memories.release_claim.example.json", "app_memories.output.schema.json")]
     [InlineData("app_memories.resolve_all.example.json", "app_memories.output.schema.json")]
     // Insight candidates (SB-P5-05): the waiting list, best first; a dry run (no id, no time found, one page); a candidate
     // used, one rejected, the same decision again, and the other decision on a decided one refused.

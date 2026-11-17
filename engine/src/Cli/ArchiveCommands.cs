@@ -160,6 +160,10 @@ public static class ArchiveCommands
         if (report.Outcomes.TryGetValue("standing", out var standing))
             o.WriteLine("  standing instructions: " + string.Join(", ", standing.OrderBy(x => Rank(x.Key)).ThenBy(x => x.Key, StringComparer.Ordinal)
                 .Select(x => $"{x.Value} {Said(x.Key, dry)}")));
+        // Work items (079) likewise.
+        if (report.Outcomes.TryGetValue("work", out var work))
+            o.WriteLine("  work items: " + string.Join(", ", work.OrderBy(x => Rank(x.Key)).ThenBy(x => x.Key, StringComparer.Ordinal)
+                .Select(x => $"{x.Value} {Said(x.Key, dry)}")));
         if (report.VersionsKept + report.VersionsLeftOut > 0)
             o.WriteLine($"  earlier versions: {report.VersionsKept} {(dry ? "would be kept" : "kept")}"
                 + (report.VersionsLeftOut > 0 ? $", {report.VersionsLeftOut} left out (from before a scope its reader does not read)" : ""));

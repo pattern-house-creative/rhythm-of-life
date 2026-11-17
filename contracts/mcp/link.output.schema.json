@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/link.output.schema.json",
   "title": "link answer",
-  "description": "The memory tool link's answer (SB-P4-02, migration 052): one link a person or an AI client made between two memories of one scope, as stored. source and target are the memories as named; from and to as stored (relates_to has no direction and is stored with the smaller id first, so from and to may be target and source). verification is inferred for an AI client's link and verified for a person's (D-015); provenance says the same in upstream's words (system, explicit). created: this call made it (or made a dismissed one anew); unchanged: it was there already and nothing changed. scope, owner and scopes are the source memory's and the install's. No memory's words. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "description": "The memory tool link's answer (SB-P4-02, migration 052): one link a person or an AI client made between two memories of one scope, as stored. source and target are the memories as named; from and to as stored (relates_to has no direction and is stored with the smaller id first, so from and to may be target and source). type is one of Second Brain's types, or depends_on (migration 080, with memory.work on): from a work item to one it waits on, both work items of one scope, closing no loop. verification is inferred for an AI client's link and verified for a person's (D-015); provenance says the same in upstream's words (system, explicit). created: this call made it (or made a dismissed one anew); unchanged: it was there already and nothing changed. scope, owner and scopes are the source memory's and the install's. No memory's words. Listed and answered only with memory.tools on (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
   "anyOf": [
     {
       "type": "object",
@@ -52,7 +52,8 @@
             "about_person",
             "part_of_project",
             "follows",
-            "drawn_from"
+            "drawn_from",
+            "depends_on"
           ]
         },
         "directed": {

@@ -148,8 +148,8 @@ public sealed class EngineLoginTests(DatabaseFixture fixture) : IClassFixture<Da
     // link pruning pass (056) deletes only automatic links past their grace period, never one someone stated or one with
     // an end in the trash, writing no memory (MemoryLinkPruningTests). The insight candidate pass (064) writes only pairs of
     // one scope whose memories are both eligible and 30 or more days apart, checked again as it writes, never a memory
-    // (InsightCandidateTests). The operator's imports (Operator: 043's, 058's, 060's
-    // and 061's of Rhythm's own format, 059's of a Second Brain export) have no caller to check either: the operator on
+    // (InsightCandidateTests). The operator's imports (Operator: 043's, 058's, 060's,
+    // 061's, 065's and 079's of Rhythm's own format, 059's of a Second Brain export) have no caller to check either: the operator on
     // the host is no principal, as in delete forever's operator path (038), and only the terminal calls them (rhythm import and rhythm
     // import-second-brain, engine/src/Cli/), which the scan below holds; each one decides what its named reader may write
     // (MemoryArchiveTests, SecondBrainImportTests). So too rhythm capture disconnect (067), which deletes nothing and moves
@@ -163,7 +163,7 @@ public sealed class EngineLoginTests(DatabaseFixture fixture) : IClassFixture<Da
     static readonly string[] Jobs = ["prune_memory_requests", "prune_recall_log", "purge_memory_trash", "memory_staleness_pass", "prune_made_links",
         "memory_insight_accrue", "offboard_close"];
     static readonly string[] Triggers = ["offboarding_returned"];
-    static readonly string[] Operator = ["import_memory", "import_memory_commitment", "import_memory_decision", "import_memory_due", "import_memory_standing", "import_memory_link",
+    static readonly string[] Operator = ["import_memory", "import_memory_commitment", "import_memory_decision", "import_memory_due", "import_memory_standing", "import_memory_work", "import_memory_link",
         "import_memory_project", "import_second_brain_link", "import_second_brain_memory", "import_second_brain_project", "disconnect_capture",
         "offboard_person", "offboard_trash"];
     static readonly string Unchecked = $"""

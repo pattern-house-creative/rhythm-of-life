@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "invalid",
+  "error": "This memory is tagged task, which makes it a personal task on the open loops: a work item is not one. Take the tag off first (resolve_loop not_a_task), or save the work as a memory of its own"
+}

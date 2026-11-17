@@ -1,0 +1,89 @@
+{
+  "ok": true,
+  "memories": [
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a063",
+      "scope": "shared",
+      "owner": "household",
+      "author": null,
+      "source": "app",
+      "kind": null,
+      "importance": null,
+      "volatility": null,
+      "status": "draft",
+      "tags": [],
+      "project": {
+        "id": "6d3c2a10-0000-4000-8000-00000000e004",
+        "slug": "allotment",
+        "name": "Allotment"
+      },
+      "content": "DEMO: a rain gauge by the allotment shed. Done when a week of readings is on the shed door.",
+      "truncated": false,
+      "held": null,
+      "validFrom": null,
+      "unknownStart": false,
+      "validUntil": null,
+      "revision": 2,
+      "createdAt": "2026-11-02T09:30:00.123456+00:00",
+      "updatedAt": "2026-11-02T09:30:00.123456+00:00",
+      "state": "current",
+      "replacedBy": null,
+      "retractedSources": [],
+      "capsule": null,
+      "work": {
+        "type": "feature",
+        "state": "active",
+        "priority": 1,
+        "assignee": {
+          "kind": "agent",
+          "name": "Rain gauge - claude-code"
+        },
+        "claim": {
+          "label": "Rain gauge - claude-code",
+          "claimedAt": "2026-11-02T09:30:00.123456+00:00",
+          "expiresAt": "2026-11-02T11:30:00.123456+00:00"
+        }
+      }
+    },
+    {
+      "id": "6d3c2a10-0000-4000-8000-00000000a064",
+      "scope": "shared",
+      "owner": "household",
+      "author": null,
+      "source": "app",
+      "kind": null,
+      "importance": null,
+      "volatility": null,
+      "status": "draft",
+      "tags": [],
+      "project": {
+        "id": "6d3c2a10-0000-4000-8000-00000000e004",
+        "slug": "allotment",
+        "name": "Allotment"
+      },
+      "content": "DEMO: label the seed trays by sowing week.",
+      "truncated": false,
+      "held": null,
+      "validFrom": null,
+      "unknownStart": false,
+      "validUntil": null,
+      "revision": 1,
+      "createdAt": "2026-11-02T09:30:00.123456+00:00",
+      "updatedAt": "2026-11-02T09:30:00.123456+00:00",
+      "state": "current",
+      "replacedBy": null,
+      "retractedSources": [],
+      "capsule": null,
+      "work": {
+        "type": "improvement",
+        "state": "ready",
+        "priority": null,
+        "assignee": {
+          "kind": "person",
+          "name": "sam"
+        }
+      }
+    }
+  ],
+  "next": null
+}

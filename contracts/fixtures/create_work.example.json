@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a061",
+  "revision": 1,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": {
+    "id": "6d3c2a10-0000-4000-8000-00000000e004",
+    "slug": "allotment",
+    "name": null,
+    "created": false
+  },
+  "work": {
+    "work_type": "bug",
+    "state": "backlog",
+    "priority": 2
+  },
+  "changed": [],
+  "unchanged": false,
+  "replayed": false,
+  "dropped_tags": [],
+  "held": null,
+  "message": "Stored as a draft, a household memory, visible to everyone in the household (per-person scopes are off). set_status canonical confirms it once the person agrees it is right. It is a work item (bug, backlog, priority 2): list_work lists it, and update_work moves its state."
+}

@@ -28,6 +28,9 @@ public sealed class RelationshipEngine(Database db, IRelationshipSource source,
     // Whether the reads serve a native memory a newer one of its scope replaced, with what replaced it (SB-P4-11;
     // RelationshipCatalog.Replaced, memory.tools on). Off, the default, every read is exactly as before.
     public bool Replaced { get; init; }
+    // Whether a read says of a native memory's star that its memory is a work item (migration 079; set from
+    // RelationshipCatalog.Work, memory.work on). Off, the default, every read is exactly as before.
+    public bool Work { get; init; }
     // Whether the reads serve the links a person or an AI client made (made_links, SB-P4-02; RelationshipCatalog.MadeLinks,
     // memory.tools on) beside the map's own. Off, the default, none is read, so an install with every setting off answers
     // as before even after an operator's import brought made links in (043).
@@ -281,17 +284,20 @@ public sealed class RelationshipEngine(Database db, IRelationshipSource source,
     // memories (`replaced`, SB-P4-11) is told, on each such star's record, the star of the memory that replaced it, read
     // now (MemoryStars.ReplacedBy); never stored, and without `replaced` the read is exactly as before.
     internal static async Task<List<Stored>> Load(Guid principal, NpgsqlConnection c, NpgsqlTransaction? tx, bool vectors, CancellationToken ct,
-        bool serving = false, bool replaced = false)
+        bool serving = false, bool replaced = false, bool work = false)
     {
         var snapshot = vectors ? "r.relationship_snapshot" : "r.relationship_snapshot - 'Embedding' - 'MapEmbedding' - 'MapEmbeddingModel'";
         var truth = serving && replaced;
+        // A reader served work items (`work`, 079) is told, on each such star's record, its memory's work properties, read
+        // now (MemoryStars.Work); never stored, and without `work` the read is exactly as before.
+        var worked = serving && work;
         // At most the budget's most recently observed rows. A pass holds no more than the budget, so the latest pass is
         // always whole; the older rows past it are ones no pass has listed lately (an adapter turned off, a listing past
         // its cap), which no reader shows once their freshness lapses. Edges are retired only between rows in the working
         // set, so a row left out keeps its links. A reader's budget is counted over what it is served.
         await using var cmd = Database.Command(c, tx, $"""
-            SELECT s.id,s.relationship_snapshot,s.version{(truth ? $",{MemoryStars.ReplacedBy("s")}" : "")} FROM (
-              SELECT r.id,{snapshot} AS relationship_snapshot,r.xmin::text AS version{(truth ? ",r.external_id" : "")} FROM resources r {(serving ? Keys : "")}
+            SELECT s.id,s.relationship_snapshot,s.version{(truth ? $",{MemoryStars.ReplacedBy("s")}" : "")}{(worked ? $",{MemoryStars.Work("s")}" : "")} FROM (
+              SELECT r.id,{snapshot} AS relationship_snapshot,r.xmin::text AS version{(truth || worked ? ",r.external_id" : "")} FROM resources r {(serving ? Keys : "")}
               WHERE r.relationship_snapshot IS NOT NULL AND {(serving ? Served(replaced: replaced) : Database.Visible())}
                 AND r.revision IS NOT DISTINCT FROM r.relationship_snapshot->>'Revision'
                 AND r.title=r.relationship_snapshot->>'Title'
@@ -307,6 +313,7 @@ public sealed class RelationshipEngine(Database db, IRelationshipSource source,
         {
             var record = JsonSerializer.Deserialize<DiscoveryRecord>(reader.GetString(1))!;
             if (truth && !reader.IsDBNull(3)) record = record with { ReplacedBy = MemoryStars.Key(record.Key.Subject, reader.GetGuid(3)).GraphId };
+            if (worked && !reader.IsDBNull(truth ? 4 : 3)) record = record with { Work = MemoryWorkProps.From(reader.GetString(truth ? 4 : 3)) };
             rows.Add(new(reader.GetGuid(0), record, reader.GetString(2)));
         }
         return rows;
@@ -431,7 +438,7 @@ public sealed class RelationshipEngine(Database db, IRelationshipSource source,
         await using var c = await db.Source.OpenConnectionAsync(ct);
         await using var read = await c.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead, ct);
         await Database.Execute(c, read, "SET TRANSACTION READ ONLY", ct);
-        var served = await Load(principal, c, read, false, ct, serving: true, replaced: Replaced);
+        var served = await Load(principal, c, read, false, ct, serving: true, replaced: Replaced, work: Work);
         var fresh = served
             .Where(s => s.Record.RetrievedAt >= cutoff && !unavailableProviders.Contains(s.Record.Key.Provider))
             .GroupBy(s => s.Record.Key.GraphId).Select(g => g.MaxBy(s => s.Record.RetrievedAt)!)

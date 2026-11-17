@@ -42,6 +42,9 @@ public sealed record DiscoveryRecord(ResourceKey Key, string Scope, string Kind,
     // On a native memory's star that a newer memory of its scope replaced, that memory's star id, set by a read that
     // serves replaced memories (RelationshipEngine.Replaced, SB-P4-11) at that read; never set by a pass, never stored.
     [System.Text.Json.Serialization.JsonIgnore] public string? ReplacedBy { get; init; }
+    // On a native memory's star whose memory is a work item (migration 079), its work properties, set by a read that serves
+    // them (RelationshipEngine.Work, memory.work on) at that read; never set by a pass, never stored.
+    [System.Text.Json.Serialization.JsonIgnore] public MemoryWorkProps? Work { get; init; }
     // With graph.similarity.model set (D-256), a second vector made by that model with Embedding's recipe from the same
     // text, and the model's id: read by the map's similar and copy links alone (SimilaritySuggestions.MapModel), never by
     // a reader that serves stars (RelationshipEngine.Load leaves it out) or by anything else that reads Embedding. Set by

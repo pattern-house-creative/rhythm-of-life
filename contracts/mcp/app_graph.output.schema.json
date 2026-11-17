@@ -130,6 +130,17 @@
             "state": { "const": "replaced" },
             "replacedBy": { "type": "string", "minLength": 1, "maxLength": 1000 }
           }
+        },
+        "work": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "state", "priority"],
+          "description": "A native memory's star whose memory is a work item (migration 079's memory_work, read at each read): served only while memory.work is on, for the app to draw it as work and to leave it off a sky when its person asks. priority is 1 first to 4 last, or null. Absent on every other star.",
+          "properties": {
+            "type": { "enum": ["task", "bug", "feature", "improvement"] },
+            "state": { "enum": ["backlog", "ready", "active", "review", "done", "cancelled"] },
+            "priority": { "type": ["integer", "null"], "minimum": 1, "maximum": 4 }
+          }
         }
       }
     },

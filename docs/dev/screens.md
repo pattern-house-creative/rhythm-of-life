@@ -252,6 +252,15 @@ screen with the default settings.
   last one. With nothing to undo it reports `failed`, `detail.summary` "Nothing to undo".
 - **Tiles.** A per-screen tile map in `localStorage` (`rhythm-of-life.tiles`) gives each tile its place; each tile's
   `grid-area` follows the map (place `changed` is grid area `context`). The default map changes nothing on screen.
+- **Work items on the sky.** With the engine's `memory.work` on, a memory that is a work item is a star drawn as a
+  small box (a dot in it while the work is open, a tick once done, a bar when cancelled; finished work is quieter), named
+  as a work item to a screen reader. Sources & settings has "Work items on the sky", on by default and kept per screen in
+  `localStorage` (`rhythm-of-life.work-items`), followed by the browser's other tabs (`watchSettings`); it is offered
+  only while the map has a work item, or while they are hidden on that screen. Like the automatic links it is display
+  only and never reaches the engine: off, no sky of that screen (Home's, a dashboard's map part, the explorer's) draws a
+  work item's star or a link to one (`graphView.ts` `withoutWork`), so a hidden star takes no room either; the chosen
+  star and pinned ones are still drawn, the explorer's lists and a star's panel still read them, and the Memories view
+  lists every one. Nothing is deleted or changed.
 - **Lines on the sky.** Sources & settings has "Automatic links on the sky" (first "Similar links on the sky"), on by
   default and kept per screen in `localStorage` (`rhythm-of-life.similar-links`, the first name's key, so an "off" chosen
   then holds); the browser's other tabs follow it (`watchSettings`). Unlike the layout and tiles it is display only and

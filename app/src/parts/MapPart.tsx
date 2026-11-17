@@ -34,6 +34,9 @@ export interface MapSky {
   // Whether it draws the dashed links ("Automatic links on the sky", Sources
   // & settings; absent: drawn). Off, a selected star still draws its own.
   automaticLinks?: boolean;
+  // Whether it draws work items' stars ("Work items on the sky", Sources &
+  // settings; absent: drawn). Off, a selected or pinned one still shows.
+  workItems?: boolean;
 }
 
 // What "Explore" lights in the explorer: a focused part's stars, added to the
@@ -253,6 +256,7 @@ export function MapPart({
         nodes={blocked ? [] : drawn.nodes}
         edges={drawn.edges}
         automaticLinks={sky.automaticLinks ?? true}
+        workItems={sky.workItems ?? true}
         pinned={pins}
         selected={selected}
         onSelect={onStar}

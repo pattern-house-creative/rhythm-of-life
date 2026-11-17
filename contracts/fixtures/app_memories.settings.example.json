@@ -3,6 +3,7 @@
   "scopes": "off",
   "person": null,
   "share": false,
+  "work": false,
   "capsules": false,
   "capture": false,
   "secondBrainImport": false,

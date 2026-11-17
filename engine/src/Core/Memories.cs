@@ -26,7 +26,8 @@ namespace Knowledge;
 // project slug or alias another project of that scope answers to, MemoryProjects.cs); and an undo's (MemoryUndo.cs):
 // `nothing_to_undo`, `no_version`, `not_visible`, `pruned` (Revision holds the oldest revision still kept) and `moved`;
 // and a share's (MemoryShare.cs): `scopes_off`, `held` and `no_author`; and a supersede's (MemoryTruth.cs): `held`,
-// `retracted` and `protected`; and a contradiction's (MemoryContradictions.cs): `not_offered`, `settled` and `needs_person`.
+// `retracted` and `protected`; and a contradiction's (MemoryContradictions.cs): `not_offered`, `settled` and `needs_person`;
+// and a work item's (MemoryWork.cs, migration 081): `claimed`, a live claim of another holds it.
 // The message is the engine's own words, never another scope's data.
 public sealed class MemoryRefused(string code, string message, int? revision = null, IReadOnlyList<string>? known = null) : Exception(message)
 {
@@ -175,12 +176,14 @@ public sealed record MemoryWrite(Guid Id, int Revision, string Subject, string S
 // ended or in the trash. Standing: it is a standing instruction (migration 065, SB-P5-12); in a list false for a held one.
 // Contradictions: the memories of its scope that stand against it as possible contradictions
 // (migration 068, SB-P5-03), closest first, at most 10; empty when none, and for one held, marked wrong, ended or in the trash.
+// Work: its work properties when it is a work item (migration 079, MemoryWork.cs), or none; they hold no words, so a held
+// one keeps them.
 public sealed record MemoryRecord(Guid Id, string Subject, string Scope, string? Author, string Source, string? Kind,
     int? Importance, string? Volatility, string Status, IReadOnlyList<string> Tags, MemoryProjectRef? Project, string? Content,
     bool Truncated, string? Hold, DateTimeOffset? ValidFrom, bool UnknownStart, DateTimeOffset? ValidUntil, int Revision,
     DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, string? Capsule = null, string? Slot = null, string State = "current",
     Guid? ReplacedBy = null, IReadOnlyList<Guid>? RetractedSources = null, MemoryDue? Due = null, IReadOnlyList<MemoryCopy>? DuplicateOf = null,
-    bool Standing = false, IReadOnlyList<MemoryCandidate>? Contradictions = null);
+    bool Standing = false, IReadOnlyList<MemoryCandidate>? Contradictions = null, MemoryWorkProps? Work = null);
 
 public sealed record MemoryCursor(DateTimeOffset CreatedAt, Guid Id);
 
@@ -189,10 +192,13 @@ public sealed record MemoryCursor(DateTimeOffset CreatedAt, Guid Id);
 // Since and Before bound when it was written. Newest first, Limit at most 50; After continues from a page's Next. Query (the app's
 // Memories list, SB-P6-01): memories whose words hold it, whatever the case; the store trims it and takes 1 to MemoryStore.QueryMax
 // characters, and app_memories' door, its one caller, takes at most QueryMax as sent and something besides spaces. A held memory's
-// words never select it. Every caller that names no query lists as before.
+// words never select it. Every caller that names no query lists as before. Work, WorkType and WorkPriority (the app's Memories list,
+// migration 079): only work items, in one state, open (every state but done and cancelled) or all; of one type; of one priority, 1 to
+// 4, or 0 for the unranked. Any of the three keeps work items only. Work properties hold no words, so a held one is selected as any.
 public sealed record MemoryFilter(string? Scope = null, IReadOnlyList<string>? Tags = null, string? Kind = null, string? Status = null,
     string? Project = null, string? Author = null, string? Source = null, DateTimeOffset? Since = null, DateTimeOffset? Before = null,
-    int Limit = 10, MemoryCursor? After = null, int PreviewChars = MemoryInput.PreviewDefault, string? Query = null);
+    int Limit = 10, MemoryCursor? After = null, int PreviewChars = MemoryInput.PreviewDefault, string? Query = null,
+    string? Work = null, string? WorkType = null, int? WorkPriority = null);
 
 public sealed record MemoryPage(IReadOnlyList<MemoryRecord> Items, MemoryCursor? Next);
 
@@ -377,6 +383,20 @@ public sealed partial class MemoryStore(NpgsqlDataSource source, RecallLog? foll
             if (words.Length is 0 or > QueryMax) throw new MemoryRefused("invalid", $"A search is 1 to {QueryMax} characters");
             Add("(m.hold IS NULL AND strpos(lower(m.content),lower(@query))>0)", "query", words);
         }
+        // Work items only (079), by the properties they have now: exact, as list_work's filters are.
+        if (filter.Work is not null || filter.WorkType is not null || filter.WorkPriority is not null)
+        {
+            var state = MemoryWork.Listed(filter.Work);
+            var type = filter.WorkType is null ? null : MemoryWork.Type(filter.WorkType);
+            if (filter.WorkPriority is { } rank && rank != 0) MemoryWork.Priority(rank);
+            Add("""
+                EXISTS(SELECT 1 FROM memory_work w WHERE w.memory_id=m.id
+                  AND (@workState::text IS NULL OR w.state=@workState OR @workState='open' AND w.state NOT IN ('done','cancelled'))
+                  AND (@workType::text IS NULL OR w.work_type=@workType) AND (@workPriority::int IS NULL OR coalesce(w.priority,0)=@workPriority))
+                """, "workState", state);
+            args.Add(("workType", type));
+            args.Add(("workPriority", filter.WorkPriority));
+        }
         if (filter.Kind is not null) Add("m.kind=@kind", "kind", filter.Kind);
         if (filter.Status is not null) Add("m.status=@status", "status", filter.Status);
         if (filter.Author is not null) Add("m.author_id=@author", "author", filter.Author);
@@ -442,7 +462,10 @@ public sealed partial class MemoryStore(NpgsqlDataSource source, RecallLog? foll
           memory_due_json(m.due_at,m.due_kind,m.due_source)::text,
           {CopiesColumn},
           {(chars is null ? "m.standing" : "m.hold IS NULL AND m.standing")},
-          {CandidatesColumn}
+          {CandidatesColumn},
+          (SELECT (memory_work_json(k.work_type,k.state,k.priority)||jsonb_strip_nulls(jsonb_build_object(
+            'assignee',memory_work_assignee_json(k.assignee_person,k.assignee_label),'claim',memory_work_claim_json(memory_work_claim(k.memory_id)))))::text
+            FROM memory_work k WHERE k.memory_id=m.id)
         {From}
         """;
 
@@ -455,7 +478,8 @@ public sealed partial class MemoryStore(NpgsqlDataSource source, RecallLog? foll
             Text(10), r.GetBoolean(11), Text(12), At(13), !r.IsDBNull(14) && r.GetBoolean(14), At(15), r.GetInt32(16),
             r.GetFieldValue<DateTimeOffset>(17), r.GetFieldValue<DateTimeOffset>(18), Text(22), Text(23), r.GetString(24),
             r.IsDBNull(25) ? null : r.GetGuid(25), r.GetFieldValue<Guid[]>(26), MemoryDue.From(r.IsDBNull(27) ? null : r.GetString(27)),
-            Copies(r.IsDBNull(28) ? null : r.GetString(28)), r.GetBoolean(29), Candidates(r.IsDBNull(30) ? null : r.GetString(30)));
+            Copies(r.IsDBNull(28) ? null : r.GetString(28)), r.GetBoolean(29), Candidates(r.IsDBNull(30) ? null : r.GetString(30)),
+            MemoryWorkProps.From(r.IsDBNull(31) ? null : r.GetString(31)));
     }
 
     async Task<MemoryWrite> Write(string sql, Guid principal, MemoryCall call, IReadOnlyList<string> dropped, CancellationToken ct,
@@ -531,7 +555,7 @@ public sealed partial class MemoryStore(NpgsqlDataSource source, RecallLog? foll
         "P0002" => new("unknown", "Unknown memory"),
         "42501" => new("forbidden", e.MessageText),
         "22023" when e.Hint is "nothing_to_undo" or "no_version" or "not_visible" or "moved" or "scopes_off" or "held" or "no_author"
-            or "retracted" or "protected" or "not_due" or "unknown_project" or "limit" or "not_offered" or "settled" or "needs_person" =>
+            or "retracted" or "protected" or "not_due" or "unknown_project" or "limit" or "not_offered" or "settled" or "needs_person" or "claimed" =>
             new(e.Hint, e.MessageText),
         "22023" when e.Hint is { } hint && hint.StartsWith("pruned:", StringComparison.Ordinal) && int.TryParse(hint[7..], out var kept) =>
             new("pruned", e.MessageText, kept),

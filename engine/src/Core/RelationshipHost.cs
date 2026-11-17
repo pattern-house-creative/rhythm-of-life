@@ -75,7 +75,7 @@ public sealed class RelationshipHost(Database db, Func<RelationshipHostConfigura
         config.Validate();
         // "content" and "data" are "get" plus that one node's current text or measurements, read when it is opened.
         var one = query is { Operation: "content" or "data" };
-        var (page, shown) = await new RelationshipEngine(db, SnapshotOnly.Instance) { Replaced = config.Catalog.Replaced, MadeLinks = config.Catalog.MadeLinks }.ReadSnapshot(principal,
+        var (page, shown) = await new RelationshipEngine(db, SnapshotOnly.Instance) { Replaced = config.Catalog.Replaced, MadeLinks = config.Catalog.MadeLinks, Work = config.Catalog.Work }.ReadSnapshot(principal,
             TimeSpan.FromSeconds(config.FreshnessSeconds), config.GraphNodeLimit, Unavailable(), adapters.Shows, ct,
             one ? null : knownNodes, one ? null : knownEdges, one ? query! with { Operation = "get" } : query);
         if (query is { Operation: "content" })
@@ -95,7 +95,7 @@ public sealed class RelationshipHost(Database db, Func<RelationshipHostConfigura
         var config = Config();
         if (!await Reads(config, principal, ct)) throw new UnauthorizedAccessException("Relationship graph unavailable");
         config.Validate();
-        return await new RelationshipEngine(db, SnapshotOnly.Instance) { Replaced = config.Catalog.Replaced, MadeLinks = config.Catalog.MadeLinks }.View(principal,
+        return await new RelationshipEngine(db, SnapshotOnly.Instance) { Replaced = config.Catalog.Replaced, MadeLinks = config.Catalog.MadeLinks, Work = config.Catalog.Work }.View(principal,
             TimeSpan.FromSeconds(config.FreshnessSeconds), Unavailable(), ct);
     }
     // One reader's snapshot and the configuration it was read under, for a dashboard's feeds.

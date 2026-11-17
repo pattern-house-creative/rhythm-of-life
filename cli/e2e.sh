@@ -547,7 +547,7 @@ step "every setting on, as an operator turns them on, a capture connection made 
 # memory.scopes, memory.tools and memory.share are on already (above); app.viewers stays off, since this version refuses on,
 # and so does engine.rerank, since on the engine would fetch a reranker's files and this run never downloads a model.
 dc --profile cli run --rm --no-deps --entrypoint sed cli -i \
-  -e '/^memory:/a\  capsules: on' -e '/^memory:/a\  secondBrainImport: on' -e '/^memory:/a\  capture: on' -e '/^memory:/a\  capsuleWrites: on' \
+  -e '/^memory:/a\  capsules: on' -e '/^memory:/a\  secondBrainImport: on' -e '/^memory:/a\  capture: on' -e '/^memory:/a\  capsuleWrites: on' -e '/^memory:/a\  work: on' \
   -e '/^engine:/a\  recall: on' -e '/^engine:/a\  searchKnowledge: combined' -e '/^engine:/a\  recallLog: on' -e '/^engine:/a\  nightSummary: on' -e '/^engine:/a\  writeLimit: on' -e '/^engine:/a\  rerank: off' \
   -e '/^app:/a\  viewers: off' -e '/^graph:/a\  pluginLinks: on' -e '/^  embeddings:/a\    thresholds: tuned' /work/rhythm.yaml \
   >/dev/null 2>&1 || fail "could not switch every setting on in rhythm.yaml"

@@ -1,0 +1,39 @@
+{
+  "ok": true,
+  "id": "6d3c2a10-0000-4000-8000-00000000a063",
+  "revision": 2,
+  "scope": "shared",
+  "owner": "household",
+  "status": "draft",
+  "scopes": "off",
+  "project": {
+    "id": "6d3c2a10-0000-4000-8000-00000000e004",
+    "slug": "allotment",
+    "name": null,
+    "created": false
+  },
+  "work": {
+    "work_type": "feature",
+    "state": "active",
+    "priority": 1,
+    "assignee": {
+      "kind": "agent",
+      "name": "Allotment gauge - claude-code"
+    }
+  },
+  "changed": [
+    "work_state"
+  ],
+  "unchanged": false,
+  "replayed": false,
+  "dropped_tags": [],
+  "held": null,
+  "message": "Claimed until 2026-11-08T12:15:00Z, and moved to active (revision 2 now; history records it, work_changed). Keep claim_id: claim_work with it renews the claim, update_work with it moves the item's state, and release_work with it lets it go. Until then no other session moves its state.",
+  "claim": {
+    "id": "6d3c2a10-0000-4000-8000-0000000c1a1d",
+    "label": "Allotment gauge - claude-code",
+    "claimed_at": "2026-11-08T10:15:00Z",
+    "expires_at": "2026-11-08T12:15:00Z",
+    "renewed": false
+  }
+}

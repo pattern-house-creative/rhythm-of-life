@@ -671,6 +671,36 @@ export function fakeEngine({
             },
           });
         }
+        // A person's release of a work item's claim (migration 081): the claim goes, the memory does not change.
+        case "release_claim": {
+          const m = live.get(String(request.id))!;
+          const held = Boolean(m.work?.claim);
+          if (held) {
+            const { claim: _, ...work } = m.work!;
+            live.set(m.id, { ...m, work });
+          }
+          return ok({
+            written: {
+              op: "release_claim",
+              id: m.id,
+              revision: m.revision,
+              to: null,
+              scope: m.scope,
+              owner: m.owner,
+              status: m.status,
+              scopes: "off",
+              project: null,
+              unchanged: !held,
+              replayed: false,
+              droppedTags: [],
+              held: null,
+              trash: null,
+              capsule: null,
+              projectLeft: false,
+              cascade: null,
+            },
+          });
+        }
         case "update": {
           const m = live.get(String(request.id))!;
           const clear = (request.clear as string[] | undefined) ?? [];

@@ -116,7 +116,7 @@ public static partial class AppMemories
     public static readonly string[] Writes = ["capture", "append", "update", "status", "release", "release_all", "capsule", "forget", "restore", "undo", "delete",
         "dismiss", "undismiss", "link", "unlink", "still_true", "clear_flags", "keep_copy", "settle_contradiction", "resurface_dismiss",
         "undo_group", "forget_all", "restore_all", "delete_all", "project_create", "project_update", "project_delete", "review_insight", "resolve",
-        "resolve_loop", "resolve_due", "record_outcome", "stop_standing", "resolve_all"];
+        "resolve_loop", "resolve_due", "record_outcome", "stop_standing", "resolve_all", "release_claim"];
     static readonly string[] Ops = [.. Reads, .. Writes];
 
     // A capsule op names core or project with one of its slots (CapsuleSlots, 025's checks), or none to take the memory
@@ -132,7 +132,7 @@ public static partial class AppMemories
     // Each op's arguments beside op: the required, then the optional.
     static readonly IReadOnlyDictionary<string, (string[] Required, string[] Optional)> Shapes = new Dictionary<string, (string[], string[])>
     {
-        ["list"] = ([], ["scope", "tag", "kind", "status", "project", "query", "cursor", "limit"]),
+        ["list"] = ([], ["scope", "tag", "kind", "status", "project", "query", "cursor", "limit", "work", "workType", "workPriority"]),
         ["trash"] = ([], ["cursor", "limit"]),
         ["get"] = (["id"], ["version"]),
         ["history"] = (["id"], ["before", "limit"]),
@@ -165,10 +165,12 @@ public static partial class AppMemories
         ["brief"] = ([], ["scope", "project"]),
         ["resurface"] = ([], []),
         ["resurface_dismiss"] = (["id"], []),
-        ["tags"] = ([], ["scope", "tag", "kind", "status", "project", "query"]),
+        ["tags"] = ([], ["scope", "tag", "kind", "status", "project", "query", "work", "workType", "workPriority"]),
         ["changes"] = ([], ["since", "scope", "notHeld"]),
         ["capsule_status"] = (["capsule"], ["project", "scope"]),
         ["settings"] = ([], []),
+        // A person ends a work item's claim (migration 081), any claim, with no claim id: only with memory.work on.
+        ["release_claim"] = (["id"], []),
         ["undo_group"] = (["group"], []),
         ["forget_all"] = (["memories"], []),
         ["restore_all"] = (["memories"], []),
@@ -398,6 +400,10 @@ public static partial class AppMemories
             "note" => Text(500),
             "insight" => Uuid(),
             "notHeld" => v.ValueKind is JsonValueKind.True or JsonValueKind.False,
+            // A list's work filter (migration 079): work items in one state, open or all; of one type; of one priority, 0 for unranked.
+            "work" => Word([.. MemoryWork.States, MemoryWork.Open, "all"]),
+            "workType" => Word([.. MemoryWork.Types]),
+            "workPriority" => Number(0, MemoryWork.PriorityLast),
             "direction" => Word(Directions),
             "window" => Word([.. DueDates.Windows]),
             "source" => Word(CalibrationSources),
@@ -448,6 +454,11 @@ public static partial class AppMemories
         Guid? Uuid(string name) => Text(name) is { } t ? Guid.Parse(t) : null;
         string[]? Many(string name) => args.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Array
             ? [.. v.EnumerateArray().Select(x => x.GetString()!)] : null;
+        // A list's work filter (migration 079), named only while the install has work items on (memory.work): its word, or for the
+        // priority a mark that it was given; null when the call names none.
+        string? Work(string name) => !args.TryGetProperty(name, out var v) ? null
+            : !MemoryTools.WorkOn(services) ? throw new ArgumentException("Work items are off in this install (memory.work)")
+            : v.ValueKind == JsonValueKind.String ? v.GetString() : "given";
         MemoryCall Way(bool keyed = false) => new(Channel, null, keyed ? Text("key") : null);
         var id = Uuid("id") ?? Guid.Empty;
         (Guid Id, int Revision)[] Revisions() => [.. args.GetProperty("memories").EnumerateArray()
@@ -457,7 +468,7 @@ public static partial class AppMemories
             JsonObject answer = op switch
             {
                 "list" => await List(store, principal, Text("scope"), Text("tag"), Text("kind"), Text("status"), Text("project"), Text("cursor"),
-                    Number("limit") ?? ListDefault, ct, Text("query")),
+                    Number("limit") ?? ListDefault, ct, Text("query"), Work("work"), Work("workType"), Work("workPriority") is null ? null : Number("workPriority")),
                 "trash" => await Trash(store, principal, Text("cursor"), Number("limit") ?? TrashDefault, ct),
                 "get" => await Get(store, principal, id, Number("version"), ct),
                 "history" => await History(store, principal, id, Number("before"), Number("limit") ?? MemoryStore.HistoryDefault, ct),
@@ -483,7 +494,10 @@ public static partial class AppMemories
                 "connections" => Connections(await store.Connections(principal, id, Text("type"), Number("limit") ?? MemoryStore.ConnectionsDefault, ct)
                     ?? throw Unknown()),
                 "stale" => await Stale(store, principal, Text("scope"), Text("cursor"), Number("limit") ?? StaleDefault, ct),
-                "link" => Linked(await store.Link(principal, id, Uuid("target")!.Value, Text("type") ?? "relates_to", null, Way(), ct)),
+                // depends_on (migration 080) only while the install has work items on; otherwise refused as the list's work filter is.
+                "link" => Linked(await store.Link(principal, id, Uuid("target")!.Value, Text("type") ?? "relates_to", null, Way(), ct,
+                    work: Text("type") == MemoryWork.DependsOn && !MemoryTools.WorkOn(services)
+                        ? throw new ArgumentException("Work items are off in this install (memory.work)") : MemoryTools.WorkOn(services))),
                 "unlink" => Unlinked(await store.Unlink(principal, id, Uuid("target")!.Value, Text("type"), Way(), ct)),
                 "still_true" => Confirmed(await store.StillTrue(principal, id, Number("expected"), Way(), ct)),
                 "clear_flags" => Written(op, await store.ClearFlags(principal, id, Number("expected"), Way(), ct)),
@@ -495,11 +509,13 @@ public static partial class AppMemories
                 "resurface_dismiss" => ResurfaceDismissed(await store.DismissResurfaced(principal, id, Way(), ct)),
                 "settle_contradiction" => Settled(await store.Settle(principal, id, Uuid("target")!.Value, Text("decision")!, Number("expected"), Number("targetExpected"), Way(), ct)),
                 "tags" => await Tagged(store, principal, new MemoryFilter(Text("scope"), Text("tag") is { } tag ? [tag] : null, Text("kind"), Text("status"), Text("project"),
-                    Query: Text("query")), ct),
+                    Query: Text("query"), Work: Work("work"), WorkType: Work("workType"), WorkPriority: Work("workPriority") is null ? null : Number("workPriority")), ct),
                 "changes" => await Changes(store, principal, Instant(Text("since")), Text("scope"),
                     args.TryGetProperty("notHeld", out var notHeld) && notHeld.ValueKind == JsonValueKind.True, ct),
                 "capsule_status" => await CapsuleStatus(services, principal, Text("capsule")!, Text("project"), Text("scope"), ct),
                 "settings" => await Settings(services, principal, ct),
+                "release_claim" => Written(op, (await store.ReleaseWork(principal, !MemoryTools.WorkOn(services)
+                    ? throw new ArgumentException("Work items are off in this install (memory.work)") : id, null, Way(), ct)).Write),
                 "undo_group" => Regrouped(await store.UndoGroup(principal, Text("group")!, Way(), ct)),
                 "forget_all" => ForgottenAll(await store.ForgetAll(principal, Revisions(), Way(), ct)),
                 "restore_all" => RestoredAll(await store.RestoreAll(principal, [.. args.GetProperty("memories").EnumerateArray()
@@ -609,11 +625,11 @@ public static partial class AppMemories
     }
 
     static async Task<JsonObject> List(MemoryStore store, Guid principal, string? scope, string? tag, string? kind, string? status, string? project,
-        string? cursor, int limit, CancellationToken ct, string? query = null)
+        string? cursor, int limit, CancellationToken ct, string? query = null, string? work = null, string? workType = null, int? workPriority = null)
     {
         var at = MemoryTools.Cursor(cursor);
         var page = await store.List(principal, new MemoryFilter(scope, tag is null ? null : [tag], kind, status, project, null, null, null, null, limit,
-            at is { } a ? new MemoryCursor(a.At, a.Id) : null, ListPreview, query), ct);
+            at is { } a ? new MemoryCursor(a.At, a.Id) : null, ListPreview, query, work, workType, workPriority), ct);
         return new()
         {
             ["memories"] = new JsonArray([.. page.Items.Select(m => (JsonNode)Memory(m))]),
@@ -754,8 +770,9 @@ public static partial class AppMemories
     // replacedBy and retractedSources (migration 049, SB-P4-11): what it is now, what replaced it (only while replaced) and
     // the retracted memories of its scope that flagged it, as the MCP get serves them; they hold no words, so a held one in
     // a list carries them too. duplicateOf (migration 063): the memories of its scope it was flagged as a copy of on save
-    // that stand now, closest first, only when it has any (never for a held one).
-    static JsonObject Memory(MemoryRecord m) => Standing(Copies(new()
+    // that stand now, closest first, only when it has any (never for a held one). work (migration 079): its type, state and
+    // priority, only when it is a work item; they hold no words, so a held one in a list carries them too.
+    static JsonObject Memory(MemoryRecord m) => Worked(Standing(Copies(new()
     {
         ["id"] = m.Id.ToString(), ["scope"] = m.Scope, ["owner"] = m.Subject, ["author"] = m.Author, ["source"] = m.Source, ["kind"] = m.Kind,
         ["importance"] = m.Importance, ["volatility"] = m.Volatility, ["status"] = m.Status, ["tags"] = Strings(m.Tags), ["project"] = Project(m.Project),
@@ -764,7 +781,19 @@ public static partial class AppMemories
         ["capsule"] = m.Capsule is { } kind ? new JsonObject { ["kind"] = kind, ["slot"] = m.Slot } : null,
         ["state"] = m.State, ["replacedBy"] = m.State == "replaced" ? m.ReplacedBy?.ToString() : null,
         ["retractedSources"] = Strings((m.RetractedSources ?? []).Select(s => s.ToString())),
-    }, "duplicateOf", m.Hold is null ? m.DuplicateOf : null), "contradictions", m.Hold is null ? m.Contradictions : null);
+    }, "duplicateOf", m.Hold is null ? m.DuplicateOf : null), "contradictions", m.Hold is null ? m.Contradictions : null), m.Work);
+
+    // A work item's properties (079), under work, only when the memory is one, so every other answer is as before; with
+    // whose it is and the live claim on it (081), each only when it has one, the claim never with its id.
+    static JsonObject Worked(JsonObject answer, MemoryWorkProps? work)
+    {
+        if (work is null) return answer;
+        var named = new JsonObject { ["type"] = work.Type, ["state"] = work.State, ["priority"] = work.Priority };
+        if (work.Assignee is { } a) named["assignee"] = new JsonObject { ["kind"] = a.Kind, ["name"] = a.Name };
+        if (work.Claim is { } c) named["claim"] = new JsonObject { ["label"] = c.Label, ["claimedAt"] = c.ClaimedAt, ["expiresAt"] = c.ExpiresAt };
+        answer["work"] = named;
+        return answer;
+    }
 
     // The copies a memory names (SB-P5-02), under `name`, only when it names any, so every other answer is as before.
     static JsonObject Copies(JsonObject answer, string name, IReadOnlyList<MemoryCopy>? copies)

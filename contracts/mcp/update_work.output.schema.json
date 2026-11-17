@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rhythm-of-life.example.invalid/contracts/mcp/update_work.output.schema.json",
+  "title": "update_work answer",
+  "description": "The memory tool update_work's answer (migration 079): a work item's state, type or priority changed, as a change of the memory. work is its properties now and before those it had; changed names what moved (work_state, work_type, work_priority); summary is what the call gave when the state became done or cancelled, kept in the change's audit row. The state before is kept as a version, the revision moved, history records it (work_changed) and undo puts it back; a repeat answers unchanged true with changed empty, and nothing was written. replayed is always false and dropped_tags empty. Refused (invalid): a memory that is no work item, a state done or cancelled with no summary, a summary with any other change, one over 280 characters or that reads like instructions to an AI client, and a memory whose time has ended; held and retracted for one held for review or marked wrong; conflict for a stale expected_revision. Listed and answered only with memory.tools and memory.work on, and refused (off) with the second off (contracts/README.md 2.1). The JSON in its text content, and on success the same as its structured content; a refusal is isError true with the refusal body.",
+  "anyOf": [
+    {
+      "$ref": "memory.defs.schema.json#/$defs/workWritten"
+    },
+    {
+      "$ref": "memory.defs.schema.json#/$defs/refusal"
+    }
+  ]
+}

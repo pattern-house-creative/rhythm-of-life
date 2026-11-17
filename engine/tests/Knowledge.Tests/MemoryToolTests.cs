@@ -83,6 +83,9 @@ static class MemoryToolSettings
          "validity_changed", "superseded", "reopened", "reclosed", "flagged", "unflagged", "flags_cleared", "confirmed", "resolved", "outcome",
          "due_set", "due_changed", "duplicate_flagged", "standing_set", "standing_stopped", "contradiction_proposed", "contradiction_settled"];
     public static readonly string[] ShareEvents = ["shared", "unshared"];
+    // 079's work properties saved with a new work item and changed later, and 081's claim made and ended, which history names
+    // only with memory.work on.
+    public static readonly string[] WorkEvents = ["work_set", "work_changed", "work_claimed", "work_released"];
 
     // A call each tool would take, so a test can add one argument to it.
     public static readonly IReadOnlyDictionary<string, string> Valid = new Dictionary<string, string>
@@ -268,13 +271,13 @@ public sealed class MemoryToolTests
         Assert.Equal(MemoryToolSettings.HistoryEvents,
             System.Text.RegularExpressions.Regex.Match(history, @"what happened \(([a-z_, ]+)\)").Groups[1].Value.Split(", "));
         // That list is every event a migration writes on a memory's audit row (the first word its VALUES name), but a
-        // purge's, after which the memory has no history to read, and a share's, which it names only with memory.share on
-        // (MemoryShareToolTests).
+        // purge's, after which the memory has no history to read, a share's, which it names only with memory.share on
+        // (MemoryShareToolTests), and a work item's, which it names only with memory.work on (MemoryWorkToolTests).
         var migrations = Path.Combine([AppContext.BaseDirectory, "..", "..", "..", "..", "..", "migrations"]);
         var written = Directory.GetFiles(migrations, "*.sql").SelectMany(f => System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(f),
             @"INSERT INTO memory_events\(memory_id,[^)]*\)\s*VALUES\([^']*'([a-z_]+)'").Select(m => m.Groups[1].Value)).ToHashSet();
         Assert.True(written.Remove("purged"));
-        Assert.Equal(MemoryToolSettings.HistoryEvents.Concat(MemoryToolSettings.ShareEvents).Order(), written.Order());
+        Assert.Equal(MemoryToolSettings.HistoryEvents.Concat(MemoryToolSettings.ShareEvents).Concat(MemoryToolSettings.WorkEvents).Order(), written.Order());
         // Nothing among them releases, deletes for good, shares or slots: those are a person's, or another item's.
         Assert.DoesNotContain(tools, t => t.ProtocolTool.Name.Contains("delete") || t.ProtocolTool.Name.Contains("release")
             || t.ProtocolTool.Name.Contains("capsule") || t.ProtocolTool.Name.Contains("share"));
@@ -777,7 +780,7 @@ public sealed class MemoryInstructionsTests
     {
         TestSettings.Use();
         var all = RhythmConfig.Parse(TestSettings.Yaml.Replace("engine: { legacySearch: false }", "engine: { legacySearch: false, recall: on }")
-            + "\nmemory: { tools: on, capsules: on, capsuleWrites: on }\n");
+            + "\nmemory: { tools: on, capsules: on, capsuleWrites: on, work: on }\n");
         return HarnessTools.Create(all, []).ToDictionary(t => t.ProtocolTool.Name,
             t => t.ProtocolTool.InputSchema.GetProperty("properties").EnumerateObject().Select(p => p.Name).ToArray());
     }
@@ -829,6 +832,7 @@ public sealed class MemoryInstructionsTests
         // Besides tools and their arguments: what their answers hold, the changes history names, and the link types link
         // takes and connections answers (Relationships.LinkTypes).
         var arguments = tools.Values.SelectMany(a => a).Concat(Members.Value).Concat(MemoryStore.Undoable).Concat(MemoryToolSettings.HistoryEvents)
+            .Concat(MemoryToolSettings.WorkEvents)
             .Concat(Knowledge.Relationships.LinkTypes.All.Select(t => t.Name)).Concat(ArgumentWords.Value).ToHashSet();
         foreach (var (tool, args) in Calls(text))
         {

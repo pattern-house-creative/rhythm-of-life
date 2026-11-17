@@ -20,7 +20,13 @@ public sealed record GraphNode(string id, string title, string type, string over
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     IReadOnlyList<GraphSeries>? measurements = null,
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    GraphTruth? truth = null);
+    GraphTruth? truth = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    GraphWork? work = null);
+// A native memory's star whose memory is a work item (migration 079, served only with memory.work on): its type, state
+// and priority (1 first to 4 last, or none), for the app to draw it as work and to leave it off a sky when asked. Absent
+// on every other star.
+public sealed record GraphWork(string type, string state, int? priority);
 // A native memory's star that a newer memory of its scope replaced (SB-P4-11, served only with memory.tools on): state
 // replaced and the replacing memory's star id, for the app to draw it faded, never hidden. Absent on every other star.
 public sealed record GraphTruth(string state, string replacedBy);
@@ -71,7 +77,8 @@ public static class GraphProjection
                 new(Identity(r.Key), url, url, r.ModifiedAt, r.RetrievedAt, r.Revision, r.Key.Subject,
                     new(r.Scope, true, url is not null), "available", null),
                 r.Groups is { Count: > 0 } groups ? groups.Select(g => new GraphGroup(g.Id, g.Label)).ToArray() : null,
-                truth: r.ReplacedBy is { } by ? new GraphTruth("replaced", by) : null);
+                truth: r.ReplacedBy is { } by ? new GraphTruth("replaced", by) : null,
+                work: r.Work is { } work ? new GraphWork(work.Type, work.State, work.Priority) : null);
         }).ToArray();
         var edges = links.Where(l => supported.ContainsKey(l.Source) && supported.ContainsKey(l.Target))
             .Select(l => new GraphEdge(l.Id, l.Source.GraphId, l.Target.GraphId, l.Type,

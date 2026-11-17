@@ -949,6 +949,85 @@ upstream's author lock (ledger SEC-04), with its gaps closed (below).
   it keeps as data (D-121); upstream's 24-hour cache of ids and vectors (each question reads the rows, and a vector is made
   once per text revision and model in this process); the 0.67 and 50 as settings (CFG-15). `resolve` has its `stop_standing`
   since migration 071, below.
+- **Work items** (migration 079; `memory.work`, off by default, beside `memory.tools`): a project's backlog, kept as
+  memories (`Core/MemoryWork.cs`). A work item is no new kind of record: it is a memory, with its id, words, project,
+  links, history and star, that also has a row in `memory_work`: a type (task, bug, feature or improvement), a state
+  (backlog, ready, active, review, done or cancelled) and maybe a priority (1 first to 4 last). What it must do, and how
+  to tell it is done, stay in the memory's words, so 036 screens them; no work property holds words. Its properties from
+  each revision on are kept in `memory_work_states`, as 060 keeps a decision's states, so every other change of the
+  memory carries them on and `undo_memory` (079's replacement of 065's) compares those at the revision it goes back to
+  with those now, names a difference `work`, and writes what it brought back at its own revision: an undo of a change
+  takes it back, an undo of the change that made a memory a work item makes it an ordinary memory again (a state row with
+  no type), and an undo of that undo brings the properties back. The writers are a change like any other under 033's
+  author lock (`memory_for_change`): `remember_memory_work` writes a new memory with its properties in one transaction
+  (through `create_memory`, or 061's `remember_memory_due` when the call gives a deadline; its idempotency key covers
+  both; audit row `work_set`), `set_memory_work` gives properties to a memory that is here already, and
+  `update_memory_work` changes state, type or priority (both: a version, the revision, one audit row `work_changed`,
+  no key, a repeat answers unchanged). A work item belongs to a project when it is made one; a project deleted later
+  (035) still takes its memories out, and that item stays a work item with no project until it is given one. A state
+  that becomes done or cancelled takes a summary, 1 to 280 characters on one line, kept in that audit row and nowhere
+  else and listed with the item while that change is its newest change of properties; one that reads like instructions
+  to an AI client is refused (036's `memory_screen`), since no hold covers an audit row, as 058 refuses such a name. It
+  is the one piece of free text here that is not a memory's words. **A work item is not a personal commitment**: it
+  never carries the tag `task`. Two triggers hold that from both sides (`memory_work_no_task` on `memory_work`,
+  `memories_work_no_task` on a change of `memories.tags`), so no write path brings the two together, 058's
+  `memory_open_loop` never answers for one, and `list_loops`, the brief and `resolve` are as they were
+  (`A_work_item_is_never_an_open_loop_or_a_digest_source`). Nor is a decision or a standing instruction made one. Two
+  predicates change by one line each, only for a memory with a row: `memory_digest_eligible` leaves a work item out (a
+  thing to do, not a fact to roll up), and `memory_due` leaves out one that is done or cancelled, which keeps its date,
+  as a finished task does. Recall, links on save, the duplicate and contradiction checks, the stale queue, insight
+  candidates and the map read a work item as any memory. The list (`memory_work_listed`: live, not marked wrong, its
+  window open) is its scope's, not one person's: every reader of a memory is served it, unlike the open loops, and only
+  who may change the memory changes it. In the trash it keeps its rows and is in no list; deleted for good they go
+  with it (`ON DELETE CASCADE`). Work changes are among the changes an undo reverses (`MemoryStore.Undoable`,
+  family `work`), so the brief and the app's Memories view list an AI client's and a person can undo them, one or a
+  group; an AI client may undo them too. `update_work` writes no words of the memory, so it is not counted toward a
+  burst (045); a new work item is a memory's writing and is. The engine records what a client says about the work and
+  cannot tell whether it was done. **In the app** the Memories list is the backlog: `app_memories` ops `list` and `tags`
+  take `work`, `workType` and `workPriority` (`MemoryFilter`, the list's own predicates, so the count beside the list is
+  its length), a work item's memory carries `work`, and `settings` says whether the install has work items on; the app
+  changes no work property. **On the map** a work item is a star like any memory's, and with `memory.work` on its star
+  says `work` `{type, state, priority}`, read at each read as a replaced fact's `truth` is (`MemoryStars.Work`,
+  `RelationshipEngine.Work`; never stored in the star's snapshot), so the app draws it as a small box and a screen can
+  leave work items off its skies ("Work items on the sky", kept in the browser, [screens.md](screens.md)). Not built:
+  a person changing a work item's state or assignee in the app, and work items at the terminal.
+  **Dependencies** (migration 080): one work item that cannot start until another is done says so with a made link of
+  Rhythm's own type `depends_on` (`LinkTypes.All`, 051's `link_types()` as 080 replaces it, the app's `linkTypes`), from
+  the item that waits to the one it waits on. 080 replaces 057's `link_memories` with one more argument, `p_work`, which
+  the engine passes true only with `memory.work` on (the tool and the app's link both), as 078 gave
+  `set_memory_capsule` `p_clients`; without it `depends_on` is refused and every other link is made as before. With
+  it, both ends must be work items, and a link that would close a loop (`memory_work_reaches`: the target already waits
+  on the source through active `depends_on` links) is refused, under a per-scope advisory lock so two links made at once
+  cannot close one between them. Whether an item is blocked is never stored: `memory_work_waiting` is the one definition
+  of what it waits on (its active `depends_on` links in its scope to work items listed now that are neither done nor
+  cancelled; one held for review still holds it up; one in the trash, marked wrong, ended or no longer a work item does
+  not), read by `list_work` at each read for `blocked_by` and `blocked` (the item open itself and waiting on any), and
+  by its `blocked` filter. A link changes no memory (052), so a dependency moves no revision, is in no history and no
+  undo reverses it; `unlink` removes it. The trash keeps a trashed item's links (038) and an export carries them (043)
+  as every made link's; an import's counts as one made here. On the map a `depends_on` link is drawn as every made link,
+  read in the app as "waits on" from the item that waits and "needed by" from the other.
+  **Assignment and claims** (migration 081). The assignee is two nullable columns on `memory_work` and on each
+  `memory_work_states` row (`assignee_person`, a current person's subject id; `assignee_label`, any other name, 1 to 120
+  characters on one line, screened by 036's `memory_screen`; never both): `memory_work_assignee` reads a word as a
+  person when it is one, so `sam` is Sam and `Shed window - claude-code` a label. It is a work property like the rest,
+  in 079's version and undo (an undo to a state naming a person no longer current comes back with none), in the export
+  per state, and filtered exactly by `list_work`. It holds nothing. A **claim** is a row of `memory_work_claims`, one
+  per item at most (keyed by the item, `ON DELETE CASCADE` from its work row, so an undo that makes the memory
+  ordinary takes it): the engine's `gen_random_uuid()` claim id, the label people read, the login and channel that
+  made it, and when it ends, 2 hours on (`memory_work_claim_minutes()`, `MemoryWork.ClaimMinutes`). Every session of a
+  household uses one login, so the id, returned only to the claimer and never listed, is the binding: the label is not
+  unique and nothing checks it. A claim past its `expires_at` is no claim; nothing sweeps it, the next claim replaces
+  the row. `claim_memory_work` makes one (refused `claimed`, HINT, while another live one holds the item; an item
+  `done` or `cancelled` is refused; one in `backlog` or `ready` moves to `active` as a `work_changed` version with
+  action `claim`), or renews the caller's with its id. 081 replaces `update_memory_work` so that while a live claim
+  holds an item a change of state needs its id on every channel, a person's included (a person releases the claim
+  first), and `done` or `cancelled` with it deletes the claim; type, priority and assignee stay free.
+  `release_memory_work` deletes it: an AI client's call needs the id, a person's (app, terminal channel) does not, so
+  a person can always free an item a crashed session left claimed. A claim is not a version: it moves no revision and
+  no undo touches it; each one made and ended writes a `memory_events` row (`work_claimed`, `work_released`, with its
+  label and cause) that history lists. It is not exported: a claim is this install's and short-lived. The app shows
+  an item's assignee and claim on its row and opened memory, with a Release claim button (`app_memories` op
+  `release_claim`).
 - **Today** (migration 069, SB-P5-08; story 12; D-214): the brief (`Core/MemoryBrief.cs`), what needs the person now, reached
   through the memory tool `brief` and the app's `app_memories` op `brief`, only with `memory.tools` on. It
   defines nothing and writes nothing: each section is the head of a list another tool walks, read by that list's own statement,
@@ -1339,6 +1418,9 @@ through the channel `mcp` fixed in its handler (section 5):
 | `still_true` | `StillTrue` | a write's place with its new checked time, why it was in the queue and the flags that came off, never a memory's words; no revision moves (053) |
 | `list_loops` | `Loops` | the open loops it reads, may change and owns (section 5), with the asked list's `total` and both directions' lengths from the same read, each a 500-character preview with its direction and counterparty; a held memory is never in it (058) |
 | `resolve_loop` | `Resolve` | a write's place with the action, the loop's direction and counterparty and the fields it changed (`tags`), never a memory's words; a held memory is refused (058) |
+| `list_work` (with `memory.work` on) | `Work` | the work items it reads that 079's `memory_work_listed` lists, by priority and then oldest first, under exact filters, with the asked list's `total` and each state's count from the same read, each a 500-character preview with its properties, due date and summary; one held for review without its words, tags, project, due date or summary, and never selected by a project filter (079) |
+| `create_work`, `update_work` (with `memory.work` on) | `CreateWork`, `MakeWork`, `UpdateWork` | a write's place with the item's work properties, those before a change and the summary it took, never a memory's words; a held memory is refused a change (079) |
+| `claim_work`, `release_work` (with `memory.work` on) | `ClaimWork`, `ReleaseWork` | a write's place with the item's work properties and the claim made, renewed or ended (its id only to the claimer), never a memory's words (081) |
 | `list_decisions` | `Decisions` | the decisions it reads, may change and owns (section 5, the open loops' rule), in one list (`open`, `due`, `upcoming`, `resolved`, `scored` or `all`), with the asked list's `total` and the five lists' lengths from the same read, each a 500-character preview with its confidence, outcome and review date; a held memory is never in it (060) |
 | `record_outcome` | `RecordOutcome` | a write's place with the result, the outcome before, the re-asks and the next review date and the fields it changed (`outcome`), never a memory's words; a held memory is refused (060) |
 | `decision_calibration` | `Calibration` | counts and figures over the scored list it is served (`list_decisions` `scored`: the same clause, so `n` is that list's length), none below its minimum; tag names only as a topic, from a memory it reads; writes nothing (060) |
@@ -1892,7 +1974,12 @@ only pins of a star the pinner reads now; a reader is served at most the 24 olde
   (061, SB-P5-10) its `due` object, the moment in UTC, its kind and source (an import puts it only on the memory it has
   just added, `import_memory_due`), and for a standing instruction (065, SB-P5-12) `standing` true (an import marks only
   the memory it has just added, `import_memory_standing`, never a decision, a commitment, a task or a dated memory, and a
-  line over 500 characters stays unmarked, refused); each
+  line over 500 characters stays unmarked, refused), and for a work item (079) its `work` object, its type, state and
+  priority and its states (the properties from each revision on, none for a stretch it was no work item) from the
+  reader's history floor on, the state at the floor written at the floor (an import adds them only to the memory it has
+  just added, at the revisions it keeps, `import_memory_work`, never to a memory tagged `task`, a decision or a standing
+  instruction, and never states that do not end at the properties the line gives; a line with no states is one state at
+  the floor); each
   project's id,
   scope, slug, name, description, status,
   author, aliases, revision and dates, and for a project a held write made that no person has let in yet (046) its
