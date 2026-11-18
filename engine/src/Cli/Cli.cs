@@ -15,7 +15,7 @@ public static class CliCommands
             case "init": return InitCommand.Run(deploy, args);
             case "connect": return await ConnectCommand.Run(deploy, args, ct: ct);
             case "disconnect": return ConnectCommand.Disconnect(deploy, args, Console.Out);
-            case "doctor": return await DoctorCommand.Run(deploy, Console.Out, StackCommands.Http, ct: ct, read: StackCommands.Body);
+            case "doctor": return await DoctorCommand.Run(deploy, Console.Out, StackCommands.Http, ct: ct, read: StackCommands.Body, mounts: DoctorCommand.EngineMounts.Current());
             case "preflight": return StackCommands.Preflight(deploy, Console.Out);
             case "ready": return await StackCommands.Ready(deploy, Console.Out, StackCommands.Http, ct: ct);
             case "token": return await TokenCommand.Token(deploy, args, Console.Out, ct: ct);
@@ -168,7 +168,7 @@ public static class CliCommands
                       connect [<adapter>] [--set key=value] [--no-input]   list adapters, or turn one on
                       disconnect <adapter>                                  turn one off
                       doctor                                                check settings, secrets and the running stack
-                      token create <name> [--person <id>] [--out <file>] [--role harness|ingest] [--plugin <name>]
+                      token create <name> [--person <id>] [--out <file>] [--role harness|ingest] [--plugin <name>] [--expires-at <UTC timestamp>]
                                                                            a token file; --person: it speaks for that person
                       token list | token revoke <name> | token revoke --all every enabled token and whom it speaks for; disable
                                                                            one, or every token at once after a leak

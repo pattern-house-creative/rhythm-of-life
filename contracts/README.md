@@ -123,7 +123,8 @@ The browser never talks to the engine and never sees a token. It calls the app's
   command twice. The screen simply listens again.
 - Engine-side checks, as today: the `Host` header MUST be in `engine.allowedHosts` (default
   `localhost`, `127.0.0.1`, `[::1]`, `engine`); a request carrying `Origin` is refused (no CORS, no
-  browser calls); only `POST /mcp`, `GET /health` and the app's `GET /app/documents/<id>` (1.5) exist.
+  browser calls). For authenticated requests, `engine.hostRoles` restricts which roles can use the
+  matching hostname across permitted ports. Hosts without a rule keep their original roles. Only `POST /mcp`, `GET /health` and the app's `GET /app/documents/<id>` (1.5) exist.
 - Failures. The engine answers an app tool call that cannot succeed either with an HTTP status or with
   `result.isError: true` and `structuredContent.error = {"code":string,"message":string}`:
 
@@ -1219,7 +1220,8 @@ The screen tools (`docs/dev/screens.md` 3.5 and 8):
   they name none; a version that names stars has none. Its payload in the feed read names no star and is
   `{kind: "memories", status, asOf, where, limit, count, memories, truncated}`, or with status `unavailable` a
   `reason` instead of the last three; each memory is a fixed shape (`feed-memory`), its `preview` stored words the page
-  shows as text. Fixtures `app_dashboards.memories.example.json` and `app_dashboards.memories.version.example.json`.
+  shows as text. Set `fullText: true` on the feed for complete text in `preview`, within the 3 MB dashboard budget.
+  The default is 300 characters. Fixtures `app_dashboards.memories.example.json` and `app_dashboards.memories.version.example.json`.
 - `app_screens` is the screens' side of live screens, pinned by `docs/dev/screens.md` (3.4) and
   `mcp/app_screens.output.schema.json`. `screen` is always the calling screen's own id (16-64 characters of
   `A-Za-z0-9_-`), because every screen shares the app principal. `listen` records the screen as open, expires its

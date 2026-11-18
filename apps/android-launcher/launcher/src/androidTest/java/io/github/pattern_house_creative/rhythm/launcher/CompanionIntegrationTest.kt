@@ -407,6 +407,154 @@ class CompanionIntegrationTest {
         rule.onNodeWithTag("tile:DASHBOARD:$board").performTouchInput { click(center) }
         waitText("Garden overview"); back()
     }
+    @Test fun navigationKeepsTheSamePreviewDocuments() {
+        waitPreviewText("28 min")
+        fun cardViews(): List<WebView> {
+            var cards = emptyList<WebView>()
+            onMain { activity -> cards = webViews(activity.window.decorView).filter { it.url?.contains("launcher-card.html") == true } }
+            return cards
+        }
+        val original = cardViews()
+        assertEquals(2, original.size)
+        rule.mainClock.autoAdvance = true
+        repeat(2) {
+            rule.onNodeWithTag("swipe-search").performClick()
+            rule.onNodeWithTag("drawer-handle").performClick()
+        }
+        rule.onNodeWithTag("tile:DASHBOARD:$board").performClick()
+        waitText("Garden overview")
+        back()
+        waitPreviewText("28 min")
+        assertEquals("Returning from the reader should preserve both WebViews", original, cardViews())
+        rule.mainClock.autoAdvance = true
+        rule.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.CREATED)
+        rule.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED)
+        waitPreviewText("28 min")
+        assertEquals("Backgrounding should pause the same documents", original, cardViews())
+    }
+
+    @Test fun readerRetainsItsDocumentAcrossPauseAndChecksAccessOnResume() {
+        rule.onNodeWithTag("tile:DASHBOARD:$board").performClick()
+        waitText("Garden overview")
+        fun reader(): WebView {
+            lateinit var page: WebView
+            onMain { activity -> page = webViews(activity.window.decorView).last() }
+            return page
+        }
+        val original = reader()
+        onMain { original.evaluateJavascript("document.documentElement.dataset.retained = 'yes'", null) }
+        rule.mainClock.autoAdvance = true
+        rule.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.CREATED)
+        rule.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED)
+        waitText("Garden overview")
+        assertSame(original, reader())
+        assertTrue(readerBoolean("document.documentElement.dataset.retained === 'yes'"))
+        rule.mainClock.autoAdvance = true
+        onMain { it.recreate() }
+        waitText("Garden overview")
+        rule.mainClock.autoAdvance = true
+        rule.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.CREATED)
+        control("denied")
+        rule.activityRule.scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED)
+        rule.waitUntil(15000) {
+            rule.onAllNodesWithTag("full-household").fetchSemanticsNodes().isEmpty()
+        }
+        rule.onNodeWithText("Rhythm OS").assertExists()
+    }
+
+    @Test fun crashingRendererLeavesLocalAppsUsable() {
+        Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 29)
+        waitPreviewText("28 min")
+        var terminated = false
+        onMain { activity ->
+            val page = webViews(activity.window.decorView).first()
+            terminated = page.webViewRenderProcess?.terminate() == true
+        }
+        assertTrue(terminated)
+        rule.mainClock.autoAdvance = true
+        rule.waitUntil(15000) {
+            rule.onAllNodesWithText("Android System WebView stopped. Your apps are still available.").fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onNodeWithTag("swipe-search").performClick()
+        rule.onNodeWithTag("search-input").assertExists()
+        rule.onNodeWithTag("drawer-handle").performClick()
+        rule.onNodeWithText("Rhythm OS").assertExists()
+    }
+
+    @Test fun searchFailureKeepsPreviewsButDenialClearsThem() {
+        waitPreviewText("28 min")
+        rule.mainClock.autoAdvance = true
+        control("graph-error")
+        rule.onNodeWithTag("swipe-search").performClick()
+        rule.onNodeWithTag("search-input").performTextInput("garden")
+        rule.waitUntil(15000) { rule.onAllNodesWithText("Rhythm search unavailable").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("drawer-handle").performClick()
+        waitPreviewText("28 min")
+        rule.mainClock.autoAdvance = true
+        control("graph-denied")
+        rule.onNodeWithTag("swipe-search").performClick()
+        rule.onNodeWithTag("search-input").performTextInput("garden")
+        rule.waitUntil(15000) { rule.onAllNodesWithText("Household access unavailable").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("drawer-handle").performClick()
+        onMain { assertTrue(webViews(it.window.decorView).isEmpty()) }
+    }
+
+    @Test fun driveSheetOpensInBrowserAndBackReturnsToItsReader() {
+        val sheet = Tile(TileKind.STAR, "drive:fixture:synthetic-sheet")
+        control("drive-preview")
+        store.save(previous.copy(tiles = listOf(sheet)))
+        onMain { it.recreate() }
+        rule.onNodeWithTag("tile:${sheet.key}").performClick()
+        waitText("Open original")
+        val original = "https://docs.google.com/spreadsheets/d/synthetic-sheet/edit"
+        assertTrue(readerBoolean("document.querySelector('.explorer-reader input').value === '$original' && !document.querySelector('.explorer-reader iframe')"))
+        val target = AtomicReference<Offset>()
+        onMain { activity ->
+            val view = webViews(activity.window.decorView).last()
+            val frame = android.graphics.Rect()
+            view.getGlobalVisibleRect(frame)
+            view.evaluateJavascript("""(() => {
+              const link = document.querySelector('.explorer-reader a[href="$original"]');
+              link.scrollIntoView({block:'center'});
+              const r = link.getBoundingClientRect();
+              return [r.x + r.width / 2, r.y + r.height / 2, innerWidth];
+            })()""") { result ->
+                val point = org.json.JSONArray(result)
+                val scale = frame.width() / point.getDouble(2)
+                target.set(Offset(frame.left + (point.getDouble(0) * scale).toFloat(),
+                    frame.top + (point.getDouble(1) * scale).toFloat()))
+            }
+        }
+        rule.waitUntil(5000) { target.get() != null }
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val automation = instrumentation.uiAutomation
+        val received = AtomicReference<android.content.Intent>()
+        val monitor = object : android.app.Instrumentation.ActivityMonitor() {
+            override fun onStartActivity(intent: android.content.Intent): android.app.Instrumentation.ActivityResult? {
+                if (intent.action == android.content.Intent.ACTION_VIEW) received.set(intent)
+                return null // Let Android launch the actual browser.
+            }
+        }
+        instrumentation.addMonitor(monitor)
+        try {
+            nativeStroke(target.get(), target.get())
+            rule.waitUntil(5000) { received.get() != null }
+            val outgoing = received.get()
+            assertEquals(original, outgoing.dataString)
+            val browser = outgoing.selector!!.resolveActivity(instrumentation.targetContext.packageManager)
+            assertNotNull("The test emulator needs a browser", browser)
+            rule.waitUntil(15000) { automation.rootInActiveWindow?.packageName == browser.packageName }
+            assertTrue(automation.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK))
+            rule.waitUntil(15000) { automation.rootInActiveWindow?.packageName == instrumentation.targetContext.packageName }
+            waitText("Open original")
+            assertTrue(readerBoolean("document.querySelector('.explorer-reader input').value === '$original'"))
+        } finally {
+            instrumentation.removeMonitor(monitor)
+        }
+        back()
+        rule.onNodeWithTag("tile:${sheet.key}").assertExists()
+    }
+
     @Test fun failuresLoadingAndInterruptedOpenStayRecoverable() {
         control("slow")
         rule.onNodeWithTag("tile:STAR:$star").performScrollTo().performTouchInput { click(center) }

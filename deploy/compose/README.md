@@ -30,8 +30,10 @@ file. Every command, and the compose calls behind them, is in [cli/README.md](..
 missing: run ./rhythm init first"; Docker will have made empty folders where the secret files belong (open
 question Q-017), and `init` replaces them.
 
-Networks: `internal` (no internet, no published ports; Postgres lives only here) and `egress`
-(outbound internet and published ports, bound to `RHYTHM_BIND`, default `127.0.0.1`). The compose
+The private `database` bridge connects Postgres to its database clients. Trusted plugins and
+backend services keep their `internal` and `egress` bridges. App-facing gateways use `edge` for
+their upstreams and internet access. The MCP-only tunnel reaches the engine over `egress`. Host
+ports bind to `RHYTHM_BIND` (default `127.0.0.1`). The compose
 project is named `rhythm` unless `.env` names another (`COMPOSE_PROJECT_NAME`, which `rhythm init --project-name`
 records), so an external plugin joins `rhythm_internal` and `rhythm_egress`, or `<project>_internal` and
 `<project>_egress`.

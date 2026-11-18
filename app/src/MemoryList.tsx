@@ -63,6 +63,7 @@ export interface MemoryFilters {
 }
 
 // A filter as a list and its tags take it. A project's own scope is the one it is read in.
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export const filterArgs = (
   f: MemoryFilters,
 ): Record<string, string | number> => ({
@@ -121,6 +122,7 @@ export function MemoryList({
   // The words in the box, looked for once asked; what the list filters by is set back into it, and Clear filters empties it, words typed
   // but not yet looked for too.
   const [words, setWords] = useState(filters.query ?? "");
+  // eslint-disable-next-line react/set-state-in-effect -- Reset the editable draft when navigation or Clear filters changes the applied query.
   useEffect(() => setWords(filters.query ?? ""), [filters.query]);
   const find = () => {
     const query = words.trim().slice(0, maxQuery) || undefined;

@@ -105,6 +105,7 @@ import "./MemoryView.css";
 
 // The memory a native memory's star stands for (provider and account memory, its id the memory's; MemoryStars.Key in
 // the engine), or null for any other star.
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export const nativeMemoryId = (n?: GraphNode | null) =>
   n?.resource.identity.provider === "memory" &&
   n.resource.identity.account === "memory" &&
@@ -115,6 +116,7 @@ export const nativeMemoryId = (n?: GraphNode | null) =>
     : null;
 
 // The project a native project's star stands for (MemoryStars.ProjectKey: account project), or null for any other star.
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export const nativeProjectId = (n?: GraphNode | null) =>
   n?.resource.identity.provider === "memory" &&
   n.resource.identity.account === "project" &&
@@ -125,6 +127,7 @@ export const nativeProjectId = (n?: GraphNode | null) =>
     : null;
 
 // Whether the engine serves the Memories view now: asked once per session, false meanwhile and on any failure.
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export function useMemoriesServed(client?: MemoryClient) {
   const [served, setServed] = useState(false);
   useEffect(() => {

@@ -70,10 +70,12 @@ function show(
   page: GraphPage,
   selected: string | null,
   memories?: MemoryClient,
+  nativeReader = false,
 ) {
   const onSelect = vi.fn();
   const view = render(
     <Explorer
+      nativeReader={nativeReader}
       knowledge={controller(page, memories)}
       selected={selected}
       onSelect={onSelect}
@@ -168,6 +170,40 @@ it("opens documents in a reader beside the panel, and Escape closes it first", a
   ).not.toBeInTheDocument();
   expect(onSelect).not.toHaveBeenCalled();
   expect(panel()).toHaveTextContent("Fictional plan");
+});
+
+it.each(["https://docs.google.com/document/d/fictional-doc/edit", "https://docs.google.com/spreadsheets/d/fictional-sheet/edit", "https://drive.google.com/file/d/fictional-pdf/view"])(
+  "offers the original link in the launcher without embedding an unavailable Google frame",
+  async (original) => {
+    const s = sky();
+    s.doc.resource.canonicalUrl = original;
+    const user = userEvent.setup();
+    show(s.page, s.doc.id, undefined, true);
+    await user.click(screen.getByRole("button", { name: "View original file link" }));
+    const reader = screen.getByRole("region", { name: "Source reader" });
+    expect(within(reader).getByRole("textbox", { name: "Original file link" })).toHaveValue(original);
+    expect(within(reader).queryByRole("link", { name: "Open original" })).toBeNull();
+    expect(reader.querySelector("iframe")).toBeNull();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("region", { name: "Source reader" })).toBeNull();
+  },
+);
+
+it("offers a same-window Open original link when the launcher can hand it to a browser", async () => {
+  const previous = window.location.href;
+  window.history.replaceState(null, "", "/launcher.html?openOriginal=1");
+  try {
+    const s = sky();
+    show(s.page, s.doc.id, undefined, true);
+    await userEvent.click(screen.getByRole("button", { name: "View original file link" }));
+    const reader = screen.getByRole("region", { name: "Source reader" });
+    const link = within(reader).getByRole("link", { name: "Open original" });
+    expect(link).toHaveAttribute("href", s.doc.resource.canonicalUrl);
+    expect(link).not.toHaveAttribute("target");
+    expect(within(reader).getByRole("textbox")).toHaveValue(s.doc.resource.canonicalUrl);
+  } finally {
+    window.history.replaceState(null, "", previous);
+  }
 });
 
 it("says when something has no links yet", () => {

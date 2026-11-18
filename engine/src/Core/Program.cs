@@ -121,7 +121,7 @@ static async Task Serve(RhythmConfig config, string data, string[] args, Cancell
         Ingest: (context, caller) => IngestEndpoint.Handle(context, caller, context.RequestServices.GetRequiredService<Ingest>(), config),
         Document: (context, caller, document) => AppFiles.Handle(context, caller.Id, document, db, archive, config),
         Capture: Engine.CaptureRoute(config, db)),
-        app.Services.GetRequiredService<RequestLog>(), oauth).Handle);
+        app.Services.GetRequiredService<RequestLog>(), oauth, config.Engine.AcceptsRole).Handle);
     if (oauth is not null) oauth.Map(app);
     app.MapGet("/health", async (HttpContext context) =>
     {
@@ -202,11 +202,12 @@ public static class Engine
         Embeddings embeddings, Func<bool>? ready = null)
     {
         var state = Path.Combine(data, "state");
+        var model = EmbeddingSettings.From(config).Enabled ? embeddings.Id : null;
         // With graph.similarity.model set, the map model's vectors too, once it has loaded (D-256); before then, or when it
         // cannot load, the pass makes none and the map's similar links use the live model's (RelationshipHost.Refresh).
         return new RelationshipHost(db, () => ready is null || ready() ? RelationshipHostConfiguration.From(config, principal(), state) : null,
             c => new CatalogRelationshipSource(c, registry, (wanted, ct) => CatalogReader.Inventory(db, c.Principal, wanted, ct),
-                embeddings.Model is null ? null : embeddings.Vector, embeddings.Id)
+                embeddings.Model is null ? null : embeddings.Vector, model)
             {
                 MapEmbed = c.Map is not null && embeddings.Map is { Model: not null } map && map.Spec == c.Map.Model ? map.Vector : null,
                 MapEmbedModel = c.Map?.Model.Id,

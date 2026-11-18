@@ -321,6 +321,8 @@ export default function Explorer({
   dashboardScreen,
   dashboardParts,
   behind = false,
+  nativeReader = false,
+  onOpenOriginal,
   automaticLinks = true,
   workItems = true,
 }: {
@@ -370,6 +372,8 @@ export default function Explorer({
   // Whether the sky draws the dashed links ("Automatic links on the sky", Sources & settings).
   // Off, the star in focus still draws all of its own, Discover (which reviews them) draws them
   // all, and the panel lists them whatever it says.
+  nativeReader?: boolean;
+  onOpenOriginal?: (id: string) => void;
   automaticLinks?: boolean;
   // Whether the sky draws work items' stars ("Work items on the sky", Sources & settings).
   workItems?: boolean;
@@ -653,7 +657,13 @@ export default function Explorer({
     return [...rows.values()];
   }, [node, page.edges, page.nodes, memoriesServed]);
   const sourceDocument = page.nodes.find((n) => n.id === documentId);
-  const preview = sourceDocument ? drivePreviewUrl(sourceDocument) : null;
+  const drivePreview = sourceDocument ? drivePreviewUrl(sourceDocument) : null;
+  const preview = nativeReader ? null : drivePreview;
+  const originalLink = sourceDocument ? safeSourceUrl(sourceDocument) : null;
+  const externalDriveFile = nativeReader && !!drivePreview && !!originalLink;
+  const canOpenInBrowser =
+    externalDriveFile &&
+    new URLSearchParams(window.location.search).get("openOriginal") === "1";
   // A memory or a record saved on the engine has no original to embed, so its current text is read
   // from the source while it is open, held only in this state and dropped when it closes.
   const readText = session?.text;
@@ -1857,7 +1867,7 @@ export default function Explorer({
                           {node.provenance.demo
                             ? "Read sample source"
                             : drivePreviewUrl(node)
-                              ? "Preview original"
+                              ? nativeReader ? "View original file link" : "Preview original"
                               : memoryText(node) && session?.text
                                 ? node.type === "note"
                                   ? "Read note"
@@ -1887,7 +1897,7 @@ export default function Explorer({
                               Open in Memories
                             </button>
                           )}
-                        {opensAt(node) && (
+                        {opensAt(node) && !(nativeReader && drivePreviewUrl(node)) && (
                           <a
                             className="secondary-action"
                             href={opensAt(node)!}
@@ -2287,10 +2297,10 @@ export default function Explorer({
                 {sourceDocument.title}
               </h2>
             </div>
-            {safeSourceUrl(sourceDocument) && (
+            {originalLink && !externalDriveFile && (
               <a
                 className="secondary-action reader-open"
-                href={safeSourceUrl(sourceDocument)!}
+                href={originalLink}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -2338,6 +2348,26 @@ export default function Explorer({
                 }}
               />
             </Suspense>
+          ) : externalDriveFile ? (
+            <div className="reader-text google-file-original">
+              {canOpenInBrowser ? (
+                <>
+                  <a
+                    className="secondary-action"
+                    href={originalLink}
+                    rel="noreferrer"
+                    onClick={() => onOpenOriginal?.(sourceDocument.id)}
+                  >
+                    Open original <ExternalLink size={14} aria-hidden="true" />
+                  </a>
+                  <p>Use your Google account in the browser to access this file.</p>
+                </>
+              ) : <p>Google Drive previews require another site. Copy this file link into a browser signed in to Google.</p>}
+              <label>
+                Original file link
+                <input type="url" readOnly value={originalLink} onFocus={(event) => event.currentTarget.select()} />
+              </label>
+            </div>
           ) : preview ? (
             <iframe
               className="source-preview"
@@ -2389,12 +2419,12 @@ export default function Explorer({
               </p>
             </div>
           )}
-          {!dashboardStar && (
+          {!dashboardStar && !externalDriveFile && (
             <p className="source-meta">
               {sourceDocument.provenance.demo
                 ? "Fictional records have no original file or source link."
                 : preview
-                  ? "Shown by Google Drive with your Google sign-in. If it asks you to sign in or request access, open the original instead."
+                  ? "Google Drive controls this preview. If it stays blank or asks for sign-in or access, use Open original."
                   : dataStar
                     ? "Read from the Rhythm engine just now: each measurement's latest reading and daily lows, averages and highs for the last 90 days. Not saved by the app."
                     : original

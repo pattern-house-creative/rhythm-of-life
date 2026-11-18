@@ -30,6 +30,7 @@ public sealed class OAuthConfigTests
     internal static RhythmConfig Config(string callback = "https://client.example.invalid/callback") => new()
     {
         Engine = new() { PublicMcpUrl = "https://mcp.example.invalid/mcp", AllowedHosts = ["mcp.example.invalid", "engine"],
+            HostRoles = [new() { Host = "mcp.example.invalid", Roles = ["harness"] }],
             Oauth = new() { Enabled = true, RedirectUris = [callback] } }
     };
 }
@@ -56,7 +57,8 @@ public sealed class OAuthDatabaseTests(DatabaseFixture fixture) : IClassFixture<
         var oauth = app.Services.GetService<OAuthServer>();
         if (oauth is not null) { await oauth.Initialize(app.Services, default); oauth.Use(app, () => true); }
         app.Use(new Perimeter(config.Engine.AllowedHosts, () => true, (t, ct) => fixture.Db.Authenticate(t, ct),
-            new(App: (_, _) => Task.CompletedTask, Ingest: (_, _) => Task.CompletedTask, Document: (_, _, _) => Task.CompletedTask), oauth: oauth).Handle);
+            new(App: (_, _) => Task.CompletedTask, Ingest: (_, _) => Task.CompletedTask, Document: (_, _, _) => Task.CompletedTask), oauth: oauth,
+            hostAcceptsRole: config.Engine.AcceptsRole).Handle);
         oauth?.Map(app);
         app.MapPost("/mcp", (HttpContext c) => Results.Text(c.Items["principal"]!.ToString()!));
         await app.StartAsync();
@@ -193,6 +195,27 @@ public sealed class OAuthDatabaseTests(DatabaseFixture fixture) : IClassFixture<
             using var unchanged = await Mcp(server.Client, legacy.Token);
             Assert.Equal(HttpStatusCode.OK, unchanged.StatusCode);
         }
+    }
+
+    [PostgresFact] public async Task Expiry_of_the_underlying_credential_ends_existing_OAuth_access_and_refresh()
+    {
+        var directory = Temp();
+        var credential = await Credential(directory);
+        await using var server = await Open(directory);
+        var verifier = Verifier();
+        var code = await Code(server.Client, credential.Token, verifier);
+        var grant = await TokenResponse(await Exchange(server.Client, code, verifier));
+        var access = grant.GetProperty("access_token").GetString();
+        var refresh = grant.GetProperty("refresh_token").GetString()!;
+        await Scoped.Execute(fixture.Source, "UPDATE principals SET last_used_at=NULL WHERE id=@id", ("id", credential.Id));
+        using var accepted = await Mcp(server.Client, access);
+        Assert.Equal(HttpStatusCode.OK, accepted.StatusCode);
+        Assert.NotNull((await new Principals(fixture.Source).List(default)).Single(t => t.Id == credential.Id).LastUsedAt);
+        await Scoped.Execute(fixture.Source, "UPDATE principals SET expires_at=now()-interval '1 second' WHERE id=@id", ("id", credential.Id));
+        using var denied = await Mcp(server.Client, access);
+        Assert.Equal(HttpStatusCode.Unauthorized, denied.StatusCode);
+        using var deniedRefresh = await Refresh(server.Client, refresh);
+        Assert.Equal(HttpStatusCode.BadRequest, deniedRefresh.StatusCode);
     }
 
     [PostgresFact] public async Task OAuth_rejects_wrong_resource_pkce_callbacks_csrf_and_foreign_origin()

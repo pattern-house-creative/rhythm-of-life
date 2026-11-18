@@ -47,8 +47,10 @@ const insights = (headers: Record<string, string> = {}) =>
 
 // The Authorization header of the engine call made last.
 const bearer = () =>
-  (vi.mocked(fetch).mock.calls.at(-1)?.[1]?.headers as Record<string, string>)
-    .Authorization;
+  (
+    vi.mocked(fetch).mock.calls.at(-1)?.[1]?.headers as
+      Record<string, string> | undefined
+  )?.Authorization;
 
 // Opens a session for alex: the cookie the browser keeps and the credential the engine registered.
 async function open(base = origin) {

@@ -4,7 +4,7 @@ namespace Knowledge.Tests;
 
 // A native memory's history and its earlier states (migration 034, Core/MemoryHistory.cs; SB-P3-03,
 // docs/dev/memory.md section 5, read its history): every change listed newest first with who made it and how, one
-// state read by its revision, the 20 newest earlier states kept, and history visible from the share on. Fictional
+// state read by its revision, unique wording preserved when duplicate versions are pruned, and history visible from the share on. Fictional
 // people only: alex, sam and the household; every text is DEMO. Nothing outside these tests reads a memory's history.
 public sealed class MemoryHistoryTests(DatabaseFixture fixture) : IClassFixture<DatabaseFixture>
 {
@@ -185,33 +185,30 @@ public sealed class MemoryHistoryTests(DatabaseFixture fixture) : IClassFixture<
         }
     }
 
-    [PostgresFact] public async Task The_twenty_newest_earlier_states_are_kept_and_every_change_is_still_listed()
+    [PostgresFact] public async Task The_last_copy_of_each_wording_survives_and_every_change_is_still_listed()
     {
         var s = fixture.Source;
         var who = await MemoryLogins.Make(s, "kept");
         await Scoped.Mode(s, "off");
         var id = (await Store.Create(who.Alex, new("DEMO: day 0 of the fictional diary."), MemoryLogins.Mcp, default)).Id;
         for (var day = 1; day <= 25; day++) await Store.Append(who.Alex, id, $"DEMO: day {day}.", null, MemoryLogins.Mcp, default);
-        Assert.Equal("6..25 20", await MemoryLogins.Scalar(s,
+        Assert.Equal("1..25 25", await MemoryLogins.Scalar(s,
             "SELECT min(revision)||'..'||max(revision)||' '||count(*) FROM memory_versions WHERE memory_id=@id", ("id", id)));
         var (first, items) = (await All(who.Sam, id, 7))!.Value;
         Assert.Equal(Enumerable.Range(1, 26).Reverse(), items.Select(i => i.Revision));
-        Assert.Equal((26, 20, 6, true, false), (first.Revision, first.Kept, first.OldestKept, first.Pruned, first.Cut));
-        // An older change is still listed, from its audit row, without the state it wrote.
-        Assert.All(items.Where(i => i.Revision < 6), i => Assert.True(!i.Kept && i.Status is null && i.Preview is null && i.Scope == "shared"));
-        Assert.All(items.Where(i => i.Revision >= 6), i => Assert.True(i.Kept && i.Preview is not null));
+        Assert.Equal((26, 20, 1, false, false), (first.Revision, first.Kept, first.OldestKept, first.Pruned, first.Cut));
+        Assert.All(items, i => Assert.True(i.Kept && i.Preview is not null));
         Assert.Equal(("created", "alex"), (items[^1].Event, items[^1].Person));
-        var pruned = (await Store.GetVersion(who.Sam, id, 3, default))!;
-        Assert.Equal(((MemoryVersion?)null, "pruned", (int?)6), (pruned.Version, pruned.Missing, pruned.OldestKept));
+        Assert.Equal("DEMO: day 0 of the fictional diary.", (await Store.GetVersion(who.Sam, id, 1, default))!.Version!.Content);
         Assert.EndsWith("DEMO: day 5.", (await Store.GetVersion(who.Sam, id, 6, default))!.Version!.Content);
 
-        // Whatever order the states arrive in (a restore's, an import's), one at a time or together, the newest 20 stay.
+        // When the words are identical, the newest 20 stay even in a bulk or out-of-order import.
         foreach (var order in new IEnumerable<int>[] { Enumerable.Range(1, 40), Enumerable.Range(1, 40).Reverse(), [] })
         {
             var many = await MemoryRows.Memory(s, "household", null, "DEMO: many versions.", ",revision", ",41");
             const string Insert = """
                 INSERT INTO memory_versions(memory_id,revision,subject_id,scope,content,status,written_at)
-                SELECT @m,r,'household','shared','DEMO: version '||r,'draft',now()-interval '1 day' FROM unnest(@r) r
+                SELECT @m,r,'household','shared','DEMO: same wording','draft',now()-interval '1 day' FROM unnest(@r) r
                 """;
             if (order.Any()) foreach (var revision in order) await Scoped.Execute(s, Insert, ("m", many), ("r", new[] { revision }));
             else await Scoped.Execute(s, Insert, ("m", many), ("r", Enumerable.Range(1, 40).Reverse().ToArray()));
@@ -233,17 +230,17 @@ public sealed class MemoryHistoryTests(DatabaseFixture fixture) : IClassFixture<
             await Store.Append(who.Alex, id, "DEMO: a private addition.", null, MemoryLogins.Mcp, default);
             await Store.Append(who.Alex, id, "DEMO: another.", null, MemoryLogins.Mcp, default);
             await Move(id, "household", who.Alex);
-            for (var item = 1; item <= 26; item++) await Store.Append(who.Alex, id, $"DEMO: Family item {item}.", null, MemoryLogins.Mcp, default);
-            // Revision 30 now; states 10 to 29 kept. Sam sees from the share (4) on, 4 to 9 no longer kept.
+            for (var item = 1; item <= 26; item++) await Store.Update(who.Alex, id, new(Tags: [$"tag-{item}"]), null, MemoryLogins.Mcp, default);
+            // Revision 30. Three private wordings survive. Sam sees only shared states, including a pruned stretch.
             var (sam, items) = (await All(who.Sam, id, 10))!.Value;
             Assert.Equal(Enumerable.Range(4, 27).Reverse(), items.Select(i => i.Revision));
-            Assert.Equal((true, "alex", 10, true), (sam.Cut, sam.EarlierBy, sam.OldestKept, sam.Pruned));
+            Assert.Equal((true, "alex", 13, true), (sam.Cut, sam.EarlierBy, sam.OldestKept, sam.Pruned));
             Assert.Equal("not_visible", (await Store.GetVersion(who.Sam, id, 2, default))!.Missing);
-            Assert.Equal(("pruned", (int?)10), ((await Store.GetVersion(who.Sam, id, 5, default))!.Missing, (await Store.GetVersion(who.Sam, id, 5, default))!.OldestKept));
+            Assert.Equal(("pruned", (int?)13), ((await Store.GetVersion(who.Sam, id, 5, default))!.Missing, (await Store.GetVersion(who.Sam, id, 5, default))!.OldestKept));
             var (alex, mine) = (await All(who.Alex, id))!.Value;
             Assert.Equal(30, mine.Count);
-            Assert.Equal((false, 10, true), (alex.Cut, alex.OldestKept, alex.Pruned));
-            Assert.Equal(("pruned", (int?)10), ((await Store.GetVersion(who.Alex, id, 2, default))!.Missing, (await Store.GetVersion(who.Alex, id, 2, default))!.OldestKept));
+            Assert.Equal((false, 1, true), (alex.Cut, alex.OldestKept, alex.Pruned));
+            Assert.NotNull((await Store.GetVersion(who.Alex, id, 2, default))!.Version);
             Assert.Equal("1:created:private", Line(mine.TakeLast(1)));
         }
         finally { await Scoped.Mode(s, "off"); }
@@ -351,7 +348,8 @@ public sealed class MemoryHistoryTests(DatabaseFixture fixture) : IClassFixture<
             await Store.Append(who.Alex, id, "DEMO: a private addition.", null, MemoryLogins.Mcp, default);
             await Move(id, "household", who.Alex);
             for (var item = 1; item <= 22; item++) await Store.Append(who.Alex, id, $"DEMO: Family item {item}.", null, MemoryLogins.Mcp, default);
-            Assert.Equal(0L, await MemoryLogins.Scalar(s, "SELECT count(*) FROM memory_versions WHERE memory_id=@id AND scope='private'", ("id", id)));
+            // An older installation could already have lost its private versions when it upgraded.
+            await Scoped.Execute(s, "DELETE FROM memory_versions WHERE memory_id=@id AND scope='private'", ("id", id));
             Assert.Contains((await new Principals(s).OffPreview(default)).Private,
                 p => p.Person == "alex" && p.What == "earlier private changes of memories now in Family" && p.Count >= 2);
             Assert.NotEmpty(await new Principals(s).SwitchOff(default));

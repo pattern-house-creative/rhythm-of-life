@@ -56,6 +56,7 @@ public sealed class MemoryTruthTests(DatabaseFixture fixture) : IClassFixture<Da
         var old = await Remember(who.Alex, "DEMO: the Pellow choir rehearses on Tuesday evenings.", "canonical");
         var fresh = await Remember(who.Alex, "DEMO: the Pellow choir rehearses on Wednesday evenings now.");
         var unrelated = await Remember(who.Alex, "DEMO: the Pellow allotment opens at nine.");
+        await MemoryRows.SetCreationOrder(s, old, fresh, unrelated);
         await Passages.Sweep(new EmbeddingBackfill(db), model, covered);
         var recall = new Recall(db, model, covered);
         async Task<Guid[]> Found() => [.. (await recall.Search(who.Alex, new("Pellow choir rehearses", 20), default)).Hits.Select(h => h.Id)];

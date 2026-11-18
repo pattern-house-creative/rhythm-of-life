@@ -79,7 +79,7 @@ internal enum class DragSource { HOME, DRAWER, DOCK }
 
 @Composable internal fun LauncherTile(tile:Tile,title:String,app:LaunchApp?,origin:String,live:Boolean,online:Boolean,
     modifier:Modifier,onOpen:()->Unit,onEdit:()->Unit,onEarlier:(()->Unit)?,onLater:(()->Unit)?,onAccessLost:()->Unit,
-    onRemove:(()->Unit)?=null,editing:Boolean=false,webActive:()->Boolean={true}) {
+    onRemove:(()->Unit)?=null,editing:Boolean=false,listRow:Boolean=false,webActive:()->Boolean={true}) {
     Box(modifier.testTag("tile:${tile.key}").semantics {
         customActions=buildList {
             add(CustomAccessibilityAction("Edit $title"){onEdit();true})
@@ -89,7 +89,14 @@ internal enum class DragSource { HOME, DRAWER, DOCK }
         }
         onLongClick(label="Home options"){onEdit();true}
     }.clickable(role=Role.Button,onClickLabel=if(tile.kind==TileKind.PREVIEW)"Open dashboard" else "Open $title",onClick=onOpen)) {
-      Column(Modifier.fillMaxSize(),horizontalAlignment=Alignment.CenterHorizontally) {
+      if (listRow) {
+          Row(Modifier.fillMaxSize().padding(horizontal=8.dp), verticalAlignment=Alignment.CenterVertically,
+              horizontalArrangement=Arrangement.spacedBy(14.dp)) {
+              if(app!=null) Image(app.icon.asImageBitmap(),null,Modifier.size(36.dp))
+              else DashboardGlyph(title,tile.target,Modifier.size(36.dp))
+              Text(title,fontSize=16.sp,maxLines=2,overflow=TextOverflow.Ellipsis)
+          }
+      } else Column(Modifier.fillMaxSize(),horizontalAlignment=Alignment.CenterHorizontally) {
         if(tile.kind==TileKind.PREVIEW) {
             Box(Modifier.fillMaxSize().clip(RoundedCornerShape(22.dp)).background(Color(0x99152d29))
                 .border(1.dp,Color(0x2bbbe8d5),RoundedCornerShape(22.dp))) {

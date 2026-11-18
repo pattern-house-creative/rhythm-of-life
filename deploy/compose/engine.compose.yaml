@@ -12,7 +12,7 @@
 
 services:
   postgres:
-    image: ${RHYTHM_POSTGRES_IMAGE:-pgvector/pgvector:0.8.7-pg17-bookworm}
+    image: ${RHYTHM_POSTGRES_IMAGE:-pgvector/pgvector:0.8.7-pg17-bookworm@sha256:b513c48566e4777cd3370451400000c78eda6a08131d68f4c31d4a76f27bd8fd}
     # One clear line instead of a confusing failure when `rhythm init` has not written the secrets yet (Docker then
     # mounts an empty folder in place of the missing file, open question Q-017).
     entrypoint:
@@ -30,7 +30,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - internal
+      - database
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${RHYTHM_DB_ADMIN_USER:-rhythm_admin} -d ${RHYTHM_DB_NAME:-rhythm}"]
       interval: 10s
@@ -64,7 +64,7 @@ services:
       - postgres_password
       - engine_db
     networks:
-      - internal
+      - database
     read_only: true
     tmpfs:
       - /tmp
@@ -109,8 +109,10 @@ services:
       # MCP for clients on this computer; exposure recipes reach it differently (open question Q-012).
       - "${RHYTHM_BIND:-127.0.0.1}:${RHYTHM_MCP_PORT:-8181}:8080"
     networks:
+      - database
       - internal
       - egress
+      - edge
     healthcheck:
       test: ["CMD", "rhythm-engine", "healthcheck"]
       interval: 15s
@@ -134,7 +136,7 @@ services:
   # port, no internet. Turn it on with adapters.titles (enabled, model) in rhythm.yaml and --profile titles.
   titles:
     profiles: ["titles"]
-    image: ${RHYTHM_OLLAMA_IMAGE:-ollama/ollama:0.40.13}
+    image: ${RHYTHM_OLLAMA_IMAGE:-ollama/ollama:0.40.13@sha256:b2f0122c476bc9fe7ce679d8bb4bd555351e25e2554eefb156f61cb0a89cf429}
     environment:
       OLLAMA_HOST: 0.0.0.0:11434
       OLLAMA_MODELS: /models
@@ -162,7 +164,7 @@ services:
   #   docker compose -f deploy/compose/compose.yaml run --rm titles-pull <model>
   titles-pull:
     profiles: ["titles-pull"]
-    image: ${RHYTHM_OLLAMA_IMAGE:-ollama/ollama:0.40.13}
+    image: ${RHYTHM_OLLAMA_IMAGE:-ollama/ollama:0.40.13@sha256:b2f0122c476bc9fe7ce679d8bb4bd555351e25e2554eefb156f61cb0a89cf429}
     entrypoint:
       - /bin/sh
       - -c
@@ -201,6 +203,8 @@ services:
       PGDATABASE: ${RHYTHM_DB_NAME:-rhythm}
       PGUSER: ${RHYTHM_DB_ADMIN_USER:-rhythm_admin}
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      RHYTHM_BACKUP_SERIES: ${COMPOSE_PROJECT_NAME:-rhythm}
+      RHYTHM_BACKUP_RETENTION: ${RHYTHM_BACKUP_RETENTION:-off}
       RESTIC_REPOSITORY: /backups/restic
       RESTIC_PASSWORD_FILE: /run/secrets/backup_password
     secrets:
@@ -211,7 +215,7 @@ services:
       - ${RHYTHM_BACKUP_DIR:-./data/backups}:/backups
       - ${RHYTHM_BACKUP_STAGING_DIR:-./data/backup-staging}:/staging
     networks:
-      - internal
+      - database
     cap_drop:
       - ALL
     security_opt:
@@ -246,7 +250,7 @@ services:
       - ${RHYTHM_BACKUP_DIR:-./data/backups}:/backups
       - ${RHYTHM_BACKUP_STAGING_DIR:-./data/backup-staging}:/staging
     networks:
-      - internal
+      - database
     cap_drop:
       - ALL
     cap_add:
@@ -278,6 +282,8 @@ services:
       # The project and image tag this command runs under, which init records in .env.
       COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME:-rhythm}
       RHYTHM_VERSION: ${RHYTHM_VERSION:-dev}
+      RHYTHM_APP_PORT: ${RHYTHM_APP_PORT:-8080}
+      RHYTHM_MCP_PORT: ${RHYTHM_MCP_PORT:-8181}
     configs:
       - source: rhythm
         target: /etc/rhythm/rhythm.yaml
@@ -289,6 +295,7 @@ services:
       - ${RHYTHM_BACKUP_DIR:-./data/backups}:/data/backups
       - ${RHYTHM_BACKUP_STAGING_DIR:-./data/backup-staging}:/data/backup-staging
     networks:
+      - database
       - internal
     security_opt:
       - no-new-privileges:true

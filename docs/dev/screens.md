@@ -326,9 +326,13 @@ above stays as it is, except where this section says otherwise.
   returns to what is under it: the Home dashboard when it replaced that, else the view or the sky beneath. Undo brings
   back both. `open_star`, `open_dashboard`, `search` and `home` replace
   it; `layout`, `move_tile` and a `corner_card` that changed the card end it so the change shows; `set_home` leaves a
-  full screen of another dashboard alone. The page's frame stays sealed, so the app hears nothing over it: while the exit control is hidden, a clear
-  layer over the page takes the first movement, touch or scroll and shows the control (that first tap does not reach
-  the page). A tap into the page counts too, and while the page keeps focus the control stays, the layer away, for a
+  full screen of another dashboard alone. Full-screen dashboards and corner cards show their last feed read,
+  the latest observation time or source day for measurement feeds, and any failed refresh. Native health
+  tiles show the observation alongside the value at narrow widths too. Sources & settings opens Changed
+  lately on phones, including the stale-source warning. On touchscreens the exit button has its own row above the dashboard.
+  The first tap goes directly to the page or card, even after the screen has been idle. On pointer-only screens
+  the page's frame stays sealed. While the exit control is hidden, a clear layer takes the first movement or scroll
+  and shows the control. A click into the page counts too, and while the page keeps focus the control stays, the layer away, for a
   minute after the last sign. The browser's Fullscreen API is not used: a command has no user gesture to start it. A
   full screen that can't open (its code didn't load, or it broke while drawing) gives way to what is under it by
   itself, with no alert to dismiss, and is not tried again by itself until the app reloads: going Home skips a Home
@@ -1056,7 +1060,7 @@ on as well. It is what a project board is built on.
   Each memory has `id`, `graphId` (its star, for `rhythm.openStar`), `scope`, `owner`, `project` (`{id, slug, name,
   graphId}`, the project's star) or null, `tags`, `kind`, `status`, `state` (current, replaced, ended or retracted, as
   the list says it: the list shows a replaced or ended memory, so the feed does too), `createdAt`, `updatedAt`, `due`
-  (`{at, local, kind}`) or null, `preview` (its first 300 characters, as the Memories list cuts them) and `truncated`,
+  (`{at, local, kind}`) or null, `preview` (its first 300 characters by default, or its whole text with `fullText: true`) and `truncated`,
   and `work`: null for an ordinary memory and with `memory.work` off, else `{type, state, priority, assignee, claim,
   blocked, blockedBy, dependencies}`, where
   `claim` is `{label, claimedAt, expiresAt}`, who holds it and until when, never the claim's id, and `blockedBy` the

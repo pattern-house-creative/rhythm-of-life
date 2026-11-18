@@ -111,16 +111,16 @@ public sealed class MapModelTests
         Assert.False((pass with { Model = null, MapModel = EmbeddingModels.BgeSmall.Id }).Outdated(previous));
     }
 
-    [Fact] public async Task A_pass_makes_each_map_vector_once_keeps_it_while_unchanged_and_lists_none_without_the_model()
+    [Fact] public async Task A_pass_keeps_unchanged_vectors_while_the_configured_models_are_loading()
     {
         var notes = new EmbeddedNotes("tagged-notes", "Garden plan", "Seed order");
         var files = new KeptFiles("tagged-files", "Garden budget");
         int live = 0, mapped = 0;
         Func<string, string, float[]?>? throwing = null;
-        CatalogRelationshipSource Source(IReadOnlyList<DiscoveryRecord> stored, string? mapModel)
+        CatalogRelationshipSource Source(IReadOnlyList<DiscoveryRecord> stored, string? mapModel, bool liveReady)
         {
             var source = new CatalogRelationshipSource(Map(Settings("model: bge-small")), new AdapterRegistry([notes, files]),
-                (_, _) => Task.FromResult(new CatalogInventory([], [])), (_, _) => { live++; return EmbeddingModelTests.Same(); }, EmbeddingModels.MiniLmId)
+                (_, _) => Task.FromResult(new CatalogInventory([], [])), liveReady ? (_, _) => { live++; return EmbeddingModelTests.Same(); } : null, EmbeddingModels.MiniLmId)
             {
                 MapEmbed = mapModel is null ? null : throwing ?? ((_, _) => { mapped++; return Axis(0); }),
                 MapEmbedModel = mapModel ?? EmbeddingModels.BgeSmall.Id,
@@ -128,9 +128,9 @@ public sealed class MapModelTests
             source.Prime(stored);
             return source;
         }
-        async Task<(IReadOnlyList<DiscoveryRecord> Records, IReadOnlyList<string> Notes)> Pass(IReadOnlyList<DiscoveryRecord> stored, string? mapModel)
+        async Task<(IReadOnlyList<DiscoveryRecord> Records, IReadOnlyList<string> Notes)> Pass(IReadOnlyList<DiscoveryRecord> stored, string? mapModel, bool liveReady = true)
         {
-            var source = Source(stored, mapModel);
+            var source = Source(stored, mapModel, liveReady);
             var batch = await source.Fetch(Principal, default);
             RelationshipDiscovery.Validate(batch);
             return ([.. batch.Records.Where(r => r.Key.Provider.StartsWith("tagged-", StringComparison.Ordinal))], source.Notes);
@@ -145,16 +145,22 @@ public sealed class MapModelTests
         var (second, _) = await Pass(first, bge);
         Assert.Equal((0, 0), (live, mapped));
         Assert.All(second, r => Assert.Same(first.Single(f => f.Key == r.Key).MapEmbedding, r.MapEmbedding));
-        // The map model not loaded: no map vector is listed, so the stored snapshots lose theirs and are as without the key.
-        var (fallback, _) = await Pass(second, null);
-        Assert.Equal((0, 0), (live, mapped));
-        Assert.All(fallback, r => Assert.Equal(((float[]?)null, (string?)null, EmbeddingModels.MiniLmId), (r.MapEmbedding, r.MapEmbeddingModel, r.EmbeddingModel)));
-        Assert.All(fallback, r => Assert.DoesNotContain("MapEmbedding", JsonSerializer.Serialize(r), StringComparison.Ordinal));
-        // Loaded again, each map vector is made once more from the same text; the live vectors stay as they are (the file is
-        // read again for its map vector: Outdated).
+        // Neither model is loaded at first after a restart. The next pass has just the live one.
+        var (cold, _) = await Pass(second, null, liveReady: false);
+        var (fallback, _) = await Pass(cold, null);
         var (again, _) = await Pass(fallback, bge);
-        Assert.Equal((0, 3), (live, mapped));
-        Assert.All(again, r => Assert.Equal(bge, r.MapEmbeddingModel));
+        foreach (var pass in new[] { cold, fallback, again })
+            Assert.All(pass, r =>
+            {
+                var original = first.Single(f => f.Key == r.Key);
+                Assert.Same(original.Embedding, r.Embedding);
+                Assert.Same(original.MapEmbedding, r.MapEmbedding);
+                Assert.Equal((EmbeddingModels.MiniLmId, bge), (r.EmbeddingModel, r.MapEmbeddingModel));
+            });
+        Assert.Equal((0, 0, 1), (live, mapped, files.Reads));
+        // Content that changed while the models were loading cannot keep the earlier revision's vectors.
+        var (changed, _) = await Pass(second.Select(r => r with { ContentRevision = "r0" }).ToArray(), null, liveReady: false);
+        Assert.All(changed, r => { Assert.Null(r.Embedding); Assert.Null(r.MapEmbedding); });
         // Another map model makes its own; one never stands in for another's.
         mapped = 0;
         var (other, _) = await Pass(again, "another-map-model");
@@ -163,7 +169,7 @@ public sealed class MapModelTests
         // A file left for a later pass keeps its live vector and has no map vector meanwhile: on the map, off its links.
         files.Rereads = false;
         mapped = 0;
-        var (waiting, _) = await Pass(fallback, bge);
+        var (waiting, _) = await Pass(other, bge);
         Assert.Equal(2, mapped);
         Assert.Null(waiting.Single(r => r.Title == "Garden budget").MapEmbedding);
         Assert.NotNull(waiting.Single(r => r.Title == "Garden budget").Embedding);
@@ -295,7 +301,7 @@ public sealed class MapModelDatabaseTests(DatabaseFixture fixture) : IClassFixtu
                 (r.Embedding, r.MapEmbedding, r.MapEmbeddingModel, r.EmbeddingModel)));
 
             // The map model's files missing: the live model's vectors and graph.similarity's numbers, as without the key,
-            // said in the notes; the stored map vectors go with the pass.
+            // said in the notes; the configured model's stored vectors survive for the next warm pass.
             mapStatus = "download-failed";
             Assert.Equal("complete", await host.Refresh(false, default));
             (_, links, methods) = await Map();
@@ -304,9 +310,9 @@ public sealed class MapModelDatabaseTests(DatabaseFixture fixture) : IClassFixtu
             Assert.True(host.MapFellBack);
             Assert.Contains("graph.similarity.model bge-small is download-failed: the similar links used the live embeddings model's vectors "
                 + "and graph.similarity's thresholds (docs/models.md)", host.Notes);
-            Assert.Equal(Enumerable.Repeat("none false", 3), await Stored());
+            Assert.Equal(Enumerable.Repeat($"{EmbeddingModels.BgeSmall.Id} true", 3), await Stored());
 
-            // Back on: the map vectors are made again and its links return.
+            // Back on: the stored map vectors are reused and its links return.
             mapStatus = "on";
             Assert.Equal("complete", await host.Refresh(false, default));
             (_, links, _) = await Map();

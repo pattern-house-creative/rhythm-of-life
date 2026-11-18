@@ -13,7 +13,9 @@ The same web-standard handlers run in both places: `app/api/*.ts` are thin Verce
 - The engine reachable from the internet over HTTPS, through an exposure recipe
   (`deploy/exposure/`), for example a Cloudflare Tunnel with Cloudflare Access service-token
   authentication in front of the engine's `/mcp`.
-- The engine's `engine.allowedHosts` including that public host name.
+- The engine's `engine.allowedHosts` including that public host name. If AI clients use a
+  harness-only hostname, give the hosted facade its own protected route and list its hostname with
+  `roles: [app]` under `engine.hostRoles`. The proxy forwards the original Host to the engine.
 - The app token from `deploy/compose/secrets/app_token` (created by `rhythm init`).
 
 ## Project settings

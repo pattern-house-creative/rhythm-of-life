@@ -114,6 +114,7 @@ export interface DashboardFeed {
   // A memories feed's filters, as the engine stored them; the app only
   // passes them on.
   where?: Record<string, unknown>;
+  fullText?: boolean;
 }
 // One version, with its page and the feeds it reads.
 export interface Dashboard extends DashboardSummary {
@@ -378,11 +379,13 @@ function cleanFeed(v: unknown): DashboardFeed | null {
   if (v.kind === "memories")
     return v.star === undefined &&
       (v.where === undefined || object(v.where)) &&
+      (v.fullText === undefined || typeof v.fullText === "boolean") &&
       (v.limit === undefined || count(v.limit, 1000))
       ? {
           name: v.name,
           kind: "memories",
           ...(object(v.where) ? { where: v.where } : {}),
+          ...(typeof v.fullText === "boolean" ? { fullText: v.fullText } : {}),
           ...(count(v.limit, 1000) ? { limit: v.limit } : {}),
         }
       : null;

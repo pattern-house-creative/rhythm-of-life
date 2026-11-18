@@ -21,6 +21,7 @@ const page = 20;
 
 // One step's memories, page by page. Its results, and whether a page failed (its refusal is on screen already). `member`: what the op
 // names its list (a review queue's step for several names its items, run 22).
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export async function several<R>(
   tools: MemoryTools,
   op: string,
@@ -43,6 +44,7 @@ export async function several<R>(
 
 // What became of the rest, once the step's own words have said what went: how many changed since their person read them, how
 // many weren't theirs or are gone, each only when there are any. `stays` is what a memory left behind does.
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export function severalWords(
   results: { result: string }[],
   done: readonly string[],
@@ -101,6 +103,7 @@ export function BulkBar({
   useEffect(() => {
     if (!asking) return;
     const { layer } = tools;
+    // eslint-disable-next-line react/immutability -- Register the confirmation in the shared mutable Escape-handler ref until cleanup.
     layer.current = () => {
       setAsking(null);
       return true;
@@ -109,6 +112,7 @@ export function BulkBar({
       layer.current = null;
     };
   }, [asking, tools]);
+  // eslint-disable-next-line react/set-state-in-effect -- A confirmation applies only to the selection it was opened for.
   useEffect(() => setAsking(null), [count]);
   if (count === 0) return null;
   return (

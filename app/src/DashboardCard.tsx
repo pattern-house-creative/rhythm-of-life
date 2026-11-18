@@ -7,6 +7,8 @@ import type { CardShape } from "./dashboardFrame";
 import { dashboardCache } from "./dashboardCache";
 import type { Dashboard, DashboardData } from "./dashboards";
 import type { GraphSession } from "./liveGraph";
+import { stamp } from "./health";
+import { feedObservationTimes } from "./feedObservationTimes";
 import "./DashboardCard.css";
 
 // A corner's card is read again every five minutes while the screen is on; a
@@ -43,6 +45,13 @@ export default function DashboardCard({
   );
   const [drawn, setDrawn] = useState(false);
   const [broken, setBroken] = useState(false);
+  const [feedStatus, setFeedStatus] = useState<{
+    id: string;
+    version: number;
+    asOf?: string;
+    observations?: string;
+    warning?: string;
+  } | null>(null);
   const port = useRef<MessagePort | null>(null),
     latest = useRef<DashboardData | null>(null),
     timer = useRef<ReturnType<typeof setTimeout> | null>(null),
@@ -94,15 +103,43 @@ export default function DashboardCard({
   useEffect(() => {
     if (!dashboard || !session.dashboardData) return;
     const controller = new AbortController();
-    const read = () =>
-      session.dashboardData!(dashboard.id, dashboard.version, controller.signal)
-        .then((result) => {
-          if (controller.signal.aborted || !result) return;
-          latest.current = result;
-          dashboardCache.keepData(result);
-          sendRef.current(result);
-        })
-        .catch(() => {});
+    let sequence = 0;
+    const read = async () => {
+      const request = ++sequence;
+      const { id, version } = dashboard;
+      const result = await session.dashboardData!(
+        id,
+        version,
+        controller.signal,
+      ).catch(() => null);
+      if (controller.signal.aborted || request !== sequence) return;
+      if (
+        !result ||
+        result.dashboard.id !== id ||
+        result.dashboard.version !== version
+      ) {
+        setFeedStatus((before) => ({
+          id,
+          version,
+          ...(before?.id === id && before.version === version ? before : {}),
+          warning: "Feed refresh failed",
+        }));
+        return;
+      }
+      latest.current = result;
+      dashboardCache.keepData(result);
+      const incomplete = Object.values(result.feeds).some(
+        (feed) => feed.status !== "ok",
+      );
+      setFeedStatus({
+        id,
+        version,
+        asOf: result.asOf,
+        observations: feedObservationTimes(result),
+        warning: incomplete ? "Feed unavailable" : undefined,
+      });
+      sendRef.current(result);
+    };
     void read();
     const interval = setInterval(() => {
       if (!document.hidden) void read();
@@ -163,6 +200,12 @@ export default function DashboardCard({
   };
 
   const shownTitle = dashboard?.title ?? title;
+  const status =
+    dashboard &&
+    feedStatus?.id === dashboard.id &&
+    feedStatus.version === dashboard.version
+      ? feedStatus
+      : null;
   return (
     <div className={`dashboard-card ${shape}`}>
       <div className="section-label">
@@ -192,6 +235,15 @@ export default function DashboardCard({
               ? missing
               : "This card can’t be drawn right now. Open the dashboard to see it."}
         </p>
+      )}
+      {status && !unavailable && (
+        <small className="dashboard-card-freshness">
+          {status.warning && `${status.warning}. `}
+          {status.observations && `${status.observations}. `}
+          {status.asOf
+            ? `Feeds read ${stamp(status.asOf)}`
+            : "No feed read yet"}
+        </small>
       )}
       {/* A dashboard this viewer can't read is nothing to open. */}
       {!(dashboard === null && missing) && (

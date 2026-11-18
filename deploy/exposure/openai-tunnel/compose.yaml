@@ -1,5 +1,5 @@
 # OpenAI Secure MCP Tunnel exposure: OpenAI's tunnel client (tunnel-client) dials out to OpenAI and carries ChatGPT's
-# MCP calls to the engine's /mcp on the internal network. Nothing is published on the host and nothing listens for
+# MCP calls to the engine's /mcp on the egress network. Nothing is published on the host and nothing listens for
 # the internet. The client adds this recipe's own harness token to every call, so ChatGPT holds no token.
 #
 # Included from deploy/compose/compose.yaml. The service starts only with the profile:
@@ -17,7 +17,7 @@ services:
   openai-tunnel:
     profiles: ["openai-tunnel"]
     # An exact version: OpenAI publishes one tag per release and recommends a version or a digest over latest.
-    image: ${RHYTHM_OPENAI_TUNNEL_IMAGE:-ghcr.io/openai/tunnel-client:v0.0.18}
+    image: ${RHYTHM_OPENAI_TUNNEL_IMAGE:-ghcr.io/openai/tunnel-client:v0.0.18@sha256:486321616c197fed2d3fbe7d44f22433ce9a1e6c1ee434c0d6652868a5fda5c1}
     # The published image runs as root; 65532 is the non-root user of the client's own runtime image.
     user: "65532:65532"
     entrypoint: ["/bin/sh", "/etc/rhythm/openai-tunnel.sh"]
@@ -30,8 +30,7 @@ services:
       - openai-tunnel_key
       - openai-tunnel_token
     networks:
-      # internal reaches engine:8080; egress reaches OpenAI (outbound HTTPS only).
-      - internal
+      # This tunnel only needs the engine and outbound internet.
       - egress
     healthcheck:
       # Liveness only. Whether the tunnel is connected is /readyz (README); an OpenAI outage must not fail ./rhythm up.

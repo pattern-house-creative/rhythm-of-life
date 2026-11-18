@@ -45,5 +45,5 @@ records `on` refuses to start while `rhythm.yaml` says `off`, and a start with `
 table comes back row for row (`MemoryRestoreTests`, which restores a real `pg_dump` into a throwaway database and
 compares every table).
 
-No retention or deletion: prune the restic repository, the staging folders and old `rhythm_before_*` databases
-yourself when you choose to.
+The scheduled script can apply the [opt-in snapshot retention policy](../../docs/backups.md#each-backup).
+Failed staging folders and old `rhythm_before_*` databases remain for the operator to review.

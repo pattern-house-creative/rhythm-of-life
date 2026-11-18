@@ -27,9 +27,21 @@ public static partial class InitCommand
         var o = ask.Output;
         if (File.Exists(deploy.Settings) && !a.Has("--force"))
             throw new ArgumentException("This install is already set up (rhythm.yaml exists). `rhythm doctor` checks it; `rhythm init --force` writes new settings and keeps every secret.");
-        string Answer(string flag, string question, string? fallback, Func<string, string?> problem) =>
-            a[flag] is { } given ? (problem(given) is { } wrong ? throw new ArgumentException($"{flag}: {wrong}") : given)
-            : ask.Ask(question, fallback, flag, problem);
+        var oldEnv = a.Has("--force") && File.Exists(deploy.Env) ? File.ReadAllText(deploy.Env) : null;
+        var previous = oldEnv is null ? [] : EnvFile.Parse(oldEnv);
+        var answered = new HashSet<string>();
+        string Answer(string flag, string question, string? fallback, Func<string, string?> problem)
+        {
+            if (a[flag] is { } given)
+            {
+                answered.Add(flag);
+                return problem(given) is { } wrong ? throw new ArgumentException($"{flag}: {wrong}") : given;
+            }
+            var result = ask.Ask(question, fallback, flag, problem);
+            if (result != fallback) answered.Add(flag);
+            return result;
+        }
+        string Previous(string key, string fallback) => previous.GetValueOrDefault(key) is { Length: > 0 } value ? value : fallback;
 
         o.WriteLine("Setting up Rhythm of Life. Enter takes the value in [brackets].");
         var name = Answer("--name", "Name of this install", "Rhythm of Life", v => v.Length is >= 1 and <= 60 ? null : "1-60 characters").Trim();
@@ -56,12 +68,15 @@ public static partial class InitCommand
             : ask.Confirm("Show the fictional demo data (always labelled DEMO)?", true, "--demo");
         var notes = Answer("--notes", "A folder of Markdown notes to show as stars (optional, Enter for none)", "", v => v.Length == 0 ? null : HostPathProblem(v));
         var project = Answer("--project-name", "Docker Compose project name (a second install on this computer needs its own)",
-            environment("COMPOSE_PROJECT_NAME") is { Length: > 0 } current ? current : "rhythm",
+            environment("COMPOSE_PROJECT_NAME") is { Length: > 0 } current ? current : Previous("COMPOSE_PROJECT_NAME", "rhythm"),
             v => ProjectName().IsMatch(v) ? null : "lower case letters, digits, '-' or '_', starting with a letter or digit, up to 63");
-        var version = environment("RHYTHM_VERSION") is { Length: > 0 } tag ? tag : "dev";
+        var version = environment("RHYTHM_VERSION") is { Length: > 0 } tag ? tag : Previous("RHYTHM_VERSION", "dev");
         if (!ImageTag().IsMatch(version)) throw new ArgumentException("RHYTHM_VERSION is not an image tag: letters, digits, '_', '.' or '-'");
-        var appPort = Port(a["--app-port"] ?? "8080", "--app-port");
-        var mcpPort = Port(a["--mcp-port"] ?? "8181", "--mcp-port");
+        // Compose resolves quoted/interpolated host ports before passing them to the CLI container.
+        string PublishedPort(string key, string fallback) =>
+            oldEnv is not null && environment(key) is { Length: > 0 } effective ? effective : Previous(key, fallback);
+        var appPort = Port(a["--app-port"] ?? PublishedPort("RHYTHM_APP_PORT", "8080"), "--app-port");
+        var mcpPort = Port(a["--mcp-port"] ?? PublishedPort("RHYTHM_MCP_PORT", "8181"), "--mcp-port");
 
         var (appUrl, mcpUrl) = exposure switch
         {
@@ -88,19 +103,25 @@ public static partial class InitCommand
             ? m.Value : m.Groups["key"].Value + people[0].Id);
         Verify(yaml, expected);
 
-        var env = Header(Template(deploy, "env.example", ".env.example"),
+        var env = oldEnv ?? Header(Template(deploy, "env.example", ".env.example"),
             "# .env: the compose-level settings of this install, written by `rhythm init`. Nothing here is secret:",
             "# secrets are files under secrets/ (docs/configuration.md). An empty value means the default in the compose files.");
         string Under(string sub) => data.Contains('\\') && !data.Contains('/') ? $"{data.TrimEnd('\\')}\\{sub}" : $"{data.TrimEnd('/')}/{sub}";
-        foreach (var (key, value) in new[]
+        void Setting(string key, string value, bool requested = false)
         {
-            ("COMPOSE_PROJECT_NAME", project), ("RHYTHM_VERSION", version),
-            ("RHYTHM_CONFIG_FILE", "./rhythm.yaml"), ("RHYTHM_BIND", exposure == "lan" ? "0.0.0.0" : "127.0.0.1"),
-            ("RHYTHM_APP_PORT", appPort.ToString()), ("RHYTHM_MCP_PORT", mcpPort.ToString()),
-            ("RHYTHM_NOTES_DIR", notes.Length > 0 ? notes : Under("notes")), ("RHYTHM_IMPORT_DIR", Under("import")),
-            ("RHYTHM_BACKUP_DIR", Under("backups")), ("RHYTHM_BACKUP_STAGING_DIR", Under("backup-staging")),
-        })
-            env = EnvFile.Set(env, key, value);
+            if (!previous.ContainsKey(key) || requested) env = EnvFile.Set(env, key, value);
+        }
+        Setting("COMPOSE_PROJECT_NAME", project, answered.Contains("--project-name") || project != Previous("COMPOSE_PROJECT_NAME", "rhythm"));
+        Setting("RHYTHM_VERSION", version, version != Previous("RHYTHM_VERSION", "dev"));
+        Setting("RHYTHM_CONFIG_FILE", "./rhythm.yaml");
+        Setting("RHYTHM_BIND", exposure == "lan" ? "0.0.0.0" : "127.0.0.1", answered.Contains("--exposure"));
+        Setting("RHYTHM_APP_PORT", appPort.ToString(), a["--app-port"] is not null);
+        Setting("RHYTHM_MCP_PORT", mcpPort.ToString(), a["--mcp-port"] is not null);
+        var changeData = answered.Contains("--data");
+        Setting("RHYTHM_NOTES_DIR", notes.Length > 0 ? notes : Under("notes"), answered.Contains("--notes") || changeData);
+        Setting("RHYTHM_IMPORT_DIR", Under("import"), changeData);
+        Setting("RHYTHM_BACKUP_DIR", Under("backups"), changeData);
+        Setting("RHYTHM_BACKUP_STAGING_DIR", Under("backup-staging"), changeData);
 
         // Secrets first: a failure here leaves no settings file pointing at secrets that are not there.
         Owners.Folder(deploy.Secrets, Owners.Person(deploy, Owners.PrivateFolder));
@@ -126,7 +147,7 @@ public static partial class InitCommand
         Owners.Rewrite(deploy.Env, env, Owners.Person(deploy, Owners.Readable));
         // A data folder inside the deploy folder is made now; one elsewhere on the host by `rhythm up` (preflight).
         var inside = Path.GetFullPath(Path.Combine(deploy.Root, data));
-        if (!Path.IsPathRooted(data) && !data.Contains(':') && inside.StartsWith(deploy.Root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+        if ((oldEnv is null || changeData) && !Path.IsPathRooted(data) && !data.Contains(':') && inside.StartsWith(deploy.Root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
             StackCommands.PrepareFolders(inside, deploy, notes.Length == 0);
 
         o.WriteLine();

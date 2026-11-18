@@ -28,6 +28,29 @@ class HouseholdClientFixtureTest {
         val sky=HouseholdClient(origin).load()
         assertTrue(sky.dashboards.isEmpty());assertEquals(10,sky.stars.size);assertTrue(sky.warning.contains("Dashboard previews unavailable"))
     }
+    @Test fun discoveryIsReusedUntilExpiryAndDiscardedAfterAccessLoss() = runBlocking {
+        mode("normal")
+        var clock = 100L
+        val client = HouseholdClient(origin) { clock }
+        fun reads(): Int {
+            val data = URL("$origin/__fixture/state").readText()
+            return org.json.JSONObject(data).getJSONObject("reads").optInt("/api/graph")
+        }
+        val baseline = reads()
+        assertEquals(10, client.load().stars.size)
+        clock += 299_999
+        assertEquals(10, client.load().stars.size)
+        assertEquals(baseline + 1, reads())
+        clock++
+        client.load()
+        assertEquals(baseline + 2, reads())
+        mode("denied")
+        assertTrue(runCatching { client.load() }.exceptionOrNull() is HouseholdAccessDenied)
+        mode("normal")
+        client.load()
+        assertEquals(baseline + 3, reads())
+    }
+
     @Test fun graphAccessDenialFailsClosedAndOldCompanionCannotSeedPreviews()=runBlocking {
         mode("graph-denied")
         assertTrue(runCatching { HouseholdClient(origin).load() }.isFailure)

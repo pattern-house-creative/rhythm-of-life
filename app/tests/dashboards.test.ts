@@ -105,6 +105,7 @@ it("keeps a dashboard that reads memories by filter, which may name no star", ()
     name: "items",
     kind: "memories",
     where: { project: ["demo-garden"], state: { not: ["done", "cancelled"] } },
+    fullText: true,
     limit: 500,
   };
   expect(
@@ -118,6 +119,7 @@ it("keeps a dashboard that reads memories by filter, which may name no star", ()
   for (const broken of [
     { ...memories, star: "memory:memory:x" },
     { ...memories, where: "project" },
+    { ...memories, fullText: "yes" },
     { ...memories, limit: 1001 },
   ])
     expect(

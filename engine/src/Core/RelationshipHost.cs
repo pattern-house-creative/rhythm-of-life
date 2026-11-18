@@ -353,10 +353,10 @@ public sealed class CatalogRelationshipSource(RelationshipHostConfiguration conf
     Dictionary<ResourceKey, DiscoveryRecord> stored = [];
     // The vectors this pass may list, by reference, each with the model that made it: those it made or reused, and
     // those stored last pass, which an adapter that did not read a record again keeps (the Drive adapter does).
-    readonly Dictionary<float[], string> made = new(ReferenceEqualityComparer.Instance);
+    readonly System.Collections.Concurrent.ConcurrentDictionary<float[], string> made = new(ReferenceEqualityComparer.Instance);
     // The map model's vector for each of those live vectors that has one, by the live vector's reference (D-256): made
     // this pass, or stored last pass by the same map model for the same content revision.
-    readonly Dictionary<float[], float[]> mapped = new(ReferenceEqualityComparer.Instance);
+    readonly System.Collections.Concurrent.ConcurrentDictionary<float[], float[]> mapped = new(ReferenceEqualityComparer.Instance);
     int mapFailed;
     readonly List<string> notes = [];
     // This pass's stars of replaced memories (SB-P4-11), which Bounded keeps after the current records of every source.
@@ -370,8 +370,8 @@ public sealed class CatalogRelationshipSource(RelationshipHostConfiguration conf
     // At most this much of a whole text is kept for the titles model, more than the titles adapter sends (6,000
     // characters, as the evaluation cut its whole-text input), as much as the pass reads of a native memory's text.
     const int MaxTitleText = 8000;
-    readonly string? model = embed is null ? null
-        : !string.IsNullOrWhiteSpace(model) ? model : throw new ArgumentException("An embedder needs its model's name");
+    readonly string? model = !string.IsNullOrWhiteSpace(model) ? model
+        : embed is null ? null : throw new ArgumentException("An embedder needs its model's name");
     // The map model this pass makes vectors with (graph.similarity.model, loaded), and its id; null without one. Only
     // used beside the live model: without `embed` no record has a vector, as before.
     public Func<string, string, float[]?>? MapEmbed { get; init; }
@@ -391,7 +391,7 @@ public sealed class CatalogRelationshipSource(RelationshipHostConfiguration conf
             if (record.Embedding is { } vector && SimilaritySuggestions.ModelOf(record) is { } by)
             {
                 made[vector] = by;
-                if (MapModel is { } map && record.MapEmbedding is { } kept && record.MapEmbeddingModel == map) mapped[vector] = kept;
+                if (MapEmbedModel is { } wanted && record.MapEmbedding is { } kept && record.MapEmbeddingModel == wanted) mapped[vector] = kept;
             }
     }
 
@@ -457,7 +457,7 @@ public sealed class CatalogRelationshipSource(RelationshipHostConfiguration conf
                 continue;
             }
             var mine = stored.Where(s => adapter.Providers.ContainsKey(s.Key.Provider)).ToDictionary();
-            var pass = new SourcePass(mine, Vector, Math.Max(memories, 0), Math.Max(documents, 0), model)
+            var pass = new SourcePass(mine, Vector, Math.Max(memories, 0), Math.Max(documents, 0), embed is null ? null : model)
             {
                 MapModel = MapModel,
                 MemoryShares = shares?.ToDictionary(s => s.Key, s => Math.Max(s.Value.Memories, 0), StringComparer.Ordinal),
@@ -627,9 +627,9 @@ public sealed class CatalogRelationshipSource(RelationshipHostConfiguration conf
     // With a map model the record's map vector is kept beside it the same way (Mapped).
     float[]? Vector(ResourceKey key, string contentRevision, string title, string text)
     {
-        if (embed is null) return null;
         if (stored.TryGetValue(key, out var previous) && previous.ContentRevision == contentRevision && previous.Embedding is { } kept
-            && SimilaritySuggestions.ModelOf(previous) == model) return Mapped(Made(kept), title, text);
+            && SimilaritySuggestions.ModelOf(previous) == model) return Mapped(kept, title, text);
+        if (embed is null) return null;
         try { return string.IsNullOrWhiteSpace(text) ? null : Mapped(Made(embed(title, text)), title, text); }
         catch (Exception e) when (e is ArgumentException or InvalidDataException) { return null; }
     }
@@ -643,9 +643,9 @@ public sealed class CatalogRelationshipSource(RelationshipHostConfiguration conf
         try
         {
             if (MapEmbed!(title, text) is { } vector) mapped[live] = vector;
-            else mapFailed++;
+            else Interlocked.Increment(ref mapFailed);
         }
-        catch (Exception e) when (e is not OperationCanceledException) { mapFailed++; }
+        catch (Exception e) when (e is not OperationCanceledException) { Interlocked.Increment(ref mapFailed); }
         return live;
     }
     float[]? Made(float[]? vector)
@@ -655,11 +655,11 @@ public sealed class CatalogRelationshipSource(RelationshipHostConfiguration conf
     }
     // Each listed vector names the model that made it. One this pass did not make, reuse or store last pass has no known
     // model, so it is left out rather than compared with another model's.
-    // A map vector is listed only beside the live vector it was made with, tagged with this pass's map model; any other
-    // (a record an adapter passed on as it was stored, a map model since changed or turned off) is left out.
+    // Keep a configured map model's vectors beside their original live vectors even while loading. With the
+    // key removed or changed, Prime did not retain the old map vectors. Only a loaded model drives map links.
     DiscoveryRecord Tagged(DiscoveryRecord record) => record.Embedding is null ? record with { EmbeddingModel = null, MapEmbedding = null, MapEmbeddingModel = null }
         : made.TryGetValue(record.Embedding, out var by) ? record with { EmbeddingModel = by,
-            MapEmbedding = MapModel is not null && mapped.TryGetValue(record.Embedding, out var map) ? map : null,
-            MapEmbeddingModel = MapModel is not null && mapped.ContainsKey(record.Embedding) ? MapModel : null }
+            MapEmbedding = mapped.TryGetValue(record.Embedding, out var map) ? map : null,
+            MapEmbeddingModel = map is null ? null : MapEmbedModel }
         : record with { Embedding = null, EmbeddingModel = null, MapEmbedding = null, MapEmbeddingModel = null };
 }

@@ -21,6 +21,7 @@ import type { MemoryTools } from "./memoryScreen";
 // began and not by which was checked; the earlier stands by taking the later out, which ends the review until that memory comes back (068).
 
 // Escape takes a question back first, while one is open.
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export function useLayer(open: boolean, close: () => void, tools: MemoryTools) {
   useEffect(() => {
     if (!open) return;
@@ -37,6 +38,7 @@ export function useLayer(open: boolean, close: () => void, tools: MemoryTools) {
 }
 
 // One list of a queue, page by page: its items, the next page's place and the whole list's length, which comes with each page.
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export function useQueue<A extends { next: string | null; count: number }, T>(
   tools: MemoryTools,
   request: Record<string, unknown>,

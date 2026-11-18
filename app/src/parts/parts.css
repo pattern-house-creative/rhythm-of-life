@@ -207,8 +207,8 @@
   margin-top: 10px;
 }
 @container part (max-height: 150px) {
-  .native-part .run-value > span {
-    display: none;
+  .native-part .run-value > .workout-observation {
+    line-height: 1.2;
   }
 }
 @container part (min-height: 240px) {

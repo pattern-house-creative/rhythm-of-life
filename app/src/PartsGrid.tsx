@@ -202,40 +202,30 @@ export function PartsGrid<P extends GridPart>({
   useEffect(() => onFold?.(fold), [fold, onFold]);
 
   // Each part's element in the order the grid first drew them; a part added later comes last.
-  const order = useRef<string[]>([]);
+  const [order, setOrder] = useState(() =>
+    readingOrder(parts).map((p) => p.id),
+  );
   const ids = new Set(parts.map((p) => p.id));
-  order.current = [
-    ...order.current.filter((id) => ids.has(id)),
+  const nextOrder = [
+    ...order.filter((id) => ids.has(id)),
     ...readingOrder(parts)
       .map((p) => p.id)
-      .filter((id) => !order.current.includes(id)),
+      .filter((id) => !order.includes(id)),
   ];
+
+  if (
+    nextOrder.length !== order.length ||
+    nextOrder.some((id, i) => order[i] !== id)
+  )
+    setOrder(nextOrder);
 
   const canArrange = !!arrange && fold === "saved" && !plain;
   // What is drawn: a part held by the keys moves as it goes; a dropped change, until saved.
   const drawn =
     held?.by === "keys" ? held.working : (settling ?? (parts as P[]));
+  // eslint-disable-next-line react/set-state-in-effect -- Drop the optimistic arrangement once the host supplies the saved parts.
   useEffect(() => setSettling(null), [parts]);
 
-  // While a part is held the document's root says so, and Escape puts it back wherever focus is.
-  const holding = held !== null;
-  useEffect(() => {
-    if (!holding) return;
-    const rootEl = document.documentElement;
-    rootEl.setAttribute("data-arranging", "");
-    const key = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || heldRef.current?.by !== "pointer") return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      putBack();
-    };
-    window.addEventListener("keydown", key, true);
-    return () => {
-      rootEl.removeAttribute("data-arranging");
-      window.removeEventListener("keydown", key, true);
-    };
-    // putBack reads only refs and setters, so the one it closes over always works.
-  }, [holding]);
   useEffect(
     () => () => {
       clearTimeout(holdTimer.current);
@@ -257,6 +247,25 @@ export function PartsGrid<P extends GridPart>({
     if (now?.by === "keys" || (now?.by === "pointer" && now.moved))
       say(`${partLabel(grid(now.start) as never, now.id)} put back`);
   }
+  // While a part is held the document's root says so, and Escape puts it back wherever focus is.
+  const holding = held !== null;
+  useEffect(() => {
+    if (!holding) return;
+    const rootEl = document.documentElement;
+    rootEl.setAttribute("data-arranging", "");
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || heldRef.current?.by !== "pointer") return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      putBack();
+    };
+    window.addEventListener("keydown", key, true);
+    return () => {
+      rootEl.removeAttribute("data-arranging");
+      window.removeEventListener("keydown", key, true);
+    };
+    // putBack reads only refs and setters, so the one it closes over always works.
+  }, [holding]);
   // Hands a change to the host; drawn as dropped until the host draws what it saved.
   const drop = (change: GridChange<P>) => {
     if (!arrange) return;
@@ -463,7 +472,9 @@ export function PartsGrid<P extends GridPart>({
   // over a part's area shows that part's grip as a hover would.
   const [hovered, setHovered] = useState<string | null>(null);
   const partsNow = useRef(parts);
-  partsNow.current = parts;
+  useLayoutEffect(() => {
+    partsNow.current = parts;
+  }, [parts]);
   useEffect(() => {
     const el = root.current;
     const host = overlay ? el?.parentElement : el;
@@ -530,7 +541,7 @@ export function PartsGrid<P extends GridPart>({
       data-held={held ? "" : undefined}
       data-touched={touched ? "" : undefined}
     >
-      {order.current.map((id) => {
+      {order.map((id) => {
         const part = drawn.find((p) => p.id === id);
         if (!part) return null;
         const known = part.kind === undefined || isPartKind(part.kind);

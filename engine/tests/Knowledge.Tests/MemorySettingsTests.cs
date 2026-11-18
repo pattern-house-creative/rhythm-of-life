@@ -381,6 +381,32 @@ public sealed class MemorySettingsDatabaseTests(DatabaseFixture fixture) : IClas
     }
     string File(string name) => System.IO.File.ReadAllText(deploy.Secret($"harness_{name}_token"));
 
+    [PostgresFact] public async Task Token_expiry_and_last_use_are_visible_without_exposing_the_credential()
+    {
+        Directory.CreateDirectory(deploy.Root);
+        var expiry = DateTimeOffset.UtcNow.AddDays(2).ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        await Run("token", "create", "trial-client", "--expires-at", expiry);
+        var key = File("trial-client");
+        var tokens = new Principals(fixture.Source);
+        async Task<Principals.Token> Listed() => (await tokens.List(default)).Single(t => t.Name == "trial-client");
+        var token = await Listed();
+        Assert.Null(token.LastUsedAt);
+        Assert.Equal(expiry, token.ExpiresAt!.Value.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'"));
+        Assert.True(await tokens.Enabled(key, default));
+        Assert.Equal(token.Id, (await fixture.Db.Authenticate(key, default))!.Id);
+        var used = (await Listed()).LastUsedAt;
+        Assert.NotNull(used);
+        var list = await Run("token", "list");
+        Assert.Contains($"id={token.Id}", list);
+        Assert.DoesNotContain(key, list);
+        await Scoped.Execute(fixture.Source, "UPDATE principals SET expires_at=now()-interval '1 second' WHERE id=@id", ("id", token.Id));
+        Assert.False(await tokens.Enabled(key, default));
+        Assert.Null(await fixture.Db.Authenticate(key, default));
+        Assert.Equal(used, (await Listed()).LastUsedAt);
+        Assert.Contains("(expired: refused)", await Run("token", "list"));
+        await Assert.ThrowsAsync<ArgumentException>(() => Run("token", "create", "already-expired", "--expires-at", "2000-01-01T00:00:00Z"));
+    }
+
     [PostgresFact] public async Task A_token_made_for_a_person_is_listed_with_them_and_refused_once_they_are_suspended()
     {
         Directory.CreateDirectory(deploy.Root);

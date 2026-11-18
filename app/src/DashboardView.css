@@ -15,6 +15,12 @@
   line-height: 1.7;
   color: #d2dee3;
 }
+.dashboard-freshness {
+  flex: none;
+  margin: 0;
+  font-size: 12px;
+  color: #c5d3dc;
+}
 .dashboard-notice {
   flex: none;
   margin: 0;

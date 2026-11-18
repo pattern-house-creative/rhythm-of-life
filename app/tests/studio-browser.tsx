@@ -1,6 +1,6 @@
 // Synthetic visual/sandbox verification only. No live engine, source data, credentials or timed typing.
 import { createRoot } from "react-dom/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Studio } from "../src/Studio";
 import DashboardView from "../src/DashboardView";
 import { draftDashboard } from "../src/studioProtocol";
@@ -144,6 +144,7 @@ channel.onmessage = async ({ data }) => {
   persist();
   window.dispatchEvent(new Event("rhythm:studio"));
 };
+// eslint-disable-next-line react/only-export-components -- This standalone entry mounts its own React root.
 function TestScreen() {
   const [saved, setSaved] = useState(state.status === "saved");
   const board = state.candidate
@@ -187,9 +188,14 @@ function TestScreen() {
     </>
   );
 }
+// eslint-disable-next-line react/only-export-components -- This standalone entry mounts its own React root.
 function Controller() {
   const [result, setResult] = useState("");
-  channel.onmessage = (e) => setResult(JSON.stringify(e.data));
+  useEffect(() => {
+    const receive = (e: MessageEvent) => setResult(JSON.stringify(e.data));
+    channel.addEventListener("message", receive);
+    return () => channel.removeEventListener("message", receive);
+  }, []);
   return (
     <main style={{ padding: 40 }}>
       <h1>Studio synthetic controller</h1>

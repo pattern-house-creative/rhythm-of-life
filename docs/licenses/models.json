@@ -19,12 +19,12 @@
     },
     {
       "name": "bge-small",
-      "repository": "Xenova/bge-small-en-v1.5",
-      "revision": "ea104dacec62c0de699686887e3f920caeb4f3e3",
-      "card": "https://huggingface.co/Xenova/bge-small-en-v1.5/raw/ea104dacec62c0de699686887e3f920caeb4f3e3/README.md",
-      "cardSha256": "ce711ead2cb11725c9c6de69779d918c500ab12c74c5c2437ff0c448ed1566a5",
+      "repository": "michaelfeil/bge-small-en-v1.5",
+      "revision": "ab7b31bd10f9bfbb915a28662ec4726b06c6552a",
+      "license": "mit",
+      "card": "https://huggingface.co/michaelfeil/bge-small-en-v1.5/raw/ab7b31bd10f9bfbb915a28662ec4726b06c6552a/README.md",
+      "cardSha256": "ce4f33232c350f770735df54b3318182814c927231e26c3d05d414310d4207ce",
       "notices": [],
-      "licenseStatus": "No license declaration in the pinned export model card",
       "original": {
         "repository": "BAAI/bge-small-en-v1.5",
         "revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",

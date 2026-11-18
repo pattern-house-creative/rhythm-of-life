@@ -124,8 +124,7 @@ public sealed class MemoryShareTests(DatabaseFixture fixture) : IClassFixture<Da
     }
 
     // A move retires the state it replaces as any change does, marked moved, and the prune (034's, replaced by 048) takes
-    // such a state first, never the newest kept one: an AI client moving a memory back and forth evicts none of its
-    // earlier edits but the one the first move's change would, and a memory still keeps twenty earlier states at most.
+    // such a state first among duplicates. Moving a memory back and forth cannot evict its last copy of earlier wording.
     [PostgresFact] public async Task Moving_a_memory_back_and_forth_keeps_its_earlier_edits()
     {
         var who = await On("share-loop");
@@ -146,16 +145,15 @@ public sealed class MemoryShareTests(DatabaseFixture fixture) : IClassFixture<Da
         // Back in Alex's private scope, so the first draft is still one undo away.
         var undone = await Store.Undo(who.Alex, id, 1, 28, Mcp, default);
         Assert.Equal((29, "DEMO: the fictional seed list, first draft."), (undone.Revision, (await Store.Get(who.Alex, id, default))!.Content));
-        // Twenty edits kept, then a move: it evicts the oldest edit, as any change would, and a second move evicts the
-        // first one's state, not another edit.
+        // A move never evicts a unique edit. A copy in another scope is retained separately.
         var full = (await Store.Create(who.Alex, new("DEMO: the fictional pond log, entry 0."), Mcp, default)).Id;
         for (var entry = 1; entry <= 20; entry++) await Store.Append(who.Alex, full, $"DEMO: entry {entry}.", null, Mcp, default);
         Assert.Equal("20 20 1..20", await Scalar(Kept, ("id", full)));
         await Store.Share(who.Alex, full, "shared", null, Mcp, default);
-        Assert.Equal("20 19 2..21", await Scalar(Kept, ("id", full)));
+        Assert.Equal("21 20 1..21", await Scalar(Kept, ("id", full)));
         await Store.Share(who.Alex, full, "private", null, Mcp, default);
-        Assert.Equal("20 19 2..22", await Scalar(Kept, ("id", full)));
-        Assert.Equal("pruned", (await Store.GetVersion(who.Alex, full, 21, default))!.Missing);
+        Assert.Equal("22 20 1..22", await Scalar(Kept, ("id", full)));
+        Assert.NotNull((await Store.GetVersion(who.Alex, full, 21, default))!.Version);
         Assert.NotNull((await Store.GetVersion(who.Alex, full, 2, default))!.Version);
     }
 

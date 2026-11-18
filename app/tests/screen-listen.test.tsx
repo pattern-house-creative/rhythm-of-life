@@ -494,6 +494,7 @@ function Tab({
   useEffect(() => watchScreenName(identity.id, setRenamed), [identity.id]);
   useEffect(() => {
     if (renames)
+      // eslint-disable-next-line react/immutability -- The test harness passes this mutable ref to drive a tab rename from outside React.
       renames.current = (name) => {
         saveScreenName(name, false);
         setRenamed(name);

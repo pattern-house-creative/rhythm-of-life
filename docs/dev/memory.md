@@ -234,7 +234,8 @@ upstream's author lock (ledger SEC-04), with its gaps closed (below).
   records its audit row under the subject it lands in, so its arrival is the first revision new readers see. A state
   that was held is served without its words unless a later state the reader sees holds the same text released, and
   then with its tags and project only when that state holds the same ones (a release vouched for nothing else). The
-  20 newest earlier states are kept (D-036); every audit row is kept, so an older change is listed without its words
+  retention target is 20 earlier states. Migration 085 keeps the last copy of each wording within its subject,
+  scope and hold status, even beyond that target. Every audit row is kept, including for pruned duplicate states
   (`MemoryHistoryTests`).
 - **Today** (migration 035, SB-P3-07): the project row is built in the store's checked writers
   (`create_memory_project`, `update_memory_project` for its name, description, aliases and archive or restore, and
@@ -424,10 +425,8 @@ upstream's author lock (ledger SEC-04), with its gaps closed (below).
   answer of its tells it where the memory is. Like any change it retires the state it replaces, moves the revision and writes one audit row,
   `shared` or `unshared`, under the subject it lands in (with where it came from, the fields it changed and how many star
   rows it dropped), so 034's floor starts a new reader's history at it, and an undo of it is refused (`moved`). The
-  state a move retires is marked moved, and 034's prune (replaced in 048) takes such a state first, never the newest kept
-  one, when a memory is over its twenty: a move changes no words, so moving a memory back and forth evicts at most one
-  earlier edit (the first move's, as any change's would) and never every one, which a loop of twenty moves otherwise
-  would; each move still writes an audit row, never removed. What
+  state a move retires is marked moved. When a memory is over its twenty, pruning takes duplicate moved or cascaded
+  states first and keeps the newest copy of each wording in each scope and hold status. Each move writes an audit row. What
   follows the memory: its subject and scope (its passages and vectors with them), its author, its person- and AI-made
   links (`made_links` keep their ids; each is served only to a reader of both ends) and its project by slug, the landing
   scope's project of that slug or alias taking it or one being made there with the slug as its name (no private
@@ -1615,7 +1614,7 @@ the copy.
 | screens | `screens.showing`, `screen_commands` (the screens program's 020) | what a screen shows; commands with star ids and queries | 7.5: a viewer session's showing and command arguments only for records the asker reads, its typed query text to no other principal (SB-P1-15, built in 027 and `Core/Screens.cs`) |
 | the app | the browser | nothing: no `/api` answer is cached (`app/vite.config.ts`, `runtimeCaching: []`), text lives in React state until the reader closes, `localStorage` keeps the layout; but the browser's own history keeps the address a capture tab opened with (SB-P7-03): the page's title, its address and up to 8 000 characters of selection after the `#`, which a browser that syncs history sends to its sync service too ([../security.md](../security.md#saving-pages-from-the-browser)) | unchanged |
 | an AI client | outside Rhythm | what it was answered | beyond Rhythm's reach: scopes decide what Rhythm answers, not what a client keeps |
-| logs | the engine's request log and rebuild notes | fixed fields, kinds and counts; never an id, title or text (`Mcp/RequestLog.cs`, `RelationshipHost.Notes`) | unchanged |
+| logs | the engine's request log and rebuild notes | fixed fields, kinds and counts; an authenticated call names its credential's public ID. No memory ID, title or text (`Mcp/RequestLog.cs`, `RelationshipHost.Notes`) | unchanged |
 | backups | restic, outside the database | everything | the operator's (section 9) |
 
 **Vectors.** No tool returns a vector. Star vectors are read only by the rebuild (every other read drops them,

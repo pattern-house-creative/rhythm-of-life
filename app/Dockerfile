@@ -7,7 +7,7 @@
 # runs as the image's non-root "node" user and writes nothing, so it runs with a read-only
 # root filesystem (deploy/compose/app.compose.yaml). It listens on PORT (8080) on all
 # interfaces inside the container; compose decides what reaches it from outside.
-ARG NODE_IMAGE=node:24-alpine
+ARG NODE_IMAGE=node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5
 
 FROM ${NODE_IMAGE} AS build
 WORKDIR /src

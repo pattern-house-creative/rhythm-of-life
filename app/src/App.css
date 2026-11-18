@@ -199,6 +199,7 @@
 }
 .metric-caption {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 7px;
   font-size: 10px;
@@ -209,6 +210,9 @@
   height: 4px;
   background: #81cbb1;
   border-radius: 50%;
+}
+.app .sleep-value > .sleep-observation {
+  display: inline;
 }
 .sparkline {
   position: relative;
@@ -2937,6 +2941,29 @@ span.dashboard-full {
   color: #e3f3f5;
   background: #accde41c;
   white-space: nowrap;
+}
+/* A sealed frame cannot forward touches to its parent. Give touchscreens a
+   dedicated exit row so the first tap always reaches the dashboard itself. */
+@media (any-pointer: coarse) {
+  .full-screen-wake {
+    display: none;
+  }
+  .full-screen:not(.awake):not(.native-reader)
+    .parts:not(.plain)
+    > .parts-part:is([data-kind="page"], [data-kind="card"])::after {
+    content: none;
+  }
+  .full-screen-bar {
+    position: static;
+    order: -1;
+    align-self: flex-end;
+    flex: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .full-screen-bar button {
+    min-height: 44px;
+  }
 }
 /* Phones: the page goes edge to edge, and the control is a full-size touch target. */
 @media (max-width: 760px) and (min-height: 501px),

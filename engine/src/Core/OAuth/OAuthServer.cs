@@ -130,8 +130,9 @@ public sealed class OAuthServer(RhythmConfig config, Database db)
     public async Task<Caller?> Caller(Guid id, CancellationToken ct)
     {
         await using var command = db.Source.CreateCommand($"""
-            SELECT p.id,p.name,p.role FROM principals p WHERE p.id=@id AND p.enabled AND NOT p.terminal
-              AND p.role='harness' AND {Principals.PersonCurrent}
+            UPDATE principals p SET last_used_at=greatest(p.last_used_at,clock_timestamp())
+            WHERE p.id=@id AND p.role='harness' AND {Principals.TokenCurrent} AND {Principals.PersonCurrent}
+            RETURNING p.id,p.name,p.role
             """);
         command.Parameters.AddWithValue("id", id);
         await using var reader = await command.ExecuteReaderAsync(ct);
@@ -219,6 +220,7 @@ public sealed class OAuthServer(RhythmConfig config, Database db)
         if (credential.Length is < 32 or > 512) return Results.StatusCode(401);
         var caller = await db.Authenticate(credential, context.RequestAborted);
         if (caller is not { Role: "harness" }) return Results.StatusCode(401);
+        Mcp.RequestLog.Of(context)?.Authenticated(caller, "oauth_authorize");
         var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         identity.SetClaim(Claims.Subject, caller.Id.ToString());
         var principal = new ClaimsPrincipal(identity);
@@ -240,8 +242,9 @@ public sealed class OAuthServer(RhythmConfig config, Database db)
         if (!ResourceMatches(request)) return OAuthError(Errors.InvalidTarget);
         var result = await context.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         if (!result.Succeeded || result.Principal is not { } principal
-            || !Guid.TryParse(principal.GetClaim(Claims.Subject), out var id) || await Caller(id, context.RequestAborted) is null)
+            || !Guid.TryParse(principal.GetClaim(Claims.Subject), out var id) || await Caller(id, context.RequestAborted) is not { } caller)
             return OAuthError(Errors.InvalidGrant);
+        Mcp.RequestLog.Of(context)?.Authenticated(caller, "oauth_token");
         return Results.SignIn(principal, authenticationScheme: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
 

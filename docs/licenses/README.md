@@ -47,19 +47,19 @@ Mozilla's [MPL FAQ](https://www.mozilla.org/en-US/MPL/2.0/FAQ/) explains the dis
 the tool privately and distributing its covered code. OFL fonts do not require relicensing Rhythm's
 application code; the fonts themselves retain OFL. No dependency was relicensed or replaced here.
 
-## Model terms and unresolved export
+## Model terms
 
 | Model | Evidence at the exact runtime/benchmark pin | Status |
 |---|---|---|
 | Xenova all-MiniLM-L6-v2 | pinned export card declares Apache-2.0; original sentence-transformers card also declares Apache-2.0 | declaration verified |
-| Xenova bge-small-en-v1.5 | pinned export card has **no licence declaration** and no LICENSE file; the original BAAI card declares MIT | unresolved export provenance; do not claim this export's licence is verified or redistribute its weights on that assumption |
+| michaelfeil bge-small-en-v1.5 | the pinned export card and upstream BAAI card both declare MIT | quantized weights and vocabulary match the previous export byte for byte |
 | BAAI bge-base-en-v1.5 | pinned card declares MIT | declaration verified; benchmark-only |
 | BAAI bge-reranker-base | pinned card declares MIT | declaration verified; off by default |
 | cross-encoder ms-marco-MiniLM-L6-v2 | pinned card declares Apache-2.0 | declaration verified; off by default |
 
 The JSON links directly to each pinned card and records its hash. These Hugging Face pins contain no
 standalone licence files; model-card declarations are evidence of the stated terms, not copies of
-copyright notices to accompany a future redistributed model bundle. No weights were downloaded.
+copyright notices to accompany a future redistributed model bundle. The BGE-small weights and vocabulary were downloaded for SHA-256 verification.
 
 The suggested optional titles model, `qwen3:4b-instruct-2507-q4_K_M`, comes from Qwen3-4B-Instruct-2507
 ([card at `cdbee75f`](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/blob/cdbee75f17c01a7cc42f958dc650907174af0554/README.md)),
@@ -67,16 +67,12 @@ which declares Apache-2.0. An Ollama tag is not an immutable model digest; verif
 artifact and its notices before redistributing it. Arbitrary titles models and external AI clients
 are selected by the operator and require their own terms review.
 
-**Owner decision before release:** obtain confirmation of the pinned Xenova BGE-small export's terms,
-or approve an alternative with clear provenance. Switching models or pins changes vector identity
-and requires its own evaluation; this task changes neither pins nor installations.
-
 ## Container and system software boundary
 
 The npm/NuGet inventory is not a complete container SBOM. The compose recipes reference Node/.NET,
 PostgreSQL/pgvector, Alpine/Ubuntu packages, restic/Python and optional exposure or titles services
 (Ollama, cloudflared, Caddy, Tailscale and the selected tunnel client). Their licences and notices
-remain with their upstream images/packages. Several tags float and operators can override them.
+remain with their upstream images/packages. The defaults use pinned manifest digests and operators can override them.
 An exact image inventory, OS-package vulnerability scan, and all source/notice obligations for an
 image distribution must be generated from the actual image digests before publishing images. This
 task did not pull or publish images, inspect production, or assert container redistribution clearance.
@@ -103,6 +99,6 @@ the exact packages, refresh their metadata and original legal files using
 `NUGET_PACKAGES=<restored-package-cache> node scripts/collect-license-evidence.mjs` (public network reads),
 review changes, then run `licenses:check`. The collection script's curated model list must follow any
 model-registry change. Checking runs offline, detects lockfile drift and altered legal files, and
-explicitly reports the unresolved BGE-small status. The app build fails if a bundled package lacks
+requires a licence declaration for each pinned model. The app build fails if a bundled package lacks
 its original licence file. The dated [dependency review](../dependency-license-review-20261109.md)
 records vulnerability findings, checks and remaining decisions.

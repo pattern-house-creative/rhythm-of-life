@@ -1,7 +1,7 @@
 # openai-tunnel
 
 An Exposure adapter: OpenAI's tunnel client (`ghcr.io/openai/tunnel-client`, compose profile `openai-tunnel`)
-dials out to OpenAI and carries ChatGPT's MCP calls to the engine's `/mcp` on the internal network, adding the
+dials out to OpenAI and carries ChatGPT's MCP calls to the engine's `/mcp` on the egress network, adding the
 tunnel's own harness token. Nothing is published on the host and nothing on the internet can connect in. A route
 for ChatGPT (and Codex or the Responses API) without a domain; [harness/chatgpt/](../../harness/chatgpt/README.md)
 compares it with Cloudflare.

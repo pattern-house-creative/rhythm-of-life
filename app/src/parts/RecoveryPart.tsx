@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
 import { ArrowUpRight, ChevronRight, Heart, Moon } from "lucide-react";
-import { hasMeasurement, healthCaption, healthStatus } from "../health";
+import {
+  hasMeasurement,
+  healthCaption,
+  healthStatus,
+  observationLabel,
+} from "../health";
 import { sleepDuration } from "../model";
 import type { ObservatoryData } from "../model";
 import { garminOn } from "./partData";
@@ -38,10 +43,11 @@ export function RecoveryPart({
           {blocked || !sleepReady
             ? "—"
             : sleepDuration(data.recovery.sleepMinutes)}
-          <span>
-            {signals?.sleep.provenance.calendarDate
-              ? `sleep · ${signals.sleep.provenance.calendarDate}`
-              : "sleep"}
+          <span className="sleep-observation">
+            sleep
+            {!blocked &&
+              sleepReady &&
+              ` · ${observationLabel((signals?.sleep ?? data.recovery).provenance)}`}
             {signals?.sleep.status === "stale" ? " · stale" : ""}
           </span>
         </div>
@@ -55,6 +61,13 @@ export function RecoveryPart({
                 : (data.recovery.restingHeartRate ?? "—")}{" "}
               <small>bpm</small>
             </b>
+            {!blocked && heartReady && (
+              <small>
+                {observationLabel(
+                  (signals?.restingHeartRate ?? data.recovery).provenance,
+                )}
+              </small>
+            )}
             {signals && <small>{healthStatus(signals.restingHeartRate)}</small>}
           </span>
           <span>
@@ -65,6 +78,13 @@ export function RecoveryPart({
                 : (data.recovery.overnightHrvMs ?? "—")}{" "}
               <small>ms</small>
             </b>
+            {!blocked && hrvReady && (
+              <small>
+                {observationLabel(
+                  (signals?.overnightHrv ?? data.recovery).provenance,
+                )}
+              </small>
+            )}
             {signals && <small>{healthStatus(signals.overnightHrv)}</small>}
           </span>
         </div>

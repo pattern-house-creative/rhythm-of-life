@@ -30,9 +30,11 @@ def run(args, env=None):
     args = [str(a) for a in args]
     calls.append(args)
     tool = Path(args[0]).name
-    if tool == "pg_restore" and case == "stopped":
+    if tool == "pg_restore" and case in ("stopped", "uncertain"):
         raise KeyboardInterrupt()
     if "--tuples-only" in args:
+        if case == "uncertain":
+            raise RuntimeError("database status unavailable")
         return "\n".join(sorted(re.findall(r"'([a-z_0-9]+)'", args[-1])[::2])) + "\n"
     return ""
 b.run = run
@@ -57,7 +59,7 @@ def folder(files, listed=None):
 def refused(f, says):
     try:
         b.load(f)
-    except RuntimeError as e:
+    except b.RestoreRefused as e:
         assert says in str(e), str(e)
         return str(e)
     raise AssertionError("loaded")
@@ -104,11 +106,30 @@ elif case == "cut":
     # Loaded again, every file is the backup's own: nothing to add, nothing refused.
     calls.clear()
     b.load(f)
+elif case == "retention":
+    os.environ["RHYTHM_BACKUP_SERIES"] = "test"
+    os.environ.pop("RHYTHM_BACKUP_RETENTION", None)
+    b.retention()
+    assert not calls
+    b.retention(preview=True)
+    assert "--dry-run" in calls[-1] and "--prune" not in calls[-1]
+    os.environ["RHYTHM_BACKUP_RETENTION"] = "on"
+    b.retention()
+    assert calls[-1][1:] == ["forget", "--tag", "rhythm:test", "--group-by", "tags",
+                             "--keep-daily", "7", "--keep-weekly", "5", "--keep-monthly", "12", "--prune"]
 elif case == "stopped":
     f = folder({"database.dump": "DEMO dump", "archive/ab/one.txt": "DEMO one"})
     refused(f, "the load was stopped; the live database was not switched; the half-loaded database rhythm_restore_")
     assert tools()[:2] == ["createdb", "pg_restore"] and "dropdb" in tools(), tools()
     assert not (archive / "ab" / "one.txt").exists()
+elif case == "uncertain":
+    f = folder({"database.dump": "DEMO dump", "archive/ab/one.txt": "DEMO one"})
+    try:
+        b.load(f)
+    except RuntimeError as e:
+        assert not isinstance(e, b.RestoreRefused) and "check which database" in str(e), str(e)
+    else:
+        raise AssertionError("unconfirmed database switch was accepted")
 else:
     raise SystemExit("unknown case " + case)
 `;
@@ -131,3 +152,5 @@ test("a manifest naming a file by a path no backup writes loads nothing and writ
   load(t, "outside"));
 test("an archive file whose copy is cut short never takes its name, and the retry loads", { skip }, (t) => load(t, "cut"));
 test("a load stopped part way drops the database it made and says the live one was not switched", { skip }, (t) => load(t, "stopped"));
+test("an unavailable database after an interrupted restore cannot authorize a restart", { skip }, (t) => load(t, "uncertain"));
+test("retention needs opt-in and selects only this project; preview never prunes", { skip }, (t) => load(t, "retention"));

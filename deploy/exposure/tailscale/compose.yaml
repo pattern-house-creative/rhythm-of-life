@@ -11,7 +11,7 @@
 services:
   tailscale:
     profiles: ["tailscale"]
-    image: ${RHYTHM_TAILSCALE_IMAGE:-tailscale/tailscale:v1.88.3}
+    image: ${RHYTHM_TAILSCALE_IMAGE:-tailscale/tailscale:v1.88.3@sha256:b2a19f6b6402adc26a2aa8cb90da66afe3061e718ac67ed3f21ec3d4b366439f}
     hostname: ${RHYTHM_TAILSCALE_HOSTNAME:-rhythm}
     environment:
       TS_HOSTNAME: ${RHYTHM_TAILSCALE_HOSTNAME:-rhythm}
@@ -26,9 +26,8 @@ services:
     volumes:
       - tailscale-state:/var/lib/tailscale
     networks:
-      # internal reaches app:8080 and engine:8080; egress reaches the tailnet.
-      - internal
-      - egress
+      # The app-facing gateway reaches both app and engine on the edge bridge.
+      - edge
     cap_drop:
       - ALL
     security_opt:

@@ -85,7 +85,7 @@ PowerShell type `.\rhythm.ps1` where this page says `./rhythm`.
    longer works; delete it and make a new one with `./rhythm token create <name>`. Plugin and capture token files it
    does not check: make those again too ([../cli/README.md](../cli/README.md#restore), [backups.md](backups.md)).
 8. **An upgrade**: `./rhythm upgrade` rebuilds this checkout under the same tag, after a backup, and rolls back to the
-   images before it if anything fails. It leaves every setting, secret and connector as it was
+   images before it if anything fails. After a possible migration it keeps the stack stopped and prints the exact backup restore command. It leaves every setting and secret file as it was
    ([../cli/README.md](../cli/README.md#upgrade)).
 9. **Remove the trial** when you are done. First check which project the next command acts on: the
    `COMPOSE_PROJECT_NAME` your shell sets, if any (`echo $COMPOSE_PROJECT_NAME`; in PowerShell
@@ -200,7 +200,7 @@ rest at its next run ([dev/engine.md](dev/engine.md)).
 | the map | `graph.maxMemories` 3000 and `graph.maxDocuments` 1000 (at most 4900 together), `graph.nodeLimit` 300 |
 | a document | 5 MiB added in the app; 20 MiB dropped in the documents folder |
 | a memory's text | over 32 KiB it is held for review on every channel; a capture's body is at most 288 KiB and its text 131,072 bytes |
-| a memory's history | 20 earlier states kept, every audit row kept |
+| a memory's history | 20 earlier states plus any additional unique wording, every audit row kept |
 | the trash | 14 days, then deleted for good by the daily purge |
 | standing instructions (`memory.tools: on`) | 500 characters each, 50 a scope |
 | a work item's summary (`memory.work: on`) | 280 characters on one line, given when it becomes done or cancelled |

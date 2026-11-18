@@ -17,8 +17,7 @@ Hosted AI services (ChatGPT, connectors added by URL) cannot reach a tailnet. Fo
 
 ## How it works
 
-`compose.yaml` here adds a `tailscale` container (profile `tailscale`) on the stack's `internal` and
-`egress` networks. It joins your tailnet as its own machine, named `rhythm` by default, and
+`compose.yaml` here adds a `tailscale` container (profile `tailscale`) on the stack's `edge` network. It joins your tailnet as its own machine, named `rhythm` by default, and
 `tailscale serve` answers HTTPS on that name with the tailnet's certificate:
 
 - `/` goes to `http://app:8080`;

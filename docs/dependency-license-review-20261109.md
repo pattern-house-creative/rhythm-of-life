@@ -7,6 +7,18 @@ applied to this current baseline, then extended to cover the rest of the distrib
 
 ## Dependency findings
 
+### 17 November recheck
+
+With the committed app lockfile on `90d3e288`, `npm audit --json` reported 12 high and two
+moderate dependency entries. The production-only check, `npm audit --omit=dev`, reported zero.
+The counts include packages affected through dependencies. A high-severity picomatch advisory
+now covers all its published versions, including 4.0.7 in Vite 8.3.5 and Vitest 5.0.5.
+Updating or replacing only the PWA plugin cannot clear those paths. The registry still lists
+vite-plugin-pwa 2.0.0 and workbox-build 7.4.1 as their latest versions.
+[picomatch advisory](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
+
+### 9 November baseline
+
 A fresh `npm audit --json` returned **three advisories affecting six entries: two low and four
 moderate, no high or critical**. All affected entries are in the PWA build chain:
 `vite-plugin-pwa -> workbox-build -> @rollup/plugin-node-resolve / glob -> deepmerge / minimatch`.

@@ -33,10 +33,43 @@ public sealed partial class RhythmConfig
     public sealed class InstanceSection { public string Name { get; init; } = "Rhythm of Life"; }
     public sealed class Person { public string Id { get; init; } = ""; public string Name { get; init; } = ""; }
     public sealed class DemoSection { public bool Enabled { get; init; } = true; }
+    public sealed class HostRoleRule
+    {
+        public string Host { get; init; } = "";
+        public List<string> Roles { get; init; } = [];
+    }
+
     public sealed class EngineSection
     {
         public string Url { get; init; } = "http://engine:8080";
         public List<string> AllowedHosts { get; init; } = ["localhost", "127.0.0.1", "[::1]", "engine"];
+        public List<HostRoleRule> HostRoles { get; init; } = [];
+
+        // Host role rules apply to the hostname across all allowed ports. The perimeter checks allowedHosts separately.
+        public bool AcceptsRole(string host, string role)
+        {
+            var name = host.TrimEnd('.');
+            var rule = HostRoles.FirstOrDefault(r => string.Equals(name, r.Host, StringComparison.OrdinalIgnoreCase));
+            return rule is null || rule.Roles.Contains(role);
+        }
+
+        internal void ValidateHostRoles()
+        {
+            if (HostRoles is null || HostRoles.Count > 20) throw new ConfigException("engine.hostRoles lists up to 20 host rules");
+            if (HostRoles.Count == 0) return;
+            var allowed = AllowedHosts.Select(h => new HostString(h).Host.TrimEnd('.')).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var rule in HostRoles)
+            {
+                if (rule is null || string.IsNullOrEmpty(rule.Host) || rule.Host.EndsWith('.') || rule.Host.Length > 253
+                    || Uri.CheckHostName(rule.Host) == UriHostNameType.Unknown || !allowed.Contains(rule.Host) || !seen.Add(rule.Host))
+                    throw new ConfigException("engine.hostRoles needs a distinct hostname from engine.allowedHosts, without a port or final dot");
+                if (rule.Roles is null || rule.Roles.Count is < 1 or > 4 || rule.Roles.Distinct().Count() != rule.Roles.Count
+                    || rule.Roles.Any(r => r is not ("harness" or "app" or "ingest" or "capture")))
+                    throw new ConfigException("engine.hostRoles roles are one or more distinct values: harness, app, ingest, capture");
+            }
+        }
+
         public string? PublicMcpUrl { get; init; }
         public OAuthSettings? Oauth { get; init; }
         public bool LegacyToolNames { get; init; }
@@ -224,6 +257,7 @@ public sealed partial class RhythmConfig
         if (People.Select(p => p.Id).Distinct().Count() != People.Count) throw new ConfigException("people ids must be distinct");
         if (Engine.AllowedHosts is null || Engine.AllowedHosts.Count is < 1 or > 20 || Engine.AllowedHosts.Any(h => string.IsNullOrWhiteSpace(h) || h.Length > 253))
             throw new ConfigException("engine.allowedHosts lists 1-20 host names");
+        Engine.ValidateHostRoles();
         if (Graph.RefreshSeconds is < 300 or > 86400) throw new ConfigException("graph.refreshSeconds is 300-86400");
         if (Graph.FreshnessSeconds < Graph.RefreshSeconds + 60 || Graph.FreshnessSeconds > 86400)
             throw new ConfigException("graph.freshnessSeconds is at least graph.refreshSeconds + 60, at most 86400");

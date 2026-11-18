@@ -650,6 +650,7 @@ public sealed class MemoryLoopToolTests(DatabaseFixture fixture) : IClassFixture
         Assert.Equal("invalid", (string)(await ai.Refused("remember", new { content = "DEMO: long.", owed_to = new string('a', 65) }))["code"]!);
 
         // The list: newest first, two directions with their counts, each loop's counterparty in words.
+        await MemoryRows.SetCreationOrder(s, Id(owed), Id(owe), Id(task));
         var all = await ai.Ok("list_loops");
         Assert.Equal(("all", 3, 2, 1), ((string)all["direction"]!, (int)all["total"]!, (int)all["you_owe"]!, (int)all["owed_to_you"]!));
         Assert.Equal([Id(task), Id(owe), Id(owed)], all["loops"]!.AsArray().Select(l => Id(l!)));

@@ -191,6 +191,15 @@ const server = createServer({pfx:readFileSync(certificate),passphrase:'fixture-o
 
     const body=JSON.parse(Buffer.concat(chunks).toString()||'{}');
 
+    if(mode==='drive-preview') {
+      const sheet = {...nodes[0], id:'drive:fixture:synthetic-sheet', type:'document', title:'Garden spreadsheet',
+        provenance:{...nodes[0].provenance, sourceId:'drive', recordId:'synthetic-sheet'},
+        resource:{...nodes[0].resource, identity:{provider:'drive',account:'fixture',externalId:'synthetic-sheet'},
+          canonicalUrl:'https://docs.google.com/spreadsheets/d/synthetic-sheet/edit', content:null,
+          access:{scope:'household',canRead:true,canOpen:true}}};
+      return json({...graph,nodes:[...nodes,sheet]});
+    }
+
     if(body.operation==='content') return json(nodes.find(n=>n.id===body.value)||null);
 
     if(mode==='missing' && body.operation==='neighbors') return json({...graph,nodes:[],edges:[]});

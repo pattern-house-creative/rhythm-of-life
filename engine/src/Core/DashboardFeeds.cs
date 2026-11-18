@@ -22,6 +22,7 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
     RhythmConfig Settings => settings ?? RhythmConfig.Current;
     // A memory's preview in a memories feed: the length the app's Memories list cuts it to.
     public const int MemoryPreview = Mcp.AppMemories.ListPreview;
+    internal const string MemoriesTooLarge = "Too much data for one dashboard: ask for fewer memories (limit) or narrow the filters.";
     static readonly string Own = $"{Database.Visible()} AND r.relationship_snapshot IS NULL";
     // Each data star's metrics and units, listed once per revision of the star for each reader: listing them reads the
     // provider's whole history, and a rebuild gives the star a new revision whenever they change. A metric first ingested
@@ -53,10 +54,10 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
         {
             var record = feed.Kind is "log" or "memories" ? null : records.GetValueOrDefault(feed.Star);
             var payload = feed.Kind == "log" ? await LogFeed(principal, feed, ct)
-                : feed.Kind == "memories" ? await MemoriesFeed(principal, feed, ct)
+                : feed.Kind == "memories" ? await MemoriesFeed(principal, feed, preview, ct)
                 : record is null ? Unavailable(feed, null, "This star isn't on the map now.")
                 : await One(principal, feed, record, config!, ct);
-            return (feed, record, payload: preview ? Preview(payload) : payload);
+            return (feed, record, payload: preview && feed.Kind != "memories" ? Preview(payload) : payload);
         }));
         foreach (var (feed, record, read1) in read)
         {
@@ -64,7 +65,7 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
             var size = Encoding.UTF8.GetByteCount(payload.ToJsonString());
             if (used + size > MaxBytes)
             {
-                payload = feed.Kind == "memories" ? Memories(feed, "unavailable", "Too much data for one dashboard: ask for fewer memories (limit) or narrow the filters.")
+                payload = feed.Kind == "memories" ? Memories(feed, "unavailable", MemoriesTooLarge)
                     : Unavailable(feed, record, "Too much data for one dashboard: ask for by day, fewer days or fewer metrics.");
                 size = Encoding.UTF8.GetByteCount(payload.ToJsonString());
             }
@@ -255,7 +256,7 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
     // The native memories its reader reads that match a memories feed's filters (MemoryMatch, as the app's Memories view
     // lists them), newest first, never one held for review or in the trash, nor, unless its status filter names them, one
     // marked wrong: count (how many match in all), memories (at most limit) and truncated (more match than it gives).
-    async Task<JsonObject> MemoriesFeed(Guid principal, DashboardFeed feed, CancellationToken ct)
+    async Task<JsonObject> MemoriesFeed(Guid principal, DashboardFeed feed, bool preview, CancellationToken ct)
     {
         if (!MemorySettings.ToolsOn(Settings)) return Memories(feed, "unavailable", "Memories are off in this install (memory.tools).");
         var match = feed.Matched();
@@ -263,13 +264,16 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
         if (match.Worked && !work) return Memories(feed, "unavailable", "Work items are off in this install (memory.work).");
         try
         {
-            var found = await new MemoryStore(db.Source).Matching(principal, match, feed.Limit!.Value, MemoryPreview, ct);
+            var limit = feed.Limit!.Value;
+            var found = await new MemoryStore(db.Source).Matching(principal, match, preview ? Math.Min(limit, PreviewMemories) : limit,
+                feed.FullText == true ? null : MemoryPreview, ct);
             if (found.UnknownProjects.Count > 0)
                 return Memories(feed, "unavailable", Reason($"This feed names a project you don't read: {string.Join(", ", found.UnknownProjects)}."));
             var payload = Memories(feed, "ok", null);
             payload["count"] = found.Count;
             payload["memories"] = new JsonArray([.. found.Items.Select(m => (JsonNode)Memory(m, work))]);
-            payload["truncated"] = found.Count > found.Items.Count;
+            payload["truncated"] = found.Count > limit;
+            if (found.Items.Count < Math.Min(limit, found.Count)) payload["previewOf"] = Math.Min(limit, found.Count);
             return payload;
         }
         catch (MemoryRefused e) { return Memories(feed, "unavailable", Reason(e.Message)); }
@@ -428,12 +432,6 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
                 var used = kept.Select(r => (string?)r!["record"]).ToHashSet(StringComparer.Ordinal);
                 foreach (var id in records.Select(r => r.Key).Where(id => !used.Contains(id)).ToArray()) records.Remove(id);
             }
-        }
-        // A memories feed's newest memories, the first it gives.
-        if (payload["memories"] is JsonArray memories && memories.Count > PreviewMemories)
-        {
-            payload["previewOf"] = memories.Count;
-            payload["memories"] = new JsonArray([.. memories.Take(PreviewMemories).Select(m => m!.DeepClone())]);
         }
         if (payload["text"] is JsonValue value && value.GetValue<string>() is { Length: > PreviewText } text)
         { payload["previewOf"] = text.Length; payload["text"] = text[..PreviewText]; }

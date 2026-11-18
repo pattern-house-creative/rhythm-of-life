@@ -12,9 +12,8 @@ namespace Knowledge;
 // is cut from its Family stretch, as every reader outside Family is). A state that was held is served without its words
 // (no text, tags or project, as a list serves a held memory, D-149), unless a later state this reader sees holds the same
 // text released; its tags and project then only when that later state holds them too, since a release vouched for
-// nothing else (a caller's tags can carry the held text's words). The 20
-// newest earlier states are kept (D-036, 034); every change's audit row is kept, so an older change is still listed,
-// without its words.
+// nothing else (a caller's tags can carry the held text's words). A memory keeps at least the configured number of
+// retired states when available, plus any unique wording (085). Even pruned states still have their audit rows.
 //
 // The history tool and get's version argument (SB-P3-09) and the app's Memories view (SB-P3-12, SB-P3-13) read it, only
 // with memory.tools on, so with it off every existing answer is as it was.
@@ -32,9 +31,9 @@ public sealed record MemoryHistoryItem(int Revision, string Event, DateTimeOffse
 
 // A memory's history as one reader sees it. Revision: the current one. Next: the revision to pass as before for the
 // next, older page; none at the end. Cut: earlier history lies in a scope this reader does not read; EarlierBy: its
-// author, when that earlier history was in the author's own scope (none when it was Family's). Kept: how many earlier states a memory keeps; OldestKept: the oldest revision this reader sees
-// whose state is still kept; Pruned: states older than that, which this reader would see, are no longer kept (their
-// changes are still listed).
+// author, when that earlier history was in the author's own scope (none when it was Family's). Kept: the retention
+// target before duplicate states may be pruned. OldestKept: the earliest revision this reader sees with a state.
+// Pruned: some change in this reader's history has lost its state, including gaps between retained revisions.
 public sealed record MemoryHistory(Guid Id, int Revision, IReadOnlyList<MemoryHistoryItem> Items, int? Next, bool Cut,
     string? EarlierBy, int Kept, int OldestKept, bool Pruned);
 
@@ -96,7 +95,7 @@ public sealed partial class MemoryStore
             items.RemoveAll(i => i.Revision < next);
         }
         return new(id, seen.Revision, items, next, seen.Floor > 1, seen.Floor > 1 && seen.AuthorsBelow ? seen.Author : null, seen.Kept,
-            seen.OldestKept, seen.OldestKept > seen.Floor);
+            seen.OldestKept, seen.Pruned);
     }
 
     // One state by its revision, the current one included; null when the caller does not read the memory at all.
@@ -132,7 +131,7 @@ public sealed partial class MemoryStore
     // What a reader is served of a memory's history: the current revision, the author, the oldest revision it sees (034's
     // floor), the oldest of those whose state is kept, how many a memory keeps, and whether any change below the floor was
     // in the author's own scope; null when it does not read the memory.
-    sealed record HistorySpan(int Revision, string? Author, int Floor, int OldestKept, int Kept, bool AuthorsBelow);
+    sealed record HistorySpan(int Revision, string? Author, int Floor, int OldestKept, int Kept, bool AuthorsBelow, bool Pruned);
 
     static async Task<HistorySpan?> Seen(NpgsqlConnection c, NpgsqlTransaction tx, Guid principal, Guid id, CancellationToken ct)
     {
@@ -140,12 +139,14 @@ public sealed partial class MemoryStore
             SELECT m.revision,m.author_id,f.floor,
               coalesce((SELECT min(v.revision) FROM memory_versions v WHERE v.memory_id=m.id AND v.revision>=f.floor),m.revision),
               memory_versions_kept(),
-              EXISTS(SELECT 1 FROM memory_events e WHERE e.memory_id=m.id AND e.revision<f.floor AND e.subject_id=m.author_id)
+              EXISTS(SELECT 1 FROM memory_events e WHERE e.memory_id=m.id AND e.revision<f.floor AND e.subject_id=m.author_id),
+              EXISTS(SELECT 1 FROM memory_events e WHERE e.memory_id=m.id AND e.revision>=f.floor AND e.revision<m.revision
+                AND NOT EXISTS(SELECT 1 FROM memory_versions v WHERE v.memory_id=m.id AND v.revision=e.revision))
             {From} CROSS JOIN LATERAL (SELECT memory_history_floor(@principal,m.id) AS floor) f
             WHERE m.id=@id AND {Database.Visible("r")}
             """, ("principal", principal), ("id", id));
         await using var r = await cmd.ExecuteReaderAsync(ct);
-        return await r.ReadAsync(ct) ? new(r.GetInt32(0), Text(r, 1), r.GetInt32(2), r.GetInt32(3), r.GetInt32(4), r.GetBoolean(5)) : null;
+        return await r.ReadAsync(ct) ? new(r.GetInt32(0), Text(r, 1), r.GetInt32(2), r.GetInt32(3), r.GetInt32(4), r.GetBoolean(5), r.GetBoolean(6)) : null;
     }
 
     // The memory's current state and its kept earlier states from the floor on, each marked held when it was held and no

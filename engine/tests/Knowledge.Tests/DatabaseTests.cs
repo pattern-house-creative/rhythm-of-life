@@ -146,6 +146,31 @@ public sealed class DatabaseTests(DatabaseFixture fixture) : IClassFixture<Datab
         Assert.Equal(vector, Assert.Single(source.Primed, r => r.Key == memory.Key).Embedding);
     }
 
+    [PostgresFact] public async Task A_fresh_observation_can_correct_the_latest_reading_on_a_data_star()
+    {
+        var principal = await new Principals(fixture.Source).System(Principals.GraphName, default);
+        var source = new SyntheticRelationshipSource();
+        var engine = new RelationshipEngine(fixture.Db, source);
+        var now = DateTimeOffset.FromUnixTimeSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        var previous = SyntheticRelationshipSource.New(CatalogStars.Provider, "record", CatalogStars.DataAccount("cgm"))
+            with { RetrievedAt = now.AddHours(-2), ModifiedAt = now.AddHours(-3) };
+        source.Replace(previous);
+        await engine.Refresh(principal);
+
+        // Revoking the newest reading leaves an older measurement as the latest. The new observation
+        // refreshes the star even though its reported latest measurement moves back.
+        var corrected = previous with { RetrievedAt = now, ModifiedAt = now.AddHours(-4) };
+        source.Replace(corrected);
+        await engine.Refresh(principal);
+        // A delayed replay of the previous observation cannot put the revoked time back.
+        source.Replace(previous);
+        await engine.Refresh(principal);
+        var view = await engine.View(principal, TimeSpan.FromHours(1), new HashSet<string>());
+        var star = Assert.Single(view.Records, r => r.Key == previous.Key);
+        Assert.Equal(corrected.ModifiedAt, star.ModifiedAt);
+        Assert.Equal(corrected.RetrievedAt, star.RetrievedAt);
+    }
+
     [PostgresFact] public async Task A_data_feed_lists_its_metrics_once_per_revision_of_its_star()
     {
         // Listing a data star's metrics reads its provider's whole history, so a dashboard read every few minutes does it

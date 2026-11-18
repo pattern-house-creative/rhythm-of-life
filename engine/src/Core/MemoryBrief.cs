@@ -42,7 +42,7 @@ public sealed record MemoryBriefChanges(int Total, int Changes, bool Truncated, 
 public sealed record MemoryBrief(string Zone, string? Project, bool UnknownProject, MemoryBriefDated<MemoryDueItem> Due, MemoryBriefDated<MemoryDecision> Decisions,
     MemoryBriefList<MemoryLoop> YouOwe, MemoryBriefList<MemoryLoop> OwedToYou, MemoryBriefList<MemoryStale> Stale, MemoryBriefList<InsightStreamItem> Insights,
     MemoryBriefList<MemoryContradiction> Contradictions, MemoryBriefList<MemoryDuplicate> Duplicates, int Held, MemoryBriefList<MemoryStandingItem> Standing,
-    DecisionCalibration Calibration, MemoryBriefChanges Changes)
+    DecisionCalibration Calibration, MemoryBriefChanges Changes, int LargestForgetBurst)
 {
     // In a line, for a client or a card: what needs attention, each by its count, or that nothing does. The counts alone: no words.
     public string Says
@@ -69,6 +69,12 @@ public sealed record MemoryBrief(string Zone, string? Project, bool UnknownProje
             // Cut at one read's changes, the count is only how many at least.
             if (Changes.Truncated) Add(Changes.Total, "or more groups of AI changes", "or more groups of AI changes");
             else Add(Changes.Total, "group of AI changes", "groups of AI changes");
+            if (LargestForgetBurst >= MemoryStore.BriefForgetThreshold)
+            {
+                if (said.Length > 0) said.Append(". ");
+                said.Append("Check the trash: one AI connection forgot ").Append(LargestForgetBurst)
+                    .Append(" memories within ten minutes");
+            }
             return said.Length == 0 ? "Nothing needs attention." : said.Append('.').ToString();
         }
     }
@@ -80,6 +86,7 @@ public sealed partial class MemoryStore
     // standing 3); the review's 3 and the groups' 5 are Rhythm's. Each list's tool walks the rest. A preview is shorter than a list's.
     public const int BriefDue = 5, BriefDecisions = 3, BriefLoops = 5, BriefStale = 2, BriefInsights = 1, BriefReview = 3, BriefStanding = 3, BriefGroups = 5,
         BriefPreview = 120, BriefProjectMax = 128;
+    internal const int BriefForgetThreshold = 5;
 
     // A reader's brief, optionally of one scope; project names a project for its standing instructions. Each section's count
     // comes from the statement that read its items, so the two agree (decisions has two windows, so two statements: Reviews); the
@@ -118,10 +125,30 @@ public sealed partial class MemoryStore
         var standing = name is null || unknown ? new MemoryBriefList<MemoryStandingItem>(0, []) : await StandingFor(principal, scope, name, ct);
         var calibration = await Calibration(principal, scope, null, ct);
         var changes = await Changes(principal, null, Mcp.MemoryTools.Channel, ct, notHeld: true, scope: scope);
+        var forgotten = await ForgetBurst(principal, MemorySettings.Named(scope), changes.Since, ct);
 
         return new(due.Zone, name, unknown, dates, decisions, new(owe.Total, owe.Items), new(owed.Total, owed.Items), new(stale.Total, stale.Items),
             new(proposed.Total, proposed.Items), new(contradictions.Total, contradictions.Items), new(duplicates.Total, duplicates.Items), held, standing, calibration,
-            new(changes.Groups.Count, changes.Groups.Sum(g => g.Changes), changes.Truncated, changes.Since, [.. changes.Groups.Take(BriefGroups)]));
+            new(changes.Groups.Count, changes.Groups.Sum(g => g.Changes), changes.Truncated, changes.Since, [.. changes.Groups.Take(BriefGroups)]), forgotten);
+    }
+
+    // A warning only for memories this reader can still restore. Each row is one distinct memory in the trash.
+    // A rolling window avoids splitting a burst at a clock boundary; separate connections never add together.
+    async Task<int> ForgetBurst(Guid principal, string? scope, DateTimeOffset since, CancellationToken ct)
+    {
+        await using var cmd = source.CreateCommand("""
+            SELECT coalesce(max(n),0)::int FROM (
+              SELECT count(*) OVER (PARTITION BY t.trashed_by ORDER BY t.trashed_at
+                RANGE BETWEEN interval '10 minutes' PRECEDING AND CURRENT ROW) n
+              FROM memory_trash t JOIN memories m ON m.id=t.memory_id
+              WHERE t.channel='mcp' AND t.reason='forget' AND t.trashed_at>=@since AND t.trashed_by IS NOT NULL
+                AND m.hold IS NULL AND (@scope IS NULL OR m.scope=@scope)
+                AND memory_may_change(@principal,m.subject_id,m.author_id,scopes_on())) windowed
+            """);
+        cmd.Parameters.AddWithValue("principal", principal);
+        cmd.Parameters.AddWithValue("since", since);
+        cmd.Parameters.AddWithValue("scope", NpgsqlDbType.Text, (object?)scope ?? DBNull.Value);
+        return (int)(await cmd.ExecuteScalarAsync(ct))!;
     }
 
     // The decisions section from list_decisions' due page and, when that page leaves room, its upcoming page. Each window's count

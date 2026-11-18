@@ -19,8 +19,10 @@ ChatGPT). The home network option is just a setting; the others have a folder he
 
 ## What every recipe keeps
 
-- **Postgres is never reachable**: it lives only on the compose `internal` network, which cannot
-  publish ports or reach the internet.
+- **Postgres** lives only on the private `database` bridge. No exposure container joins it.
+- **App-facing gateways** (Cloudflare, Tailscale and Caddy) join `edge` so they can forward both the
+  app and the engine. The MCP-only OpenAI tunnel joins `egress`, which reaches the engine only
+  of those two services.
 - **The app and engine ports stay on `127.0.0.1`** (`RHYTHM_BIND` default). Recipes reach the
   services over the compose networks (`app:8080`, `engine:8080`) or the loopback ports, never by
   opening them wider.

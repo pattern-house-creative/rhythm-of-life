@@ -12,18 +12,30 @@ namespace Knowledge.Cli;
 // modes). Exit 1 when anything failed; a note never fails.
 public static partial class DoctorCommand
 {
+    public sealed record EngineMounts(string Settings, string DatabaseFile, string AppTokenFile)
+    {
+        public static EngineMounts? Current() =>
+            Environment.GetEnvironmentVariable("RHYTHM_CLI_DATA") is null &&
+            Environment.GetEnvironmentVariable("RHYTHM_CONFIG") is { Length: > 0 } settings &&
+            Environment.GetEnvironmentVariable("RHYTHM_DB_FILE") is { Length: > 0 } database &&
+            Environment.GetEnvironmentVariable("RHYTHM_APP_TOKEN_FILE") is { Length: > 0 } token
+                ? new(settings, database, token) : null;
+    }
+
     // Adapters that keep a person's own records as private rows under the household when their owner is the household
     // (the Second Brain personal workspace, docs/dev/memory.md section 2): with scopes on, Family reads them.
     static readonly string[] PrivateUnderHousehold = ["second-brain"];
 
     public static async Task<int> Run(DeployFolder deploy, TextWriter o, StackCommands.Probe probe, string? descriptors = null, CancellationToken ct = default,
-        Func<NpgsqlDataSource>? database = null, StackCommands.Read? read = null)
+        Func<NpgsqlDataSource>? database = null, StackCommands.Read? read = null, EngineMounts? mounts = null)
     {
         var report = new Report(o);
-        o.WriteLine($"Checking {deploy.Shown(deploy.Settings)}, {deploy.Shown(deploy.Env)} and {deploy.Shown(deploy.Secrets)}/");
+        var settings = mounts?.Settings ?? deploy.Settings;
+        if (mounts is null) o.WriteLine($"Checking {deploy.Shown(settings)}, {deploy.Shown(deploy.Env)} and {deploy.Shown(deploy.Secrets)}/");
+        else o.WriteLine("Checking the running engine's mounted settings and credentials.");
 
         RhythmConfig? config = null;
-        var yaml = File.Exists(deploy.Settings) ? File.ReadAllText(deploy.Settings) : null;
+        var yaml = File.Exists(settings) ? File.ReadAllText(settings) : null;
         if (yaml is null) report.Fail("rhythm.yaml is missing: run ./rhythm init");
         else
             try
@@ -33,16 +45,25 @@ public static partial class DoctorCommand
             }
             catch (ConfigException e) { report.Fail($"rhythm.yaml: {e.Message}"); }
 
-        var envText = File.Exists(deploy.Env) ? File.ReadAllText(deploy.Env) : null;
+        var envText = mounts is null && File.Exists(deploy.Env) ? File.ReadAllText(deploy.Env) : null;
         var env = envText is null ? [] : EnvFile.Parse(envText);
-        if (envText is null) report.Fail(".env is missing: run ./rhythm init");
+        if (mounts is not null) report.Skip("Compose settings, service secrets and host ports are checked by ./rhythm doctor from the checkout");
+        else if (envText is null) report.Fail(".env is missing: run ./rhythm init");
         else if (env.GetValueOrDefault("RHYTHM_CONFIG_FILE") is "./rhythm.yaml" or "rhythm.yaml") report.Ok(".env points the containers at rhythm.yaml");
         else report.Fail(".env does not set RHYTHM_CONFIG_FILE=./rhythm.yaml, so the containers read another settings file");
 
         var values = new List<string>();
-        foreach (var name in DeployFolder.CoreSecrets)
-            Secret(report, deploy, deploy.Secret(name), Owners.CoreSecret(name), true, values, Shape(name));
-        foreach (var token in deploy.Tokens) Secret(report, deploy, token, null, true, values, null);
+        if (mounts is null)
+        {
+            foreach (var name in DeployFolder.CoreSecrets)
+                Secret(report, deploy, deploy.Secret(name), Owners.CoreSecret(name), true, values, Shape(name));
+            foreach (var token in deploy.Tokens) Secret(report, deploy, token, null, true, values, null);
+        }
+        else
+        {
+            Secret(report, deploy, mounts.DatabaseFile, Owners.CoreSecret("engine_db"), true, values, Shape("engine_db"));
+            Secret(report, deploy, mounts.AppTokenFile, Owners.CoreSecret("app_token"), true, values, Shape("app_token"));
+        }
 
         // Values in the form their adapter's descriptor gives (a tunnel ID, say): settings, not leaked secrets.
         var plain = new HashSet<string>(StringComparer.Ordinal);
@@ -52,7 +73,7 @@ public static partial class DoctorCommand
             try { known = AdapterDescriptor.Load(descriptors); }
             catch (ConfigException e) { report.Fail(e.Message); }
             var profiles = (env.GetValueOrDefault("COMPOSE_PROFILES") ?? "").Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            foreach (var d in known.Where(d => config.AdapterEnabled(d.Name)))
+            foreach (var d in known.Where(d => mounts is null && config.AdapterEnabled(d.Name)))
             {
                 var before = report.Failures;
                 foreach (var secret in d.Secrets.Where(s => s.Required || File.Exists(deploy.AdapterSecret(d.Name, s.Purpose))))
@@ -72,7 +93,7 @@ public static partial class DoctorCommand
                     foreach (var value in setting.Type == "list" ? config.Adapter(d.Name).List(setting.Key)
                         : config.Adapter(d.Name).String(setting.Key) is { } one ? [one] : [])
                         if (Regex.IsMatch(value, setting.Pattern!)) plain.Add(value);
-            Ports(report, config, env);
+            if (mounts is null) Ports(report, config, env);
             foreach (var name in PrivateUnderHousehold.Where(n => config.AdapterEnabled(n) && (config.Adapter(n).Owner ?? RhythmConfig.Household) == RhythmConfig.Household))
                 report.Note($"adapter {name} keeps its personal records as private rows under the household: with memory scopes on, Family reads them "
                     + $"(set adapters.{name}.owner to a person for them to be that person's; docs/dev/memory.md section 2)");
@@ -81,7 +102,7 @@ public static partial class DoctorCommand
         var leaks = 0;
         if (yaml is not null) leaks += Leaks(report, "rhythm.yaml", yaml, values, SettingsKeys(yaml), plain);
         if (envText is not null) leaks += Leaks(report, ".env", envText, values, env.Where(p => p.Value.Length > 0).Select(p => p.Key).Where(k => EnvSecretKey().IsMatch(k)), plain);
-        if (leaks == 0 && (yaml is not null || envText is not null)) report.Ok("no secret-shaped values in rhythm.yaml or .env");
+        if (leaks == 0 && (yaml is not null || envText is not null)) report.Ok(mounts is null ? "no secret-shaped values in rhythm.yaml or .env" : "no secret-shaped values in rhythm.yaml");
 
         var health = await probe(HttpMethod.Get, "http://engine:8080/health", ct);
         if (health is null) report.Skip("the stack is not running (or not reachable from here): engine and MCP checks skipped");
@@ -93,6 +114,17 @@ public static partial class DoctorCommand
             if (mcp == 401) report.Ok("MCP answers and asks for a token"); else report.Fail($"MCP answers {mcp?.ToString() ?? "nothing"} without a token, not 401");
             var app = await probe(HttpMethod.Get, "http://app:8080/api/health", ct);
             if (app == 200) report.Ok("app is healthy"); else report.Fail($"app health answers {app?.ToString() ?? "nothing"}: ./rhythm logs app");
+        }
+        if (Uri.TryCreate(config?.Engine.PublicMcpUrl, UriKind.Absolute, out var address))
+        {
+            if (address.IsLoopback)
+                report.Skip("engine.publicMcpUrl uses the host's loopback; check the published port from the host");
+            else
+            {
+                var status = await probe(HttpMethod.Post, address.AbsoluteUri, ct);
+                if (status == 401) report.Ok("public MCP answers and asks for a token");
+                else report.Fail($"public MCP answers {status?.ToString() ?? "nothing"} without a token; expected 401 (check engine.publicMcpUrl and the public route)");
+            }
         }
         // From the database itself, whether or not the engine answers: a recorded mode that does not match rhythm.yaml
         // is just what stops the engine's start, so the stack is then down while Postgres still runs.

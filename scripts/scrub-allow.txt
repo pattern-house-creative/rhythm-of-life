@@ -9,3 +9,10 @@
 # Private-pattern matches cannot be listed here. Fix the content instead.
 # Keep this list short. Every entry is a place a reviewer must trust.
 secret:url-credentials apps/android-launcher/launcher/src/test/java/**/LayoutTest.kt -- a made-up address with a user name and password, which the test checks the launcher refuses (the file was under another package name in earlier commits)
+release:image-digest deploy/image-pins.txt -- public image digests verified against the deploy inventory
+release:image-digest deploy/**/*.yaml -- public image digests verified against the deploy inventory
+release:image-digest deploy/exposure/reverse-proxy/README.md -- public image digests verified against the deploy inventory
+release:image-digest app/Dockerfile -- public image digests verified against the deploy inventory
+release:image-digest engine/Dockerfile -- public image digests verified against the deploy inventory
+release:image-digest engine/backup/Dockerfile -- public image digests verified against the deploy inventory
+release:image-digest engine/tests/upstream/compose.yaml -- public image digests verified against the deploy inventory

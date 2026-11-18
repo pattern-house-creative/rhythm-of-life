@@ -1,7 +1,7 @@
 {
   "name": "rhythm-of-life-app",
   "private": true,
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Rhythm of Life app: the PWA and its server facade.",
   "license": "Apache-2.0",
   "type": "module",
@@ -13,7 +13,7 @@
     "build": "tsc -b && vite build && npm run build:server",
     "build:server": "tsc -p tsconfig.api.json",
     "start": "node build/server/node.js",
-    "lint": "oxlint",
+    "lint": "oxlint --max-warnings=0",
     "preview": "vite preview",
     "test": "vitest run",
     "smoke": "node scripts/smoke.mjs",

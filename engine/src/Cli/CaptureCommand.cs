@@ -16,7 +16,7 @@ namespace Knowledge.Cli;
 public static class CaptureCommand
 {
     public const string Name = "capture";
-    public const string Usage = "capture connect <name> [--person <id>] [--out <file>] | capture list | capture disconnect <name>";
+    public const string Usage = "capture connect <name> [--person <id>] [--out <file>] [--expires-at <UTC timestamp>] | capture list | capture disconnect <name>";
 
     public static bool Offered(RhythmConfig config) => MemorySettings.CaptureOn(config);
 
@@ -33,15 +33,17 @@ public static class CaptureCommand
             case "connect" when args.Length >= 2 && !args[1].StartsWith("--", StringComparison.Ordinal):
             {
                 string? person = null, file = null;
+                DateTimeOffset? expires = null;
                 for (var i = 2; i < args.Length; i++)
                     switch (args[i])
                     {
                         case "--person" when i + 1 < args.Length && !args[i + 1].StartsWith("--", StringComparison.Ordinal) && person is null: person = args[++i]; break;
                         case "--out" when i + 1 < args.Length && !args[i + 1].StartsWith("--", StringComparison.Ordinal) && file is null: file = args[++i]; break;
+                        case "--expires-at" when i + 1 < args.Length && expires is null: expires = TokenCommand.Expiry(args[++i]); break;
                         default: throw new ArgumentException(Usage);
                     }
                 var output = Path.GetFullPath(file ?? deploy.Secret($"capture_{args[1]}_token"));
-                await new Principals(source).CreateCapture(args[1], person, output, ct);
+                await new Principals(source).CreateCapture(args[1], person, output, ct, expires);
                 Owners.Apply(output, Owners.Token(deploy, output));
                 o.WriteLine($"Capture token for {args[1]} ({Writes(person, await ScopesOn(source, ct))}) written to {deploy.Shown(output)}; it is shown to no one. "
                     + "It saves memories with POST /capture on the engine's port and reads nothing (cli/README.md).");

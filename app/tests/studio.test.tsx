@@ -2,6 +2,7 @@ import {
   act,
   fireEvent,
   render,
+  renderHook,
   screen,
   waitFor,
 } from "@testing-library/react";
@@ -293,13 +294,10 @@ it("requires actual frame acknowledgement and guards selection revisions", async
       }),
     ),
   );
-  let selected: ReturnType<typeof useDashboardSelection>;
-  function Host() {
-    selected = useDashboardSelection(board, true);
-    return <>{selected.ui}</>;
-  }
-  render(<Host />);
-  await screen.findByLabelText("Next Week");
+  const { result: selected } = renderHook(() =>
+    useDashboardSelection(board, true),
+  );
+  await waitFor(() => expect(selected.current.ui).not.toBeNull());
   let result: Awaited<ReturnType<typeof runDashboardControl>> | undefined;
   const args = {
     dashboard: board.id,
@@ -316,7 +314,7 @@ it("requires actual frame acknowledgement and guards selection revisions", async
   });
   expect(result).toBeUndefined();
   await act(async () => {
-    selected!.acknowledge(1, true);
+    selected.current.acknowledge(1, true);
     await pending;
   });
   expect(result?.result).toBe("shown");
@@ -335,7 +333,7 @@ it("requires actual frame acknowledgement and guards selection revisions", async
     });
   });
   await act(async () => {
-    selected!.acknowledge(2, true);
+    selected.current.acknowledge(2, true);
     await pending;
   });
   expect(reverted?.detail.values).toEqual({ week: 0 });

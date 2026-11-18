@@ -10,7 +10,7 @@ class LayoutTest {
         assertEquals(before.tiles,next.tiles.filterNot { it.target==BUILTIN_GLUCOSE })
         val tile=next.tiles.single { it.target==BUILTIN_GLUCOSE }
         assertEquals("https://example.org/launcher-card.html#builtin=glucose",webDestination("https://example.org",tile,true))
-        assertEquals("https://example.org/launcher.html#rhythm-launcher=builtin:glucose",webDestination("https://example.org",tile))
+        assertEquals("https://example.org/launcher.html?openOriginal=1#rhythm-launcher=builtin:glucose",webDestination("https://example.org",tile))
         assertEquals(before,next.remove(tile.key))
         assertEquals(next,next.showPreview(BUILTIN_GLUCOSE))
         assertTrue(webDestination("https://example.org",Tile(TileKind.DASHBOARD,"glucose")).contains("dashboard:glucose"))
@@ -75,5 +75,18 @@ class LayoutTest {
         assertTrue(sameOrigin(origin, "https://example.org:443/api/dashboards"))
         val url = webDestination(origin, star.copy(target = "a/#b?x=1"))
         assertTrue(url.contains("star:a%2F%23b%3Fx%3D1"))
+    }
+    @Test fun onlyHttpsGoogleFileLinksQualifyForBrowserHandoff() {
+        listOf(
+            "https://docs.google.com/document/d/example/edit",
+            "https://docs.google.com/spreadsheets/d/example/edit?resourcekey=example#gid=123",
+            "https://docs.google.com/presentation/d/example/preview",
+            "https://drive.google.com/file/d/example/view"
+        ).forEach { assertTrue(it, isGoogleFile(it)) }
+        listOf(
+            "http://docs.google.com/document/d/example/edit", "https://docs.google.com.example.org/document/d/example/edit",
+            "https://user@drive.google.com/file/d/example", "https://drive.google.com:8080/file/d/example",
+            "https://drive.google.com/drive/folders/example", "https://docs.google.com/document/d/"
+        ).forEach { assertFalse(it, isGoogleFile(it)) }
     }
 }

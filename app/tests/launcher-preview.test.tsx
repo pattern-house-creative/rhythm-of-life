@@ -146,6 +146,23 @@ it("renders an automatic preview with current data and truthful provenance", asy
     expect.any(AbortSignal),
   );
 });
+it("keeps a ready card while covered, sleeps while hidden and refreshes when due on return", async () => {
+  vi.useFakeTimers();
+  const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(false);
+  const session = { dashboard: vi.fn(async () => board), dashboardData: vi.fn(async () => data) };
+  render(<LauncherPreview id={board.id} session={session} />);
+  await act(() => vi.advanceTimersByTimeAsync(1));
+  expect(screen.getByText("21 °C")).toBeVisible();
+  hidden.mockReturnValue(true);
+  await act(async () => document.dispatchEvent(new Event("visibilitychange")));
+  await act(() => vi.advanceTimersByTimeAsync(previewRefreshMs));
+  expect(session.dashboardData).toHaveBeenCalledTimes(1);
+  hidden.mockReturnValue(false);
+  await act(async () => document.dispatchEvent(new Event("visibilitychange")));
+  expect(screen.getByText("21 °C")).toBeVisible();
+  expect(session.dashboardData).toHaveBeenCalledTimes(2);
+  hidden.mockRestore();
+});
 it("clears previous data on refresh failure and reads a newer version coherently", async () => {
   vi.useFakeTimers();
   const session = {

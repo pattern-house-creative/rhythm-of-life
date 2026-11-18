@@ -1,7 +1,7 @@
 import { personName } from "./instance";
 import { statusNames } from "./memories";
 import type { Memory, MemoryChange, MemoryHistory } from "./memories";
-import { counted, dayOf, rowGroup, when } from "./memoryScreen";
+import { dayOf, rowGroup, when } from "./memoryScreen";
 
 // A memory's history as a timeline (SB-P6-01): its changes newest first under the day each came, who or what made each (an AI
 // client's named as one, never as a person, even a client that speaks for a person), what it did and how its words read then;
@@ -12,6 +12,7 @@ import { counted, dayOf, rowGroup, when } from "./memoryScreen";
 // stored data, so never shown bare, where a client calling itself a person or the terminal would read as one.
 const named = (what: string, client: string | null) =>
   client ? `${what} (${client})` : what;
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export const madeBy = (c: MemoryChange) =>
   c.channel === "mcp"
     ? c.person
@@ -27,6 +28,7 @@ export const madeBy = (c: MemoryChange) =>
             ? "the terminal"
             : "Rhythm";
 
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export const happened = (c: MemoryChange) => {
   switch (c.event) {
     case "created":
@@ -152,11 +154,7 @@ export function MemoryTimeline({
       )}
       {history.pruned && (
         <p className="memory-hint">
-          Each entry stays, but only{" "}
-          {history.oldestKept > 1
-            ? `revisions from ${history.oldestKept} on`
-            : counted(history.oldestKept, "revision", "revisions")}{" "}
-          can still be read or put back.
+          Every change is listed. Some earlier revisions can no longer be opened or restored.
         </p>
       )}
     </>

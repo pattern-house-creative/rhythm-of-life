@@ -46,6 +46,7 @@ plugin's own section under `adapters`) keeps whatever keys it brings.
 | `demo.enabled` | `true` | seed the engine with the fictional demo dataset, labelled DEMO; turn off to remove its stars, numbers, dashboards and insight (a demo dashboard someone changed, and the insight once someone gave feedback on it or reviewed it, stay; open question Q-133) |
 | `engine.url` | `http://engine:8080` | what the app's server calls (it appends `/mcp`). Empty: the app runs in demo mode |
 | `engine.allowedHosts` | `localhost`, `127.0.0.1`, `[::1]`, `engine` | `Host` header values the engine accepts |
+| `engine.hostRoles` | none | Role filters on authenticated routes by hostname, e.g. `[{ host: rhythm-mcp.example.invalid, roles: [harness] }]`. Use a hostname in `allowedHosts` without its port. Available roles are `harness`, `app`, `ingest` and `capture`. Other hosts keep their existing roles. |
 | `engine.publicMcpUrl` | `http://127.0.0.1:8181/mcp` | the MCP address `rhythm up` prints for your AI clients |
 | `engine.oauth.enabled` | `false` | enable OAuth alongside existing bearer tokens on the same `/mcp`; requires a canonical HTTPS `publicMcpUrl` and its host in `allowedHosts`; [setup](../harness/chatgpt/oauth.md) |
 | `engine.oauth.clientId` | `rhythm-chatgpt` | predefined public OAuth client, with authorization code and S256 PKCE |

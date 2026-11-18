@@ -46,7 +46,7 @@ runs them again.
 | Repository script tests | `npm test` |
 | Scrub check, every tracked file | `node scripts/scrub-check.mjs --all --public-only` |
 | App: tests, build and smoke | `npm --prefix app ci`, then `npm --prefix app run verify` |
-| App: lint | `npm --prefix app run lint` |
+| App: lint (every warning fails CI) | `npm --prefix app run lint` |
 | Engine: build | `dotnet build engine/Engine.slnx` (0 warnings expected) |
 | Engine: tests without a database | `dotnet test engine/Engine.slnx` (the database tests are skipped, each saying so) |
 | Engine: every test, with a throwaway database | `sh engine/test-db.sh` (or `.\engine\test-db.ps1`); needs Docker, removes its container after |

@@ -8,6 +8,7 @@ import {
   hasMeasurement,
   healthCaption,
   healthStatus,
+  observationLabel,
   shortTime,
 } from "../health";
 import type { DemoState, ObservatoryData } from "../model";
@@ -78,17 +79,24 @@ export function GlucosePart({
           className={`metric-caption ${healthStatus(data.current) === "stale" ? "caution" : ""}`}
         >
           <i />
-          {healthStatus(data.current) === "unavailable"
-            ? "Source unavailable"
-            : !currentReady
-              ? "No measurement"
-              : healthStatus(data.current) === "stale"
-                ? "Reading is stale"
-                : data.current.provenance.demo
-                  ? "Demo reading"
-                  : data.current.provenance.kind === "archive"
-                    ? "Archived reading"
-                    : "Recorded reading"}
+          <span>
+            {healthStatus(data.current) === "unavailable"
+              ? "Source unavailable"
+              : !currentReady
+                ? "No measurement"
+                : healthStatus(data.current) === "stale"
+                  ? "Reading is stale"
+                  : data.current.provenance.demo
+                    ? "Demo reading"
+                    : data.current.provenance.kind === "archive"
+                      ? "Archived reading"
+                      : "Recorded reading"}
+          </span>
+          {!blocked && currentReady && (
+            <time dateTime={data.current.provenance.observedAt ?? undefined}>
+              {observationLabel(data.current.provenance)}
+            </time>
+          )}
         </div>
         {!blocked && hasMeasurement(data.glucose) && spark && (
           <Sparkline series={data.glucose} />

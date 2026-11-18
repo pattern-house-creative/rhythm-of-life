@@ -14,6 +14,11 @@ public sealed class RequestLog(ILogger<RequestLog> log, Func<DateTimeOffset>? cl
     // The engine's one log, or none where an endpoint runs without the engine's services (some tests).
     public static RequestLog? Of(HttpContext context) => context.RequestServices?.GetService<RequestLog>();
 
+    // One line per authenticated call. The principal id is the public identifier in token list; the route is a
+    // constant selected by the door. Omit names, arguments, headers, resource ids and credential material.
+    public void Authenticated(Caller caller, string route) =>
+        log.LogInformation("Authenticated call: {PrincipalId} {Role} {Route}", caller.Id, caller.Role, route);
+
     // Refused before any endpoint: origin_present, host_not_allowed, not_found, not_ready, no_token, unknown_token,
     // method_not_allowed or wrong_role (with the caller's role); or by the ingest endpoint, plugin_off.
     public void Refused(int status, string reason, string? role = null)

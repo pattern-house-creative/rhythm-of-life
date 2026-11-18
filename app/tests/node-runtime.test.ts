@@ -17,7 +17,7 @@ it("pins one Node major in engines, the image and the types", () => {
   const lock = JSON.parse(read("package-lock.json"));
   expect(pkg.engines.node).toBe("24.x");
   expect(lock.packages[""].engines.node).toBe("24.x");
-  expect(read("Dockerfile")).toMatch(/^ARG NODE_IMAGE=node:24-alpine$/m);
+  expect(read("Dockerfile")).toMatch(/^ARG NODE_IMAGE=node:24-alpine@sha256:[0-9a-f]{64}$/m);
   expect(pkg.devDependencies["@types/node"]).toMatch(/^\^24\./);
 });
 

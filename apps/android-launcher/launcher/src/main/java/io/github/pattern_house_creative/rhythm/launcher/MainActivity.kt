@@ -2,11 +2,9 @@ package io.github.pattern_house_creative.rhythm.launcher
 
 import android.content.*
 import android.os.Bundle
-import android.graphics.Bitmap
-import android.webkit.*
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.*
+import androidx.activity.viewModels
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.SystemBarStyle
 import androidx.compose.ui.graphics.Brush
@@ -53,51 +51,44 @@ import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.*
-import java.io.ByteArrayInputStream
 import kotlin.math.sin
 
-data class LaunchApp(val tile: Tile, val title: String, val icon: Bitmap)
+class LauncherNavigation : androidx.lifecycle.ViewModel() {
+    val reader = mutableStateOf<String?>(null)
+}
 internal data class HomeRemoval(val tile:Tile,val index:Int)
 class MainActivity : ComponentActivity() {
+    private val navigation by viewModels<LauncherNavigation>()
     private var homeSignal by mutableIntStateOf(0)
-    override fun onCreate(state: Bundle?) {
-        super.onCreate(state); enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT), navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT))
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState); enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT), navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT))
         // Owner-authorized: screenshots and system captures of the launcher are allowed.
         setContent { MaterialTheme(typography = ObservatoryTypography, colorScheme = darkColorScheme(primary = Color(0xffa8e1c6),
             background = Color(0xff10171c), surface = Color(0xff18272c), onSurface = Color(0xffdfebe9))) {
-                CompositionLocalProvider(LocalContentColor provides Color(0xffdfebe9)) { Launcher(homeSignal) }
+                CompositionLocalProvider(LocalContentColor provides Color(0xffdfebe9)) { Launcher(homeSignal, navigation) }
             } }
     }
     override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); homeSignal++ }
 }
-private fun installed(context: Context): List<LaunchApp> {
-    val pm = context.packageManager
-    return pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
-        .filter { it.activityInfo.packageName != context.packageName }.mapNotNull { info -> runCatching {
-            val drawable = info.loadIcon(pm)
-            val bitmap = Bitmap.createBitmap(96, 96, Bitmap.Config.ARGB_8888)
-            drawable.setBounds(0, 0, 96, 96); drawable.draw(android.graphics.Canvas(bitmap))
-            LaunchApp(Tile(TileKind.APP, ComponentName(info.activityInfo.packageName, info.activityInfo.name)
-                .flattenToString()), info.loadLabel(pm).toString(), bitmap)
-        }.getOrNull() }.distinctBy { it.tile.key }.sortedBy { it.title.lowercase() }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Launcher(homeSignal: Int) {
+internal fun Launcher(homeSignal: Int, navigation: LauncherNavigation) {
     val context = LocalContext.current
     val store = remember { LauncherStore(context) }
     var layout by remember { mutableStateOf(store.load()) }
     var origin by remember { mutableStateOf(store.origin) }
+    val client = remember(origin) { origin.takeIf { it.isNotEmpty() }?.let { HouseholdClient(it) } }
+    var appRevision by remember { mutableIntStateOf(0) }
+    var switching by remember { mutableStateOf(false) }
+    var sessionError by remember { mutableStateOf("") }
     var appsReady by remember { mutableStateOf(false) }
     var previews by remember { mutableStateOf(false) }
     var apps by remember { mutableStateOf(emptyList<LaunchApp>()) }
-    var household by remember { mutableStateOf<Household?>(null) }
+    var household by remember(origin) { mutableStateOf<Household?>(null) }
     var found by remember { mutableStateOf(emptyList<RhythmItem>()) }
     var query by remember { mutableStateOf("") }
     var insight by remember { mutableStateOf<DailyInsight?>(null) }
@@ -114,10 +105,11 @@ fun Launcher(homeSignal: Int) {
     val dragState=remember { LauncherDrag() }
     val homeScroll=rememberScrollState()
     val drawerScroll=rememberLazyGridState()
+    var alphabetical by remember { mutableStateOf(store.alphabeticalDrawer) }
     var sky by remember { mutableStateOf(false) }
     var settings by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<Tile?>(null) }
-    var web by remember { mutableStateOf<String?>(null) }
+    var web by navigation.reader
     var status by remember { mutableStateOf("") }
     var visible by remember { mutableStateOf(false) }
     var online by remember { mutableStateOf(true) }
@@ -125,14 +117,24 @@ fun Launcher(homeSignal: Int) {
     var still by remember { mutableStateOf(store.still) }
     val appsByKey = remember(apps) { apps.associateBy { it.tile.key } }
     val owner = LocalLifecycleOwner.current
+    fun accessLost() {
+        client?.clearDiscovery()
+        insight = null; insightOpen = false; household = null; found = emptyList()
+        if (web != origin) web = null
+        status = "Household access unavailable"
+    }
     DisposableEffect(context) {
+        val unregister = observeApps(context) { appRevision++ }
+        onDispose { unregister() }
+    }
+    DisposableEffect(context, client) {
         val manager = context.getSystemService(android.net.ConnectivityManager::class.java)
         val handler = android.os.Handler(android.os.Looper.getMainLooper())
         val callback = object : android.net.ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: android.net.Network) { handler.post { online = true } }
             override fun onLost(network: android.net.Network) { handler.post {
                 online = manager.activeNetwork != null
-                if (!online) { insight = null; insightOpen = false; household = null; found = emptyList(); status = "Offline · apps remain available" }
+                if (!online) { client?.clearDiscovery(); insight = null; insightOpen = false; household = null; found = emptyList(); status = "Offline · apps remain available" }
             } }
         }
         online = manager.activeNetwork != null
@@ -159,17 +161,18 @@ fun Launcher(homeSignal: Int) {
     LaunchedEffect(undoHome) { if(undoHome!=null){delay(8000);undoHome=null} }
     fun edit(tile:Tile) { keyboard?.hide();focus.clearFocus();selected=tile }
     fun close() { drawerMotion.snapClosed();dragState.cancel(); editHome=false;insightOpen = false; keyboard?.hide(); focus.clearFocus(); web = null; query = ""; selected = null; settings = false; previews = false }
-    LaunchedEffect(homeSignal) { close() }
+    LaunchedEffect(homeSignal) { if (homeSignal > 0) close() }
     DisposableEffect(owner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) { visible = true; refresh++ }
-            if (event == Lifecycle.Event.ON_PAUSE) { drawerMotion.snapClosed();dragState.cancel();editHome=false;visible = false; insight = null; insightOpen = false; household = null; found = emptyList() }
+            if (event == Lifecycle.Event.ON_PAUSE) { drawerMotion.snapClosed();dragState.cancel();editHome=false;visible = false; insight = null; insightOpen = false; found = emptyList() }
         }
         owner.lifecycle.addObserver(observer)
         visible = owner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
-    LaunchedEffect(refresh) {
+    LaunchedEffect(refresh, appRevision, visible) {
+        if (!visible) return@LaunchedEffect
         apps = withContext(Dispatchers.IO) { installed(context) }
         if (!store.initialized && apps.isNotEmpty()) save(HomeLayout(apps.take(8).map { it.tile }, apps.take(6).map { it.tile }))
         appsReady = true
@@ -179,19 +182,20 @@ fun Launcher(homeSignal: Int) {
         if (appsReady && loaded?.previewsReady == true) layout = store.initialPreviews(layout, loaded.dashboards.map { it.id })
     }
     LaunchedEffect(origin, visible, refresh, web, online) {
-        if (origin.isEmpty() || !visible || !online) { household = null; return@LaunchedEffect }
-        if (web != null) return@LaunchedEffect
+        if (client == null || !online) { household = null; return@LaunchedEffect }
+        if (!visible || web != null) return@LaunchedEffect
         while (isActive) {
-            status = "Connecting to household…"
+            if (household == null) status = "Connecting to household…"
             try {
-                val loaded = HouseholdClient(origin).load { dashboards ->
+                val loaded = client.load { dashboards ->
                     if (household == null) household = dashboards
                     status = dashboards.warning
                 }
                 household = loaded; status = loaded.warning
             }
             catch (e: CancellationException) { throw e }
-            catch (_: Exception) { household = null; status = "Household unavailable · apps work offline" }
+            catch (_: HouseholdAccessDenied) { accessLost() }
+            catch (_: Exception) { client.clearDiscovery(); household = null; status = "Household unavailable · apps work offline" }
             delay(60_000)
         }
     }
@@ -208,11 +212,14 @@ fun Launcher(homeSignal: Int) {
         if(origin.isBlank() || !visible || !online || web!=null)return@LaunchedEffect
         while(isActive) {
             try {
-                insight=currentDailyInsight(HouseholdClient(origin).insights(),System.currentTimeMillis())
+                val current = client ?: return@LaunchedEffect
+                val generation = current.accessGeneration
+                val result = currentDailyInsight(current.insights(), System.currentTimeMillis())
+                if (generation == current.accessGeneration) insight = result
                 insightState="No current insight available"
             } catch(e:CancellationException) { throw e }
             catch(e:HouseholdAccessDenied) {
-                insight=null;insightOpen=false;household=null;found=emptyList()
+                accessLost()
                 insightState="Household access unavailable";break
             } catch(_:Exception) {
                 insight=null;insightOpen=false;insightState="Insight unavailable · try reconnecting"
@@ -224,9 +231,15 @@ fun Launcher(homeSignal: Int) {
         found = emptyList()
         if (query.isBlank() || origin.isBlank() || !visible || !online) return@LaunchedEffect
         delay(350)
-        try { found = HouseholdClient(origin).search(query) }
+        val current = client ?: return@LaunchedEffect
+        val generation = current.accessGeneration
+        try {
+            val result = current.search(query)
+            if (generation == current.accessGeneration) found = result
+        }
         catch (e: CancellationException) { throw e }
-        catch (_: Exception) { household = null; status = "Rhythm search unavailable" }
+        catch (_: HouseholdAccessDenied) { accessLost() }
+        catch (_: Exception) { status = "Rhythm search unavailable" }
     }
     fun title(tile: Tile): String = if (tile.kind == TileKind.APP) appsByKey[tile.key]?.title ?: "App unavailable"
         else if (tile.target == BUILTIN_GLUCOSE) "Glucose"
@@ -235,8 +248,9 @@ fun Launcher(homeSignal: Int) {
     fun open(tile: Tile) {
         drawerMotion.snapClosed();query="";keyboard?.hide();focus.clearFocus()
         if (tile.kind == TileKind.APP) {
-            try { context.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-                .setComponent(ComponentName.unflattenFromString(tile.target)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)) }
+            try {
+                launchInstalled(context, tile.target, appsByKey[tile.key])
+            }
             catch (_: Exception) { status = "This app is no longer available"; refresh++ }
         } else if (origin.isEmpty()) settings = true else web = webDestination(origin, tile)
     }
@@ -262,15 +276,18 @@ fun Launcher(homeSignal: Int) {
             (household?.builtins.orEmpty()+household?.dashboards.orEmpty()).filter { it.title.contains(query,true) }.map { Tile(TileKind.DASHBOARD,it.id) } +
             (if(query.isBlank())household?.stars.orEmpty() else found).map { Tile(TileKind.STAR,it.id) }).distinctBy { it.key }
     }
+    val drawerTitles = remember(alphabetical, results, apps, household, found) {
+        if (alphabetical) results.associate { it.key to title(it) } else emptyMap()
+    }
     val rootGestures=launcherGestures(dragState,visible && web==null && !previews && !settings && selected==null && !insightOpen,
         drawerMotion,{!drawerScroll.canScrollBackward},results,homeScroll,layout,{save(it)},::edit,{previews=true},
         {drawerMotion.snapClosed(false);keyboard?.hide();focus.clearFocus()},{drawerMotion.request(true)})
     BoxWithConstraints(Modifier.fillMaxSize().testTag("launcher-root").background(Color(0xff07181d)).onGloballyPositioned { dragState.root=it.boundsInRoot() }.then(rootGestures)) {
         val revealHeight=skyRevealDp(maxHeight.value).dp
-        AmbientSky(skyGraph, household?.links.orEmpty(), still || systemStill, visible && web == null && !drawer, sky)
-        Column(Modifier.fillMaxSize().windowInsetsPadding(homeInsets).padding(horizontal = 16.dp)
+        AmbientSky(skyGraph, household?.links.orEmpty(), still || systemStill, visible && web == null && (!drawer || drawerMotion.settledOpen), sky)
+        Column(Modifier.fillMaxSize().windowInsetsPadding(homeInsets)
             .then(if(web!=null)Modifier.clearAndSetSemantics{} else Modifier)) {
-            Row(Modifier.fillMaxWidth().height(52.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().padding(horizontal=16.dp).height(52.dp), verticalAlignment = Alignment.CenterVertically) {
                 RhythmGlyph(Modifier.size(14.dp))
                 Spacer(Modifier.width(4.dp))
                 Text("Rhythm OS", fontSize = 19.sp, fontFamily = ObservatoryTitle, fontWeight = FontWeight.Normal,
@@ -290,10 +307,10 @@ fun Launcher(homeSignal: Int) {
                     }
                 }
             }
-            if (status.isNotEmpty()) Text(status, color = Color(0xffa1b6bc), fontSize = 12.sp, modifier = Modifier.padding(8.dp))
+            if (status.isNotEmpty()) Text(status, color = Color(0xffa1b6bc), fontSize = 12.sp, modifier = Modifier.padding(horizontal=24.dp,vertical=8.dp))
             Box(Modifier.weight(1f).fillMaxWidth().clipToBounds().onGloballyPositioned{drawerMotion.viewport=it.boundsInRoot()}) {
                 // Home geometry remains stable throughout drawer entry, dragging and exit.
-                Column(Modifier.fillMaxSize().graphicsLayer{alpha=if(drawerMotion.covered)0f else 1f}
+                Column(Modifier.fillMaxSize().padding(horizontal=16.dp).graphicsLayer{alpha=1f-drawerMotion.fraction}
                     .pointerInput(drawer){if(drawer)awaitPointerEventScope{while(true){val event=awaitPointerEvent(PointerEventPass.Initial);event.changes.forEach{it.consume()}}}}
                     .then(if(drawer)Modifier.clearAndSetSemantics{} else Modifier)) {
                     AnimatedSkyRegion(sky && !drawer && !(dragState.tile!=null && dragState.source==DragSource.DRAWER),
@@ -303,13 +320,13 @@ fun Launcher(homeSignal: Int) {
                     Box(Modifier.weight(1f).fillMaxWidth()) {
                         HomeCellGrid(layout.tiles,homeScroll,dragState,still || systemStill,Modifier.fillMaxSize()) { tile,cellModifier ->
                             LauncherTile(tile,title(tile),appsByKey[tile.key],origin,
-                                origin.isNotBlank() && visible && web==null && household!=null,online,cellModifier,
+                                origin.isNotBlank() && online && household!=null,online,cellModifier,
                                 {if(editHome)edit(tile)else open(tile)},{edit(tile)},{
                                     val i=layout.tiles.indexOfFirst{it.key==tile.key};if(i>0)save(layout.move(tile.key,layout.tiles[i-1].key))
                                 },{
                                     val i=layout.tiles.indexOfFirst{it.key==tile.key};if(i>=0 && i<layout.tiles.lastIndex)save(layout.move(tile.key,layout.tiles[i+1].key))
-                                },{insight=null;insightOpen=false;household=null;found=emptyList();status="Household access unavailable"},
-                                onRemove={removeHome(tile)},editing=editHome,webActive={!drawerMotion.covered})
+                                },::accessLost,
+                                onRemove={removeHome(tile)},editing=editHome,webActive={visible && web==null && !drawerMotion.covered})
                         }
                         if(layout.tiles.isEmpty()) Text("Swipe up for apps · hold empty space for previews",fontSize=12.sp,
                             color=Color(0xff9fb6b0),modifier=Modifier.align(Alignment.Center).padding(24.dp))
@@ -336,34 +353,32 @@ fun Launcher(homeSignal: Int) {
                     }
                 }
                 DrawerSurface(drawerMotion) {
-                    Column(Modifier.fillMaxSize().background(Color(0xf5102427),RoundedCornerShape(24.dp)).padding(10.dp)
+                    Column(Modifier.fillMaxSize().padding(horizontal=8.dp)
                         .drawerImePadding(homeInsets,drawerMotion).testTag("app-drawer").then(if(!drawer)Modifier.clearAndSetSemantics{} else Modifier)) {
                         Box(Modifier.fillMaxWidth().height(20.dp).testTag("drawer-handle")
                             .onGloballyPositioned{drawerMotion.header=it}
-                            .semantics{contentDescription="Drag down to close apps"},contentAlignment=Alignment.Center) {
+                            .semantics{contentDescription="Drag down to close apps"}
+                            .clickable(onClickLabel="Close apps"){drawerMotion.request(false)},contentAlignment=Alignment.Center) {
                             Box(Modifier.width(38.dp).height(4.dp).background(Color(0xff91b9ae),RoundedCornerShape(2.dp)))
                         }
-                        Row(verticalAlignment=Alignment.CenterVertically) {
-                            OutlinedTextField(query,{query=it.take(200)},singleLine=true,shape=RoundedCornerShape(22.dp),
-                                textStyle=androidx.compose.ui.text.TextStyle(fontSize=14.sp),placeholder={Text("Search apps & Rhythm",fontSize=13.sp)},
-                                modifier=Modifier.weight(1f).testTag("search-input").focusRequester(searchFocus).onGloballyPositioned{drawerMotion.field=it})
-                            IconButton(onClick={drawerMotion.request(false)},modifier=Modifier.semantics{contentDescription="Close apps"}){Text("×",fontSize=24.sp)}
-                        }
-                        TextButton(onClick={previews=true},modifier=Modifier.testTag("add-preview")){Text("+  Add preview")}
-                        LazyVerticalGrid(columns=GridCells.Fixed(4),state=drawerScroll,
-                            modifier=Modifier.weight(1f).testTag("drawer-grid").onGloballyPositioned{drawerMotion.grid=it},
-                            horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-                            items(results,key={it.key}){tile->
-                                DisposableEffect(tile.key){onDispose{dragState.drawerCoordinates.remove(tile.key)}}
-                                LauncherTile(tile,title(tile),appsByKey[tile.key],origin,false,online,
-                                    Modifier.height(80.dp).onGloballyPositioned{dragState.drawerCoordinates[tile.key]=it},
-                                    {open(tile)},{edit(tile)},null,null,{})
-                            }
+                        OutlinedTextField(query,{query=it.take(200)},singleLine=true,shape=RoundedCornerShape(22.dp),
+                            textStyle=androidx.compose.ui.text.TextStyle(fontSize=14.sp),placeholder={Text("Search apps & Rhythm",fontSize=13.sp)},
+                            modifier=Modifier.fillMaxWidth().testTag("search-input").focusRequester(searchFocus).onGloballyPositioned{drawerMotion.field=it})
+                        DrawerToolbar(alphabetical, onLayoutChange = {
+                            alphabetical = it
+                            store.alphabeticalDrawer = it
+                            drawerScroll.requestScrollToItem(0)
+                        }, onAddPreview = { previews = true })
+                        DrawerResults(results, alphabetical, drawerTitles, drawerScroll, drawerMotion) { tile, modifier ->
+                            DisposableEffect(tile.key){onDispose{dragState.drawerCoordinates.remove(tile.key)}}
+                            LauncherTile(tile,title(tile),appsByKey[tile.key],origin,false,online,
+                                modifier.onGloballyPositioned{dragState.drawerCoordinates[tile.key]=it},
+                                {open(tile)},{edit(tile)},null,null,{}, listRow = alphabetical)
                         }
                     }
                 }
             }
-            Row(Modifier.fillMaxWidth().padding(vertical=8.dp).height(56.dp).testTag("home-dock")
+            Row(Modifier.fillMaxWidth().padding(horizontal=16.dp,vertical=8.dp).height(56.dp).testTag("home-dock")
                 .onGloballyPositioned { dragState.dock=it.boundsInRoot() }
                 .background(Color(0xee061b1f),RoundedCornerShape(28.dp)).border(.5.dp,Color(0x1cd0f5e5),RoundedCornerShape(28.dp)),
                 verticalAlignment=Alignment.CenterVertically) {
@@ -387,21 +402,38 @@ fun Launcher(homeSignal: Int) {
             }
         }
         DragOverlay(dragState,::title,apps)
-        if (web != null && visible) {
+        if (web != null) {
             val entering = remember(web) { Animatable(if (still || systemStill) 1f else 0f) }
             LaunchedEffect(web,still,systemStill) { entering.animateTo(1f,tween(if (still || systemStill) 0 else 500,easing = ObservatoryEase)) }
             Column(Modifier.testTag("full-household").semantics {
                 isTraversalGroup=true
                 customActions=listOf(CustomAccessibilityAction("Return to Home"){web=null;refresh++;true})
             }.fillMaxSize().graphicsLayer { alpha = entering.value; translationY = (1f-entering.value)*35.dp.toPx() }.background(Color(0xff091d23)).safeDrawingPadding()) {
-            if (online) key(web) { RestrictedWeb(origin, web!!, Modifier.weight(1f).fillMaxWidth()) {
-                insight=null; insightOpen=false; household = null; found = emptyList(); status = "Household access unavailable"
-            } }
+            if (online && sameOrigin(origin, web!!)) key(web) {
+                RestrictedWeb(origin, web!!, Modifier.weight(1f).fillMaxWidth(), active = visible, accessLost = ::accessLost)
+            }
             else Column(Modifier.padding(20.dp)) {
                 Text("Offline · reconnect to open this view")
                 TextButton(onClick={web=null;refresh++}){Text("Return to Home")}
             }
             }
+        }
+    }
+    fun changeOrigin(next: String) {
+        if (switching) return
+        val old = origin
+        web = null; accessLost(); status = ""; origin = ""; store.origin = ""
+        switching = true; sessionError = ""
+        drawerScope.launch {
+            try {
+                clearWebSession()
+                if (next.isNotEmpty() && old != next) save(layout.copy(tiles = layout.tiles.filter { it.kind == TileKind.APP },
+                    dock = layout.dock.filter { it.kind == TileKind.APP }))
+                store.origin = next; origin = next; refresh++; settings = false
+            } catch (e: CancellationException) { throw e }
+            catch (_: RuntimeException) {
+                sessionError = "Disconnected. Update Android System WebView and retry clearing the web session."
+            } finally { switching = false }
         }
     }
     val availableDashboards = household?.builtins.orEmpty() + household?.dashboards.orEmpty()
@@ -465,21 +497,13 @@ fun Launcher(homeSignal: Int) {
             OutlinedTextField(address, { address = it; error = false }, label = { Text("https://household.example") }, isError = error)
             TextButton(onClick = { still = !still; store.still = still }) { Text(if (still) "Motion: reduced" else "Motion: gentle") }
             if (origin.isNotEmpty()) TextButton(onClick = { settings = false; web = origin }) { Text("Open household sign-in") }
-            TextButton(onClick = {
-                web = null; insight=null; insightOpen=false; household = null; found = emptyList()
-                CookieManager.getInstance().removeAllCookies(null); WebStorage.getInstance().deleteAllData()
-                origin = ""; store.origin = ""; settings = false
-            }) { Text("Disconnect and clear web session") }
-        } }, confirmButton = { TextButton(onClick = {
+            if (sessionError.isNotEmpty()) Text(sessionError)
+            TextButton(enabled = !switching, onClick = { changeOrigin("") }) { Text("Disconnect and clear web session") }
+        } }, confirmButton = { TextButton(enabled = !switching, onClick = {
             val clean = householdOrigin(address)
-            if (clean == null) error = true else {
-                if (clean != origin) {
-                    household = null; found = emptyList()
-                    CookieManager.getInstance().removeAllCookies(null); WebStorage.getInstance().deleteAllData()
-                    save(layout.copy(tiles = layout.tiles.filter { it.kind == TileKind.APP }))
-                }
-                store.origin = clean; origin = clean; refresh++; settings = false
-            }
+            if (clean == null) error = true
+            else if (clean != origin) changeOrigin(clean)
+            else { refresh++; settings = false }
         }) { Text("Save") } })
     }
 }

@@ -8,6 +8,13 @@ namespace Knowledge.Tests;
 // tests run as the database's owner, as those functions will). Fictional people only: alex, sam and the household.
 static class MemoryRows
 {
+    // Tests that depend on chronology choose distinct instants in the past. Independent database transactions
+    // read the wall clock, which can repeat or step back; their insertion order does not guarantee timestamp order.
+    public static Task SetCreationOrder(NpgsqlDataSource source, params Guid[] ids) => Run(source, """
+        UPDATE memories m SET created_at=now()-(60+cardinality(@ids)-x.position)*interval '1 second'
+        FROM unnest(@ids::uuid[]) WITH ORDINALITY x(id,position) WHERE m.id=x.id
+        """, ("ids", ids));
+
     public static async Task Run(NpgsqlDataSource source, string sql, params (string, object?)[] args)
     {
         await using var c = await source.OpenConnectionAsync();

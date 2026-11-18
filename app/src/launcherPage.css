@@ -22,6 +22,19 @@
 .launcher-entry .reader-text {
   min-height: 0;
 }
+.google-file-original .secondary-action {
+  min-height: 48px;
+}
+.google-file-original label {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+}
+.google-file-original input {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 0;
+}
 /* The native launcher already provides the surrounding navigation. Its built-in
    glucose reader uses the whole WebView, even when an older WebView reports
    inconsistent media-query dimensions. The normal household panel is unchanged. */

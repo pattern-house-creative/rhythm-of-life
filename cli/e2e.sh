@@ -188,7 +188,10 @@ state() { # <file> <token file>
   { listening
     offered "$2"
     ./rhythm help 2>/dev/null
-    ./rhythm token list 2>/dev/null
+    # offered and the running app authenticate while we compare the install. Keep whether each credential was used,
+    # its identity and expiry; only the time of an observed use advances between snapshots.
+    tokens=$(./rhythm token list 2>/dev/null) || fail "could not list tokens"
+    printf '%s\n' "$tokens" | sed -E 's/([[:blank:]])last-used=[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z([[:blank:]])/\1last-used=recorded\2/'
     ./rhythm doctor 2>/dev/null | grep -E '^ +[a-zA-Z]+ +adapter ' || true
     # A harness token is refused at the capture route, on or off, so this saves nothing.
     echo "capture, viewer: $(capture "$2" "DEMO: never saved.") $(viewer)"

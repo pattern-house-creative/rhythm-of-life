@@ -70,7 +70,7 @@ class CellInteractionTest {
         Thread.sleep(350);rule.waitForIdle()
         assertEquals("IME must not move the dock",dockBefore,rule.onNodeWithTag("home-dock").fetchSemanticsNode().boundsInRoot)
         screenshot("drawer")
-        rule.onNodeWithContentDescription("Close apps").performClick()
+        rule.onNodeWithTag("drawer-handle").performClick()
         assertEquals(seeded,store.load())
     }
     @Test fun drawerDragCanCancelThenPlaceOnHomeAndIntoFullDockWithoutLosingPins() {
@@ -92,7 +92,7 @@ class CellInteractionTest {
         rule.onNodeWithTag("launcher-root").performTouchInput{cancel()}
         rule.waitForIdle();assertEquals(seeded,store.load())
         rule.onNodeWithTag("search-input").assertExists()
-        rule.onNodeWithContentDescription("Close apps").performClick()
+        rule.onNodeWithTag("drawer-handle").performClick()
         lift()
         val end=rule.onNodeWithTag("home-grid").fetchSemanticsNode().boundsInRoot.center
         rule.onNodeWithTag("launcher-root").performTouchInput{moveTo(end)}
@@ -163,7 +163,7 @@ class CellInteractionTest {
                     throw e
                 }
                 rule.onNodeWithTag("search-input").assertIsDisplayed()
-                rule.onNodeWithContentDescription("Close apps").performSemanticsAction(SemanticsActions.OnClick){it()}
+                rule.onNodeWithTag("drawer-handle").performSemanticsAction(SemanticsActions.OnClick){it()}
                 rule.mainClock.advanceTimeBy(300)
                 rule.onNodeWithTag("search-input").assertDoesNotExist()
             }

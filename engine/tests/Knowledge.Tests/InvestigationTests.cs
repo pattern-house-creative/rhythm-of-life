@@ -45,6 +45,24 @@ public class InvestigationTests
         var report=HealthAnalysis.Explore(samples,Start,Start.AddDays(29));var top=report.Findings[0];
         Assert.Equal("safety_band",top.Kind);Assert.Equal(100,top.Priority);Assert.Contains("historical",top.Summary);Assert.Equal(45,Assert.Single(top.Supporting).OriginalValue);
     }
+    [Theory]
+    [InlineData("Etc/GMT+6")]
+    [InlineData("unspecified")]
+    public void Unusual_days_use_only_finished_source_days_even_across_UTC_midnight(string zone)
+    {
+        // Nine observed dates; Jan 9 is still in progress even though UTC has advanced to Jan 10.
+        var now = new DateTimeOffset(2026, 1, 10, 1, 0, 0, TimeSpan.Zero);
+        var readings = Enumerable.Range(0, 9).Select(d => Sample("steps", d == 8 ? 5 : d == 7 ? 500 : 100,
+            d, "tracker", zone)).ToArray();
+        var report = HealthAnalysis.Explore(readings, Start, Start.AddDays(8), asOf: now);
+        var finding = Assert.Single(report.Findings, f => f.Kind == "unusual_days");
+        Assert.Equal(8, Json(finding.Statistics).GetProperty("totalDays").GetInt32());
+        Assert.Equal(500, Assert.Single(finding.Supporting).OriginalValue);
+        Assert.Equal(9, Json(report.Coverage[0]).GetProperty("days").GetInt32());
+        var afterMidnight = HealthAnalysis.Explore(readings, Start, Start.AddDays(8), asOf: now.AddHours(13));
+        Assert.Equal(2, Assert.Single(afterMidnight.Findings, f => f.Kind == "unusual_days").Supporting.Length);
+    }
+
     [Fact] public void Associations_include_contradiction_stability_and_trend_confounding_checks()
     {
         var raw=Enumerable.Range(0,28).SelectMany(d=>new[]{Sample("steps",100+d*10,d),Sample("resting_heart_rate",50+d,d,"lab")}).ToArray();

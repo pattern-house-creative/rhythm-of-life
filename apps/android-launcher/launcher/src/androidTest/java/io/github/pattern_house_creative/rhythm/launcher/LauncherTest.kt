@@ -94,7 +94,7 @@ class LauncherTest {
         rule.onNodeWithText("Rhythm OS").assertExists()
         repeat(3) {
             rule.onNodeWithTag("swipe-search").performClick()
-            rule.onNodeWithContentDescription("Close apps").performClick()
+            rule.onNodeWithTag("drawer-handle").performClick()
             rule.onNodeWithText("More sky").performClick()
             rule.onNodeWithText("Less sky").performClick()
             rule.onNodeWithContentDescription("Settings").performClick()

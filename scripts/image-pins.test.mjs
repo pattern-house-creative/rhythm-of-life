@@ -18,7 +18,6 @@ const pins = read("deploy/image-pins.txt")
     const [image, since, where] = line.trim().split(/\s+/);
     return { image, since, where };
   });
-const dated = pins.filter((p) => p.since !== "floating");
 
 // Defaults of `image: ${VAR:-<image>}` in the deploy compose files, and the bases the Dockerfiles build FROM.
 function usedImages() {
@@ -50,14 +49,13 @@ test("the pin list names exactly the images the deploy files and Dockerfiles use
   assert.equal(new Set(pins.map((p) => p.image)).size, pins.length, "an image is listed twice");
 });
 
-test("every pin has a day or floating, and is set where the list says", () => {
+test("every image has a SHA-256 digest and a valid check date at its declared location", () => {
   const tomorrow = Date.now() + 24 * 3600 * 1000;
   for (const { image, since, where } of pins) {
-    if (since !== "floating") {
-      assert.match(since, /^\d{4}-\d{2}-\d{2}$/, image);
-      const day = Date.parse(`${since}T00:00:00Z`);
-      assert.ok(!Number.isNaN(day) && new Date(day).toISOString().startsWith(since) && day < tomorrow, `${image}: ${since}`);
-    }
+    assert.match(image, /^[^@]+:[^@]+@sha256:[0-9a-f]{64}$/, image);
+    assert.match(since, /^\d{4}-\d{2}-\d{2}$/, image);
+    const day = Date.parse(`${since}T00:00:00Z`);
+    assert.ok(!Number.isNaN(day) && new Date(day).toISOString().startsWith(since) && day < tomorrow, `${image}: ${since}`);
     assert.ok(where && existsSync(join(root, where)), `${image}: ${where}`);
     assert.ok(read(where).includes(image), `${where} does not set ${image}`);
   }
@@ -67,14 +65,15 @@ test("every mention of a pinned image names the pinned version", () => {
   const skip = (path) => /(?:^|\/)(?:packages\.lock\.json|package-lock\.json)$/.test(path) || path === "deploy/image-pins.txt";
   const texts = tracked.filter((p) => !skip(p) && existsSync(join(root, p))).map((p) => [p, readFileSync(join(root, p))]);
   const stale = [];
-  for (const { image } of dated) {
-    const at = image.lastIndexOf(":");
-    const name = image.slice(0, at).replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
-    const mention = new RegExp(`(?<![\\w./-])${name}:([A-Za-z0-9._-]*[A-Za-z0-9])`, "g");
+  for (const { image } of pins) {
+    const [taggedImage, digest] = image.split("@");
+    const at = taggedImage.lastIndexOf(":");
+    const name = taggedImage.slice(0, at).replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+    const mention = new RegExp(`(?<![\\w.@/-])${name}:(v?[0-9][A-Za-z0-9._-]*[A-Za-z0-9]|[0-9])(?:@(sha256:[a-f0-9]{64}))?`, "g");
     for (const [path, bytes] of texts) {
       if (bytes.includes(0)) continue;
-      for (const [whole, tag] of bytes.toString("utf8").matchAll(mention))
-        if (tag !== image.slice(at + 1)) stale.push(`${path}: ${whole}`);
+      for (const [whole, tag, hash] of bytes.toString("utf8").matchAll(mention))
+        if (tag !== taggedImage.slice(at + 1) || (hash && hash !== digest)) stale.push(`${path}: ${whole}`);
     }
   }
   assert.deepEqual(stale, []);
@@ -94,9 +93,9 @@ test("engine/global.json accepts the SDK the engine image builds with", () => {
   assert.ok(accepted[rollForward], `global.json (${version}, ${rollForward}) refuses the image's SDK`);
 });
 
-test("upgrades build with --pull, so the floating bases get their patch releases", () => {
-  assert.match(read("rhythm"), /dc --profile backup build --pull;/);
-  assert.match(read("rhythm.ps1"), /dc --profile backup build --pull \}/);
+test("upgrades pull the configured image bases when rebuilding", () => {
+  for (const wrapper of ["rhythm", "rhythm.ps1"])
+    assert.match(read(wrapper), /\bdc --profile backup build --pull(?=[\s;|&}]|$)/m);
   const builds = [...read("deploy/truenas/README.md").matchAll(/docker compose [^`\n]*\bbuild\b[^`\n]*/g)].map((m) => m[0]);
   assert.ok(builds.length >= 2);
   for (const command of builds) assert.match(command, /--pull\b/, command);

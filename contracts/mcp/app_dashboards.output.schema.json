@@ -177,7 +177,8 @@
         "limit": { "description": "1-60 for a links feed, 1-1000 for a memories feed.", "type": "integer", "minimum": 1, "maximum": 1000 },
         "log": { "$ref": "#/$defs/log" },
         "subject": { "$ref": "#/$defs/subject" },
-        "where": { "$ref": "#/$defs/memory-where" }
+        "where": { "$ref": "#/$defs/memory-where" },
+        "fullText": { "description": "For memories feeds, include each memory's complete text in preview.", "type": "boolean" }
       }
     },
     "declared": {
@@ -425,7 +426,7 @@
       }
     },
     "feed-memory": {
-      "description": "One memory in a memories feed: its id and its star's graphId, scope, owner, project (with its star) or null, tags, kind, status, state (current, replaced, ended or retracted), when it was written and last changed, its due date, the first 300 characters of its words (truncated when cut) and, for a work item with memory.work on, its work properties; null otherwise.",
+      "description": "One memory in a memories feed: its id and its star's graphId, scope, owner, project (with its star) or null, tags, kind, status, state (current, replaced, ended or retracted), when it was written and last changed, its due date, its words (first 300 characters by default, whole with fullText, truncated when cut) and, for a work item with memory.work on, its work properties; null otherwise.",
       "type": "object", "additionalProperties": false,
       "required": ["id", "graphId", "scope", "owner", "project", "tags", "kind", "status", "state", "createdAt", "updatedAt", "due", "preview", "truncated", "work"],
       "properties": {
@@ -468,7 +469,7 @@
             }
           ]
         },
-        "preview": { "type": "string", "maxLength": 300 },
+        "preview": { "type": "string", "maxLength": 131072 },
         "truncated": { "type": "boolean" },
         "work": {
           "oneOf": [

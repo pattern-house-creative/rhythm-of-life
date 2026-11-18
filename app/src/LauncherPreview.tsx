@@ -191,9 +191,10 @@ function PreviewRead({
   useEffect(() => {
     let gone = false,
       busy = false;
+    let lastRead = 0;
     const controller = new AbortController();
     const refresh = async () => {
-      if (busy || gone) return;
+      if (busy || gone || document.hidden) return;
       busy = true;
       const request = new AbortController();
       const abort = () => request.abort();
@@ -218,7 +219,10 @@ function PreviewRead({
           data.dashboard.version !== dashboard.version
         )
           throw new Error("unavailable");
-        if (!gone && !request.signal.aborted) setRead({ dashboard, data });
+        if (!gone && !request.signal.aborted) {
+          lastRead = Date.now();
+          setRead({ dashboard, data });
+        }
       } catch {
         if (!gone) {
           setRead(null);
@@ -230,14 +234,15 @@ function PreviewRead({
         busy = false;
       }
     };
+    const resume = () => { if (Date.now() - lastRead >= previewRefreshMs) void refresh(); };
+    document.addEventListener("visibilitychange", resume);
     void refresh();
-    const interval = setInterval(() => {
-      if (!document.hidden) void refresh();
-    }, previewRefreshMs);
+    const interval = setInterval(refresh, previewRefreshMs);
     return () => {
       gone = true;
       controller.abort();
       clearInterval(interval);
+      document.removeEventListener("visibilitychange", resume);
     };
   }, [id, session]);
   return read ? (

@@ -5,8 +5,8 @@ native Kotlin and Compose app that talks to a Rhythm of Life install you already
 previews sit in the app grid, the sky of stars is behind the screen, and today's insight is at the
 bottom.
 
-> **Development build** (`0.1.12-dev`). It has been used on one phone. There is no release build, no
-> signing setup and no store listing: you build a debug APK yourself and install it. Read
+> **Development build** (`0.1.13-dev`). The drawer update was tested on an Android 14 emulator. Local builds produce a debug APK or
+> an unsigned release APK. Release signing and physical-phone acceptance are still outstanding. Read
 > [What it does not do yet](#what-it-does-not-do-yet) first.
 
 > **Not a medical device.** The launcher can show a glucose reading from your install. It is for your
@@ -16,10 +16,13 @@ bottom.
 ## What you get
 
 - **Your apps, as a launcher.** A four-column Home grid, a dock with six places and a drawer of every
-  installed app. Apps open the usual way and keep working when your install cannot be reached.
+  app Android exposes to the launcher, including available work-profile apps with their Android badges.
+  Personal and work copies keep distinct pins. Apps remain available if your install or Android System WebView is unavailable.
 - **Dashboard previews on Home.** A preview takes the room of four icons and redraws from fresh data.
-  Touch it and the whole dashboard opens in a reader; Android's Back returns to Home.
-- **One search.** Swipe up to search your apps, your dashboards and your install's stars together.
+  Touch it and the whole dashboard opens in a reader; Android's Back returns to Home. Visible Home cards stay in memory during drawer and reader navigation, pause when covered, and refresh when due.
+- **App drawer.** Swipe up to search your apps, dashboards and stars against the sky. Choose Grid or A–Z.
+  In A–Z, slide your finger along the letters to jump through the list. The launcher remembers your choice.
+  Swipe the top handle down to close, or use Android Back.
 - **The sky.** "More sky" moves the grid down and shows the stars your install gives the launcher, with
   their links. Pinch, pan, touch a star to see what it is linked to, and open it.
 - **Today's insight.** A strip at the bottom opens the day's insight with its points, sources and
@@ -51,8 +54,23 @@ On Windows PowerShell use `.\gradlew.bat`. The first build needs the internet: i
 packages the launcher builds with and the two fonts ([Fonts and licences](#fonts-and-licences)).
 
 The APK is `launcher/build/outputs/apk/debug/launcher-debug.apk`, signed with your machine's debug key.
-Install it with `adb install`, or copy it to the phone and open it. Android asks before it lets a new
+For development, install it with `adb install`, or copy it to the phone and open it. Android asks before it lets a new
 app be the Home app; the launcher never changes that by itself.
+
+### Prepare a daily-use release
+
+Build the non-debuggable release locally with `./gradlew :launcher:assembleRelease`. The unsigned
+artifact is `launcher/build/outputs/apk/release/launcher-release-unsigned.apk`. Android requires a
+signature before installation. The release owner can sign this APK with their chosen, backed-up
+release key using Android SDK Build Tools `apksigner sign --ks <keystore> --out launcher-release.apk
+launcher-release-unsigned.apk`, then inspect the result with
+`apksigner verify --verbose --print-certs launcher-release.apk`. Keep the keystore and credentials
+outside the repository. Future updates use the same signing identity and a higher version code.
+
+Android will reject an in-place update of a debug-signed install with a different release certificate.
+Choose the transition and how to preserve the current Home layout before changing an existing phone.
+Check Home/Back, reader backgrounding, work-profile launching, loss of access and battery use on the
+device before selecting it as the daily Home app.
 
 ## Connect it to your install
 
@@ -94,7 +112,9 @@ that it has drawn within eight seconds, the generated preview is shown instead, 
 ## How it is kept safe
 
 - **Only your install's address.** The web views load that one HTTPS origin and nothing else. A
-  request to anywhere else is answered empty, and a link or sign-in that leaves the origin is refused.
+  request to anywhere else is answered empty. In a Google Drive source reader, tap **Open original**
+  to open the file in your Android browser. Google checks access using your browser's sign-in.
+  The reader also shows a selectable file link you can copy.
 - **Certificate errors are refused.** There is no "continue anyway".
 - **No bridge into Android.** Pages get no JavaScript interface, no file or content access, no
   downloads, no permission grants and no third-party cookies.
@@ -113,13 +133,18 @@ token.
 
 ## What it does not do yet
 
-- **No release build.** Only a debug APK that you build and sign yourself.
+- **Release signing is owner-managed.** The project builds an unsigned release APK. See [Prepare a daily-use release](#prepare-a-daily-use-release).
 - **No sign-in that leaves your install's address.** A front door that sends you to another site to
   sign in, as Cloudflare Access does, is refused. An address you can reach without that, such as a
   tailnet one, works.
 - **Tested mostly on an emulator.** The automated tests run on an emulator against a local stand-in
   for an install. On a real phone it has been used on one device, by hand.
 - **No per-person sign-in.** It sees what your install's web app shows any browser at that address.
+- **Reader and refresh behavior.** An open reader stays mounted during ordinary backgrounding. On
+  return it checks access before showing content. Rotation can reopen the same reader; process death
+  returns to Home. No reader destination is stored on disk. While Home is visible, the launcher
+  checks the household and dashboard list every minute. It can reuse successful graph metadata for
+  five minutes. Access denial or loss of the network clears it.
 - **The sky is an overview.** It shows the stars the install returns for discovery, up to 2,000, not
   every record. Search finds the rest.
 

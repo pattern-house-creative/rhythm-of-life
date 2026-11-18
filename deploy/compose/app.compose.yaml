@@ -32,9 +32,9 @@ services:
       # This computer only by default; RHYTHM_BIND=0.0.0.0 for the home network.
       - "${RHYTHM_BIND:-127.0.0.1}:${RHYTHM_APP_PORT:-8080}:8080"
     networks:
-      # internal reaches the engine; egress only carries the published port.
+      # Internal lets trusted peers reach the facade; edge serves the app-facing proxies and host port.
       - internal
-      - egress
+      - edge
     read_only: true
     tmpfs:
       - /tmp

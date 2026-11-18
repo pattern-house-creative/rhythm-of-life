@@ -159,7 +159,8 @@ public sealed class RequestLogTests
         Assert.Equal("Request refused: 403 wrong_role (role legacy)", log.Lines[^1]);
         Assert.Equal(HttpStatusCode.MethodNotAllowed, (await Send(client, "GET", "http://engine/mcp", "Bearer older-key")).StatusCode);
         Assert.Equal("Request refused: 405 method_not_allowed (role legacy)", log.Lines[^1]);
-        Assert.Equal(8, log.Lines.Count);
+        Assert.Equal(8, log.Lines.Count(l => l.StartsWith("Request refused:", StringComparison.Ordinal)));
+        Assert.Equal(2, log.Lines.Count(l => l == $"Authenticated call: {older.Id} legacy mcp"));
         Assert.DoesNotContain(log.Lines, l => l.Contains("fictional", StringComparison.Ordinal) || l.Contains("example.invalid", StringComparison.Ordinal));
     }
 }

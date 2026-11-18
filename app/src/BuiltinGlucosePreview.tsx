@@ -65,11 +65,12 @@ export default function BuiltinGlucosePreview() {
         }
       }
     };
-    const change = () => {
+    const change = (event: Event) => {
       generation++;
       active?.abort();
       busy = false;
-      setData(null);
+      if (event.type === "offline") setData(null);
+      setNow(Date.now());
       setLoading(!document.hidden && navigator.onLine);
       void read();
     };
@@ -79,7 +80,7 @@ export default function BuiltinGlucosePreview() {
     window.addEventListener("online", change);
     const refresh = setInterval(() => void read(), 60_000);
     // Age and freshness continue advancing even between successful source reads.
-    const clock = setInterval(() => setNow(Date.now()), 15_000);
+    const clock = setInterval(() => { if (!document.hidden) setNow(Date.now()); }, 15_000);
     return () => {
       gone = true;
       active?.abort();

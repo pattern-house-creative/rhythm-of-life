@@ -29,6 +29,7 @@ internal sealed class EmbeddedNotes(string name, params string[] titles) : IMemo
 internal sealed class KeptFiles(string name, params string[] titles) : IDocumentSource
 {
     public bool Rereads { get; set; } = true;
+    public int Reads { get; private set; }
     public bool Invents { get; set; }
     public string Name => name;
     public IReadOnlyDictionary<string, ProviderPolicy> Providers { get; } =
@@ -41,9 +42,10 @@ internal sealed class KeptFiles(string name, params string[] titles) : IDocument
             var key = new ResourceKey("household", name, name, t.ToLowerInvariant().Replace(' ', '-'));
             var record = new DiscoveryRecord(key, "shared", "document", t, null, "r1", null, now, [], ContentRevision: "r1");
             if (Invents) return record with { Embedding = EmbeddingModelTests.Same() };
-            return pass.Previous.TryGetValue(key, out var previous) && previous.ContentRevision == "r1" && !(Rereads && pass.Outdated(previous))
-                ? record with { Embedding = previous.Embedding }
-                : record with { Embedding = pass.Vector(key, "r1", t, "DEMO: a fictional file about " + t) };
+            if (pass.Previous.TryGetValue(key, out var previous) && previous.ContentRevision == "r1" && !(Rereads && pass.Outdated(previous)))
+                return record with { Embedding = previous.Embedding };
+            Reads++;
+            return record with { Embedding = pass.Vector(key, "r1", t, "DEMO: a fictional file about " + t) };
         }).ToArray();
         return Task.FromResult(new SourceListing(records, Complete: true));
     }

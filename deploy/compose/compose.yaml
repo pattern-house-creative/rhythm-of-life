@@ -29,12 +29,16 @@ include:
   - path: ../exposure/openai-tunnel/compose.yaml
 
 networks:
-  # Service to service only: no internet, cannot publish ports. Postgres lives only here.
+  # The database and the processes that connect to it; no internet or host ports.
+  database:
+    internal: true
+  # Private service names for trusted peers, including installed source plugins and the titles model.
   internal:
     internal: true
-  # Outbound internet, and the only network a published port can use. A service joins it only
-  # if it publishes a port (bound to RHYTHM_BIND, default 127.0.0.1) or talks to a vendor.
+  # Outbound connections for adapters, plugins and the MCP-only tunnel. The app does not join it.
   egress: {}
+  # The app-facing gateways need both app and engine, outbound connectivity and published ports.
+  edge: {}
 
 secrets:
   # The one token the app's server sends to the engine (contracts/README.md section 1.2).

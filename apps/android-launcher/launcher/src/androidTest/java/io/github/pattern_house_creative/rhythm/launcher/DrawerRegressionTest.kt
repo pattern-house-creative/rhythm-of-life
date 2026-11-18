@@ -28,16 +28,56 @@ class DrawerRegressionTest {
     @Test fun populatedAndEmptySearchResultsSurviveScrollAndRepeatedClose() {
         repeat(3) {
             open()
-            rule.onNodeWithTag("drawer-grid").performTouchInput{swipeUp()}
-            rule.onNodeWithTag("drawer-grid").performTouchInput{swipeDown()}
+            val grid = rule.onNodeWithTag("drawer-grid")
+            val range = androidx.compose.ui.semantics.SemanticsProperties.VerticalScrollAxisRange
+            // The system keyboard animates independently of Compose. A downward swipe
+            // dismisses at the top, so first scroll to a known position below it.
+            rule.waitUntil(5000) { grid.fetchSemanticsNode().config[range].maxValue() > 0 }
+            grid.performScrollToIndex(installed(context).lastIndex)
+            assertTrue(grid.fetchSemanticsNode().config[range].value() > 0)
+            grid.performTouchInput { swipeDown() }
             rule.onNodeWithTag("search-input").performTextReplacement("zz-no-installed-app-or-star-7193")
             rule.onNodeWithTag("drawer-grid").onChildren().assertCountEquals(0)
             rule.onNodeWithTag("search-input").performTextReplacement("Clock")
             assertTrue(rule.onNodeWithTag("drawer-grid").onChildren().fetchSemanticsNodes().isNotEmpty())
             rule.onNodeWithTag("search-input").performTextClearance()
             assertTrue(rule.onNodeWithTag("drawer-grid").onChildren().fetchSemanticsNodes().isNotEmpty())
-            rule.onNodeWithContentDescription("Close apps").performClick()
+            rule.onNodeWithTag("drawer-handle").performClick()
             rule.onNodeWithTag("search-input").assertDoesNotExist()
+        }
+    }
+    @Test fun eitherLayoutSearchesAndAlphabetScrubbingSurvivesReopening() {
+        val original = store.alphabeticalDrawer
+        try {
+            open()
+            val search = rule.onNodeWithTag("search-input")
+            val grid = rule.onNodeWithTag("drawer-grid")
+            val az = rule.onNodeWithText("A–Z")
+            rule.onNodeWithText("Grid").performClick()
+            search.performTextReplacement("Clock")
+            grid.onChildren().filter(hasText("Clock")).assertCountEquals(1)
+            az.performClick()
+            az.assertIsSelected()
+            grid.onChildren().filter(hasText("Clock")).assertCountEquals(1)
+            search.performTextClearance()
+            val rail = rule.onNodeWithTag("alphabet-index")
+            val range = androidx.compose.ui.semantics.SemanticsProperties.VerticalScrollAxisRange
+            rail.performTouchInput { swipe(topCenter, bottomCenter, durationMillis = 280) }
+            assertTrue("Dragging to the last letter should scroll the list", grid.fetchSemanticsNode().config[range].value() > 0)
+            rail.performTouchInput { swipe(bottomCenter, topCenter, durationMillis = 280) }
+            assertEquals(0f, grid.fetchSemanticsNode().config[range].value(), .01f)
+            search.performTextReplacement("zz-no-such-app-7193")
+            grid.onChildren().assertCountEquals(0)
+            rail.assertDoesNotExist()
+            rule.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+            search.assertDoesNotExist()
+            rule.activityRule.scenario.recreate()
+            open()
+            az.assertIsSelected()
+            rail.assertIsDisplayed()
+            rule.onNodeWithContentDescription("Close apps").assertDoesNotExist()
+        } finally {
+            store.alphabeticalDrawer = original
         }
     }
     @Test fun actualHomeIntentClosesDrawerAndKeyboardWithoutChangingLayout() {

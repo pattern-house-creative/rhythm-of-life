@@ -2,7 +2,7 @@
 
 Let ChatGPT reach the engine's `/mcp` with no public address: OpenAI's tunnel client runs as one more
 container in the stack, opens an outbound HTTPS connection to OpenAI, and carries ChatGPT's MCP calls to
-`http://engine:8080/mcp` on the internal network. No port is published, no domain or DNS record is needed,
+`http://engine:8080/mcp` on the egress network. No port is published, no domain or DNS record is needed,
 and nothing on the internet can connect in. OpenAI's guide:
 [Secure MCP Tunnels](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels).
 

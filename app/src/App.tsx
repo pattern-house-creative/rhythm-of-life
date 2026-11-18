@@ -191,7 +191,9 @@ function HomeArranging({
   );
 }
 export default function App({ launcher = false }: { launcher?: boolean }) {
-  const [launcherEntry] = useState(() => launcherTarget(location.hash));
+  const [launcherEntry, setLauncherEntry] = useState(() =>
+    launcherTarget(location.hash),
+  );
   const [launcherPending, setLauncherPending] = useState(!!launcherEntry);
   const [launcherError, setLauncherError] = useState(false);
   const [launcherRetry, setLauncherRetry] = useState(0);
@@ -200,12 +202,21 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
     [selected, setSelected] = useState<string | null>(null);
   const [state, setState] = useState<DemoState>("ready"),
     [paused, setPaused] = useState(false);
+  const browserOriginal = useRef<string | null>(null);
   const {
     data: rawData,
     refreshing,
     refresh,
   } = useHealthRefresh(
     useCallback((failed: boolean) => {
+      // Back from the Android browser reopens the file after a fresh access check.
+      // Only its identifier survives hiding the reader.
+      const openReader = browserOriginal.current;
+      browserOriginal.current = null;
+      if (!failed && document.hidden && openReader) {
+        setLauncherEntry({ kind: "star", id: openReader });
+        setLauncherPending(true);
+      }
       setView("ambient");
       setSelected(null);
       setState(failed ? "error" : "ready");
@@ -277,7 +288,10 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
     query: string;
   }>({ selected: null, reader: null, query: "" });
   const onExplorerState = useCallback(
-    (s: typeof explorerState.current) => (explorerState.current = s),
+    (s: typeof explorerState.current) => {
+      if (s.reader !== browserOriginal.current) browserOriginal.current = null;
+      explorerState.current = s;
+    },
     [],
   );
   // A view a command opened stays until the next command, Home, or someone
@@ -1551,7 +1565,9 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
                   }
                 >
                   <Explorer
+                    nativeReader={launcher}
                     knowledge={sky}
+                    onOpenOriginal={(id) => { browserOriginal.current = id; }}
                     selected={selected}
                     onSelect={setSelected}
                     close={close}
@@ -1868,6 +1884,7 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
                     edges: overview.edges,
                   }}
                   onSources={() => open("sources")}
+                  onChanged={() => open("changed")}
                   dashboard={
                     view === "dashboard" && cardPanel && session
                       ? {

@@ -101,13 +101,15 @@ public sealed class MemoryMatchTests
     {
         static DashboardFeed Feed(string where = "{}", int? limit = null) => new("items", "memories", null!, Limit: limit, Where: Where(where));
         Assert.Null(Feed().Problem(0));
+        Assert.Null((Feed() with { FullText = true }).Problem(0));
+        Assert.Equal("feeds[0]: fullText is for memories feeds", new DashboardFeed("d", "data", "rhythm:x", FullText: true).Problem(0));
         Assert.Null(Feed(limit: 1).Problem(0));
         Assert.Null(Feed(limit: MemoryStore.MatchMax).Problem(0));
         Assert.Equal("feeds[0].limit is 1–1000 for a memories feed", Feed(limit: 1001).Problem(0));
         Assert.Equal("feeds[0].limit is 1–1000 for a memories feed", Feed(limit: 0).Problem(0));
-        Assert.Equal("feeds[0]: a memories feed takes only where and limit", (Feed() with { Star = "memory:memory:x" }).Problem(0));
-        Assert.Equal("feeds[0]: a memories feed takes only where and limit", (Feed() with { Days = 7 }).Problem(0));
-        Assert.Equal("feeds[0]: a memories feed takes only where and limit", (Feed() with { Log = "walks" }).Problem(0));
+        Assert.Equal("feeds[0]: a memories feed takes only where, limit and fullText", (Feed() with { Star = "memory:memory:x" }).Problem(0));
+        Assert.Equal("feeds[0]: a memories feed takes only where, limit and fullText", (Feed() with { Days = 7 }).Problem(0));
+        Assert.Equal("feeds[0]: a memories feed takes only where, limit and fullText", (Feed() with { Log = "walks" }).Problem(0));
         Assert.Equal("feeds[2].where.status: each is canonical, draft or deprecated", Feed("""{"status":"lost"}""").Problem(2));
         Assert.Equal("feeds[0]: where is for memories feeds", new DashboardFeed("d", "data", "rhythm:x", Where: Where("{}")).Problem(0));
         Assert.Equal("feeds[0].kind must be data, contents, links, log or memories", new DashboardFeed("d", "board", "rhythm:x").Problem(0));
@@ -204,9 +206,9 @@ public sealed class MemoryFeedTests(DatabaseFixture fixture) : IClassFixture<Dat
     static MemoryWhere Where(string json) => JsonSerializer.Deserialize<MemoryWhere>(json, DashboardDraft.Json)!;
 
     // What a memories feed with `where` holds for `reader`, in full or as dashboard_data's preview.
-    async Task<JsonObject> Feed(Guid reader, string where, int? limit = null, RhythmConfig? config = null, bool preview = false)
+    async Task<JsonObject> Feed(Guid reader, string where, int? limit = null, RhythmConfig? config = null, bool preview = false, bool? fullText = null)
     {
-        DashboardFeed feed = new("items", "memories", null!, Limit: limit, Where: Where(where));
+        DashboardFeed feed = new("items", "memories", null!, Limit: limit, Where: Where(where), FullText: fullText);
         Assert.Null(feed.Problem(0));
         return (await Feeds(config).Read(reader, [feed], preview, default))["feeds"]!["items"]!.AsObject();
     }
@@ -522,17 +524,44 @@ public sealed class MemoryFeedTests(DatabaseFixture fixture) : IClassFixture<Dat
         Assert.Equal(long_.ToString(), (string?)cut["id"]);
     }
 
+    [PostgresFact] public async Task Whole_text_respects_the_byte_budget_and_a_preview_only_reads_its_twenty_rows()
+    {
+        await Scoped.Mode(fixture.Source, "off");
+        var who = await MemoryLogins.Make(fixture.Source, "feed-text-budget");
+        const string filter = """{"tag":"fd-size"}""";
+        var body = "DEMO: " + string.Concat(Enumerable.Repeat("sample text. ", 9600));
+        for (var i = 0; i < 25; i++)
+        {
+            var written = await Store.Create(who.Alex, new(body + i, ["fd-size"]), Mcp, default);
+            if (written.Hold is not null) await Store.Release(who.App, written.Id, null, new("app"), default);
+        }
+        Assert.Equal(25, (int)(await Feed(who.App, filter))["count"]!);
+        var refused = await Feed(who.App, filter, fullText: true);
+        Assert.Equal("unavailable", (string?)refused["status"]);
+        Assert.Contains("fewer memories", (string?)refused["reason"]);
+        Assert.Null(refused["memories"]);
+        var preview = await Feed(who.App, filter, preview: true, fullText: true);
+        Assert.Equal((25, 25, false), ((int)preview["count"]!, (int)preview["previewOf"]!, (bool)preview["truncated"]!));
+        Assert.Equal(20, Ids(preview).Length);
+        Assert.All(preview["memories"]!.AsArray(), m =>
+        {
+            Assert.StartsWith(body, (string)m!["preview"]!);
+            Assert.False((bool)m["truncated"]!);
+        });
+    }
+
     [PostgresFact] public async Task Save_dashboard_takes_a_memories_feed_without_a_star_and_keeps_every_other_rule()
     {
         var s = fixture.Source;
         await Scoped.Mode(s, "off");
         var who = await MemoryLogins.Make(s, "feed-save");
         const string Project = "feed-board";
-        var item = (await Store.CreateWork(who.Alex, new("DEMO: oil the board room door.", Project: Project), "task", "ready", null, null, Mcp, default)).Write.Id;
+        var text = "DEMO: oil the board room door.\n" + new string('a', 5000) + "\nThe last step is to test the latch.";
+        var item = (await Store.CreateWork(who.Alex, new(text, Project: Project), "task", "ready", null, null, Mcp, default)).Write.Id;
         var store = new DashboardStore(fixture.Source);
         IServiceProvider Services(RhythmConfig config) => new ServiceCollection().AddSingleton(store).AddSingleton(Feeds(config)).AddSingleton(config).BuildServiceProvider();
         var tools = new HarnessTools(new Retrieval(fixture.Db), new HarnessLogin(who.Alex));
-        DashboardFeed[] feeds = [new("open", "memories", null!, Limit: 500, Where: Where($$$$"""{"project":"{{{{Project}}}}","work":true,"state":{"not":["done","cancelled"]}}"""))];
+        DashboardFeed[] feeds = [new("open", "memories", null!, Limit: 500, Where: Where($$$$"""{"project":"{{{{Project}}}}","work":true,"state":{"not":["done","cancelled"]}}"""), FullText: true)];
         async Task<string> Refused(Func<Task<string>> call) => (await Assert.ThrowsAsync<McpException>(call)).Message;
 
         Guid id;
@@ -542,10 +571,12 @@ public sealed class MemoryFeedTests(DatabaseFixture fixture) : IClassFixture<Dat
         Assert.Empty(listed["stars"]!.AsArray());
         // Stored with its defaults written out (the database keeps a JSON object's members in an order of its own).
         Assert.True(JsonNode.DeepEquals(JsonNode.Parse($$$$"""
-            [{"name":"open","kind":"memories","limit":500,"where":{"status":{"not":["deprecated"]},"project":["{{{{Project}}}}"],"work":true,"state":{"not":["done","cancelled"]}}}]
+            [{"name":"open","kind":"memories","limit":500,"fullText":true,"where":{"status":{"not":["deprecated"]},"project":["{{{{Project}}}}"],"work":true,"state":{"not":["done","cancelled"]}}}]
             """), listed["feeds"]), listed["feeds"]!.ToJsonString());
         var data = JsonNode.Parse(await tools.DashboardData(Services(All), dashboardId: id, full: true))!;
         Assert.Equal([item.ToString()], data["feeds"]!["open"]!["memories"]!.AsArray().Select(m => (string)m!["id"]!));
+        var whole = data["feeds"]!["open"]!["memories"]![0]!;
+        Assert.Equal((text, false), ((string)whole["preview"]!, (bool)whole["truncated"]!));
         // Given straight to dashboard_data, the same feeds read the same.
         Assert.Equal(1, (int)JsonNode.Parse(await tools.DashboardData(Services(All), feeds: feeds))!["feeds"]!["open"]!["count"]!);
 

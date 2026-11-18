@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import bodyFont from "@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?inline";
 import displayFont from "@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?inline";
 import { sandboxDocument } from "./dashboardFrame";
@@ -88,34 +88,39 @@ export function PageFrame({
     timer.current = null;
     latest.current.onFail(reason);
   };
-  const send = (read: DashboardData) => {
-    if (!port.current) return;
-    port.current.postMessage({
-      type: "data",
-      payload: {
-        feeds: read.feeds,
-        asOf: read.asOf,
-        dashboard: {
-          id: dashboard.id,
-          version: dashboard.version,
-          title: dashboard.title,
+  const { id, version, title } = dashboard;
+  const send = useCallback(
+    (read: DashboardData) => {
+      if (!port.current) return;
+      port.current.postMessage({
+        type: "data",
+        payload: {
+          feeds: read.feeds,
+          asOf: read.asOf,
+          dashboard: {
+            id,
+            version,
+            title,
+          },
+          mode: "full",
+          edits: latest.current.edits,
+          selection: latest.current.selection,
         },
-        mode: "full",
-        edits: latest.current.edits,
-        selection: latest.current.selection,
-      },
-    });
-    if (!drewOnce.current && !timer.current)
-      timer.current = setTimeout(() => {
-        timer.current = null;
-        latest.current.onFail("The page didn't draw.");
-      }, drawMs);
-  };
+      });
+      if (!drewOnce.current && !timer.current)
+        timer.current = setTimeout(() => {
+          timer.current = null;
+          latest.current.onFail("The page didn't draw.");
+        }, drawMs);
+    },
+    [id, version, title],
+  );
   // Each new read, and edits turned on or off, reach the page.
   useEffect(() => {
-    if (data?.dashboard.version === dashboard.version) send(data);
+    if (data?.dashboard.id === id && data.dashboard.version === version)
+      send(data);
     // send reads the dashboard and the channel as they are now.
-  }, [data, edits, selection]);
+  }, [data, edits, selection, id, version, send]);
   // Leaving, or another version taking the frame's place, closes the channel and the timer.
   useEffect(
     () => () => {

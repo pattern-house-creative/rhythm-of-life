@@ -529,7 +529,9 @@ public sealed class AppMemoryQueueDatabaseTests(DatabaseFixture fixture) : IClas
         async Task<(Guid Later, Guid Earlier)> Fresh()
         {
             var w = new ContradictionStory(story++);
-            return await Pair(Checking(w), w, await Scoped.Principal(S, $"queue-lines-{story}", "harness", "alex"));
+            var pair = await Pair(Checking(w), w, await Scoped.Principal(S, $"queue-lines-{story}", "harness", "alex"));
+            await MemoryRows.SetCreationOrder(S, pair.Older, pair.Newer);
+            return pair;
         }
         Task<int> Run(string line, StringWriter o)
         {

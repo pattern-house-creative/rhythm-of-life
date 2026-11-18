@@ -81,19 +81,43 @@ running the script as root ([deploy/truenas/](../deploy/truenas/README.md)), or 
 running it through Git Bash. Check the log now and then: the last line of a good run is the snapshot
 line.
 
-**Keep a copy elsewhere.** The repository is encrypted, so copying its folder to another disk, another
-computer or a cloud storage service (rsync, rclone, a TrueNAS replication or cloud sync task) exposes
-nothing without the password. One copy off the premises protects against fire and theft.
+### Off-site copy on TrueNAS
 
-**Old snapshots** stay until you remove them. Each snapshot comes from a new staging folder and
-container, so tell restic to treat them as one series:
+After a local backup finishes and its restic check passes, capture a read-only ZFS snapshot
+of the repository dataset while backup, prune and restore jobs are idle. Set a TrueNAS cloud
+sync task to **PUSH / COPY** using a working provider connection and a dedicated destination.
+Copy only the encrypted restic repository from the stable snapshot, including its config,
+keys, indexes, snapshots and packs. Keep the separate repository password in a password
+manager or offline recovery record reachable without the NAS. Keep the staging folder,
+install secrets and password file out of the cloud task.
+
+Order the nightly jobs so that a failed local verification never starts the copy. Retain the
+last good local snapshot on remote failure and retry the cloud copy. Record the completed
+restic snapshot ID alongside the cloud task result. COPY keeps destination-only files;
+account for its separate retention and storage usage.
+
+For the first copy, and periodically afterward, retrieve the remote repository into an empty
+drill location. Use the independently kept password to list the recorded snapshot ID, run
+`restic check --read-data` and restore that snapshot to a new folder. Check the dump and
+archive against the restored manifest and follow the database drill below. Review the next
+scheduled run as well. To pause or roll back the cloud step, disable only that task and keep
+the existing local backup and all repository copies.
+
+**Snapshot age and retention.** `./rhythm doctor` reports the latest snapshot time and warns after
+48 hours or when the repository and engine data share a filesystem. Separate filesystems can still
+share physical disks. New snapshots carry the Compose project's tag. Use a dedicated repository per
+install, especially if two hosts use the same project name.
+
+Preview the nightly policy from `deploy/compose/`:
 
 ```sh
-docker compose --profile backup run --rm --entrypoint restic backup \
-  forget --group-by '' --keep-daily 7 --keep-weekly 5 --keep-monthly 12 --prune
+docker compose --profile backup run --rm -T --no-deps --entrypoint python3 backup /app/backup.py retention --dry-run
 ```
 
-Add `--dry-run` first to see what it would remove.
+To apply it after each successful scheduled backup, set `RHYTHM_BACKUP_RETENTION=on` in `.env`.
+It keeps 7 daily, 5 weekly and 12 monthly snapshots and prunes unused data. The default is off.
+Untagged snapshots from older versions stay available for manual review. Until the first tagged
+snapshot is written, doctor labels any untagged repository time as unverified for this install.
 
 ## The restore drill
 
@@ -178,10 +202,12 @@ worked):
 ## When a restore stops, and what it undoes
 
 `./rhythm restore` checks the restored folder before it changes anything, and refuses one that holds a file its manifest
-does not list, a link, or an archive file that differs from the engine's own copy. If loading fails after that (the dump
-does not load, the quarantine fails), the database it was loading into is dropped and the live one is untouched: the
-stack starts again on it and the command says what stopped it. The restored folder, a plain copy of the database, is
-removed either way. Retrying is safe; `cli/chaos.sh` runs each of these failures on a throwaway stack.
+does not list, a link, or an archive file that differs from the engine's own copy. If loading fails, the command
+reports the state of the database switch. When it confirms the live database kept its name, it restarts only the app
+or engine containers that were running when the restore began. If the switch is uncertain, the services stay stopped
+for inspection. Each run removes its plaintext snapshot and releases the staging directory it reserved. A second
+restore cannot take that directory while a restore is in progress. After an interruption, check that no restore is
+still running before removing leftover staging. `cli/chaos.sh` exercises these failures on a throwaway stack.
 
 A restore puts the database back as it was at the backup, so every change since is undone, the ones you made for safety
 too. A person suspended since is current again (their tokens stay disabled, as every token does, but a new one could be

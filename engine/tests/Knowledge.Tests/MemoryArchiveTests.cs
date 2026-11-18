@@ -675,8 +675,8 @@ public sealed class MemoryArchiveTests
     {
         await using var a = await Install.Make("off");
         var (store, who) = (a.Store, a.Who);
-        await Digests.Many(store, who.Alex, Digests.Mcp, "brook", 11);
-        await Digests.Many(store, who.Alex, Digests.Mcp, "weir", 10, project: "weir", what: "visit");
+        await Digests.Many(a.Source, who.Alex, Digests.Mcp, "brook", 11);
+        await Digests.Many(a.Source, who.Alex, Digests.Mcp, "weir", 10, project: "weir", what: "visit");
         var tagged = (await Digests.Run(store, who.Alex, null, "brook"))!;
         var weir = (await Digests.Run(store, who.Alex, "weir", null))!;
         var file = await a.Export("alex");

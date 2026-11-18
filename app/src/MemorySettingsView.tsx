@@ -103,8 +103,8 @@ export function MemorySettingsView({
         />
         <Row
           name="Earlier states kept"
-          value={`${settings.versionsKept} each`}
-          means="How many of a memory's earlier states can be read and put back. Its history keeps every entry."
+          value={`${settings.versionsKept} or more`}
+          means="Each memory also keeps the last copy of every distinct wording. Its history lists every change."
         />
         <Row
           name="Longest memory"

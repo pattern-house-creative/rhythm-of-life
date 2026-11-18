@@ -746,6 +746,13 @@
                         }
                       },
                       "default": null
+                    },
+                    "fullText": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -1376,6 +1383,13 @@
                     }
                   },
                   "default": null
+                },
+                "fullText": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
+                  "default": null
                 }
               },
               "required": [
@@ -1814,6 +1828,13 @@
                       "default": null
                     }
                   },
+                  "default": null
+                },
+                "fullText": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
                   "default": null
                 }
               },
@@ -3255,6 +3276,13 @@
                         }
                       },
                       "default": null
+                    },
+                    "fullText": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -3885,6 +3913,13 @@
                     }
                   },
                   "default": null
+                },
+                "fullText": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
+                  "default": null
                 }
               },
               "required": [
@@ -4323,6 +4358,13 @@
                       "default": null
                     }
                   },
+                  "default": null
+                },
+                "fullText": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
                   "default": null
                 }
               },

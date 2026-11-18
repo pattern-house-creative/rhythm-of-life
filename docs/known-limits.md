@@ -18,12 +18,11 @@ software stands.
 
 If you put `/mcp` on the internet (the Cloudflare recipe, or any other), know that:
 
-- **A token is the only gate, and tokens never expire.** The engine does not record when a token was
-  last used, so a leaked token is hard to notice. Give each client its own token, revoke the ones you
-  stop using (`./rhythm token revoke <name>`), and rotate them now and then.
-- **The public address answers any valid token, not only AI tokens.** The app's own token is the
-  powerful one: it is not counted by the write limit and `token revoke` cannot turn it off. Keep it on
-  the server; never give it to a client.
+- **Tokens created without an expiry stay valid until revoked.** Give each client its own token, use
+  `--expires-at` for time-limited access, and check last use with `./rhythm token list`.
+- **Set a role filter for a public MCP host.** Without an `engine.hostRoles` entry, any valid token
+  can reach its own role's routes there. Allow only `harness` at the public AI hostname and have
+  the proxy preserve that host. Keep app and plugin access on the internal engine name.
 - **The write limit is off by default.** Set `engine.writeLimit: on` for any install with a public
   address ([security.md](security.md#the-write-limit)), and add a rate-limit rule at your edge
   (Cloudflare or your proxy).
@@ -32,44 +31,40 @@ If you put `/mcp` on the internet (the Cloudflare recipe, or any other), know th
 
 Only with `memory.tools: on`.
 
-- **A memory keeps its 20 most recent earlier versions.** A client that edits one memory more than 20
-  times pushes its original wording out of the history. Only a backup brings it back.
+- **History keeps the last copy of each wording.** After 20 earlier versions, Rhythm can prune duplicate
+  states in the same scope and hold status. Wording lost before this change can be recovered only from a backup.
 - **The trash empties itself after 14 days.**
+  The brief flags five or more memories forgotten by one AI connection within ten minutes during the last
+  48 hours. It counts memories still in the trash that the reader can restore.
 
 ## Running it
 
-- **Other containers on the stack's networks are trusted.** The app's server and Postgres answer to any
-  container on the stack's `internal` network, and every exposure container joins it. Do not attach
-  containers you do not trust to those networks.
-- **A failed upgrade rolls the images back, not the database.** If an upgrade fails after its
-  migrations ran, the older engine starts on the newer schema. If anything looks wrong, restore the
-  backup the upgrade took first (`./rhythm restore`).
-- **Backups are yours to schedule, copy and prune.** `./rhythm backup` makes an encrypted backup on the
-  same machine. Nothing copies it elsewhere, removes old snapshots or warns you when the last one is
-  old. Copy the repository off the machine, keep `secrets/backup_password` offline, and do the
-  [restore drill](backups.md#the-restore-drill) once.
-- **`./rhythm init --force` writes a fresh `.env`.** Check its folders afterwards, the backup folder
-  above all, or the next backup starts a new repository somewhere else.
+- **App-facing proxies are trusted.** Cloudflare, Tailscale and Caddy relay the entire app on
+  the `edge` network and can reach its unauthenticated facade. The OpenAI tunnel and Cloudflare's MCP-only setup have
+  no shared network with the app. Postgres has its own `database` network, separate from every proxy.
+- **Recovering after a failed migration needs a restore.** Upgrade stops the stack and prints the exact
+  pre-upgrade snapshot command. Restoring disables prior tokens and undoes data written since the backup.
+- **Schedule and copy backups off-site.** Configure the nightly job, preview retention, keep the
+  password offline and run a [restore drill](backups.md#the-restore-drill). Doctor checks snapshot age
+  and shared filesystems; separate filesystems can still share the same physical disk.
 - **Images are built on your machine.** There are no published images yet, so `./rhythm upgrade --pull`
-  has nothing to pull. Third-party images are pinned by version tag, three of them to a floating tag,
-  and none by digest ([../deploy/README.md](../deploy/README.md#pinned-images)).
+  has nothing to pull. Third-party image defaults are pinned by manifest digest ([../deploy/README.md](../deploy/README.md#pinned-images)).
 
 ## Connections
 
-- **Adapters and exposure recipes are not tested against real accounts.** The Google, Garmin,
-  Tailscale, Cloudflare and TrueNAS steps are checked against fakes and `docker compose config` only.
+- **Deployment coverage is limited.** One installation runs Rhythm on TrueNAS SCALE, serves the
+  app over a tailnet, and uses a Cloudflare tunnel for MCP with ChatGPT and Claude. The Cloudflare
+  Access app-login example and the full install procedure on a fresh NAS still need end-to-end
+  verification. Automated adapter checks use fakes and deployment checks render the Compose files.
 - **The CareLink plugin is not published yet.** It is a separate, unofficial repository, and when it is out it can
   stop working whenever the vendor changes its service ([adapters/carelink.md](adapters/carelink.md)).
 
 ## Models and dependencies
 
-- **The optional `bge-small` model's licence is not confirmed.** The default model (MiniLM) is
-  Apache-2.0. The pinned export of `bge-small` carries no licence statement of its own, though the
-  original model declares MIT ([licenses/README.md](licenses/README.md)). The engine downloads it only
-  if you choose it.
-- **Six advisories in build-time tools** (two low, four moderate), in the chain that builds the web
-  app's offline support. None is in what runs
-  ([dependency-license-review-20261109.md](dependency-license-review-20261109.md)).
+- **The app's build and test toolchain has outstanding npm advisories.** On 17 November 2026
+  npm flagged 14 dependency entries (12 high and two moderate). The production dependency
+  audit reported zero. The affected graph includes Vite and Vitest as well as the offline
+  build plugin. [Dependency review](dependency-license-review-20261109.md#17-november-recheck)
 
 ## Not in this release
 

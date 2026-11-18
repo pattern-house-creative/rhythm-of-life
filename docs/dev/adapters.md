@@ -79,6 +79,7 @@ plugin's providers: `Providers` is fixed in code and read before any adapter is 
 3. **Numbers.** `Sync` builds `ingest_measurements` arguments (provider `demo`, subject `fixture`, one source per
    simulated device, deterministic values so a repeated sync changes nothing) and calls `sink.Write`. On the next map
    refresh the catalog groups them into data stars ("Activity", "Sleep", "Heart", "Mood").
+   A data star follows the latest remaining sample when a source corrects or revokes a reading.
 4. **Notes as stars.** `List` returns one `DiscoveryRecord` per note (kind `note`), with `References` to the notes it
    links (verified, directed) and `in_project` references to one record per project, plus `Groups` for display.
    `Complete: true`, so a note removed from the file leaves the map.

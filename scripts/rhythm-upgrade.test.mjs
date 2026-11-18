@@ -8,7 +8,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 // ./rhythm upgrade and rhythm.ps1 upgrade with a stand-in docker that only answers `compose config --images` and finds
-// every image it is asked about: each wrapper builds with --pull, so the floating base images get their patch releases,
+// every image it is asked about: each wrapper builds with --pull, to fetch the configured base images,
 // and after a successful upgrade names, changing nothing, the pins the install uses that were last checked over 90 days
 // ago and the images it runs that deploy/image-pins.txt does not list (an .env override). And what an upgrade must leave as it is (SB-P7-11, story
 // 17): the settings, the ports and profiles, the secret and token files and the connectors turned off, on the way to a
@@ -58,6 +58,7 @@ function install(t, wrapper) {
     `#!/bin/sh\necho "$*" >> "$(dirname "$0")/calls.log"\n` +
       'echo "${RHYTHM_VERSION:-}|${RHYTHM_BIND:-}|${RHYTHM_APP_PORT:-}|${RHYTHM_MCP_PORT:-}|${COMPOSE_PROFILES:-}|$*" >> "$(dirname "$0")/seen.log"\n' +
       'if [ -n "${FAKE_FAIL:-}" ] && [ ! -e "$(dirname "$0")/failed" ]; then case "$*" in *"$FAKE_FAIL"*) : > "$(dirname "$0")/failed"; exit 1 ;; esac; fi\n' +
+      `case "$*" in *"backup backup /var/lib/rhythm/archive"*) echo '{"snapshot": "ab12cd34", "verified_files": 2}' ;; esac\n` +
       // `image ls` answers here as in docker.ps1 below: off Windows, PowerShell finds this file for `docker`, not that one.
       'case "$*" in "image ls"*) echo sha256:0123456789ab ;; esac\n' +
       `case "$*" in *"config --images"*) printf '%s\\n' ${images.join(" ")} ;; esac\nexit 0\n`,
@@ -68,6 +69,7 @@ function install(t, wrapper) {
     `Add-Content (Join-Path $PSScriptRoot 'calls.log') "$args"\n` +
       `Add-Content (Join-Path $PSScriptRoot 'seen.log') "$env:RHYTHM_VERSION|$env:RHYTHM_BIND|$env:RHYTHM_APP_PORT|$env:RHYTHM_MCP_PORT|$env:COMPOSE_PROFILES|$args"\n` +
       `if ($env:FAKE_FAIL -and -not (Test-Path (Join-Path $PSScriptRoot 'failed')) -and "$args" -like "*$env:FAKE_FAIL*") { Set-Content (Join-Path $PSScriptRoot 'failed') ''; exit 1 }\n` +
+      `if ("$args" -like '*backup backup /var/lib/rhythm/archive*') { '{"snapshot": "ab12cd34", "verified_files": 2}' }\n` +
       `if ("$args" -like 'image ls*') { 'sha256:0123456789ab' }\n` +
       `if ("$args" -like '*config --images*') { ${images.map((i) => `'${i}'`).join(", ")} }\nexit 0\n`,
   );
@@ -266,6 +268,7 @@ function leftAsItWas({ dir, compose, secrets, before }, result, tag) {
   });
   for (const { args } of calls) {
     for (const [, profile] of args.matchAll(/--profile (\S+)/g)) assert.ok(["cli", "backup"].includes(profile), args);
+    if (args === "compose stop app engine migrate") continue;
     assert.doesNotMatch(args, /^compose (?:down|rm|stop)\b|^volume\b|^system\b|\bprune\b/, "an upgrade removes nothing");
   }
   const ups = calls.filter(({ args }) => args.startsWith("compose up"));
@@ -365,6 +368,7 @@ for (const { name, file, skip, run } of wrappers) {
   for (const [why, args, fails] of [
     ["its build fails", ["upgrade", "new"], "build --pull"],
     ["its pull fails", ["upgrade", "new", "--pull"], "compose pull"],
+    ["its readiness check fails", ["upgrade", "new"], "cli ready"],
     ["its stack does not start", ["upgrade", "new"], "up -d --wait --force-recreate"],
     // The tag itself moved here, so the images before it come back only by the tag kept in step 2.
     ["its rebuild under the same tag does not start", ["upgrade"], "up -d --wait --force-recreate"],
@@ -380,11 +384,21 @@ for (const { name, file, skip, run } of wrappers) {
       // Step 4: after what failed, each image back under its tag, and only then the stack, under that tag.
       const failed = calls.findIndex(({ args: a }) => a.includes(fails));
       const last = calls.findLastIndex(({ args: a }) => a.startsWith("compose up"));
-      assert.ok(failed > 0 && failed < last, "the stack starts again after what failed");
-      assert.equal(calls[last].version, "old", "the stack starts again under the tag before it");
-      for (const image of built) {
-        const back = calls.findIndex(({ args: a }) => a === `tag ${image}:old-previous ${image}:old`);
-        assert.ok(back > failed && back < last, `${image}:old-previous is back under ${image}:old before the stack starts again`);
+      const mayHaveMigrated = fails.startsWith("up ") || fails === "cli ready";
+      if (mayHaveMigrated) {
+        assert.match(result.stdout + result.stderr, /restore ab12cd34/);
+        const stop = calls.findIndex(({ args: a }) => a === "compose stop app engine migrate");
+        assert.ok(stop > failed && last < stop, "the possibly migrated stack is stopped and stays stopped");
+        assert.ok(!calls.some(({ args: a }) => a.includes("restore load")), "database changes await explicit restore");
+        for (const image of built)
+          assert.ok(calls.findIndex(({ args: a }) => a === `tag ${image}:old-previous ${image}:old`) > stop);
+      } else {
+        assert.ok(failed > 0 && failed < last);
+        assert.equal(calls[last].version, "old");
+        for (const image of built) {
+          const back = calls.findIndex(({ args: a }) => a === `tag ${image}:old-previous ${image}:old`);
+          assert.ok(back > failed && back < last);
+        }
       }
     });
   }

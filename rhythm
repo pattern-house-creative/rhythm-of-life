@@ -90,47 +90,78 @@ case "$command" in
     dc down "$@" ;;
   logs) dc logs "$@" ;;
   backup) backup ;;
+  doctor)
+    result=0
+    cli doctor "$@" || result=$?
+    if [ -f deploy/compose/secrets/backup_password ] && [ -f "$env_file" ]; then
+      dc --profile backup run --rm -T --no-deps --entrypoint python3 backup /app/backup.py status ||
+        echo "  note  Backup snapshot age could not be checked."
+    fi
+    exit "$result" ;;
   snapshots) dc --profile backup run --rm --entrypoint restic backup snapshots ;;
   restore)
     [ $# -eq 1 ] || { echo "usage: ./rhythm restore <snapshot>   (an id from ./rhythm snapshots, or latest)" >&2; exit 2; }
-    folder="/staging/restore-$(date -u +%Y%m%dT%H%M%SZ)"
-    # The restored folder is a plain copy of the whole database, every scope: it goes once the load is done or has
-    # failed (the snapshot keeps it, encrypted). A load that fails leaves the live database as it was (its message
-    # says so), so the stack starts again on it.
-    # Whatever stops the command before then (a step that fails, Ctrl+C), the folder goes on the way out.
-    gone() { dc --profile restore run --rm --no-deps --entrypoint rm restore -rf "$folder" ||
-      echo "Remove $folder from the backup staging folder yourself: it is a plain copy of the database." >&2; }
+    # Reserve this install's staging area before registering cleanup. Another restore may own it.
+    guard=/staging/restore-in-progress
+    folder="$guard/snapshot"
+    dc --profile restore run --rm --no-deps --entrypoint mkdir restore -m 700 "$guard" ||
+      { echo "Cannot reserve $guard. Check for a running or interrupted restore before retrying." >&2; exit 1; }
+    gone() { dc --profile restore run --rm --no-deps --entrypoint rm restore -rf "$guard" ||
+      echo "Check $guard in backup staging: it may hold a plain copy of the database." >&2; }
     trap gone EXIT
     trap 'exit 130' INT TERM
     dc --profile restore run --rm restore restore "$1" "$folder" || exit 1
+    running=$(dc ps --status running -q engine app)
     dc stop engine app
     loaded=0
     dc --profile restore run --rm restore load "$folder" || loaded=$?
-    gone
-    trap - EXIT INT TERM
-    up
-    [ "$loaded" = 0 ] || { echo "The restore did not load; the load's message above says what it left as it was." >&2; exit 1; } ;;
+    dc --profile restore run --rm --no-deps --entrypoint rm restore -rf "$folder"
+    if [ "$loaded" -ne 0 ]; then
+      echo "The restore did not load; check its message before retrying." >&2
+      # Exit 12 confirms the original database still has its name. Never run migrations after a failed load.
+      if [ "$loaded" -eq 12 ] && [ -n "$running" ]; then
+        docker start $running >/dev/null
+      fi
+      exit 1
+    fi
+    up ;;
   upgrade)
     old=$(version); new=$old; how=build
     for arg in "$@"; do case "$arg" in --pull) how=pull ;; *) new=$arg ;; esac; done
-    backup
+    saved=$(backup)
+    echo "$saved"
+    snapshot=$(echo "$saved" | sed -nE 's/^[[:space:]]*\{[[:space:]]*"snapshot":[[:space:]]*"([0-9a-f]{8,64})".*$/\1/p')
+    echo "$snapshot" | grep -Eq '^[0-9a-f]{8,64}$' && [ "$(echo "$snapshot" | wc -l)" -eq 1 ] ||
+      { echo "Upgrade stopped before changing images: no verified pre-upgrade snapshot ID." >&2; exit 1; }
     retag "$old" "$old-previous"
     export RHYTHM_VERSION="$new"
-    # --pull: the base images (.NET, Node, Postgres for pg_dump) follow their patch releases only when pulled again.
-    # Recreated even when a tag only moved: Compose does not always notice a rebuilt image under the same tag.
-    if { if [ "$how" = pull ]; then dc pull; else dc --profile backup build --pull; fi; } && up --force-recreate; then
-      if grep -q '^RHYTHM_VERSION=' "$env_file"; then sed "s/^RHYTHM_VERSION=.*/RHYTHM_VERSION=$new/" "$env_file" > "$env_file.new"
-      else { cat "$env_file"; [ -z "$(tail -c 1 "$env_file")" ] || echo; echo "RHYTHM_VERSION=$new"; } > "$env_file.new"; fi
-      cat "$env_file.new" > "$env_file" && rm -f "$env_file.new"
-      echo "Upgraded to $new. The images before it are tagged $old-previous."
-      pins || true
-    else
-      echo "Upgrade to $new failed: rolling back to $old (the backup above holds the data from before)." >&2
+    migrations_possible=0
+    rollback() {
+      trap - INT TERM
+      echo "Upgrade to $new failed: rolling back to $old." >&2
+      if [ "$migrations_possible" = 1 ]; then
+        echo "Migrations may have changed the database. Keep the stack stopped until you restore the pre-upgrade snapshot." >&2
+        echo "After the previous images are back, run: RHYTHM_VERSION='$old' ./rhythm restore $snapshot" >&2
+        echo "Restore undoes changes since that snapshot and disables old tokens (docs/backups.md)." >&2
+        dc stop app engine migrate || echo "Stop app, engine and migrate manually before restoring." >&2
+      fi
       retag "$old-previous" "$old"
       export RHYTHM_VERSION="$old"
-      up --force-recreate
+      if [ "$migrations_possible" = 0 ]; then up --force-recreate; fi
       exit 1
-    fi ;;
+    }
+    trap rollback INT TERM
+    if [ "$how" = pull ]; then dc pull || rollback; else dc --profile backup build --pull || rollback; fi
+    cli preflight || rollback
+    migrations_possible=1
+    dc up -d --wait --force-recreate && cli ready || rollback
+    if grep -q '^RHYTHM_VERSION=' "$env_file"; then sed "s/^RHYTHM_VERSION=.*/RHYTHM_VERSION=$new/" "$env_file" > "$env_file.new" || rollback
+    else { cat "$env_file"; [ -z "$(tail -c 1 "$env_file")" ] || echo; echo "RHYTHM_VERSION=$new"; } > "$env_file.new" || rollback; fi
+    cat "$env_file.new" > "$env_file" || rollback
+    trap - INT TERM
+    rm -f "$env_file.new"
+    echo "Upgraded to $new. The images before it are tagged $old-previous."
+    pins || true ;;
   connect|disconnect) cli "$command" "$@" && if [ $# -gt 0 ]; then apply; fi ;;
   help|-h|--help) sed -n '3,10s/^# \{0,1\}//p' rhythm; cli help ;;
   *) cli "$command" "$@" ;;

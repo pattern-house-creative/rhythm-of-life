@@ -30,7 +30,7 @@ With the shipped `compose.yaml` and an empty `.env`:
 |---|---|---|
 | the app | `127.0.0.1:8080` | this computer only |
 | the engine's MCP (`POST /mcp`) and `GET /health` | `127.0.0.1:8181` | this computer only, and `/mcp` needs a token |
-| Postgres | the `internal` network only, no port | the engine, `migrate` and `backup` containers |
+| Postgres | the `database` network only, no port | engine, migrate, CLI, backup and restore |
 | `cli`, `backup` | not running; started on demand (`--profile cli`, `--profile backup`) | |
 | exposure containers (`tailscale`, `cloudflared`, `openai-tunnel`) | not running unless their profile is on | |
 
@@ -38,8 +38,10 @@ With `memory.capture` on beside `memory.tools` (off by default), `POST /capture`
 [below](#capturing-from-outside). Off, it is a path like any other the engine does not know.
 
 The app, engine and `migrate` containers run as non-root users with read-only file systems and all
-capabilities dropped; every container has `no-new-privileges`. The `internal` network has no internet
-access; only services that publish a port or talk to a vendor also join `egress`.
+capabilities dropped; every container has `no-new-privileges`. The `database` and `internal` bridges have no internet access. The
+app-facing gateways share `edge` with the app and engine. They can reach the facade directly and
+are trusted to authenticate incoming app traffic. The OpenAI tunnel and a Cloudflare tunnel set to
+MCP-only share `egress` with the engine.
 
 `RHYTHM_BIND=0.0.0.0` publishes the app and the engine to every network the computer is on. That is
 fine on a home network you trust; on a computer with a public address it puts the app on the internet
@@ -62,6 +64,10 @@ one.
 
 - **One token per client**, so you can revoke one (`rhythm token revoke <name>`) without touching the
   others. A revoked token gets `401` at once.
+- Add `--expires-at` with a UTC timestamp at creation to limit a harness, plugin or capture token's lifetime.
+  An underlying harness token's expiry also ends its OAuth access and refresh. Existing tokens keep their
+  original lifetime. `rhythm token list` shows expiry, last successful authentication, and the credential's public
+  ID. Each authenticated request logs that ID, its role, and a fixed route label. It logs no credential or payload.
 - **A token's person is set when it is made and never changes**; `rhythm token list` shows it, or "household
   view". `rhythm person suspend <id>` disables every token and viewer session of that person at once, for good.
   With memory scopes off a person only records who wrote what.
@@ -111,7 +117,10 @@ works the other way round from the rest: nothing listens for the internet, and t
   the `Host` header must be in `engine.allowedHosts` (default `localhost`, `127.0.0.1`, `[::1]`, `engine`), which stops
   DNS rebinding and names you did not plan for; any request with an `Origin` header is refused, so no web page can call
   the engine's data routes from a browser; request bodies are capped. With `engine.oauth.enabled`,
-  discovery and OAuth protocol routes also exist on the configured HTTPS host. Only the authorization
+  discovery and OAuth protocol routes also exist on the configured HTTPS host. A host rule in
+  `engine.hostRoles` limits authenticated calls by the original HTTP Host. Set `[harness]` on
+  the public AI hostname and configure the proxy to preserve it. The engine ignores forwarded
+  host headers when deciding roles. Only the authorization
   form accepts a same-origin browser POST, with antiforgery protection. Keep the engine port private
   behind the TLS proxy; it uses the configured public scheme, not forwarded headers. Tool results are data: tool
   descriptions tell models that source text is untrusted, never instructions.

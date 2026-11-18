@@ -56,8 +56,8 @@ public sealed partial class MemoryStore
 {
     public static readonly TimeSpan GroupGap = TimeSpan.FromMinutes(10), ChangesWindow = TimeSpan.FromHours(48);
     public const int GroupMax = 50, GroupPage = 5, ChangesRead = 200;
-    // The most audit rows a group's members are read from: GroupMax memories with the 20 earlier states 034 keeps of each,
-    // more than any undo could go back through. A key spanning more names no group (list the changes again).
+    // Bound the audit rows read for a group independently of how many distinct wordings its memories retain.
+    // A key spanning more names no group (list the changes again).
     public const int GroupRead = GroupMax * 20;
 
     // The changes an undo reverses, each a revision of its own. A memory's writing is no change to undo (forgetting it is

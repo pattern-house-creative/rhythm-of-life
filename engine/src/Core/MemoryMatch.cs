@@ -252,7 +252,7 @@ public sealed partial class MemoryStore
     // predicates (Filtered) and never one held for review, newest first as the list orders them, at most `limit` with a
     // preview of `previewChars` as the list cuts it, and how many match in all, in one statement. A project the caller
     // doesn't read answers with its name and no memories.
-    public async Task<MemoryMatches> Matching(Guid principal, MemoryMatch match, int limit, int previewChars, CancellationToken ct)
+    public async Task<MemoryMatches> Matching(Guid principal, MemoryMatch match, int limit, int? previewChars, CancellationToken ct)
     {
         if (limit is < 1 or > MatchMax) throw new MemoryRefused("invalid", $"limit is 1 to {MatchMax}");
         if (previewChars is < 0 or > MemoryInput.PreviewMax) throw new MemoryRefused("invalid", $"A preview is 0 to {MemoryInput.PreviewMax} characters");
@@ -260,16 +260,24 @@ public sealed partial class MemoryStore
         if (await UnknownProjects(c, principal, match.Projects, ct) is { Count: > 0 } unknown) return new(0, [], unknown);
         var (where, args) = await Filtered(c, principal, new MemoryFilter(), ct, match);
         where.Add("m.hold IS NULL");
-        args.AddRange([("limit", limit), ("chars", previewChars), ("blockedMax", BlockedByMax)]);
+        args.AddRange([("limit", limit), ("chars", previewChars ?? MemoryInput.MaxBytes), ("blockedMax", BlockedByMax)]);
+        // Full text may span 1,000 large memories. Check the selected page's raw bytes in PostgreSQL before returning
+        // any bodies; the dashboard also checks the exact encoded payload (including metadata) across all its feeds.
+        var full = previewChars is null;
+        var page = full ? "SELECT h.*,sum(octet_length(m.content)) OVER () > @budget AS oversized FROM page h JOIN memories m ON m.id=h.id"
+            : "SELECT *,false AS oversized FROM page";
+        if (full) args.Add(("budget", Relationships.DashboardFeeds.MaxBytes));
         await using var cmd = Database.Command(c, null, $"""
-            WITH hit AS (SELECT m.id,count(*) OVER () AS total {From} WHERE {string.Join(" AND ", where)} ORDER BY m.created_at DESC,m.id DESC LIMIT @limit)
-            {Select("@chars", Blocking)} JOIN hit h ON h.id=m.id ORDER BY m.created_at DESC,m.id DESC
+            WITH page AS (SELECT m.id,count(*) OVER () AS total {From} WHERE {string.Join(" AND ", where)} ORDER BY m.created_at DESC,m.id DESC LIMIT @limit),
+            hit AS ({page})
+            {Select(full ? "CASE WHEN h.oversized THEN 0 ELSE @chars END" : "@chars", Blocking + ",h.oversized")} JOIN hit h ON h.id=m.id ORDER BY m.created_at DESC,m.id DESC
             """, [.. args]);
         await using var reader = await cmd.ExecuteReaderAsync(ct);
         var items = new List<MemoryMatched>();
         var total = 0;
         while (await reader.ReadAsync(ct))
         {
+            if (reader.GetBoolean(36)) throw new MemoryRefused("invalid", Relationships.DashboardFeeds.MemoriesTooLarge);
             total = (int)reader.GetInt64(32);
             items.Add(new(Record(reader), reader.GetBoolean(33), Dependencies(reader.GetString(34)), MemoryWorkDepends.From(reader.GetString(35))));
         }

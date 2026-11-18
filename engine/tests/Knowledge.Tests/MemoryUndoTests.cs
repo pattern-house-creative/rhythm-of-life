@@ -297,12 +297,12 @@ public sealed class MemoryUndoTests(DatabaseFixture fixture) : IClassFixture<Dat
         await Scoped.Mode(s, "off");
         var id = (await Store.Create(who.Alex, new("DEMO: the fictional rota, week 0."), MemoryLogins.Mcp, default)).Id;
         for (var week = 1; week <= 22; week++)
-            await Store.Update(who.Alex, id, new(Content: $"DEMO: the fictional rota, week {week}."), null, MemoryLogins.Mcp, default);
+            await Store.Update(who.Alex, id, new(Tags: [$"week-{week}"]), null, MemoryLogins.Mcp, default);
         var pruned = await Assert.ThrowsAsync<MemoryRefused>(() => Store.Undo(who.Alex, id, 2, null, MemoryLogins.Mcp, default));
         Assert.Equal(("pruned", (int?)3), (pruned.Code, pruned.Revision));
-        Assert.Equal("DEMO: the fictional rota, week 2.", (await Store.GetVersion(who.Alex, id, 3, default))!.Version!.Content);
+        Assert.Contains("week-2", (await Store.GetVersion(who.Alex, id, 3, default))!.Version!.Tags);
         Assert.Equal(3, (await Store.Undo(who.Alex, id, 3, null, MemoryLogins.Mcp, default)).To);
-        Assert.Equal("DEMO: the fictional rota, week 2.", (await Store.Get(who.Alex, id, default))!.Content);
+        Assert.Contains("week-2", (await Store.Get(who.Alex, id, default))!.Tags);
     }
 
     // An AI client's burst of changes, undone together: five memories a call, each only while the group's changes are its

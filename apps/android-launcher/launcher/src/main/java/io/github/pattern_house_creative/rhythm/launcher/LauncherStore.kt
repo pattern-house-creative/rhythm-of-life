@@ -12,6 +12,9 @@ class LauncherStore(context: Context) {
     var still: Boolean
         get() = prefs.getBoolean("still", false)
         set(value) { prefs.edit().putBoolean("still", value).apply() }
+    var alphabeticalDrawer: Boolean
+        get() = prefs.getBoolean("alphabetical-drawer", false)
+        set(value) { prefs.edit().putBoolean("alphabetical-drawer", value).apply() }
     val initialized get() = prefs.contains("layout")
     fun initialPreviews(layout: HomeLayout, dashboardIds: List<String>): HomeLayout {
         if (origin.isBlank() || dashboardIds.isEmpty() || prefs.getString("preview-setup-origin", null) == origin) return layout

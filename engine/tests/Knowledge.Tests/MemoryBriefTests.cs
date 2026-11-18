@@ -449,7 +449,7 @@ public sealed class MemoryBriefHeldTests(DatabaseFixture fixture) : IClassFixtur
         foreach (var id in new[] { due, task, owed, decision, standing, thursday, wednesday, tuesday })
             await store.Forget(alex, id, null, mcp, default);
         var trashed = await Briefs.Agree(s, alex, null, "fair");
-        Assert.Equal($"{trashed.Held} held for your review.", trashed.Says);
+        Assert.Equal($"{trashed.Held} held for your review. Check the trash: one AI connection forgot 8 memories within ten minutes.", trashed.Says);
 
         // Back from the trash, each is counted again, once.
         await store.Restore(alex, due, null, mcp, default);
@@ -863,6 +863,30 @@ public sealed class MemoryBriefHeldGroupTests(DatabaseFixture fixture) : IClassF
         Assert.Equal((at.Revision, at.Hold), (after!.Revision, after.Hold));
         // The listing that leaves nothing out still holds the one group, a held memory's change as any other's.
         Assert.Equal(4, (await store.Changes(who.Sam, since, "mcp", default)).Groups.Single(g => g.Family == "edit").Changes);
+    }
+}
+
+public sealed class MemoryBriefForgetTests(DatabaseFixture fixture) : IClassFixture<DatabaseFixture>
+{
+    [PostgresFact] public async Task A_burst_of_AI_forgets_warns_only_readers_who_can_restore_those_memories()
+    {
+        var s = fixture.Source;
+        await Scoped.Mode(s, "on");
+        var who = await MemoryLogins.Make(s, "brief-forget");
+        var store = new MemoryStore(s);
+        var ids = new List<Guid>();
+        for (var i = 0; i < MemoryStore.BriefForgetThreshold; i++)
+        {
+            var id = (await store.Create(who.Alex, new($"DEMO: fictional garden note {i}."), Briefs.Mcp, default)).Id;
+            await store.Forget(who.Alex, id, null, Briefs.Mcp, default);
+            ids.Add(id);
+        }
+        await using var ai = await StreamCalls.As(fixture, who.Alex);
+        Assert.Contains("one AI connection forgot 5 memories within ten minutes", (string)(await ai.Ok("brief"))["says"]!);
+        Assert.DoesNotContain("Check the trash", (await Briefs.Of(s, who.Sam)).Says);
+        Assert.DoesNotContain("Check the trash", (await Briefs.Of(s, who.Alex, "shared")).Says);
+        await store.Restore(who.Alex, ids[0], null, Briefs.Mcp, default);
+        Assert.DoesNotContain("Check the trash", (await Briefs.Of(s, who.Alex)).Says);
     }
 }
 

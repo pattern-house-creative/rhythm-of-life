@@ -4,7 +4,32 @@ What changed in each version, newest first. Versions follow [Semantic Versioning
 while the project is in alpha, any version may change settings or need a step from the operator, and
 each entry says so under **Upgrading**.
 
-## Unreleased
+## 0.1.0-alpha.2 (18 November 2026)
+
+- The Android launcher drawer shows apps against the sky. Choose the icon grid or an alphabetical
+  list with a draggable letter index. Both support search and remember the selected layout.
+  The reader opens original Google files in the Android browser.
+- **Upgrading:** the engine applies migrations 085 and 086 on startup. Memory history keeps distinct
+  prior wording, and tokens can record their last use and an optional expiry. Existing tokens keep
+  their previous access and have no expiry unless one is set.
+- The web app's production npm audit reported zero findings. Its build and test tools have
+  14 reported dependency findings, documented in [Known limits](docs/known-limits.md).
+
+- Nightly backups can prune snapshots under an opt-in retention policy. The doctor command reports
+  snapshot age and warns when the encrypted repository and engine data share a filesystem.
+- Unusual-day comparisons now use completed source-local days. Current readings still appear in coverage.
+- Set `engine.hostRoles` to accept only harness tokens on a public MCP hostname while preserving
+  the app and plugin roles on the internal hostname. Existing settings retain their behavior.
+
+- Postgres now uses its own private Compose network. App-facing proxies use a separate edge
+  network. **Upgrading:** move any custom service that accesses Postgres directly (such as a
+  separately managed backup) onto the project's `database` network before its next run.
+
+- Third-party container defaults now use multi-platform manifest digests. Base image patches arrive
+  when the inventory pin is updated.
+
+- The optional BGE-small model now downloads from a pinned MIT-declared copy. Its quantized weights,
+  vocabulary, and vector identity match the previous source. Existing vectors need no rebuild.
 
 - AI clients now keep related feedback and acceptance criteria on the existing project item and file a new
   item when an outcome needs independent follow-up. The shared instructions also explain which decisions

@@ -1174,7 +1174,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     expect(within(history).getAllByRole("listitem")[2]).toHaveTextContent(
       "30 October 2026",
     );
-    expect(within(region).getByText(/revisions from 3 on/)).toBeInTheDocument();
+    expect(within(region).getByText(/some earlier revisions can no longer be opened/i)).toBeInTheDocument();
   });
 
   it("never lets a client's own name read as a person or the terminal", async () => {
@@ -1416,7 +1416,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     expect(list).toHaveTextContent("Capsules for AI clients On");
     expect(list).toHaveTextContent("Capture route Off");
     expect(list).toHaveTextContent("The trash keeps 14 days");
-    expect(list).toHaveTextContent("Earlier states kept 20 each");
+    expect(list).toHaveTextContent("Earlier states kept 20 or more");
     expect(
       within(region).getByText(/These change in rhythm.yaml/),
     ).toBeInTheDocument();

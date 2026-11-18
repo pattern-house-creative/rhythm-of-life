@@ -87,8 +87,24 @@ fun webDestination(origin: String, tile: Tile, preview: Boolean = false): String
     require(householdOrigin(origin) == origin)
     require(tile.kind != TileKind.APP)
     if (tile.target == BUILTIN_GLUCOSE && tile.kind != TileKind.STAR) return if (preview)
-        "$origin/launcher-card.html#builtin=glucose" else "$origin/launcher.html#rhythm-launcher=builtin:glucose"
+        "$origin/launcher-card.html#builtin=glucose" else "$origin/$LAUNCHER_READER#rhythm-launcher=builtin:glucose"
     val encoded = java.net.URLEncoder.encode(tile.target, "UTF-8").replace("+", "%20")
     return if (preview) "$origin/launcher-card.html#dashboard=$encoded"
-    else "$origin/launcher.html#rhythm-launcher=${if (tile.kind == TileKind.STAR) "star" else "dashboard"}:$encoded"
+    else "$origin/$LAUNCHER_READER#rhythm-launcher=${if (tile.kind == TileKind.STAR) "star" else "dashboard"}:$encoded"
+}
+
+// The companion uses this capability flag to keep the copy-link UI on older launchers.
+internal const val LAUNCHER_READER = "launcher.html?openOriginal=1"
+
+private val editorFile = Regex("/(?:document|spreadsheets|presentation)/d/[A-Za-z0-9_-]+(?:/.*)?")
+private val driveFile = Regex("/file/d/[A-Za-z0-9_-]+(?:/.*)?")
+
+internal fun isGoogleFile(destination: String): Boolean {
+    val uri = try { URI(destination) } catch (_: java.net.URISyntaxException) { return false }
+    if (uri.scheme != "https" || uri.rawUserInfo != null || uri.port !in listOf(-1, 443)) return false
+    return when (uri.host?.lowercase()) {
+        "docs.google.com" -> editorFile.matches(uri.normalize().rawPath)
+        "drive.google.com" -> driveFile.matches(uri.normalize().rawPath)
+        else -> false
+    }
 }

@@ -65,7 +65,8 @@ public sealed partial class Principals(NpgsqlDataSource source)
     // token. With scopes off the person only records who wrote what; with them on it decides what the client reads.
     public Task<Guid> Create(string name, string role, string? plugin, string output, CancellationToken ct) => Create(name, role, plugin, null, output, ct);
 
-    public async Task<Guid> Create(string name, string role, string? plugin, string? person, string output, CancellationToken ct)
+    public async Task<Guid> Create(string name, string role, string? plugin, string? person, string output, CancellationToken ct,
+        DateTimeOffset? expiresAt = null)
     {
         if (!NamePattern().IsMatch(name) || name is AppName or GraphName) throw new ArgumentException("name is 1-40 lower case letters, digits, '-', '_' or ':', and not app or graph");
         if (role is not ("harness" or "ingest")) throw new ArgumentException("role is harness or ingest");
@@ -73,19 +74,20 @@ public sealed partial class Principals(NpgsqlDataSource source)
             throw new ArgumentException("an ingest token names its plugin (--plugin <name>), and only an ingest token does");
         if (person is not null && role != "harness")
             throw new ArgumentException("--person is for a harness token (an AI client); an ingest token writes for its plugin, never as a person");
-        return await Make(name, role, plugin, person, output, ct);
+        return await Make(name, role, plugin, person, output, expiresAt, ct);
     }
 
     // A capture token (rhythm capture connect, SB-P7-01): it writes into one scope, a person's private scope once scopes are
     // on, or with no person Family, and reads nothing (migration 067). A person is set when it is made, as for every token.
-    public Task<Guid> CreateCapture(string name, string? person, string output, CancellationToken ct)
+    public Task<Guid> CreateCapture(string name, string? person, string output, CancellationToken ct, DateTimeOffset? expiresAt = null)
     {
         if (!NamePattern().IsMatch(name) || name is AppName or GraphName) throw new ArgumentException("name is 1-40 lower case letters, digits, '-', '_' or ':', and not app or graph");
-        return Make(name, "capture", null, person, output, ct);
+        return Make(name, "capture", null, person, output, expiresAt, ct);
     }
 
-    async Task<Guid> Make(string name, string role, string? plugin, string? person, string output, CancellationToken ct)
+    async Task<Guid> Make(string name, string role, string? plugin, string? person, string output, DateTimeOffset? expiresAt, CancellationToken ct)
     {
+        if (expiresAt <= DateTimeOffset.UtcNow) throw new ArgumentException("The token expiry must be in the future");
         var full = Path.GetFullPath(output);
         if (File.Exists(full) || Directory.Exists(full)) throw new IOException("Token file already exists");
         var token = NewToken();
@@ -104,11 +106,12 @@ public sealed partial class Principals(NpgsqlDataSource source)
                         throw new ArgumentException($"{person} is not a person this install knows: people become known when the engine starts, "
                             + "so list them in rhythm.yaml and run ./rhythm up first");
                 }
-        await using (var insert = Database.Command(c, tx, "INSERT INTO principals(id,name,token_hash,role,plugin,person_id) VALUES(@id,@n,@h,@r,@p,@person)",
-            ("id", id), ("n", name), ("h", Hashing.Hash(token)), ("r", role), ("p", plugin), ("person", person)))
+        await using (var insert = Database.Command(c, tx, "INSERT INTO principals(id,name,token_hash,role,plugin,person_id,expires_at) VALUES(@id,@n,@h,@r,@p,@person,@expires)",
+            ("id", id), ("n", name), ("h", Hashing.Hash(token)), ("r", role), ("p", plugin), ("person", person), ("expires", expiresAt?.ToUniversalTime())))
         {
             insert.Parameters["p"].NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Text;
             insert.Parameters["person"].NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Text;
+            insert.Parameters["expires"].NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.TimestampTz;
             await insert.ExecuteNonQueryAsync(ct);
         }
         Directory.CreateDirectory(Path.GetDirectoryName(full)!);
@@ -125,11 +128,12 @@ public sealed partial class Principals(NpgsqlDataSource source)
     // like a revoked one, whatever its enabled flag says (docs/dev/memory.md section 3). Database.Authenticate and
     // Enabled take this condition on `p`.
     public const string PersonCurrent = "(p.person_id IS NULL OR EXISTS(SELECT 1 FROM subjects s WHERE s.id=p.person_id AND s.status='current'))";
+    public const string TokenCurrent = "p.enabled AND NOT p.terminal AND (p.expires_at IS NULL OR p.expires_at>clock_timestamp())";
 
     // Whether a token still opens the engine as a harness (`rhythm up` checks the token files it points people to).
     public async Task<bool> Enabled(string token, CancellationToken ct)
     {
-        await using var cmd = source.CreateCommand($"SELECT EXISTS(SELECT 1 FROM principals p WHERE p.token_hash=@h AND p.enabled AND p.role='harness' AND NOT p.terminal AND {PersonCurrent})");
+        await using var cmd = source.CreateCommand($"SELECT EXISTS(SELECT 1 FROM principals p WHERE p.token_hash=@h AND p.role='harness' AND {TokenCurrent} AND {PersonCurrent})");
         cmd.Parameters.AddWithValue("h", Hashing.Hash(token));
         return await cmd.ExecuteScalarAsync(ct) is true;
     }
@@ -226,21 +230,31 @@ public sealed partial class Principals(NpgsqlDataSource source)
     // whether it is past its 30 days (Lapsed), so refused at the door (ViewerSessions.Current) until `viewer list` or
     // `invite` disables it. A terminal login (migration 044, made by the rhythm memory commands for one person) is listed
     // with the role terminal.
-    public sealed record Token(string Name, string Role, string? Plugin, string? Person, string? PersonStatus, DateTimeOffset Created, bool Lapsed = false);
+    public sealed record Token(string Name, string Role, string? Plugin, string? Person, string? PersonStatus, DateTimeOffset Created, bool Lapsed = false)
+    {
+        public Guid Id { get; init; }
+        public DateTimeOffset? LastUsedAt { get; init; }
+        public DateTimeOffset? ExpiresAt { get; init; }
+    }
 
     public async Task<IReadOnlyList<Token>> List(CancellationToken ct)
     {
         var rows = new List<Token>();
         await using var cmd = source.CreateCommand($"""
             SELECT p.name,CASE WHEN p.terminal THEN 'terminal' ELSE p.role END,p.plugin,p.person_id,s.status,p.created_at,
-              (p.role='app' AND p.person_id IS NOT NULL AND NOT {ViewerSessions.Current})
+              (p.role='app' AND p.person_id IS NOT NULL AND NOT {ViewerSessions.Current}),p.id,p.last_used_at,p.expires_at
             FROM principals p LEFT JOIN subjects s ON s.id=p.person_id
             WHERE p.enabled AND p.role IN ('harness','app','ingest','capture') ORDER BY p.role,p.name,p.created_at
             """);
         await using var reader = await cmd.ExecuteReaderAsync(ct);
         string? Text(int i) => reader.IsDBNull(i) ? null : reader.GetString(i);
         while (await reader.ReadAsync(ct))
-            rows.Add(new(reader.GetString(0), reader.GetString(1), Text(2), Text(3), Text(4), reader.GetFieldValue<DateTimeOffset>(5), reader.GetBoolean(6)));
+            rows.Add(new(reader.GetString(0), reader.GetString(1), Text(2), Text(3), Text(4), reader.GetFieldValue<DateTimeOffset>(5), reader.GetBoolean(6))
+            {
+                Id = reader.GetGuid(7),
+                LastUsedAt = reader.IsDBNull(8) ? null : reader.GetFieldValue<DateTimeOffset>(8),
+                ExpiresAt = reader.IsDBNull(9) ? null : reader.GetFieldValue<DateTimeOffset>(9)
+            });
         return rows;
     }
 

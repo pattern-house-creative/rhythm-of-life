@@ -1,3 +1,4 @@
+using System.Globalization;
 using Npgsql;
 
 namespace Knowledge.Cli;
@@ -9,8 +10,13 @@ namespace Knowledge.Cli;
 public static class TokenCommand
 {
     public const string TokenUsage =
-        "token create <name> [--person <id>] [--out <file>] [--role harness|ingest] [--plugin <name>] | token list | token revoke <name> | token revoke --all";
+        "token create <name> [--person <id>] [--out <file>] [--role harness|ingest] [--plugin <name>] [--expires-at <UTC timestamp>] | token list | token revoke <name> | token revoke --all";
     public const string PersonUsage = "person list | person suspend <id> | person unsuspend <id> | person offboard <id>";
+
+    internal static DateTimeOffset Expiry(string? value) =>
+        DateTimeOffset.TryParseExact(value, "yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture,
+            DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var at) && at > DateTimeOffset.UtcNow ? at
+            : throw new ArgumentException("--expires-at takes a future UTC timestamp in yyyy-MM-ddTHH:mm:ssZ format");
 
     public static async Task<int> Token(DeployFolder deploy, string[] args, TextWriter o, Principals? store = null, CancellationToken ct = default)
     {
@@ -24,6 +30,7 @@ public static class TokenCommand
                 var role = Option("--role") ?? "harness";
                 var plugin = Option("--plugin");
                 var person = Option("--person");
+                DateTimeOffset? expires = args.Contains("--expires-at") ? Expiry(Option("--expires-at")) : null;
                 if (Array.IndexOf(args, "--person") >= 0 && person is null or "" || person?.StartsWith("--", StringComparison.Ordinal) == true)
                     throw new ArgumentException("--person names a person id from people in rhythm.yaml");
                 // An ingest token may leave out its name: it is plugin:<plugin> (contracts/README.md 4.1).
@@ -32,7 +39,7 @@ public static class TokenCommand
                     : throw new ArgumentException(TokenUsage);
                 // By default the token goes to the install's secrets folder, where `rhythm up` and the docs look for it.
                 var output = Path.GetFullPath(Option("--out") ?? deploy.Secret(role == "ingest" ? $"plugin_{plugin}_token" : $"harness_{who}_token"));
-                await principals.Create(who, role, plugin, person, output, ct);
+                await principals.Create(who, role, plugin, person, output, ct, expires);
                 // The person reads a harness token to give it to their client; a plugin's container reads its own.
                 Owners.Apply(output, Owners.Token(deploy, output));
                 o.WriteLine($"Token for {who} ({role}{(person is null ? role == "harness" ? ", household view" : "" : $", speaks for {person}")}) "
@@ -41,7 +48,9 @@ public static class TokenCommand
             }
             case "list":
                 foreach (var t in await principals.List(ct))
-                    o.WriteLine($"{t.Name}\t{t.Role}\t{Who(t)}\t{t.Created:yyyy-MM-dd}");
+                    o.WriteLine($"{t.Name}\t{t.Role}\t{Who(t)}\t{t.Created:yyyy-MM-dd}\tid={t.Id}"
+                        + $"\tlast-used={Stamp(t.LastUsedAt, "unknown")}\texpires={Stamp(t.ExpiresAt, "never")}"
+                        + (t.ExpiresAt <= DateTimeOffset.UtcNow ? " (expired: refused)" : ""));
                 return 0;
             case "revoke" when args.Length == 2 && args[1] == "--all":
             {
@@ -62,6 +71,9 @@ public static class TokenCommand
             default: throw new ArgumentException(TokenUsage);
         }
     }
+
+    static string Stamp(DateTimeOffset? at, string missing) =>
+        at?.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture) ?? missing;
 
     // Whom a listed token speaks for: its person, the household view (no person: once scopes are on it reads Family and
     // DEMO only, docs/dev/memory.md section 3) or its plugin; and why it is refused when its person is not current.

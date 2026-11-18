@@ -34,6 +34,7 @@ import {
 } from "./arranging";
 import type { DashboardGrid } from "./arranging";
 import { PageFrame } from "./PageFrame";
+import { feedObservationTimes } from "./feedObservationTimes";
 import type { WriteAnswer } from "./PageFrame";
 import { PartsGrid } from "./PartsGrid";
 import type { GridChange, GridOutcome } from "./PartsGrid";
@@ -402,6 +403,17 @@ export default function DashboardView({
   return (
     <div className="dashboard-view">
       {controls.ui}
+      {(bare || current?.refreshFailed) && (
+        <p className="dashboard-freshness" role="status">
+          {current?.refreshFailed && "Feed refresh failed. "}
+          {current?.read && feedObservationTimes(current.read)}{" "}
+          {current?.at
+            ? `Last read ${when(new Date(current.at).toISOString())}`
+            : "No feed read yet"}
+          {missing.length > 0 &&
+            ` · ${missing.length} of ${feeds.length} feeds unavailable`}
+        </p>
+      )}
       {failed?.fellBack && failed.version !== dashboard.version && (
         <p className="dashboard-notice" role="status">
           Version {failed.version} didn’t draw (

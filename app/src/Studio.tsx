@@ -66,10 +66,12 @@ export function Studio({
     closed = useRef(""),
     saving = useRef(false),
     fence = useRef(false);
+  const [stopping, setStopping] = useState(false);
   const [readingFeeds, setReadingFeeds] = useState(false),
     [dataAttempt, setDataAttempt] = useState(0);
   const [runner, setRunner] = useState(() => screenRunning(screen));
   useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect -- Snapshot the new screen when subscribing to its external runner events.
     setRunner(screenRunning(screen));
     const changed = (event: Event) => {
       const detail = (event as CustomEvent).detail;
@@ -85,8 +87,10 @@ export function Studio({
     setPreviews([]);
     loaded.current = "";
     fence.current = false;
+    setStopping(false);
   }, []);
   useLayoutEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect -- Clear the previous screen's private draft before paint when the session boundary changes.
     clearDraft();
     closed.current = "";
   }, [screen, enabled, clearDraft]);
@@ -96,20 +100,22 @@ export function Studio({
       window.removeEventListener("observatory-access-lost", clearDraft);
   }, [clearDraft]);
   const savedNow = useRef(saved);
-  savedNow.current = saved;
+  useLayoutEffect(() => {
+    savedNow.current = saved;
+  }, [saved]);
+  const sessionId = session?.id;
   useEffect(() => {
-    if (!session) return;
+    if (!sessionId) return;
     const before = document.activeElement as HTMLElement | null;
     const el = dialog.current;
     el?.showModal?.();
-    studioShown(session.id);
+    studioShown(sessionId);
     return () => {
       studioShown(null);
       el?.close?.();
       if (before?.isConnected) before.focus({ preventScroll: true });
     };
-  }, [session?.id]);
-  latest.current = session;
+  }, [sessionId]);
   // Studio lets go of a session that ended, here or anywhere: the dialog closes and the screen shows what it did before.
   const end = useCallback(
     (id: string) => {
@@ -134,6 +140,7 @@ export function Studio({
         setPreviews([]);
         loaded.current = "";
         fence.current = false;
+        setStopping(false);
         setError("");
       }
       latest.current = next;
@@ -207,6 +214,7 @@ export function Studio({
     };
   }, [screen, enabled, adopt, end, runner, requireRunner, clearDraft]);
   useEffect(() => {
+    const session = latest.current;
     if (!session?.candidate || session.status !== "active" || fence.current)
       return;
     const mark = `${session.id}:${session.revision}`;
@@ -344,7 +352,10 @@ export function Studio({
     setBusy(true);
     setError("");
     // Stop accepting local candidates immediately; the server fence is authoritative and must be confirmed.
-    if (op !== "save") fence.current = true;
+    if (op !== "save") {
+      fence.current = true;
+      setStopping(true);
+    }
     try {
       const result = await change(op);
       if (op === "save") {
@@ -371,7 +382,7 @@ export function Studio({
   const canSave =
     connected &&
     !busy &&
-    !fence.current &&
+    !stopping &&
     session.revision > 0 &&
     session.valid_revision === session.revision &&
     previews.some((p) => p.ready && p.revision === session.revision);
@@ -412,7 +423,7 @@ export function Studio({
       <div className="studio-progress" role="status">
         {!connected
           ? "Disconnected — retaining the preview. Reconnecting…"
-          : fence.current
+          : stopping
             ? "Stopping this session; awaiting confirmation…"
             : readingFeeds
               ? "Reading draft feeds…"

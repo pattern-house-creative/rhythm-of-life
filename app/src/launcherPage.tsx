@@ -8,59 +8,78 @@ import "./launcherPage.css";
 
 // An isolated entry using the existing readers. No service worker registration,
 // demo bootstrap or native bridge. The PWA navigation fallback excludes this page.
+// eslint-disable-next-line react/only-export-components -- This standalone entry mounts its own React root.
 function LauncherPage() {
   const [ready, setReady] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
-    let current = true;
-    setFailed(false);
+    let generation = 0;
+    let closed = false;
     const clear = () => {
-      current = false;
+      closed = true;
+      generation++;
       dashboardCache.clear();
       setReady(false);
+      setMounted(false);
       setFailed(true);
     };
-    const visibility = () => {
-      if (document.hidden) clear();
+    const verify = async () => {
+      const request = ++generation;
+      setReady(false);
+      if (closed || document.hidden) return;
+      const ok = await loadInstance();
+      if (request !== generation || closed) return;
+      if (!ok || instance().mode !== "live" || !navigator.onLine) {
+        clear();
+        return;
+      }
+      setMounted(true);
+      setReady(true);
     };
     window.addEventListener("offline", clear);
     window.addEventListener("pagehide", clear);
     window.addEventListener("observatory-access-lost", clear);
-    document.addEventListener("visibilitychange", visibility);
-    void loadInstance().then((ok) => {
-      if (!current) return;
-      const live =
-        ok &&
-        instance().mode === "live" &&
-        navigator.onLine &&
-        !document.hidden;
-      setReady(live);
-      setFailed(!live);
-    });
+    document.addEventListener("visibilitychange", verify);
+    void verify();
     return () => {
-      current = false;
+      closed = true;
       dashboardCache.clear();
       window.removeEventListener("offline", clear);
       window.removeEventListener("pagehide", clear);
       window.removeEventListener("observatory-access-lost", clear);
-      document.removeEventListener("visibilitychange", visibility);
+      document.removeEventListener("visibilitychange", verify);
     };
   }, [attempt]);
-  return ready ? (
-    <App launcher />
-  ) : (
-    <main className="boot" role="status">
-      <h1>{failed ? "Household unavailable" : "Opening household"}</h1>
-      <p>
-        {failed
-          ? "Check your connection and household access."
-          : "Verifying access to this household."}
-      </p>
-      {failed && (
-        <button onClick={() => setAttempt((n) => n + 1)}>Try again</button>
+  return (
+    <>
+      {mounted && (
+        <div style={{ display: ready ? "contents" : "none" }}>
+          <App launcher />
+        </div>
       )}
-    </main>
+      {!ready && (
+        <main className="boot" role="status">
+          <h1>{failed ? "Household unavailable" : "Opening household"}</h1>
+          <p>
+            {failed
+              ? "Check your connection and household access."
+              : "Verifying access to this household."}
+          </p>
+          {failed && (
+            <button
+              onClick={() => {
+                setFailed(false);
+                setAttempt((n) => n + 1);
+              }}
+            >
+              Try again
+            </button>
+          )}
+        </main>
+      )}
+    </>
   );
 }
 createRoot(document.getElementById("root")!).render(<LauncherPage />);

@@ -14,7 +14,10 @@ data class Household(val dashboards: List<RhythmItem>, val stars: List<RhythmIte
 
 internal class HouseholdAccessDenied : Exception()
 
-class HouseholdClient(private val origin: String) {
+class HouseholdClient(
+    private val origin: String,
+    private val now: () -> Long = android.os.SystemClock::elapsedRealtime,
+) {
     init { require(householdOrigin(origin) == origin) }
     private suspend fun read(path: String, body: JSONObject? = null): String = withContext(Dispatchers.IO) {
         val connection = URL(origin + path).openConnection() as HttpURLConnection
@@ -25,7 +28,7 @@ class HouseholdClient(private val origin: String) {
             connection.setRequestProperty("Accept", "application/json")
             connection.setRequestProperty("Cache-Control", "no-store")
             connection.setRequestProperty("Origin", origin)
-            CookieManager.getInstance().getCookie(origin)?.let { connection.setRequestProperty("Cookie", it) }
+            withWebProvider { CookieManager.getInstance().getCookie(origin) }?.let { connection.setRequestProperty("Cookie", it) }
             if (body != null) {
                 connection.requestMethod = "POST"; connection.doOutput = true
                 connection.setRequestProperty("Content-Type", "application/json")
@@ -69,7 +72,25 @@ class HouseholdClient(private val origin: String) {
         catch (e: HouseholdAccessDenied) { throw e }
         catch (_: Exception) { null }
 
-    suspend fun load(onDashboards: (Household) -> Unit = {}): Household {
+    private var graphCache: Household? = null
+    private var graphReadAt = 0L
+    internal var accessGeneration = 0L
+        private set
+
+    internal fun clearDiscovery() {
+        graphCache = null
+        accessGeneration++
+    }
+
+    suspend fun load(onDashboards: (Household) -> Unit = {}): Household = try {
+        loadCurrent(onDashboards)
+    } catch (denied: HouseholdAccessDenied) {
+        clearDiscovery()
+        throw denied
+    }
+
+    private suspend fun loadCurrent(onDashboards: (Household) -> Unit): Household {
+        val generation = accessGeneration
         val instance = JSONObject(read("/api/instance"))
         // Never show an unconfigured server's fictional sky as the household.
         check(instance.optString("mode") == "live")
@@ -81,8 +102,15 @@ class HouseholdClient(private val origin: String) {
         val dashboardItems = items(boards?.optJSONArray("dashboards"), true)
         val warning = if (boards == null) "Dashboard previews unavailable. Try reconnecting." else if (!ready) "Household companion update or access required." else ""
         // A slow/unavailable graph must not withhold dashboards already read.
+        if (generation != accessGeneration) throw kotlinx.coroutines.CancellationException("Household changed")
         if (boards != null) onDashboards(Household(dashboardItems, emptyList(), emptyList(), "Loading the household sky.", ready, warning, builtins))
+        val age = now() - graphReadAt
+        val cached = graphCache
+        if (cached != null && age in 0 until 300_000L && cached.dashboards == dashboardItems) {
+            return cached.copy(previewsReady = ready, warning = warning, builtins = builtins)
+        }
         val discovered = optional("/api/graph", JSONObject().put("operation", "discover"))
+        if (generation != accessGeneration) throw kotlinx.coroutines.CancellationException("Household changed")
         val graph = discovered ?: JSONObject()
         val stars = items(graph.optJSONArray("nodes"), false)
         val ids = (stars + dashboardItems).map { it.id }.toSet()
@@ -98,7 +126,10 @@ class HouseholdClient(private val origin: String) {
         val coverage = "${dashboardItems.size} dashboards and ${stars.size} readable records from $received returned records; ${processed-stars.size} processed records excluded by access, availability or invalid metadata. " +
             "${maxOf(0,received-processed)} records beyond the local 2,000-record limit. ${links.size} relationships loaded from ${edges.length()} returned; at most 4,000 relationships processed, and both endpoints must be readable. " +
             "${if(more) "The server reports more or incomplete results. " else ""}Discovery is a server overview, not an inventory of all household stars. Search can find records outside this view."
-        return Household(dashboardItems, stars, links, coverage, ready, if (discovered == null) "Sky unavailable; dashboard previews remain available." else warning, builtins)
+        val result = Household(dashboardItems, stars, links, coverage, ready, if (discovered == null) "Sky unavailable; dashboard previews remain available." else warning, builtins)
+        graphCache = result.takeIf { discovered != null }
+        graphReadAt = now()
+        return result
     }
     suspend fun search(query: String): List<RhythmItem> {
         require(query.trim().length in 1..200)

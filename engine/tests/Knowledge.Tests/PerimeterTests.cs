@@ -27,7 +27,10 @@ public sealed class PerimeterTests
         WebApplication app = null!;
         HttpClient client = null!;
 
-        public static async Task<Door> Open(params string[] hosts)
+        public static Task<Door> Open(params string[] hosts) =>
+            Open(new RhythmConfig.EngineSection { AllowedHosts = hosts.Length == 0 ? ["engine"] : [.. hosts] });
+
+        public static async Task<Door> Open(RhythmConfig.EngineSection settings)
         {
             var door = new Door();
             var builder = WebApplication.CreateSlimBuilder();
@@ -36,12 +39,12 @@ public sealed class PerimeterTests
             var app = builder.Build();
             var callers = new Dictionary<string, Caller>(StringComparer.Ordinal)
                 { ["app-key"] = App, ["plugin-key"] = Plugin, ["assistant-key"] = Assistant, ["older-key"] = Older };
-            app.Use(new Perimeter(hosts.Length == 0 ? ["engine"] : hosts, () => door.Ready, (token, _) =>
+            app.Use(new Perimeter(settings.AllowedHosts, () => door.Ready, (token, _) =>
             {
                 lock (door.Asked) door.Asked.Add(token);
                 return Task.FromResult(callers.GetValueOrDefault(token));
             }, new(App: (c, _) => door.Reach(c, "app"), Ingest: (c, _) => door.Reach(c, "ingest"),
-                Document: (c, _, id) => door.Reach(c, "document " + id))).Handle);
+                Document: (c, _, id) => door.Reach(c, "document " + id)), hostAcceptsRole: settings.AcceptsRole).Handle);
             app.MapGet("/health", (HttpContext c) => door.Reach(c, "health"));
             app.MapMethods("/mcp", ["GET", "POST", "DELETE"], (HttpContext c) => door.Reach(c, "harness"));
             await app.StartAsync();
@@ -58,10 +61,11 @@ public sealed class PerimeterTests
 
         // One request; the token goes in as "Bearer <token>", or `authorization` replaces the whole header.
         public async Task<(HttpStatusCode Status, string Body, HttpResponseMessage Response)> Send(string method, string url,
-            string? token = null, string? authorization = null, string? origin = null)
+            string? token = null, string? authorization = null, string? origin = null, string? forwardedHost = null)
         {
             using var request = new HttpRequestMessage(new HttpMethod(method), url);
             if ((authorization ?? (token is null ? null : "Bearer " + token)) is { } header) request.Headers.TryAddWithoutValidation("Authorization", header);
+            if (forwardedHost is not null) request.Headers.TryAddWithoutValidation("X-Forwarded-Host", forwardedHost);
             if (origin is not null) request.Headers.TryAddWithoutValidation("Origin", origin);
             if (method == "POST") request.Content = new StringContent("{}");
             var response = await client.SendAsync(request);
@@ -105,6 +109,46 @@ public sealed class PerimeterTests
             Assert.Equal(HttpStatusCode.Forbidden, (await door.Send("GET", "http://engine/health")).Status);
         }
     }
+
+    const string PublicHost = "rhythm-mcp.example.invalid";
+    static RhythmConfig WithHostRules(string rules) => RhythmConfig.Parse($$"""
+        version: 1
+        timezone: UTC
+        people: [{ id: alex, name: Alex }]
+        engine:
+          allowedHosts: [engine, {{PublicHost}}, "{{PublicHost}}.", admin.example.invalid:8181]
+          hostRoles: {{rules}}
+        """);
+
+    [Fact] public async Task Public_host_accepts_harness_only_across_allowed_ports_and_keeps_internal_roles()
+    {
+        var config = WithHostRules("[{ host: RHYTHM-MCP.EXAMPLE.INVALID, roles: [harness] }]");
+        await using var door = await Door.Open(config.Engine);
+        foreach (var host in new[] { PublicHost, PublicHost + ":8181", PublicHost + "." })
+        {
+            Assert.Equal("harness", (await door.Send("POST", $"http://{host}/mcp", "assistant-key")).Body);
+            Assert.Equal(HttpStatusCode.Forbidden, (await door.Send("POST", $"http://{host}/mcp", "plugin-key")).Status);
+            Assert.Equal(HttpStatusCode.Forbidden, (await door.Send("POST", $"http://{host}/mcp", "app-key", forwardedHost: "engine")).Status);
+            Assert.Equal(HttpStatusCode.Forbidden, (await door.Send("GET", $"http://{host}/app/documents/{Guid.NewGuid()}", "app-key")).Status);
+        }
+        Assert.Equal("app", (await door.Send("POST", "http://engine/mcp", "app-key")).Body);
+        Assert.Equal("ingest", (await door.Send("POST", "http://engine/mcp", "plugin-key")).Body);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await door.Send("POST", $"http://{PublicHost}/mcp", "unknown")).Status);
+        var portScoped = WithHostRules("[{ host: admin.example.invalid, roles: [app, ingest] }]");
+        await using var privateDoor = await Door.Open(portScoped.Engine);
+        Assert.Equal(HttpStatusCode.Forbidden, (await privateDoor.Send("POST", "http://admin.example.invalid:8181/mcp", "assistant-key")).Status);
+        Assert.Equal(HttpStatusCode.Forbidden, (await privateDoor.Send("POST", "http://admin.example.invalid:8182/mcp", "app-key")).Status);
+    }
+
+    [Theory]
+    [InlineData("[{ host: other.example.invalid, roles: [harness] }]")]
+    [InlineData("[{ host: engine:8080, roles: [harness] }]")]
+    [InlineData("[{ host: engine, roles: [] }]")]
+    [InlineData("[{ host: engine, roles: [unknown] }]")]
+    [InlineData("[{ host: engine, roles: [harness, harness] }]")]
+    [InlineData("[{ host: engine, roles: [app] }, { host: ENGINE, roles: [harness] }]")]
+    public void Invalid_host_role_settings_are_refused_at_startup(string rules) =>
+        Assert.Contains("engine.hostRoles", Assert.Throws<ConfigException>(() => WithHostRules(rules)).Message);
 
     [Fact] public async Task Health_needs_no_token_and_any_other_path_is_not_found()
     {

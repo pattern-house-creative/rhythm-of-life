@@ -11,25 +11,19 @@
 
 ## Pinned images
 
-[`image-pins.txt`](image-pins.txt) lists every third-party image the stack runs or builds from, and how each one
-moves. `npm test` checks the list against the compose files, the Dockerfiles and the docs.
+[`image-pins.txt`](image-pins.txt) lists every third-party base and service image. Each default
+includes the upstream tag and the SHA-256 digest of its multi-platform manifest index. A rebuild
+uses that exact index even if upstream has since moved the tag. Operators can override service
+images in `.env`. The upgrade command reports overrides absent from the inventory and reminds
+you when a pin you use was last checked more than 90 days ago.
 
-- **Floating tags**, the bases of the images built here (`dotnet/aspnet:10.0-noble`, `node:24-alpine`,
-  `postgres:17-alpine` for `pg_dump`): upstream pushes each .NET, Node and Postgres patch release under the same
-  tag, and a build takes it only with `--pull`. `./rhythm upgrade` and the TrueNAS steps build with `--pull`; a
-  plain `docker compose build` keeps the copy Docker pulled first.
-- **Exact versions** (Postgres with pgvector, cloudflared, the OpenAI tunnel client, Tailscale, Caddy, Ollama, the
-  .NET SDK): nothing moves them on its own, not `rhythm upgrade` and not `docker compose pull`. `./rhythm upgrade`
-  names each one the install builds from or runs that was last checked over 90 days ago, and each image the install
-  runs that the list does not have: an `RHYTHM_*_IMAGE` line in `.env`, which only you move (remove the line to
-  follow the default again). Cloudflare supports only `cloudflared` releases within a year of its newest one, so
-  check that pin at least every few months.
-
-To bump one: take upstream's newest release in the same line (the same major version, for Postgres the same Debian
-release too), set it where the list says and wherever the docs name it (`npm test` names the stale mentions), and
-give its line in `image-pins.txt` today's date. A check that finds nothing newer changes only the date. An
-install takes the new default at its next `./rhythm upgrade` (or the TrueNAS update steps): `up` pulls an image
-it does not have yet.
+To review a pin, check upstream's releases in the same major line. For Postgres keep the same
+Debian release too. Run `docker buildx imagetools inspect IMAGE:TAG` and read the top-level digest.
+Check that the index still includes each supported Linux architecture. Update the tag and digest
+where the inventory specifies and in the inventory itself. Update any other references reported
+by `npm test`, then set the row's check date. A check that confirms the existing pin updates only
+the date. Installations take the reviewed defaults on their next upgrade. Cloudflare supports
+cloudflared releases within one year of its newest release, so review that pin every few months.
 
 Postgres: a minor release (17.x) runs on the existing data folder. Back up first, and keep the Debian release of
 the tag (`-bookworm`): a newer C library sorts some text differently, and every text index would need a `REINDEX`.

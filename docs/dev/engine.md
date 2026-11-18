@@ -9,12 +9,12 @@ says how the engine implements it and where it goes beyond it.
 
 | Service | Image | Does | Networks |
 |---|---|---|---|
-| `postgres` | `pgvector/pgvector:0.8.7-pg17-bookworm` (`RHYTHM_POSTGRES_IMAGE`) | the database | internal |
-| `migrate` | `rhythm-engine` | one shot: migrations, then the engine's database login | internal |
-| `engine` | `rhythm-engine` | MCP at `/mcp`, `GET /health`, the scheduler | internal, egress |
-| `backup` (profile `backup`) | `rhythm-backup` | pg_dump + archive into restic, on demand | internal |
-| `restore` (profile `restore`) | `rhythm-backup` | restores a snapshot and loads it into a new database (`rhythm restore`) | internal |
-| `cli` (profile `cli`) | `rhythm-engine` | the `rhythm` commands: `init`, `connect`, `doctor`, `token`, `preflight` and `ready` around `up`, and `refresh`, `check-config`, `migrate` (`cli/README.md`); runs as root in the deploy folder | internal |
+| `postgres` | `pgvector/pgvector:0.8.7-pg17-bookworm` (`RHYTHM_POSTGRES_IMAGE`) | the database | database |
+| `migrate` | `rhythm-engine` | one shot: migrations, then the engine's database login | database |
+| `engine` | `rhythm-engine` | MCP at `/mcp`, `GET /health`, the scheduler | database, internal, egress, edge |
+| `backup` (profile `backup`) | `rhythm-backup` | pg_dump + archive into restic, on demand | database |
+| `restore` (profile `restore`) | `rhythm-backup` | restores a snapshot and loads it into a new database (`rhythm restore`) | database |
+| `cli` (profile `cli`) | `rhythm-engine` | the `rhythm` commands: `init`, `connect`, `doctor`, `token`, `preflight` and `ready` around `up`, and `refresh`, `check-config`, `migrate` (`cli/README.md`); runs as root in the deploy folder | database, internal |
 | `titles` (profile `titles`) | `ollama/ollama` (`RHYTHM_OLLAMA_IMAGE`) | the titles adapter's model server, no published port | internal |
 | `titles-pull` (profile `titles-pull`) | the same | one shot: `run --rm titles-pull <model>` downloads a model into the server's volume | egress |
 
@@ -563,7 +563,8 @@ schema), 404, 413, 503, each with a JSON-RPC body whose `result.isError` is true
 `structuredContent.error = {code, message}`. Ingest validation failures are `200` with `isError: true` and up to 20
 `issues`, as the contract says. A 405 (any method but POST, outside the harness) has no body.
 
-Each refusal and failure is one warning line in the engine's log (`Mcp/RequestLog.cs`, Q-137), with fixed fields only:
+Each authenticated call writes an information line with the principal UUID, role and fixed route class.
+Migration 086 records last authentication and optional expiry. Each refusal and failure is a warning line in the engine's log (`Mcp/RequestLog.cs`, Q-137), with fixed fields only:
 `Request refused: <status> <reason>` at the door (`origin_present`, `host_not_allowed`, `not_found`, `not_ready`,
 `no_token`, `unknown_token`, `method_not_allowed`, `wrong_role`, `plugin_off`, with the caller's role where known), and
 `Call failed: <role> <tool>, <status> <code> (<exception type>)` from an endpoint or a harness tool. The tool is the

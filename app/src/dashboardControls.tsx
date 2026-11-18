@@ -32,6 +32,7 @@ const failed = (summary: string): Outcome => ({
   detail: { summary },
 });
 const active = (id: string, v: number) => runtimes.get(key(id, v))?.at(-1);
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export async function runDashboardControl(
   action: string,
   args: Record<string, unknown>,
@@ -66,6 +67,7 @@ export async function runDashboardControl(
     [control.id]: args.value,
   });
 }
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export async function undoDashboardSelection(
   undo: SelectionUndo,
 ): Promise<Outcome> {
@@ -77,6 +79,7 @@ export async function undoDashboardSelection(
   );
 }
 
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export function useDashboardSelection(
   dashboard: Dashboard | null | undefined,
   visible: boolean,
@@ -92,21 +95,23 @@ export function useDashboardSelection(
       revision: number;
       finish: (ok: boolean) => void;
     } | null>(null);
-  const identity = dashboard ? key(dashboard.id, dashboard.version) : "";
+  const id = dashboard?.id,
+    version = dashboard?.version;
   useLayoutEffect(() => {
     state.current = { controls, selection };
   });
   useEffect(() => {
     let stopped = false;
+    // eslint-disable-next-line react/set-state-in-effect -- Discard controls for the previous version before the new manifest request returns.
     setControls([]);
     setSelection({ revision: 0, values: {} });
     setNotice("");
-    if (!dashboard) return;
+    if (!id || version === undefined) return;
     studioCall({
       op: "controls",
       screen: screenIdentity().id,
-      dashboardId: dashboard.id,
-      version: dashboard.version,
+      dashboardId: id,
+      version,
     })
       .then((value) => {
         if (stopped || !controlManifest(value)) return;
@@ -125,12 +130,10 @@ export function useDashboardSelection(
       pending.current?.finish(false);
       pending.current = null;
     };
-  }, [identity]); // identity includes the saved version
+  }, [id, version]);
   useEffect(() => {
-    if (!dashboard || !visible) return;
-    const id = dashboard.id,
-      version = dashboard.version,
-      k = key(id, version);
+    if (!id || version === undefined || !visible) return;
+    const k = key(id, version);
     const runtime: Runtime = {
       read: () => state.current,
       apply: async (base, values) => {
@@ -198,7 +201,7 @@ export function useDashboardSelection(
       else runtimes.delete(k);
       pending.current?.finish(false);
     };
-  }, [identity, visible]);
+  }, [id, version, visible]);
   const acknowledge = (revision: number, ok: boolean) => {
     if (pending.current?.revision === revision) pending.current.finish(ok);
   };

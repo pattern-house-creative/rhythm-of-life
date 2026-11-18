@@ -12,7 +12,7 @@ namespace Knowledge;
 // feed under. Text and pages are untrusted data wherever they are shown; the app runs a page in a sandboxed frame and the
 // engine never runs it.
 public sealed partial record DashboardFeed(string Name, string Kind, string Star, int? Days = null, string? By = null,
-    string[]? Metrics = null, int? Limit = null, string? Log = null, string? Subject = null, MemoryWhere? Where = null)
+    string[]? Metrics = null, int? Limit = null, string? Log = null, string? Subject = null, MemoryWhere? Where = null, bool? FullText = null)
 {
     public const int MaxDays = 3650, MaxLinks = 60, DefaultMemories = 200;
     // The first problem with feed `i`, in words a harness can act on; null when it is valid.
@@ -25,11 +25,12 @@ public sealed partial record DashboardFeed(string Name, string Kind, string Star
         if (Kind == "memories")
         {
             if (Star is not null || Days is not null || By is not null || Metrics is not null || Log is not null || Subject is not null)
-                return $"feeds[{i}]: a memories feed takes only where and limit";
+                return $"feeds[{i}]: a memories feed takes only where, limit and fullText";
             if (Limit is < 1 or > MemoryStore.MatchMax) return $"feeds[{i}].limit is 1–{MemoryStore.MatchMax} for a memories feed";
             return MemoryMatch.Read(Where, $"feeds[{i}].where", out _);
         }
         if (Where is not null) return $"feeds[{i}]: where is for memories feeds";
+        if (FullText is not null) return $"feeds[{i}]: fullText is for memories feeds";
         // A log feed reads a log by name, the one a log write adds to, even before it has entries or a star.
         if (Kind == "log")
         {

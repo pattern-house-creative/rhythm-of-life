@@ -9,7 +9,8 @@ namespace Knowledge.Mcp;
 // writes a line in the log naming why (RequestLog) and, but for a 405, has a JSON-RPC body. Tests drive it with fake
 // routes and tokens (PerimeterTests).
 public sealed class Perimeter(IEnumerable<string> allowedHosts, Func<bool> ready,
-    Func<string, CancellationToken, Task<Caller?>> authenticate, Perimeter.Routes routes, RequestLog? log = null, OAuthServer? oauth = null)
+    Func<string, CancellationToken, Task<Caller?>> authenticate, Perimeter.Routes routes, RequestLog? log = null,
+    OAuthServer? oauth = null, Func<string, string, bool>? hostAcceptsRole = null)
 {
     // Where an authenticated call goes: the app's and ingest's endpoints, the app's document originals, and the capture
     // endpoint when the settings open it (MemorySettings.CaptureOn).
@@ -42,6 +43,12 @@ public sealed class Perimeter(IEnumerable<string> allowedHosts, Func<bool> ready
         if (caller is null && oauth is not null && context.Request.Path == "/mcp") caller = await oauth.Authenticate(context);
         if (caller is null) { await Refuse(context, 401, "unknown_token", "Token missing or unknown."); return; }
         context.Items["principal"] = caller.Id;
+        log?.Authenticated(caller, file ? "document" : capture ? "capture" : "mcp");
+        if (hostAcceptsRole is not null && !hostAcceptsRole(context.Request.Host.Host, caller.Role))
+        {
+            await Refuse(context, 403, "host_role_not_allowed", "This role cannot use this host.", caller.Role);
+            return;
+        }
         // A document's original file is the app's alone, read with GET; everything else is POST /mcp.
         if (file)
         {

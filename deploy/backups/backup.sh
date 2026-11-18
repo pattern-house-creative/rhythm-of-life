@@ -15,3 +15,6 @@ docker compose --profile backup run --rm -T backup backup /var/lib/rhythm/archiv
 # The snapshot is saved and read back (restic check --read-data), so the plain copy can go. Removed inside the
 # backup container, by the user that wrote it.
 docker compose --profile backup run --rm -T --no-deps --entrypoint rm backup -r "/staging/$stamp"
+
+# Only after verification and staging cleanup, apply the configured policy to this project.
+docker compose --profile backup run --rm -T --no-deps --entrypoint python3 backup /app/backup.py retention

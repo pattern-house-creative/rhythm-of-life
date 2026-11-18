@@ -51,10 +51,13 @@ export function useDashboardVersion(
   } | null>(null);
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [data, setData] = useState<{
+    id: string;
     version: number;
     read: DashboardData | null;
     at: number;
+    refreshFailed: boolean;
   } | null>(null);
+  const readSequence = useRef(0);
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [arranged, setArranged] = useState<
@@ -199,35 +202,40 @@ export function useDashboardVersion(
   const read = useCallback(
     async (signal?: AbortSignal) => {
       if (!dashboard || !session.dashboardData) return;
+      const sequence = ++readSequence.current;
       setBusy(true);
+      let result: DashboardData | null = null;
       try {
-        const result = await session.dashboardData(
+        result = await session.dashboardData(
           dashboard.id,
           dashboard.version,
           signal,
         );
-        if (signal?.aborted) return;
-        if (result) {
-          dashboardCache.keepData(result);
-          if (result.dashboard.version === dashboard.version)
-            newer(dashboard, result.dashboard);
-        }
-        setData((d) => ({
-          version: dashboard.version,
-          read: result ?? (d?.version === dashboard.version ? d.read : null),
-          at: result ? Date.now() : (d?.at ?? 0),
-        }));
       } catch {
-        if (!signal?.aborted)
-          setData((d) =>
-            d?.version === dashboard.version
-              ? d
-              : { version: dashboard.version, read: null, at: 0 },
-          );
-      } finally {
-        if (!signal?.aborted) setBusy(false);
-        setNow(Date.now());
+        // Keep the last successful read for this version and show the failure.
       }
+      if (signal?.aborted || sequence !== readSequence.current) return;
+      const { id, version } = dashboard;
+      if (result?.dashboard.id !== id || result.dashboard.version !== version)
+        result = null;
+      if (result) {
+        dashboardCache.keepData(result);
+        newer(dashboard, result.dashboard);
+      }
+      const readAt = Date.now();
+      setData((previous) => {
+        const kept =
+          previous?.id === id && previous.version === version ? previous : null;
+        return {
+          id,
+          version,
+          read: result ?? kept?.read ?? null,
+          at: result ? Date.parse(result.asOf) : (kept?.at ?? 0),
+          refreshFailed: !result,
+        };
+      });
+      setNow(readAt);
+      setBusy(false);
     },
     [dashboard, session, newer],
   );
@@ -239,9 +247,11 @@ export function useDashboardVersion(
     if (kept)
       // eslint-disable-next-line react/set-state-in-effect
       setData({
+        id: dashboard.id,
         version: dashboard.version,
         read: kept,
         at: Date.parse(kept.asOf),
+        refreshFailed: false,
       });
     void read(controller.signal);
     const interval = setInterval(() => {
@@ -291,7 +301,9 @@ export function useDashboardVersion(
   );
 
   const current =
-    dashboard && data?.version === dashboard.version ? data : null;
+    dashboard && data?.id === dashboard.id && data.version === dashboard.version
+      ? data
+      : null;
   return {
     dashboard,
     key,

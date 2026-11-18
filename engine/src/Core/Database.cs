@@ -191,8 +191,10 @@ public sealed class Database(NpgsqlDataSource source, ProviderPolicies? policies
     public async Task<Caller?> Authenticate(string token, bool viewers, CancellationToken ct)
     {
         await using var cmd = source.CreateCommand($"""
-            SELECT p.id,p.name,p.role,p.plugin FROM principals p WHERE p.token_hash=@hash AND p.enabled AND NOT p.terminal AND {Principals.PersonCurrent}
+            UPDATE principals p SET last_used_at=greatest(p.last_used_at,clock_timestamp())
+            WHERE p.token_hash=@hash AND {Principals.TokenCurrent} AND {Principals.PersonCurrent}
               AND (p.role<>'app' OR p.person_id IS NULL OR @viewers AND {ViewerSessions.Current})
+            RETURNING p.id,p.name,p.role,p.plugin
             """);
         cmd.Parameters.AddWithValue("hash", Hashing.Hash(token));
         cmd.Parameters.AddWithValue("viewers", viewers);

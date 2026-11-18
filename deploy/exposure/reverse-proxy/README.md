@@ -50,7 +50,7 @@ All commands from the repository root unless said otherwise.
 3. **Make the login file.** One line per person, `<name> <bcrypt hash>`. The hash comes from Caddy,
    which asks for the password without echoing it:
    ```sh
-   docker run --rm -it caddy:2.10.2-alpine caddy hash-password
+   docker run --rm -it caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d caddy hash-password
    ```
    Write the lines to `deploy/compose/secrets/proxy_users`, for example
    `alex $2a$14$...` and `sam $2a$14$...`. It is a secret file like the others: never committed.

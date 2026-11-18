@@ -99,6 +99,7 @@ const anyNoted = (chosen: { id: string }[], notes: Record<string, string>) =>
 
 // Whether an insight could be the one a pair became: it cites both the pair's memories (a source not on the web naming each), and a private
 // pair's insight is its own person's (066's rule, which the engine checks again).
+// eslint-disable-next-line react/only-export-components -- Shared feature API; edits to this module may reload its consumers.
 export const citesBoth = (i: StreamInsight, pair: InsightPair) => {
   const named = new Set(
     i.insight.sources
@@ -378,7 +379,8 @@ export function MemoryInsightStream({ tools }: { tools: MemoryTools }) {
             <li key={i.id} className="memory-held-item">
               <strong className="memory-preview">{about.title}</strong>
               <span className="memory-meta">
-                {reviewWords[i.review]} · {scopeName(i)} · {when(i.shownAt)}
+                {reviewWords[i.review]} · {scopeName(i)} ·{" "}
+                {when(i.shownAt)}
                 {i.snoozeUntil && !i.snoozeEnded
                   ? ` · snoozed until ${when(i.snoozeUntil)}`
                   : ""}
@@ -583,10 +585,12 @@ export function MemoryPairs({ tools }: { tools: MemoryTools }) {
     insights: StreamInsight[] | null;
     picked: string;
   } | null>(null);
+  // eslint-disable-next-line react/set-state-in-effect -- Changing queues clears their bulk selection.
   useEffect(() => setChosen([]), [state]);
   useEffect(() => {
     if (!read) return;
     // What is chosen stays while it is listed and waits.
+    // eslint-disable-next-line react/set-state-in-effect -- A server refresh may remove candidates that were selected locally.
     setChosen((c) => c.filter((p) => read.items.some((x) => x.id === p.id)));
   }, [read]);
 

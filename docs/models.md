@@ -27,12 +27,10 @@ never compared. Their settings and where their files come from are in
 
 ## Model licences
 
-Model licence declarations and exact pinned sources are recorded in the
-[third-party inventory](licenses/README.md#model-terms-and-unresolved-export): MiniLM and the
-ms-marco reranker declare Apache-2.0; BAAI's bge-base and bge-reranker declare MIT. The original
-BGE-small model declares MIT, but its pinned Xenova export has no licence declaration; its export
-terms need confirmation before release. Model-card declarations do not replace the notices needed
-with any future redistribution of model files. The model pins and files are unchanged.
+The pinned model cards for MiniLM and the ms-marco reranker declare Apache-2.0. The BGE-small,
+BGE-base and BGE reranker cards declare MIT. BGE-small's quantized weights and vocabulary have
+the same SHA-256 checksums as the previous download source, so existing installations can reuse
+their files and stored vectors. See the [third-party inventory](licenses/README.md#model-terms).
 
 ## Seeing what each model is doing
 
@@ -47,7 +45,8 @@ Three places show the same states, read from the engine:
 - With `graph.similarity.model` set, the map model is listed too (role `map`). While it is not `on` (starting, its
   files missing or not matching their checksums) the map's similar links use MiniLM's vectors and `graph.similarity`'s
   numbers, and each rebuild says so in the engine log (`Map rebuild: graph.similarity.model bge-small is ...`); once it
-  loads, the engine rebuilds the map once more.
+  loads, the engine rebuilds the map once more. While either model is loading, a rebuild keeps the configured
+  models' stored vectors for unchanged content. The next warm rebuild reuses them, including for Drive files.
 - **The engine's `GET /health`**: the same, as JSON ([dev/engine.md](dev/engine.md)). It answers without a token, on
   the stack's internal network and on the engine's published port, which `RHYTHM_BIND` decides: this computer only by
   default, every address of the host with `0.0.0.0` on a LAN install ([configuration.md](configuration.md)). No

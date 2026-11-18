@@ -176,6 +176,27 @@ public sealed class CliTests : IDisposable
         Assert.Contains("4 kept", output);
     }
 
+    [Fact] public void Forced_init_preserves_the_effective_compose_settings_and_only_overrides_requested_values()
+    {
+        Init("--app-port", "18080");
+        var custom = File.ReadAllText(deploy.Env) + """
+            # site settings
+            COMPOSE_FILE=compose.yaml:extra.yaml
+            COMPOSE_PROFILES=notes
+            RHYTHM_BACKUP_DIR='/backup disk/nightly'
+            RHYTHM_IMPORT_DIR=/srv/imports
+            ANOTHER_SETTING=keep
+            """ + "\n";
+        File.WriteAllText(deploy.Env, custom);
+        Init("--force");
+        Assert.Equal(custom, File.ReadAllText(deploy.Env));
+        Assert.EndsWith(":18080", Settings().App.PublicUrl);
+        Init("--force", "--app-port", "19080", "--data", "/srv/changed");
+        Assert.Equal("19080", Env()["RHYTHM_APP_PORT"]);
+        Assert.Equal("/srv/changed/backups", Env()["RHYTHM_BACKUP_DIR"]);
+        Assert.Equal(("notes", "compose.yaml:extra.yaml", "keep"), (Env()["COMPOSE_PROFILES"], Env()["COMPOSE_FILE"], Env()["ANOTHER_SETTING"]));
+    }
+
     [Fact] public void Init_asks_each_question_when_answers_are_piped_in()
     {
         var o = new StringWriter();
@@ -259,7 +280,7 @@ public sealed class CliTests : IDisposable
         // Without the flag the project this runs under is kept (an exported COMPOSE_PROJECT_NAME, or one already in .env).
         Assert.Equal(0, InitCommand.Run(deploy, ["--no-input", "--people", "Alex", "--force"], Quiet(new StringWriter()),
             name => name == "COMPOSE_PROJECT_NAME" ? "rhythm-b" : null));
-        Assert.Equal(("rhythm-b", "dev"), (Env()["COMPOSE_PROJECT_NAME"], Env()["RHYTHM_VERSION"]));
+        Assert.Equal(("rhythm-b", "0.2.0"), (Env()["COMPOSE_PROJECT_NAME"], Env()["RHYTHM_VERSION"]));
         // Compose's own rules for a project name and an image tag.
         Assert.Contains("--project-name", Assert.Throws<ArgumentException>(() => InitCommand.Run(deploy,
             ["--no-input", "--people", "Alex", "--force", "--project-name", "Rhythm B"], Quiet(new StringWriter()), Host)).Message);
@@ -464,6 +485,31 @@ public sealed class CliTests : IDisposable
         (code, output) = await Doctor(Stack(503));
         Assert.Equal(1, code);
         Assert.DoesNotContain(Secret("app_token"), output);
+    }
+
+    [Theory]
+    [InlineData(401, 0)]
+    [InlineData(302, 1)]
+    [InlineData(null, 1)]
+    public async Task Doctor_in_running_engine_checks_only_its_mounts_and_probes_public_MCP(int? publicStatus, int expected)
+    {
+        Init();
+        const string url = "https://rhythm-mcp.example.invalid/mcp";
+        File.WriteAllText(deploy.Settings, YamlText.Set(File.ReadAllText(deploy.Settings), "engine.publicMcpUrl", YamlText.Scalar(url)));
+        var emptyCheckout = new DeployFolder(Path.Combine(deploy.Root, "unmounted"));
+        var mounts = new DoctorCommand.EngineMounts(deploy.Settings, deploy.Secret("engine_db"), deploy.Secret("app_token"));
+        var calls = new List<string>();
+        var output = new StringWriter();
+        var code = await DoctorCommand.Run(emptyCheckout, output, (method, address, ct) =>
+        {
+            calls.Add(address);
+            if (address == url) { Assert.Equal(HttpMethod.Post, method); return Task.FromResult(publicStatus); }
+            return Stack(200)(method, address, ct);
+        }, descriptors, mounts: mounts);
+        Assert.Contains(url, calls);
+        Assert.Equal(expected, code);
+        Assert.DoesNotContain(".env is missing", output.ToString());
+        Assert.DoesNotContain("rhythm.yaml is missing", output.ToString());
     }
 
     // SB-P2-01: with the stack up, the engine's version and each model's state from /health (ModelStatus), the contract's

@@ -5,14 +5,53 @@ dependency: the stack is the same `deploy/compose/` files, plus one small overri
 data on your own encrypted dataset. The engine schedules its own map refresh, so the only host job is
 the nightly backup.
 
-Needs TrueNAS SCALE 24.10 or later (apps run on Docker Compose). Checked by `docker compose config`
-only: the paths, owners and app YAML below were not run on a TrueNAS system. Placeholders: `<pool>`
-for your pool, `<backup-pool>` for where backups go, `rhythm` for the app's name.
+Needs TrueNAS SCALE 24.10 or later (apps run on Docker Compose). One household runs Rhythm on
+TrueNAS SCALE with its app accessible over a tailnet and a Cloudflare tunnel for MCP. The example
+paths, owners and YAML below are checked with Compose. Substitute your own pool, backup pool
+and app name for `<pool>`, `<backup-pool>` and `rhythm`.
 
 | File | What |
 |---|---|
 | `README.md` | this page |
 | `truenas.compose.yaml` | binds the `pgdata` and `engine-data` volumes to folders on your dataset |
+| `backup.compose.yaml` | a standalone nightly backup job for a separately managed installation |
+
+### Nightly backups for a separately managed app
+
+Use `backup.compose.yaml` when the app already has its own service names, volumes and database.
+This Compose project contains just one disposable job attached to the installed database's
+existing network. Its run command has no dependencies to start. From the repository root,
+build the job image with `docker build -t rhythm-backup:<release-tag> engine/backup`
+and set `RHYTHM_BACKUP_IMAGE_TAG` to that release tag.
+
+Create a private environment file outside the repository using the variable names in
+`backup.compose.yaml`. Set the existing database network, host, name and user. Supply paths to
+the database and restic password files. Mount the engine archive and the source provider's
+original files read-only. Set the repository path to the existing restic folder containing
+`config`. The backup user (uid 70) needs read access to both password files and source trees
+and write access to the repository and the encrypted staging folder.
+Choose a consistent `RHYTHM_BACKUP_SERIES` and leave retention off until its policy is approved.
+
+From the repository root, with the absolute path to that environment file:
+
+```sh
+docker compose --env-file /path/to/backup.env -p rhythm-nightly -f deploy/truenas/backup.compose.yaml config -q
+docker compose --env-file /path/to/backup.env -p rhythm-nightly -f deploy/truenas/backup.compose.yaml run --rm --no-deps -T --name rhythm-nightly-job backup
+```
+
+Keep the fixed container name for each installation so overlapping runs refuse to start a
+second job. Confirm the backup image, mounts, source coverage and snapshot ID before switching
+the scheduler. Run outside the import window so the provider originals stay stable during
+the copy. The job includes them under `originals/` in the same verified snapshot as the
+database dump and archive. It fails on an empty originals directory or a symbolic link.
+Other source folders covered by the current job must also be accounted for before switching.
+
+Restore the candidate snapshot to a separate drill folder, verify its manifest and load the
+dump into an isolated database. Compare the archive and provider originals to known files.
+Recover `originals/` to the provider's own storage as a separate step. The engine's database
+load handles only its database and archive. Keep the previous schedule definition and its last
+good snapshots. Switch the nightly schedule after the drill passes and verify the first scheduled
+run. Revert to the previous job if any source is missing or the drill fails.
 
 ## 1. Datasets and folders
 
@@ -120,7 +159,11 @@ include:
 TrueNAS runs it as the compose project `ix-rhythm` (hence `COMPOSE_PROJECT_NAME` above): Postgres
 starts, `migrate` runs once and exits, then the engine and the app start. The Apps screen shows them;
 from the shell, `docker compose ps` in `deploy/compose/` shows the same. An external plugin joins the
-networks `ix-rhythm_internal` and `ix-rhythm_egress` (not `rhythm_*`).
+networks `ix-rhythm_internal` and `ix-rhythm_egress` (not `rhythm_*`). Keep app-facing proxies
+on `ix-rhythm_edge`. If Cloudflare serves only MCP, use `RHYTHM_CLOUDFLARE_NETWORK=egress`
+so it cannot directly reach the app. Only processes that need a database connection belong on `ix-rhythm_database`.
+When upgrading an installation with a separately managed backup that connects directly to Postgres,
+move its database connection to this new network and verify a backup and restore.
 
 If the dataset is locked after a reboot (passphrase encryption), unlock it, then start the app.
 

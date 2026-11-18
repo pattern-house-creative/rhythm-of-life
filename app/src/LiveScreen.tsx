@@ -514,13 +514,16 @@ export function LiveScreen({
       // The change before it on this screen left the layout as it is again now, at the
       // revision Undo saved, so it can be undone in turn.
       const { id, version, base } = saved.arrangement;
-      for (const below of stack.current)
-        if (
-          below.arrangement?.id === id &&
-          below.arrangement.version === version &&
-          below.arrangement.revision === base
-        )
-          below.arrangement.revision = back.revision;
+      stack.current = stack.current.map((below) =>
+        below.arrangement?.id === id &&
+        below.arrangement.version === version &&
+        below.arrangement.revision === base
+          ? {
+              ...below,
+              arrangement: { ...below.arrangement, revision: back.revision },
+            }
+          : below,
+      );
     }
     // The star or dashboard it goes back to may have left this screen's map since (Home lets
     // go of one a command fetched, and a refresh brings back only the overview).

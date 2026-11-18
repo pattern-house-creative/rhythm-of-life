@@ -36,14 +36,13 @@ public static class EmbeddingModels
         [new("onnx/model_quantized.onnx", "model_quantized.onnx", "afdb6f1a0e45b715d0bb9b11772f032c399babd23bfc31fed1c170afc848bdb1"),
          new("vocab.txt", "vocab.txt", "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3")]);
 
-    // bge-small-en-v1.5, int8 quantized ONNX (Xenova's export of BAAI's model), CLS pooling: the candidate D-025 measures
+    // bge-small-en-v1.5, int8 quantized ONNX (the MIT-declared mirror of the same export), CLS pooling: the candidate D-025 measures
     // against MiniLM (SB-P2-06). Same size of vector (384), so it fits the passage table as it is. The weights' SHA-256 is
-    // the one the repository's file listing records for the file at the pinned revision (its large-file object id): no
-    // copy was downloaded to check it, and the engine checks it before loading. Its vocabulary is byte for byte MiniLM's
-    // (the listing names the same git object), so it has MiniLM's checksum. Queries are embedded as they are, without the
+    // verified checksum of the downloaded weights. The pinned mirror supplies the same weights and vocabulary as
+    // the previous source, so cached files and vectors keep their identity. Queries are embedded as they are, without the
     // "Represent this sentence" instruction, as Second Brain embeds them; whether an instruction helps is for the benchmark.
     public static readonly EmbeddingModel BgeSmall = new("bge-small", "bge-small-en-v1.5-quantized-6c9c6101-cls-l2-v1",
-        "Xenova/bge-small-en-v1.5", "ea104dacec62c0de699686887e3f920caeb4f3e3", Pooling.Cls, 384, 512, "RHYTHM_MODEL_DIR_BGE_SMALL",
+        "michaelfeil/bge-small-en-v1.5", "ab7b31bd10f9bfbb915a28662ec4726b06c6552a", Pooling.Cls, 384, 512, "RHYTHM_MODEL_DIR_BGE_SMALL",
         [new("onnx/model_quantized.onnx", "model_quantized.onnx", "6c9c6101a956d62dfb5e7190c538226c0c5bb9cb27b651234b6df063ee7dbfe4"),
          new("vocab.txt", "vocab.txt", "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3")]);
 

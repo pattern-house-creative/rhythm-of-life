@@ -3,11 +3,12 @@
 Needs PGHOST, PGPORT, PGUSER, PGDATABASE, PGPASSFILE; RESTIC_REPOSITORY,
 RESTIC_PASSWORD_FILE; PG_DUMP and RESTIC may name explicit executable paths.
 Run on encrypted storage. Never pass a password or connection URL as an argument.
-No deletion, retention or overwrite behavior. Restore never restarts a service;
+Only the scheduled retention command can remove tagged snapshots. Restore never restarts a service;
 load replaces the live database only by renaming, and keeps the one it replaces.
 The one thing it drops is a database a failed load made itself and never switched to.
 """
 import argparse
+from datetime import datetime, timezone
 import hashlib
 import json
 import os
@@ -41,6 +42,54 @@ def verify(folder):
     return len(manifest["files"])
 
 
+def series_tag():
+    return "rhythm:" + os.environ.get("RHYTHM_BACKUP_SERIES", "rhythm")
+
+
+def retention(preview=False):
+    mode = os.environ.get("RHYTHM_BACKUP_RETENTION", "off")
+    if mode not in ("off", "on"):
+        raise ValueError("RHYTHM_BACKUP_RETENTION must be off or on")
+    if not preview and mode == "off":
+        return
+    command = [os.environ.get("RESTIC", "restic"), "forget", "--tag", series_tag(), "--group-by", "tags",
+               "--keep-daily", "7", "--keep-weekly", "5", "--keep-monthly", "12"]
+    if preview:
+        command.append("--dry-run")
+    else:
+        command.append("--prune")
+    # The preview contains snapshot IDs and staging paths; only print it on explicit request.
+    output = run(command)
+    if preview:
+        print(output, end="")
+
+
+def status(archive):
+    repository = os.environ["RESTIC_REPOSITORY"]
+    if ":" not in repository:
+        repo = Path(repository)
+        if not (repo / "config").is_file():
+            print("  note  No encrypted backup repository found here yet.")
+            return
+        if repo.stat().st_dev == Path(archive).stat().st_dev:
+            print("  note  The backup repository and engine data are on the same filesystem; keep a separate copy.")
+    snapshots = json.loads(run([os.environ.get("RESTIC", "restic"), "--no-lock", "snapshots", "--json"])) or []
+    ours = [row for row in snapshots if series_tag() in (row.get("tags") or [])]
+    legacy = False
+    if not ours:
+        ours = [row for row in snapshots if not row.get("tags")]
+        legacy = bool(ours)
+    if not ours:
+        print("  note  No snapshot found for this install.")
+        return
+    latest = max(datetime.fromisoformat(row["time"].replace("Z", "+00:00")) for row in ours)
+    hours = (datetime.now(timezone.utc) - latest).total_seconds() / 3600
+    label = "Latest untagged snapshot in this repository (install unverified)" if legacy else "Latest backup snapshot"
+    state = "note" if legacy or hours >= 48 or hours < 0 else "ok  "
+    warning = "; older than the 48-hour limit" if hours >= 48 else "; snapshot clock is ahead" if hours < 0 else ""
+    print(f"  {state}  {label}: {latest.isoformat()}, {hours:.1f} hours ago{warning}.")
+
+
 def backup(archive, staging):
     archive, staging = Path(archive).resolve(), Path(staging).resolve()
     if staging == archive or staging.is_relative_to(archive) or archive.is_relative_to(staging):
@@ -59,12 +108,25 @@ def backup(archive, staging):
         shutil.copytree(archive, staging / "archive", ignore=shutil.ignore_patterns("*.tmp"))
     else:  # nothing archived yet
         (staging / "archive").mkdir()
+    originals_dir = os.environ.get("RHYTHM_BACKUP_ORIGINALS_DIR")
+    if originals_dir:
+        originals = Path(originals_dir).resolve(strict=True)
+        if originals.is_relative_to(staging) or staging.is_relative_to(originals):
+            raise ValueError("Originals and staging directories must be disjoint")
+        # Provider originals are recovered separately from the engine archive. Reject links instead of
+        # following a link out of the approved source folder when copying or hashing its contents.
+        copied = staging / "originals"
+        shutil.copytree(originals, copied, symlinks=True)
+        if any(path.is_symlink() for path in copied.rglob("*")):
+            raise ValueError("The originals folder contains a symbolic link")
+        if not any(path.is_file() for path in copied.rglob("*")):
+            raise ValueError("The required originals folder contains no files")
     manifest = {"format": 1, "files": {p.relative_to(staging).as_posix(): digest(p)
                 for p in staging.rglob("*") if p.is_file()}}
     (staging / "manifest.json").write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
     verify(staging)
     # Save relative paths so recovery is portable between Windows and Linux.
-    result = subprocess.run([os.environ.get("RESTIC", "restic"), "backup", "--json", "."],
+    result = subprocess.run([os.environ.get("RESTIC", "restic"), "backup", "--json", "--tag", series_tag(), "."],
                             cwd=staging, capture_output=True, text=True)
     if result.returncode:
         raise RuntimeError("Encrypted backup failed; staging retained for recovery")
@@ -110,6 +172,10 @@ def contents(folder):
     return sorted(Path(name).relative_to("archive") for name in listed if name.startswith("archive/"))
 
 
+class RestoreRefused(RuntimeError):
+    """The load did not switch databases. The wrappers can resume previously running services."""
+
+
 def load(folder):
     """Makes a restored folder the install's data: its database.dump into a NEW database, quarantined
     (restore-quarantine.sql), its archive files added to the engine's archive (never replacing one), then the new
@@ -125,7 +191,10 @@ def load(folder):
     rename, which is the last step. An archive file is copied beside its place and only then given its name, never
     over a file there, so one cut short leaves no file a retry would find differing (SB-P7-10)."""
     folder = Path(folder).resolve()
-    files = contents(folder)
+    try:
+        files = contents(folder)
+    except RuntimeError as error:
+        raise RestoreRefused(str(error)) from error
     archive = Path(os.environ.get("RHYTHM_ARCHIVE", "/var/lib/rhythm/archive"))
     owner = os.environ.get("RHYTHM_ARCHIVE_OWNER") or f"{os.getuid()}:{os.getgid()}"
     uid, gid = (int(x) for x in owner.split(":"))
@@ -133,10 +202,10 @@ def load(folder):
     for name in files:
         source, target = folder / "archive" / name, archive / name
         if not target.resolve().is_relative_to(archive.resolve()):
-            raise RuntimeError("An archive file would land outside the engine's archive; nothing was loaded")
+            raise RestoreRefused("An archive file would land outside the engine's archive; nothing was loaded")
         if target.exists():
             if not target.is_file() or digest(target) != digest(source):
-                raise RuntimeError("An archive file differs from the backup's copy; nothing was loaded")
+                raise RestoreRefused("An archive file differs from the backup's copy; nothing was loaded")
             continue
         adding.append((source, target))
     live = os.environ.get("PGDATABASE", "rhythm")
@@ -187,7 +256,7 @@ def load(folder):
                 left = f"; the half-loaded database {new} was dropped"
             except RuntimeError:
                 left = f"; drop the half-loaded database {new} yourself"
-            raise RuntimeError(f"{reason}; the live database was not switched{left}{files_note}") from failed
+            raise RestoreRefused(f"{reason}; the live database was not switched{left}{files_note}") from failed
         raise RuntimeError(f"{reason}; the switch stopped half way: rename {kept} back to {live} (or {new} to {live}) "
                            f"before starting the stack{files_note}") from failed
     # The engine's last-rebuild time would make it wait up to graph.refreshSeconds before rebuilding the revoked map.
@@ -203,12 +272,19 @@ if __name__ == "__main__":
     r = sub.add_parser("restore"); r.add_argument("snapshot"); r.add_argument("target")
     v = sub.add_parser("verify"); v.add_argument("target")
     l = sub.add_parser("load"); l.add_argument("folder")
+    sub.add_parser("status")
+    policy = sub.add_parser("retention"); policy.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     try:
         if args.action == "backup": backup(args.archive, args.staging)
+        elif args.action == "status": status("/var/lib/rhythm")
+        elif args.action == "retention": retention(args.dry_run)
         elif args.action == "restore": restore(args.snapshot, args.target)
         elif args.action == "load": load(args.folder)
         else: print(json.dumps({"verified_files": verify(args.target)}))
+    except RestoreRefused as exc:
+        print(str(exc), file=sys.stderr)
+        sys.exit(12)
     except Exception as exc:
         print(str(exc) if isinstance(exc, (ValueError, RuntimeError)) else "Backup operation failed; private details suppressed", file=sys.stderr)
         sys.exit(1)

@@ -152,12 +152,12 @@ public static partial class EnvFile
     }
     public static Dictionary<string, string> Read(string path) => File.Exists(path) ? Parse(File.ReadAllText(path)) : [];
 
-    // Sets KEY on its first line, or appends it.
+    // Sets the last assignment (the effective one), or appends it.
     public static string Set(string text, string key, string value)
     {
         var lines = Lines(text).ToList();
         var line = $"{key}={Quote(value)}";
-        var at = lines.FindIndex(l => Assignment().Match(l) is { Success: true } m && m.Groups[1].Value == key);
+        var at = lines.FindLastIndex(l => Assignment().Match(l) is { Success: true } m && m.Groups[1].Value == key);
         if (at >= 0) lines[at] = line;
         else
         {

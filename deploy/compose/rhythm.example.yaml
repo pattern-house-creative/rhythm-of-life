@@ -29,6 +29,8 @@ demo:
 engine:
   url: http://engine:8080         # the app's server calls {url}/mcp; empty means demo mode
   allowedHosts: [localhost, 127.0.0.1, "[::1]", engine]
+  # For a public host in allowedHosts, accept only AI clients there:
+  # hostRoles: [{ host: rhythm-mcp.example.invalid, roles: [harness] }]
   publicMcpUrl: http://127.0.0.1:8181/mcp   # printed for MCP clients by `rhythm up`
   legacyToolNames: false          # list the old tool names too (contracts/README.md 2.3)
   legacySearch: false             # false: ranked keyword search; true or absent: as before ranking (every word, newest first)

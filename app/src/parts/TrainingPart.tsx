@@ -68,7 +68,7 @@ export function TrainingPart({
               latestWorkout.durationMinutes ??
               "—")}{" "}
           <small>{latestDistance?.[1] ?? "min"}</small>
-          <span>
+          <span className="workout-observation">
             {blocked || !latestWorkout
               ? "—"
               : [
@@ -79,6 +79,9 @@ export function TrainingPart({
                 ]
                   .filter(Boolean)
                   .join(" · ") || "recorded activity"}
+            {!blocked &&
+              latestWorkout &&
+              ` · ${observationLabel(latestWorkout.provenance)}`}
           </span>
         </div>
         <div

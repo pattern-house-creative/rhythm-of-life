@@ -1,0 +1,60 @@
+# Standalone backup job for an existing TrueNAS app. It has no app or database service to start.
+services:
+  backup:
+    image: rhythm-backup:${RHYTHM_BACKUP_IMAGE_TAG:?set the locally built backup image tag}
+    pull_policy: never
+    entrypoint: ["/bin/sh", "/run/nightly-backup.sh"]
+    environment:
+      PGHOST: ${RHYTHM_DATABASE_HOST:?set the installed database service name}
+      PGDATABASE: ${RHYTHM_DATABASE_NAME:?set the installed database name}
+      PGUSER: ${RHYTHM_DATABASE_USER:?set the installed backup database user}
+      POSTGRES_PASSWORD_FILE: /run/secrets/database_password
+      RESTIC_PASSWORD_FILE: /run/secrets/repository_password
+      RESTIC_REPOSITORY: /repository
+      RESTIC_CACHE_DIR: /tmp/restic-cache
+      RHYTHM_BACKUP_ORIGINALS_DIR: /originals
+      RHYTHM_BACKUP_SERIES: ${RHYTHM_BACKUP_SERIES:?set the installation name for this backup series}
+      RHYTHM_BACKUP_RETENTION: ${RHYTHM_BACKUP_RETENTION:-off}
+    configs:
+      - source: nightly_backup
+        target: /run/nightly-backup.sh
+    secrets: [database_password, repository_password]
+    volumes:
+      - type: bind
+        source: ${RHYTHM_ARCHIVE_DIR:?set the engine archive folder}
+        target: /archive
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${RHYTHM_ORIGINALS_DIR:?set the provider originals folder}
+        target: /originals
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${RHYTHM_RESTIC_DIR:?set the existing encrypted restic repository folder}
+        target: /repository
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${RHYTHM_STAGE_DIR:?set the private encrypted staging folder}
+        target: /staging
+        bind: { create_host_path: false }
+    networks: [installed_database]
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+
+networks:
+  installed_database:
+    external: true
+    name: ${RHYTHM_DATABASE_NETWORK:?set the existing database network}
+
+configs:
+  nightly_backup:
+    file: ./nightly-backup.sh
+
+secrets:
+  database_password:
+    file: ${RHYTHM_DATABASE_PASSWORD_FILE:?set the path of the existing database password file}
+  repository_password:
+    file: ${RHYTHM_RESTIC_PASSWORD_FILE:?set the path of the existing restic password file}

@@ -20,8 +20,9 @@ public static class HealthAnalysis
         var id=Hashing.Hash(Version+kind+a.Id+System.Text.Json.JsonSerializer.Serialize(statistics)+string.Join('|',refs.Select(x=>x.Revision)))[..20];
         return new(id,kind,priority,summary,"observed",statistics,refs,Refs(contradict??[]),limitations??[],next);
     }
-    public static AnalysisReport Explore(HealthSample[] raw,DateOnly from,DateOnly until,int limit=3)
+    public static AnalysisReport Explore(HealthSample[] raw,DateOnly from,DateOnly until,int limit=3,DateTimeOffset? asOf=null)
     {
+        var now = asOf ?? DateTimeOffset.UtcNow;
         var series=HealthData.Prepare(raw);var findings=new List<Finding>();int comparisons=0;
         foreach(var s in series)
         {
@@ -43,13 +44,18 @@ public static class HealthAnalysis
                     limitations:["Counts are observations, not episode duration or time in range. Reporting bounds are not exact values.","Clinical importance requires context and source review; historical results do not establish a current emergency."],
                     next:"Prioritize source review and a discussion with the care team; assess current symptoms/readings separately. Do not change medication or device settings from this result."));
             }
-            if(s.Days.Length>=7)
+            // An unknown source zone can be as far west as UTC-12. Only use days complete even there.
+            var localNow = s.Zone is not null && TimeZoneInfo.TryFindSystemTimeZoneById(s.Zone, out var zone)
+                ? TimeZoneInfo.ConvertTime(now, zone) : now.ToOffset(TimeSpan.FromHours(-12));
+            var today = DateOnly.FromDateTime(localNow.DateTime);
+            var completedDays = s.Days.Where(d => d.Date < today).ToArray();
+            if(completedDays.Length>=7)
             {
-                var median=HealthData.Median(s.Days.Select(d=>d.Value));var mad=HealthData.Median(s.Days.Select(d=>Math.Abs(d.Value-median)));
-                var outliers=s.Days.Where(d=>Math.Abs(d.Value-median)>Math.Max(4.5*1.4826*mad,Math.Abs(median)*0.1+1e-9)).OrderByDescending(d=>Math.Abs(d.Value-median)).ToArray();
+                var median=HealthData.Median(completedDays.Select(d=>d.Value));var mad=HealthData.Median(completedDays.Select(d=>Math.Abs(d.Value-median)));
+                var outliers=completedDays.Where(d=>Math.Abs(d.Value-median)>Math.Max(4.5*1.4826*mad,Math.Abs(median)*0.1+1e-9)).OrderByDescending(d=>Math.Abs(d.Value-median)).ToArray();
                 if(outliers.Length>0)findings.Add(Make("unusual_days",s,55,$"{s.Metric}: unusual daily observations relative to this person's available baseline.",
-                    new{baselineMedian=median,mad,unusualDays=outliers.Length,totalDays=s.Days.Length,aggregation=s.Meaning.Aggregation},outliers.SelectMany(d=>d.Evidence),
-                    s.Days.Where(d=>!outliers.Contains(d)).Take(2).SelectMany(d=>d.Evidence),["A robust statistical outlier is not necessarily a clinically abnormal result.","Baseline covers only observed days; sparse or selective recording may explain the difference."]));
+                    new{baselineMedian=median,mad,unusualDays=outliers.Length,totalDays=completedDays.Length,aggregation=s.Meaning.Aggregation},outliers.SelectMany(d=>d.Evidence),
+                    completedDays.Where(d=>!outliers.Contains(d)).Take(2).SelectMany(d=>d.Evidence),["A robust statistical outlier is not necessarily a clinically abnormal result.","Baseline covers only observed days; sparse or selective recording may explain the difference."]));
             }
             if(s.Days.Length>=14)
             {

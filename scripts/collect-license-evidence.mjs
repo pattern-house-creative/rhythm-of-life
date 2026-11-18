@@ -170,8 +170,9 @@ const models = [
   ],
   [
     "bge-small",
-    "Xenova/bge-small-en-v1.5",
-    "ea104dacec62c0de699686887e3f920caeb4f3e3",
+    "michaelfeil/bge-small-en-v1.5",
+    "ab7b31bd10f9bfbb915a28662ec4726b06c6552a",
+    "BAAI/bge-small-en-v1.5",
   ],
   [
     "bge-base",
@@ -190,7 +191,7 @@ const models = [
   ],
 ];
 const evidence = [];
-for (const [name, repository, revision] of models) {
+for (const [name, repository, revision, upstream] of models) {
   const base = `https://huggingface.co/${repository}/raw/${revision}/`;
   const card = await get(base + "README.md");
   const p = {
@@ -216,7 +217,7 @@ for (const [name, repository, revision] of models) {
       });
     }
   }
-  const original = card?.match(
+  const original = upstream ?? card?.match(
     /^base_model:[ \t]*([^\r\n ]+\/[^\r\n ]+)[ \t]*$/m,
   )?.[1];
   if (original) {

@@ -49,7 +49,7 @@ class InteractiveDrawerTest {
         assertEquals(initial,rule.onNodeWithTag("app-drawer").fetchSemanticsNode().boundsInRoot.top,3f)
         rule.onNodeWithTag("search-input").assertExists()
         rule.mainClock.autoAdvance=true
-        rule.onNodeWithContentDescription("Close apps").performClick()
+        rule.onNodeWithTag("drawer-handle").performClick()
     }
     @Test fun gridScrollingKeepsOwnershipUntilNextGestureAtTopThenDownwardSwipeDismisses(){
         open()

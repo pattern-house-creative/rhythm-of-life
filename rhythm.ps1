@@ -112,52 +112,80 @@ switch ($command) {
     }
     'logs' { dc logs @rest }
     'backup' { backup }
+    'doctor' {
+        compose --profile cli run --rm cli doctor @rest
+        $result = $LASTEXITCODE
+        if ((Test-Path -LiteralPath (Join-Path $deploy 'secrets/backup_password') -PathType Leaf) -and (Test-Path -LiteralPath $envFile)) {
+            compose --profile backup run --rm -T --no-deps --entrypoint python3 backup /app/backup.py status
+            if ($LASTEXITCODE -ne 0) { Write-Output "  note  Backup snapshot age could not be checked." }
+        }
+        exit $result
+    }
     'snapshots' { dc --profile backup run --rm --entrypoint restic backup snapshots }
     'restore' {
         if ($rest.Count -ne 1) { throw 'usage: .\rhythm.ps1 restore <snapshot>   (an id from .\rhythm.ps1 snapshots, or latest)' }
-        $folder = "/staging/restore-$(stamp)"
-        # The restored folder is a plain copy of the whole database, every scope: it goes once the load is done or has
-        # failed (the snapshot keeps it, encrypted). A load that fails leaves the live database as it was (its message
-        # says so), so the stack starts again on it.
-        # Only a load that ran and failed says so: a snapshot that could not be restored, or a stop that failed, loaded nothing.
-        $stopped = $false; $loading = $false
+        # Reserve this install's staging area before registering cleanup. Another restore may own it.
+        $guard = '/staging/restore-in-progress'
+        $folder = "$guard/snapshot"
+        try { dc --profile restore run --rm --no-deps --entrypoint mkdir restore -m 700 $guard }
+        catch { throw "Cannot reserve $guard. Check for a running or interrupted restore before retrying." }
         try {
             dc --profile restore run --rm restore restore $rest[0] $folder
+            $running = @(dc ps --status running -q engine app)
             dc stop engine app
-            $stopped = $true
-            $loading = $true
-            dc --profile restore run --rm restore load $folder
-        } catch {
-            if ($loading) { Write-Warning "The restore did not load; the load's message above says what it left as it was." }
-            throw
+            compose --profile restore run --rm restore load $folder
+            $loaded = $LASTEXITCODE
+            dc --profile restore run --rm --no-deps --entrypoint rm restore -rf $folder
+            if ($loaded -ne 0) {
+                # Exit 12 confirms the original database still has its name.
+                if ($loaded -eq 12 -and $running.Count -gt 0) {
+                    docker start @running | Out-Null
+                    if ($LASTEXITCODE -ne 0) { throw "The restore was refused and the previous containers could not be restarted." }
+                }
+                throw "The restore did not load; check its message before retrying."
+            }
+            up
         } finally {
-            compose --profile restore run --rm --no-deps --entrypoint rm restore -rf $folder
-            if ($LASTEXITCODE -ne 0) { Write-Warning "Remove $folder from the backup staging folder yourself: it is a plain copy of the database." }
-            if ($stopped) { up }
+            compose --profile restore run --rm --no-deps --entrypoint rm restore -rf $guard
+            if ($LASTEXITCODE -ne 0) { Write-Warning "Check $guard in backup staging: it may hold a plain copy of the database." }
         }
     }
     'upgrade' {
         $old = version; $new = $old; $how = 'build'
         foreach ($arg in $rest) { if ($arg -eq '--pull') { $how = 'pull' } else { $new = $arg } }
         $saved = $env:RHYTHM_VERSION
-        backup
+        $backupOutput = @(backup)
+        $backupOutput | Write-Output
+        $snapshots = @($backupOutput | ForEach-Object { if ($_ -match '^\s*\{\s*"snapshot":\s*"([0-9a-f]{8,64})"') { $Matches[1] } })
+        if ($snapshots.Count -ne 1) { throw "Upgrade stopped before changing images: no verified pre-upgrade snapshot ID." }
+        $migrationsPossible = $false
         retag $old "$old-previous"
         try {
             $env:RHYTHM_VERSION = $new
-            # --pull: the base images (.NET, Node, Postgres for pg_dump) follow their patch releases only when pulled again.
+            # Fetch the pinned bases for this revision and check any operator-provided override.
             if ($how -eq 'pull') { dc pull } else { dc --profile backup build --pull }
             # Recreated even when a tag only moved: Compose does not always notice a rebuilt image under the same tag.
-            up --force-recreate
+            engine-cli preflight
+            $migrationsPossible = $true
+            dc up -d --wait --force-recreate
+            engine-cli ready
             $text = [IO.File]::ReadAllText($envFile)
             $text = if ($text -match '(?m)^RHYTHM_VERSION=') { $text -replace '(?m)^RHYTHM_VERSION=.*$', "RHYTHM_VERSION=$new" } else { $text.TrimEnd("`n") + "`nRHYTHM_VERSION=$new`n" }
             [IO.File]::WriteAllText($envFile, $text)
             Write-Output "Upgraded to $new. The images before it are tagged $old-previous."
         }
         catch {
-            Write-Warning "Upgrade to $new failed: rolling back to $old (the backup above holds the data from before)."
+            Write-Warning "Upgrade to $new failed: rolling back to $old."
+            if ($migrationsPossible) {
+                Write-Warning "Migrations may have changed the database. Keep the stack stopped until you restore the pre-upgrade snapshot."
+                Write-Warning "After the previous images are back, run: `$env:RHYTHM_VERSION='$old'; .\rhythm.ps1 restore $($snapshots[0])"
+                Write-Warning "Restore undoes changes since that snapshot and disables old tokens (docs/backups.md)."
+                compose stop app engine migrate
+                if ($LASTEXITCODE -ne 0) { Write-Warning "Stop app, engine and migrate manually before restoring." }
+            }
             retag "$old-previous" $old
             $env:RHYTHM_VERSION = $old
-            up --force-recreate
+            if (-not $migrationsPossible) { up --force-recreate }
             exit 1
         }
         finally { $env:RHYTHM_VERSION = $saved }

@@ -103,7 +103,7 @@ It writes:
 - `secrets/postgres_password`, `engine_db`, `app_token` and `backup_password`: 32 random bytes each (base64url),
   printed nowhere. Keep a copy of `backup_password` offline: backups cannot be read without it.
 
-It runs once: a second `init` stops. `init --force` writes new settings and `.env` and keeps every secret that
+It runs once: a second `init` stops. `init --force` writes new `rhythm.yaml` settings. Existing `.env` values (including backup folders, profiles and overrides) are kept unless you supply a replacement; missing values are filled. It keeps every secret that
 exists (the database already uses those passwords). If a `docker compose up` ran before `init`, Docker left an
 empty folder where each missing secret file should be; `init` replaces them.
 
@@ -156,7 +156,12 @@ container's user; `connect` says so and changes nothing until it exists.
 
 ## doctor
 
-Read only. It checks:
+Read only. From the checkout it checks the full installation. Inside the running engine
+(`docker compose exec engine rhythm-engine doctor`), it checks the mounted settings, database login
+and app token, and reports which host-only checks to run from the checkout. Both modes probe
+`engine.publicMcpUrl` without a token and expect 401. A host loopback address must be checked on the host.
+
+It checks:
 
 - `rhythm.yaml` is valid, and `.env` points the containers at it;
 - each secret file exists, is a file (not a folder Docker made), has the right shape, has no access for others and,
@@ -186,11 +191,14 @@ optional.
 
 ```sh
 ./rhythm token create alex-phone --person alex   # Alex's AI client; secrets/harness_alex-phone_token
-./rhythm token list                              # alex-phone  harness  alex  2026-11-01
+./rhythm token list                              # name, role, identity, creation, public ID, last use and expiry
 ./rhythm person suspend alex                     # every token bound to Alex stops working at once
 ./rhythm token revoke --all                      # after a leak: every harness, plugin and capture token, at once
 ```
 
+- `token create` and `capture connect` accept `--expires-at yyyy-MM-ddTHH:mm:ssZ`, a future UTC time.
+  Without that option the token has no explicit expiry. The `id=` from `token list` identifies it in the
+  engine's authenticated-call log. Last use is unknown until the next successful authentication after upgrade.
 - `--person <id>` binds the token to one person in `people`, for good: to move a client to another person, revoke
   its token and make a new one. A token made without it has the **household view**. With memory scopes off, every
   install's setting today, a binding changes nothing anyone reads; it records who wrote what, the token is refused
@@ -729,9 +737,13 @@ pruned for you (open question Q-054).
 7. `./rhythm up`: migrate brings the schema and the engine's login up to date, and the engine takes the app token
    from its file again.
 
-If a step from 3 to 5 fails, the live database is as it was: the new database the restore was loading into, if it
-made one, is dropped, the restored folder is removed, the stack starts again on the live database, and the command
-fails, saying what stopped it. Retrying is safe. `cli/chaos.sh` tests these failures on a throwaway stack.
+The restore command reserves `restore-in-progress` in the staging directory and removes it when finished. An
+overlapping restore stops before touching it. After an interrupted command, confirm no restore is still running
+and inspect any leftover directory before removing it. It may contain a plain copy of the database.
+If the load confirms the live database kept its name, a failed restore restarts only the engine or app containers
+that were already running. A previous upgrade may have left both stopped. If the database switch cannot be
+confirmed, the services stay stopped. Follow the load's diagnostic before retrying or starting the stack.
+The command removes its plaintext snapshot in each case. `cli/chaos.sh` exercises restore failures on a throwaway stack.
 
 A restore puts back the database as it was at the backup, so what you changed since is undone too: a person suspended
 since is current again, a person taken out of Family since is a member again, a source share or a Family admin taken back
@@ -766,7 +778,7 @@ git pull
    switch, and `ready` checks the engine and MCP. The build pulls its base images again (`--pull`), so the .NET,
    Node and Postgres patch releases come in; an image whose pinned version the new tag moved is pulled at `up`.
 4. On success the tag goes into `.env` (`RHYTHM_VERSION`). On any failure the previous images come back under their
-   tag and the stack starts on them again.
+   tag. After a build or pull failure the stack starts again. Once migration could have started, the command stops the app, engine and migrate service and prints the exact pre-upgrade snapshot restore command.
 5. It names, changing nothing, each pinned image last checked over 90 days ago and each image an `.env` line such as
    `RHYTHM_POSTGRES_IMAGE` sets, which no upgrade moves ([deploy/README.md](../deploy/README.md#pinned-images)).
 
@@ -780,8 +792,9 @@ and `cli/e2e.sh` on a real stack, with those settings off and again with them on
 their order, `./rhythm upgrade` under the same tag included: a rebuild that does not start is what they are for, and
 `cli/e2e.sh`'s rollbacks stop at the pull, before anything is rebuilt.
 
-Migrations only go forward. The previous engine runs on a schema that a newer migrate changed only as long as the
-change is compatible; when it is not, restore the backup from step 1 (open question Q-055).
+Migrations only go forward. After a possible migration, run the printed restore command before restarting the old
+engine. This rolls data back to the snapshot and disables its tokens; recreate needed tokens after verifying the
+restored state ([backups](../docs/backups.md)).
 
 ## Testing
 

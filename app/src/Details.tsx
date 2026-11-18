@@ -72,6 +72,7 @@ export function Details({
   readData,
   changes,
   onSources,
+  onChanged,
   cards,
   dashboard,
   insight,
@@ -119,6 +120,7 @@ export function Details({
   // What changed lately in the knowledge sky, for its panel.
   changes?: { nodes: GraphNode[]; edges: KnowledgeEdge[] };
   onSources?: () => void;
+  onChanged?: () => void;
   // A corner's dashboard, grown out of its card: it opens in the explorer's
   // reader beside its stars, fills the display, or becomes this screen's Home.
   dashboard?: {
@@ -427,6 +429,9 @@ export function Details({
                 <Settings2 size={28} strokeWidth={1} />
               </div>
               <div className="sources-list">
+                {onChanged && (
+                  <button onClick={onChanged}>Open Changed lately</button>
+                )}
                 {data.sources.map((s) => (
                   <div key={s.id}>
                     <span>

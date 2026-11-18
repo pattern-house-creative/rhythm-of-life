@@ -116,7 +116,7 @@ for (const model of json("docs/licenses/models.json").models) {
     `Changed model pin: ${model.name}`,
   );
   assert.ok(
-    model.license || model.licenseStatus,
+    model.license,
     `Unclassified model: ${model.name}`,
   );
 }
@@ -150,7 +150,4 @@ assert.equal(listed.size, 0);
 
 console.log(
   `Licences: ${npm.packages.length} npm entries, ${nuget.length} NuGet packages, ${gradle.length} Gradle packages; legal files and model pins match.`,
-);
-console.log(
-  "BGE-small export licensing remains unresolved; see docs/licenses/README.md.",
 );

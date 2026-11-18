@@ -183,8 +183,8 @@ public sealed class RelationshipEngine(Database db, IRelationshipSource source,
         }
         // Partial reference lists must not replace a complete list at the same source revision.
         // A changed revision invalidates old evidence even when its replacement is incomplete.
-        // A source that reports no modification time (e.g. a listing) is ordered by observation
-        // time alone; a known modification time may never move backwards.
+        // A data star reports its latest remaining sample, which can move back after a correction.
+        // Order those snapshots by observation; source documents still reject older modifications.
         await using var cmd = Database.Command(c, tx, $"""
             INSERT INTO resources(id,subject_id,provider,external_id,kind,scope,title,source_url,revision,
               source_updated_at,relationship_snapshot,status,domain)
@@ -198,7 +198,7 @@ public sealed class RelationshipEngine(Database db, IRelationshipSource source,
             WHERE (resources.relationship_snapshot IS NOT NULL OR resources.id=@existing)
               AND (resources.relationship_snapshot IS NULL OR (resources.relationship_snapshot->>'RetrievedAt')::timestamptz < @observed
                 OR resources.relationship_snapshot=@metadata::jsonb)
-              AND (resources.source_updated_at IS NULL OR @modified>=resources.source_updated_at OR @modified IS NULL)
+              AND (@dataStar OR resources.source_updated_at IS NULL OR @modified>=resources.source_updated_at OR @modified IS NULL)
               AND NOT (@partial AND resources.revision IS NOT DISTINCT FROM excluded.revision
                 AND resources.relationship_snapshot->>'ReferencesComplete'='true' AND @status='current')
             """, ("id", Guid.NewGuid()), ("subject", safe.Key.Subject), ("provider", safe.Key.Provider),
@@ -206,7 +206,7 @@ public sealed class RelationshipEngine(Database db, IRelationshipSource source,
             ("url", safe.Url), ("revision", safe.Revision), ("modified", safe.ModifiedAt?.ToUniversalTime()),
             ("metadata", JsonSerializer.Serialize(safe)), ("status", safe.Status),
             ("principal", principal), ("observed", safe.RetrievedAt.ToUniversalTime()), ("partial", !safe.ReferencesComplete),
-            ("existing", safe.ExistingResourceId));
+            ("existing", safe.ExistingResourceId), ("dataStar", CatalogStars.IsData(safe.Key)));
         // Explicit types for nullable parameters used in predicates as well as INSERT expressions.
         cmd.Parameters["modified"].NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.TimestampTz;
         cmd.Parameters["existing"].NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Uuid;
