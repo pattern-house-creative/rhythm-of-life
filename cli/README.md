@@ -22,6 +22,7 @@ On Windows PowerShell use `.\rhythm.ps1 init` and `.\rhythm.ps1 up`; every comma
 | Command | Runs | Does |
 |---|---|---|
 | `init` | in the engine image | the questions of a new install (below), then `rhythm.yaml`, `.env` and every secret |
+| `starter workspace` / `starter project <slug>` / `starter groceries` | in the engine image | install the shared dashboards and starter capsules, add a project capsule, or add the optional native grocery list. See the [starter guide](../harness/starter-workspace.md). |
 | `up` | host | `preflight`, `docker compose up -d --wait`, then `ready`: prints the app URL, the MCP URL and the **path** of the harness token file, never a token. The first `up` makes a harness token named `assistant` |
 | `down [-v]` | host | stops the stack. `-v` also deletes its volumes: the database and the archive, for good. It names the project it removes first, and is refused in a checkout that names none (no `.env`, or no `COMPOSE_PROJECT_NAME` in it or in the environment), where Compose would take the default project, `rhythm`, whichever install that is |
 | `logs [-f] [<service>]` | host | the services' logs |
@@ -86,6 +87,7 @@ Every question has a flag, so scripts and tests use `--no-input`:
 | the host name others use (all but `local`) | `--host` | none |
 | the host name for `/mcp` alone (`cloudflare` only) | `--mcp-host` | the app's host name with `-mcp` on its first label (`rhythm-mcp.example.invalid`) |
 | fictional demo data, labelled DEMO | `--demo yes\|no` | yes |
+| Projects (with Ideas), Agents and starter capsules | `--starter yes\|no` | yes on a new install |
 | a folder of Markdown notes (turns the `notes` adapter on) | `--notes` | none |
 | the Docker Compose project name (a second install on this computer needs its own) | `--project-name` | `rhythm` |
 | published ports (not asked) | `--app-port`, `--mcp-port` | `8080`, `8181` |

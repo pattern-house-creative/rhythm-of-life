@@ -5,7 +5,7 @@ namespace Knowledge.Cli;
 // broken. The host wrappers (rhythm, rhythm.ps1 at the repository root) add up, down, logs, backup, restore, upgrade.
 public static class CliCommands
 {
-    public static readonly string[] Names = ["init", "connect", "disconnect", "doctor", "preflight", "ready", "token", "person", "family", "share", "scopes", "viewer", "export", "import", "remember", "recall", "list", "release", "capsule", "delete-forever", "forget", "set-status", "link", "unlink", "still-true", "clear-flags", "undismiss", "queues", "duplicates", "contradictions", "insight-candidates", "insights", "resolve", "share-memory", "night", "import-second-brain", "help", "capture"];
+    public static readonly string[] Names = ["init", "starter", "connect", "disconnect", "doctor", "preflight", "ready", "token", "person", "family", "share", "scopes", "viewer", "export", "import", "remember", "recall", "list", "release", "capsule", "delete-forever", "forget", "set-status", "link", "unlink", "still-true", "clear-flags", "undismiss", "queues", "duplicates", "contradictions", "insight-candidates", "insights", "resolve", "share-memory", "night", "import-second-brain", "help", "capture"];
 
     public static async Task<int> Run(string command, string[] args, CancellationToken ct)
     {
@@ -13,6 +13,7 @@ public static class CliCommands
         switch (command)
         {
             case "init": return InitCommand.Run(deploy, args);
+            case "starter": return await StarterWorkspace.Run(deploy, args, Console.Out, ct);
             case "connect": return await ConnectCommand.Run(deploy, args, ct: ct);
             case "disconnect": return ConnectCommand.Disconnect(deploy, args, Console.Out);
             case "doctor": return await DoctorCommand.Run(deploy, Console.Out, StackCommands.Http, ct: ct, read: StackCommands.Body, mounts: DoctorCommand.EngineMounts.Current());
@@ -163,8 +164,9 @@ public static class CliCommands
     const string Head = """
                     Commands inside the engine image (./rhythm <command> on the host):
                       init [--no-input] [--force] [--name ..] [--people ..] [--timezone ..] [--data ..] [--exposure ..] [--host ..] [--mcp-host ..]
-                           [--demo yes|no] [--notes ..] [--app-port ..] [--mcp-port ..] [--project-name ..]
+                           [--demo yes|no] [--starter yes|no] [--notes ..] [--app-port ..] [--mcp-port ..] [--project-name ..]
                                                                            settings, .env and every secret
+                      starter workspace|groceries|project <slug>           install workspace, grocery list or project capsule
                       connect [<adapter>] [--set key=value] [--no-input]   list adapters, or turn one on
                       disconnect <adapter>                                  turn one off
                       doctor                                                check settings, secrets and the running stack

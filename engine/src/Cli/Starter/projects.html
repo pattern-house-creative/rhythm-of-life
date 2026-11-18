@@ -1,0 +1,121 @@
+<main>
+  <header>
+    <h1>Projects</h1>
+    <nav aria-label="Projects views"></nav>
+  </header>
+  <div class="toolbar">
+    <label for="project">Project</label
+    ><select id="project"></select>
+  </div>
+  <div id="board"></div>
+</main>
+<script>
+  const board = document.querySelector("#board"),
+    select = document.querySelector("#project");
+  const lanes = [
+    ["backlog", "Backlog"],
+    ["ready", "Ready"],
+    ["active", "Active"],
+    ["review", "In review"],
+    ["done", "Done"],
+  ];
+  let feeds = {},
+    view = "work",
+    project = "";
+  function draw() {
+    choose(
+      document.querySelector("nav"),
+      [
+        ["work", "Work"],
+        ["ideas", "Ideas inbox"],
+      ],
+      view,
+      (key) => {
+        view = key;
+        draw();
+      },
+    );
+    board.replaceChildren();
+    const allWork = records(feeds.work);
+    const ideas = [
+      ...new Map(
+        [...records(feeds.ideas), ...records(feeds.inbox)]
+          .filter((m) => !m.tags?.includes("inbox-guide"))
+          .map((m) => [m.id, m]),
+      ).values(),
+    ];
+    const projects = new Map(
+      [...allWork, ...ideas, ...records(feeds.projectGuides)]
+        .filter((m) => m.project)
+        .map((m) => [m.project.id, m.project.name || m.project.slug]),
+    );
+    if (!projects.has(project)) project = "";
+    select.replaceChildren(
+      new Option("All projects", ""),
+      ...[...projects]
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([id, name]) => new Option(name, id)),
+    );
+    select.value = project;
+    const visible = (m) => !project || m.project?.id === project;
+    if (view === "ideas") {
+      feedNotice(board, feeds.ideas);
+      feedNotice(board, feeds.inbox);
+      const list = ideas.filter(visible);
+      if (!list.length)
+        board.append(
+          el(
+            "p",
+            "Ask your agent to save an idea in project-ideas, or tag a project memory project-idea.",
+            "empty",
+          ),
+        );
+      for (const idea of list) board.append(card(idea));
+      return;
+    }
+    feedNotice(board, feeds.work);
+    const work = allWork.filter(visible),
+      related = new Map(allWork.map((m) => [m.id, m]));
+    if (!work.length) {
+      board.append(
+        el(
+          "p",
+          "Ask your agent to create a Ready work item in your project and describe how to check it.",
+          "empty",
+        ),
+      );
+      return;
+    }
+    const milestones = work.filter(
+      (m) => m.work.type === "feature" && m.work.dependencies?.total > 0,
+    );
+    if (milestones.length) {
+      board.append(el("h2", "Milestones"));
+      for (const m of milestones) board.append(card(m, related));
+    }
+    const columns = el("div", undefined, "lanes");
+    board.append(columns);
+    for (const [state, label] of lanes) {
+      const column = el("section", undefined, "lane"),
+        items = work.filter((m) => m.work.state === state);
+      column.append(el("h2", label + " · " + items.length));
+      items.forEach((m) => column.append(card(m, related)));
+      columns.append(column);
+    }
+    const cancelled = work.filter((m) => m.work.state === "cancelled");
+    if (cancelled.length) {
+      const archive = el("details");
+      archive.append(el("summary", "Cancelled · " + cancelled.length));
+      cancelled.forEach((m) => archive.append(card(m, related)));
+      board.append(archive);
+    }
+  }
+  select.onchange = () => {
+    project = select.value;
+    draw();
+  };
+  rhythm.onData((data) => {
+    feeds = data.feeds;
+    draw();
+  });
+</script>

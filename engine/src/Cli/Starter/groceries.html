@@ -1,0 +1,89 @@
+<main>
+  <header>
+    <h1>Groceries</h1>
+    <span id="remaining" class="meta"></span>
+  </header>
+  <p id="guide" class="muted"></p>
+  <form class="toolbar" id="add">
+    <label for="name">Item</label
+    ><input id="name" maxlength="200" required autocomplete="off" /><button
+      class="primary"
+    >
+      Add item
+    </button>
+  </form>
+  <p id="status" role="status"></p>
+  <div id="shopping"></div>
+</main>
+<script>
+  const form = document.querySelector("#add"),
+    input = document.querySelector("#name"),
+    list = document.querySelector("#shopping"),
+    status = document.querySelector("#status");
+  let latest = null,
+    pending = false;
+  async function save(change) {
+    if (pending) return false;
+    pending = true;
+    draw();
+    status.textContent = "Saving…";
+    try {
+      const result = await rhythm.write("item", change);
+      status.textContent = result.ok
+        ? "Saved."
+        : result.reason || "Could not save.";
+      return result.ok;
+    } catch {
+      status.textContent = "Could not save. Reopen the list and try again.";
+      return false;
+    } finally {
+      pending = false;
+      draw();
+    }
+  }
+  form.onsubmit = async (event) => {
+    event.preventDefault();
+    const name = input.value.trim();
+    if (!name) return;
+    if (await save({ note: name })) {
+      input.value = "";
+      input.focus();
+    }
+  };
+  function draw() {
+    if (!latest) return;
+    const { feeds, edits } = latest,
+      feed = feeds.shopping;
+    const editable = !!edits && feed?.status === "ok" && !pending;
+    form.querySelector("button").disabled = !editable;
+    input.disabled = !editable;
+    document.querySelector("#guide").textContent = edits
+      ? records(feeds.guide)[0]?.preview || ""
+      : "Turn on Allow edits below the dashboard to add groceries and mark them purchased.";
+    list.replaceChildren();
+    feedNotice(list, feed);
+    const entries = feed?.entries || [],
+      bought = new Set(
+        entries.filter((e) => e.check === "purchased").map((e) => e.note),
+      );
+    const items = entries.filter((e) => e.type === "note" && !bought.has(e.id));
+    document.querySelector("#remaining").textContent =
+      feed?.status === "ok" ? items.length + " to buy" : "";
+    if (feed?.status === "ok" && !items.length)
+      list.append(el("p", "Your shopping list is empty.", "empty"));
+    for (const item of items) {
+      const row = el("div", undefined, "row item"),
+        button = action("Purchased", () =>
+          save({ check: "purchased", note: item.id }),
+        );
+      button.setAttribute("aria-label", "Mark " + item.note + " purchased");
+      button.disabled = !editable;
+      row.append(button, el("span", item.note));
+      list.append(row);
+    }
+  }
+  rhythm.onData((data) => {
+    latest = data;
+    draw();
+  });
+</script>

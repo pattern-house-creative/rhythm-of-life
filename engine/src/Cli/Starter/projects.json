@@ -1,0 +1,50 @@
+{
+  "title": "Projects",
+  "description": "Work, milestones and the ideas inbox.",
+  "feeds": [
+    {
+      "name": "work",
+      "kind": "memories",
+      "where": {
+        "work": true
+      },
+      "fullText": true,
+      "limit": 200
+    },
+    {
+      "name": "projectGuides",
+      "kind": "memories",
+      "where": {
+        "tag": "project-guide",
+        "work": false
+      },
+      "limit": 200
+    },
+    {
+      "name": "ideas",
+      "kind": "memories",
+      "where": {
+        "tag": [
+          "project-idea",
+          "idea-stage",
+          "portfolio-idea",
+          "third-party-project"
+        ],
+        "work": false
+      },
+      "fullText": true,
+      "limit": 200
+    },
+    {
+      "name": "inbox",
+      "kind": "memories",
+      "where": {
+        "project": "project-ideas",
+        "work": false
+      },
+      "fullText": true,
+      "limit": 200
+    }
+  ],
+  "note": "Installed from the Rhythm starter templates, version 1."
+}

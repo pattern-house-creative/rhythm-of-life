@@ -8,7 +8,7 @@ namespace Knowledge.Cli;
 // Compose project name and the image tag, so every later command in this folder acts on this install's own project.
 public static partial class InitCommand
 {
-    static readonly string[] Options = ["--name", "--people", "--timezone", "--data", "--exposure", "--host", "--mcp-host", "--demo", "--notes", "--app-port", "--mcp-port", "--project-name"];
+    static readonly string[] Options = ["--name", "--people", "--timezone", "--data", "--exposure", "--host", "--mcp-host", "--demo", "--starter", "--notes", "--app-port", "--mcp-port", "--project-name"];
     static readonly string[] Switches = ["--no-input", "--force"];
     public static readonly (string Name, string Says)[] Exposures =
     [
@@ -70,6 +70,10 @@ public static partial class InitCommand
         var project = Answer("--project-name", "Docker Compose project name (a second install on this computer needs its own)",
             environment("COMPOSE_PROJECT_NAME") is { Length: > 0 } current ? current : Previous("COMPOSE_PROJECT_NAME", "rhythm"),
             v => ProjectName().IsMatch(v) ? null : "lower case letters, digits, '-' or '_', starting with a letter or digit, up to 63");
+        var existingSettings = File.Exists(deploy.Settings);
+        var previousStarter = previous.GetValueOrDefault("RHYTHM_STARTER_WORKSPACE") == "yes";
+        var starter = a["--starter"] is { } choice ? Prompter.Yes(choice) ?? throw new ArgumentException("--starter is yes or no")
+            : ask.Confirm("Install Projects, Ideas, Agents and editable starter capsules?", !existingSettings || previousStarter, "--starter");
         var version = environment("RHYTHM_VERSION") is { Length: > 0 } tag ? tag : Previous("RHYTHM_VERSION", "dev");
         if (!ImageTag().IsMatch(version)) throw new ArgumentException("RHYTHM_VERSION is not an image tag: letters, digits, '_', '.' or '-'");
         // Compose resolves quoted/interpolated host ports before passing them to the CLI container.
@@ -93,6 +97,16 @@ public static partial class InitCommand
             ("instance.name", name), ("timezone", zone), ("demo.enabled", demo ? "true" : "false"),
             ("engine.publicMcpUrl", mcpUrl), ("app.publicUrl", appUrl), ("adapters.notes.enabled", notes.Length > 0 ? "true" : "false"),
         };
+        var oldSettings = existingSettings ? File.ReadAllText(deploy.Settings) : null;
+        var enableStarter = starter && (!previousStarter || a["--starter"] is not null || !existingSettings);
+        // Choosing starter content must preserve an existing install's privacy and independently enabled tools.
+        foreach (var nameOfFlag in new[] { "scopes", "share", "capture", "secondBrainImport", "capsuleWrites", "tools", "work", "capsules" })
+        {
+            var key = "memory." + nameOfFlag;
+            var value = enableStarter && nameOfFlag is ("tools" or "work" or "capsules") ? "on"
+                : oldSettings is not null ? YamlText.Get(oldSettings, key) : null;
+            if (value is not null) expected.Add((key, value));
+        }
         if (host is not null) expected.Add(("engine.allowedHosts", string.Join(',', new[] { "localhost", "127.0.0.1", "[::1]", "engine", mcpHost! }.Distinct())));
         if (exposure == "cloudflare") { expected.Add(("adapters.cloudflare.hostname", host!)); expected.Add(("adapters.cloudflare.mcpHostname", mcpHost!)); }
         foreach (var (path, value) in expected)
@@ -114,6 +128,7 @@ public static partial class InitCommand
         Setting("COMPOSE_PROJECT_NAME", project, answered.Contains("--project-name") || project != Previous("COMPOSE_PROJECT_NAME", "rhythm"));
         Setting("RHYTHM_VERSION", version, version != Previous("RHYTHM_VERSION", "dev"));
         Setting("RHYTHM_CONFIG_FILE", "./rhythm.yaml");
+        Setting("RHYTHM_STARTER_WORKSPACE", starter ? "yes" : "no", a["--starter"] is not null || starter != previousStarter);
         Setting("RHYTHM_BIND", exposure == "lan" ? "0.0.0.0" : "127.0.0.1", answered.Contains("--exposure"));
         Setting("RHYTHM_APP_PORT", appPort.ToString(), a["--app-port"] is not null);
         Setting("RHYTHM_MCP_PORT", mcpPort.ToString(), a["--mcp-port"] is not null);

@@ -1,0 +1,93 @@
+<main>
+  <header>
+    <h1>Agents</h1>
+    <nav aria-label="Agents views"></nav>
+  </header>
+  <div id="board"></div>
+</main>
+<script>
+  const board = document.querySelector("#board");
+  let feeds = {},
+    view = "overview";
+  function section(title, rows, empty) {
+    board.append(el("h2", title));
+    if (!rows.length) board.append(el("p", empty, "empty"));
+    for (const m of rows) board.append(card(m));
+  }
+  function draw() {
+    choose(
+      document.querySelector("nav"),
+      [
+        ["overview", "Overview"],
+        ["activity", "Activity"],
+        ["handoffs", "Handoffs"],
+      ],
+      view,
+      (key) => {
+        view = key;
+        draw();
+      },
+    );
+    board.replaceChildren();
+    if (view === "overview") {
+      feedNotice(board, feeds.work);
+      const work = records(feeds.work),
+        active = work.filter((m) => m.work?.state === "active"),
+        byAgent = new Map();
+      for (const m of active) {
+        const name = m.work.claim?.label || "Unclaimed";
+        if (!byAgent.has(name)) byAgent.set(name, []);
+        byAgent.get(name).push(m);
+      }
+      if (!active.length)
+        section(
+          "Working now",
+          [],
+          "No active claims. Ask an agent to claim a Ready item to start.",
+        );
+      for (const [name, items] of byAgent) section(name, items, "");
+      const review = work
+        .filter((m) => m.work?.state === "review")
+        .sort((a, b) => String(a.updatedAt).localeCompare(String(b.updatedAt)));
+      section("Waiting for review", review, "Nothing is waiting for review.");
+      return;
+    }
+    feedNotice(board, feeds.handoffs);
+    const notes = records(feeds.handoffs);
+    if (view === "handoffs") {
+      section(
+        "Open handoffs",
+        notes.filter((m) => /^OPEN\b/i.test(m.preview)),
+        "No open handoffs.",
+      );
+      return;
+    }
+    board.append(el("h2", "Recent activity"));
+    const lines = notes
+      .filter(
+        (m) =>
+          m.tags?.includes("agent-activity-log") ||
+          /^ACTIVITY log of coding agents/i.test(m.preview),
+      )
+      .flatMap((m) =>
+        (m.preview || "")
+          .split("\n")
+          .slice(1)
+          .filter((s) => s.trim())
+          .reverse(),
+      );
+    if (!lines.length)
+      board.append(
+        el(
+          "p",
+          "Completed work appears when an agent adds a line to the activity log.",
+          "empty",
+        ),
+      );
+    for (const line of lines) board.append(el("article", line));
+  }
+  rhythm.onData((data) => {
+    feeds = data.feeds;
+    draw();
+  });
+</script>

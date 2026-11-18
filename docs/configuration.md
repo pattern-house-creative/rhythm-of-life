@@ -13,6 +13,8 @@ An install has three kinds of settings, kept apart on purpose:
 below; `rhythm up` then gives each file the owner and mode its reader needs. `rhythm upgrade` changes none of them but
 the image tag in `.env` ([../cli/README.md](../cli/README.md#upgrade)).
 
+New installs made with `rhythm init` enable `memory.tools`, `memory.work` and `memory.capsules` for the starter workspace. Choosing `--starter no` during first setup keeps the schema defaults. The generated `.env` records the choice in `RHYTHM_STARTER_WORKSPACE`. See the [starter guide](../harness/starter-workspace.md).
+
 After you edit `rhythm.yaml`, `rhythm up` restarts the engine and app on the new settings: the wrappers hand Compose
 the file's checksum, since Compose does not notice a changed config file on its own. With plain `docker compose`,
 add `--force-recreate`.

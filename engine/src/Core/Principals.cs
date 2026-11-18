@@ -12,6 +12,7 @@ namespace Knowledge;
 // no usable token).
 public sealed partial class Principals(NpgsqlDataSource source)
 {
+    internal NpgsqlDataSource Source => source;
     public const string AppName = "app", GraphName = "graph";
 
     // 32 random bytes, base64url without padding: 43 characters.
@@ -287,10 +288,12 @@ public sealed partial class Principals(NpgsqlDataSource source)
         return await cmd.ExecuteScalarAsync(ct) as string;
     }
     // Whether the switch's first start has been (JoinedKey): from then on no start adds anyone to Family.
-    public async Task<bool> Joined(CancellationToken ct)
+    public Task<bool> Joined(CancellationToken ct) => HasSetting(JoinedKey, ct);
+
+    internal async Task<bool> HasSetting(string key, CancellationToken ct)
     {
         await using var cmd = source.CreateCommand("SELECT EXISTS(SELECT 1 FROM install_settings WHERE key=@k)");
-        cmd.Parameters.AddWithValue("k", JoinedKey);
+        cmd.Parameters.AddWithValue("k", key);
         return (bool)(await cmd.ExecuteScalarAsync(ct))!;
     }
 

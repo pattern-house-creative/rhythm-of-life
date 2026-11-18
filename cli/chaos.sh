@@ -132,7 +132,7 @@ kept=$(mktemp -d)
 trap 'rm -rf "$kept"; cleanup' EXIT
 
 step "init, no input, up, and the memory tools and the capture route on"
-./rhythm init --no-input --people "Alex, Sam" --timezone Europe/London --app-port "$app" --mcp-port "$mcp" >/dev/null 2>&1 || fail "init"
+./rhythm init --no-input --starter no --people "Alex, Sam" --timezone Europe/London --app-port "$app" --mcp-port "$mcp" >/dev/null 2>&1 || fail "init"
 grep -q "^COMPOSE_PROJECT_NAME=$project$" $deploy/.env || fail ".env does not name the run's project"
 dc --profile cli run --rm --no-deps --entrypoint sed cli -i -e '/^memory:/a\  capture: on' -e '/^memory:/a\  tools: on' /work/rhythm.yaml \
   >/dev/null 2>&1 || fail "could not turn memory.tools and memory.capture on"

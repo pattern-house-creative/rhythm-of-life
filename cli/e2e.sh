@@ -238,7 +238,7 @@ dc logs postgres 2>&1 | grep -q "run ./rhythm init first" || fail "no clear mess
 dc down >/dev/null 2>&1
 
 step "init, no input" 18
-out=$(./rhythm init --no-input --people "Alex, Sam" --timezone Europe/London --app-port "$app" --mcp-port "$mcp")
+out=$(./rhythm init --no-input --starter no --people "Alex, Sam" --timezone Europe/London --app-port "$app" --mcp-port "$mcp")
 echo "$out" | tail -n 4
 echo "$out" | grep -q "Replaced 1 empty folders" || fail "init did not replace the folder Docker made"
 for f in postgres_password engine_db app_token backup_password; do [ -s $secrets/$f ] || fail "no $f"; done

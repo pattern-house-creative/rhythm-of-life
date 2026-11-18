@@ -1,0 +1,32 @@
+{
+  "title": "Groceries",
+  "description": "A shared shopping list kept in Rhythm.",
+  "feeds": [
+    {
+      "name": "shopping",
+      "kind": "log",
+      "subject": "household",
+      "log": "starter-groceries",
+      "days": 3650
+    },
+    {
+      "name": "guide",
+      "kind": "memories",
+      "where": {
+        "project": "groceries",
+        "tag": "grocery-list-guide"
+      },
+      "fullText": true,
+      "limit": 200
+    }
+  ],
+  "writes": [
+    {
+      "name": "item",
+      "kind": "log",
+      "subject": "household",
+      "log": "starter-groceries"
+    }
+  ],
+  "note": "Installed from the Rhythm starter templates, version 1."
+}

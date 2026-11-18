@@ -93,6 +93,8 @@ public static class StackCommands
             tokens.Add(first);
             o.WriteLine("Made a first harness token, named assistant, for your AI client.");
         }
+        if (env.GetValueOrDefault("RHYTHM_STARTER_WORKSPACE") == "yes" && StarterWorkspace.Available(config))
+            await StarterWorkspace.Install(store.Source, config, "workspace", null, o, ct);
         string Port(string variable, string fallback) => env.GetValueOrDefault(variable) is { Length: > 0 } port ? port : fallback;
         o.WriteLine($"{config.Instance.Name} is running.");
         o.WriteLine($"  App:  {config.App.PublicUrl ?? "http://127.0.0.1:" + Port("RHYTHM_APP_PORT", "8080")}");

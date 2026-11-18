@@ -139,7 +139,7 @@ tab=$(printf '\t')
 
 step "this checkout's images, then init with no input and no demo data" 18
 dc build engine app >/dev/null 2>&1 || fail "could not build the engine and app images from this checkout"
-out=$(./rhythm init --no-input --people "Alex, Sam" --timezone Europe/London --demo no --app-port "$app" --mcp-port "$mcp" 2>&1) ||
+out=$(./rhythm init --no-input --starter no --people "Alex, Sam" --timezone Europe/London --demo no --app-port "$app" --mcp-port "$mcp" 2>&1) ||
   fail "init: $out"
 echo "$out" | tail -n 3
 for f in postgres_password engine_db app_token backup_password; do [ -s $secrets/$f ] || fail "no $f"; done

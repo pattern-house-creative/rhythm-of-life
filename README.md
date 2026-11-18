@@ -19,10 +19,14 @@ runs inside it: your AI stays outside and connects in over MCP, with a token you
 > used to make treatment decisions. Always use your device's own display and your care team for
 > those.
 
-> **Alpha** (`0.1.0-alpha.2`). An early release for people comfortable running Docker on their own
+> **Alpha** (`0.1.0-alpha.3`). An early release for people comfortable running Docker on their own
 > machine. It works and is used daily by one household, but it has had no outside security review,
 > and upgrades between alpha versions may need care. Read
 > [Before you rely on it](#before-you-rely-on-it) first.
+
+## Your first project
+
+Open **Sources & settings → Dashboards → Projects** to see work, milestones and an Ideas inbox. **Agents** shows active claims, reviews, activity and open handoffs. Both are installed when you accept the starter workspace during setup, including with demo data off. To try it, ask your connected agent to create a Ready item in `first-project`, claim it, and leave its result in Review. The optional shared shopping list uses Rhythm’s native log. [Starter setup and agent instructions](harness/starter-workspace.md)
 
 ## What you see
 

@@ -197,6 +197,29 @@ public sealed class CliTests : IDisposable
         Assert.Equal(("notes", "compose.yaml:extra.yaml", "keep"), (Env()["COMPOSE_PROFILES"], Env()["COMPOSE_FILE"], Env()["ANOTHER_SETTING"]));
     }
 
+    [Fact] public void Starter_is_independent_of_demo_and_preserves_existing_scope_and_tool_choices()
+    {
+        Init("--demo", "no", "--starter", "no");
+        string? Flag(string name) => YamlText.Get(File.ReadAllText(deploy.Settings), "memory." + name);
+        Assert.Null(Flag("work"));
+        var settings = YamlText.Set(File.ReadAllText(deploy.Settings), "memory.scopes", "on");
+        File.WriteAllText(deploy.Settings, YamlText.Set(settings, "memory.capture", "on"));
+        Init("--force", "--starter", "yes", "--demo", "no");
+        Assert.Equal("yes", Env()["RHYTHM_STARTER_WORKSPACE"]);
+        Assert.Equal("on", Flag("tools"));
+        Assert.Equal("on", Flag("work"));
+        Assert.Equal("on", Flag("capsules"));
+        Assert.Null(Flag("capsuleWrites"));
+        File.WriteAllText(deploy.Settings, YamlText.Set(File.ReadAllText(deploy.Settings), "memory.work", "off"));
+        Init("--force");
+        Assert.Equal("off", Flag("work"));
+        Init("--force", "--starter", "no");
+        Assert.Equal("no", Env()["RHYTHM_STARTER_WORKSPACE"]);
+        Assert.Equal("on", Flag("scopes"));
+        Assert.Equal("on", Flag("capture"));
+        Assert.Equal("on", Flag("tools"));
+    }
+
     [Fact] public void Init_asks_each_question_when_answers_are_piped_in()
     {
         var o = new StringWriter();

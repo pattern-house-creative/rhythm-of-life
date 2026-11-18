@@ -125,10 +125,10 @@ export function Details({
   // reader beside its stars, fills the display, or becomes this screen's Home.
   dashboard?: {
     id: string;
-    corner: Corner;
+    corner?: Corner;
     title: string;
     session: GraphSession;
-    onReader: () => void;
+    onReader?: () => void;
     screen?: DashboardScreen;
     // Its native parts: the map, the tiles and the cards (App.tsx).
     parts?: DashboardParts;
@@ -137,6 +137,7 @@ export function Details({
   cards?: {
     dashboards: DashboardSummary[];
     chosen: DashboardCards;
+    onOpen?: (id: string) => void;
     onChoose: (corner: Corner, dashboard: string | null) => Promise<void>;
   };
   // The insight open in its panel, every insight for its history, and where
@@ -252,7 +253,9 @@ export function Details({
             : view === "insight"
               ? (insight?.from ?? "tile-changed")
               : view === "dashboard"
-                ? `tile-${dashboard?.corner ?? "training"}`
+                ? dashboard?.corner
+                  ? `tile-${dashboard.corner}`
+                  : undefined
                 : (from ?? `tile-${view}`)
         }
         initial={view === "sources" ? { opacity: 0, x: 40 } : undefined}
@@ -309,13 +312,15 @@ export function Details({
               <div className="dashboard-panel-head">
                 <h2>{dashboard.title}</h2>
                 <div className="dashboard-panel-actions">
-                  <button
-                    className="dashboard-full"
-                    onClick={dashboard.onReader}
-                  >
-                    <PanelRight size={14} aria-hidden="true" /> Open in the
-                    explorer
-                  </button>
+                  {dashboard.onReader && (
+                    <button
+                      className="dashboard-full"
+                      onClick={dashboard.onReader}
+                    >
+                      <PanelRight size={14} aria-hidden="true" /> Open in the
+                      explorer
+                    </button>
+                  )}
                   {dashboard.screen && (
                     <DashboardActions
                       id={dashboard.id}
@@ -545,6 +550,21 @@ export function Details({
                   name={screenName.name}
                   onRename={screenName.onRename}
                 />
+              )}
+              {cards?.onOpen && cards.dashboards.length > 0 && (
+                <section aria-label="Dashboards">
+                  <h3>Dashboards</h3>
+                  <div className="settings-actions">
+                    {cards.dashboards.map((board) => (
+                      <button
+                        key={board.id}
+                        onClick={() => cards.onOpen?.(board.id)}
+                      >
+                        {board.title}
+                      </button>
+                    ))}
+                  </div>
+                </section>
               )}
               {cards && (
                 <CornerCards

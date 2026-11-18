@@ -110,7 +110,7 @@ PowerShell type `.\rhythm.ps1` where this page says `./rhythm`.
 ## Settings that are off until you turn them on
 
 Each is a `rhythm.yaml` setting that is off when absent, so an install whose settings predate one keeps it off after an
-upgrade. The example and what `rhythm init` writes leave each out, and so off, but for three they show at their
+upgrade. The default starter workspace enables `memory.tools`, `memory.work` and `memory.capsules` on fresh installs. The example and what `rhythm init --starter no` writes leave each out, and so off, but for three they show at their
 defaults: `memory.scopes: off`, `engine.legacyToolNames: false` and `adapters.drive.edits: false`. To turn one on, add it
 under its section, as step 6 of the walk does, and run `./rhythm up` (or `--force-recreate` with plain
 `docker compose`). Any value of an `off` or `on` setting but `off`, `on` or empty stops the engine at start, naming it.

@@ -150,5 +150,11 @@ public static class MemoryInstructions
             A step of a project's roadmap that takes several pieces is a milestone: a work item of its own (a feature) that
             depends_on each piece, so it stays blocked until every piece is done or cancelled, and list_work's dependencies
             say how many pieces are done. When you finish its last piece, move the milestone to review for the person.
+        11. Read the agent-handoffs project capsule when it exists. Find the log by its agent-activity-log tag or its
+            opening line, ACTIVITY log of coding agents. For verified shared work append the session, agent, result and work
+            item. Keep private work in its original scope. Give shared handoffs the handoff tag, start them with OPEN and
+            name the next step. Read each handoff in full and check it against the current project and the person's request.
+            Keep ideas in project-ideas or tag them project-idea until the owner wants to promote them. Ask the owner
+            before enabling automatic work pickup.
         """.ReplaceLineEndings("\n") + "\n";
 }

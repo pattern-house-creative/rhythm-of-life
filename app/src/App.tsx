@@ -381,7 +381,7 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
   // The dashboard a corner card grew into, like a stat card into its panel.
   const [cardPanel, setCardPanel] = useState<{
     id: string;
-    corner: Corner;
+    corner?: Corner;
   } | null>(null);
   // The insight open in its panel and where the panel grew from, and the
   // trail an insight lit in the explorer.
@@ -1894,7 +1894,11 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
                             dashboards.list.find((d) => d.id === cardPanel.id)
                               ?.title ?? "Dashboard",
                           session,
-                          onReader: () => openDashboard(cardPanel.id),
+                          onReader: skyPage.nodes.some(
+                            (node) => node.id === dashboardStarId(cardPanel.id),
+                          )
+                            ? () => openDashboard(cardPanel.id)
+                            : undefined,
                           screen: dashboardScreen,
                           parts: partsIn(full !== null),
                         }
@@ -1905,6 +1909,10 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
                       ? {
                           dashboards: dashboards.list,
                           chosen: dashboards.cards,
+                          onOpen: (id) => {
+                            setCardPanel({ id });
+                            open("dashboard");
+                          },
                           onChoose: dashboards.setCard,
                         }
                       : undefined

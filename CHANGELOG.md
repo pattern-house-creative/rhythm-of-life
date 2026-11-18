@@ -4,6 +4,12 @@ What changed in each version, newest first. Versions follow [Semantic Versioning
 while the project is in alpha, any version may change settings or need a step from the operator, and
 each entry says so under **Upgrading**.
 
+## 0.1.0-alpha.3 (18 November 2026)
+
+- Fresh installs include Projects with an Ideas inbox, Agents, shared agent instructions and editable starter capsules.
+  Choose `--starter no` for a minimal install. Existing installations can add the workspace deliberately. Groceries is
+  available separately as a native shared shopping list. See [starter setup](harness/starter-workspace.md).
+
 ## 0.1.0-alpha.2 (18 November 2026)
 
 - The Android launcher drawer shows apps against the sky. Choose the icon grid or an alphabetical

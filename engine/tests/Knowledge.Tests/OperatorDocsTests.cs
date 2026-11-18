@@ -168,7 +168,7 @@ public sealed partial class OperatorDocsTests : IDisposable
             .Where(m => m.Success).ToDictionary(m => m.Groups[1].Value, m => m.Groups[2].Value);
         Assert.Equal(["memory.scopes", "engine.legacyToolNames", "adapters.drive.edits"], named.Keys);
         var listed = Rows(section).Select(r => Assert.Single(r.Names)).ToList();
-        foreach (var settings in new[] { Yaml(Text("deploy", "compose", "rhythm.example.yaml")), Yaml(File.ReadAllText(Init())) })
+        foreach (var settings in new[] { Yaml(Text("deploy", "compose", "rhythm.example.yaml")), Yaml(File.ReadAllText(Init("--starter", "no"))) })
         {
             var shown = listed.Select(path => (path, value: At(settings, path))).Where(x => x.value is not null)
                 .Select(x => $"{x.path}: {x.value!.ToJsonString().Trim('"')}").Order(StringComparer.Ordinal);

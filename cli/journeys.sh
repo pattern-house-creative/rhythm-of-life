@@ -191,7 +191,7 @@ corpus() {
 
 step "this checkout's images, then init with the demo's data, the sample folders and a fictional glucose plugin" 18
 dc build engine app >/dev/null 2>&1 || fail "could not build the engine and app images from this checkout"
-out=$(./rhythm init --no-input --people "Alex, Sam" --timezone Europe/London --demo yes --app-port "$app" --mcp-port "$mcp" 2>&1) || fail "init: $out"
+out=$(./rhythm init --no-input --starter no --people "Alex, Sam" --timezone Europe/London --demo yes --app-port "$app" --mcp-port "$mcp" 2>&1) || fail "init: $out"
 echo "$out" | tail -n 2
 into_data demo/import import || fail "could not put the sample documents and readings in the stack"
 into_data demo/notes notes || fail "could not put the sample notes in the stack"

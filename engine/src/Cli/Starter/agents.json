@@ -1,0 +1,27 @@
+{
+  "title": "Agents",
+  "description": "Current claims, reviews, activity and open handoffs.",
+  "feeds": [
+    {
+      "name": "work",
+      "kind": "memories",
+      "where": {
+        "work": true,
+        "state": ["active", "review"]
+      },
+      "fullText": true,
+      "limit": 200
+    },
+    {
+      "name": "handoffs",
+      "kind": "memories",
+      "where": {
+        "project": "agent-handoffs",
+        "work": false
+      },
+      "fullText": true,
+      "limit": 200
+    }
+  ],
+  "note": "Installed from the Rhythm starter templates, version 1."
+}

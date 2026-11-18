@@ -31,6 +31,7 @@
     <Compile Include="../Adapters/**/*.cs" />
     <Compile Include="../Cli/**/*.cs" />
     <!-- Migrations keep the resource names an existing install recorded: Knowledge.Migrations.<file>. -->
+    <EmbeddedResource Include="../Cli/Starter/*" LogicalName="Knowledge.Starter.%(Filename)%(Extension)" />
     <EmbeddedResource Include="../../migrations/*.sql" LogicalName="Knowledge.Migrations.%(Filename)%(Extension)" />
     <!-- The fictional demo seed (demo/engine/), read by the demo adapter. -->
     <EmbeddedResource Include="../../../demo/engine/*.json" LogicalName="Knowledge.Demo.%(Filename)%(Extension)" />

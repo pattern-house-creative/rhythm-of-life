@@ -1,0 +1,238 @@
+<style>
+  :root {
+    color-scheme: dark;
+    font:
+      15px/1.5 var(--rhythm-font);
+    color: #f6f4ef;
+    background: #151b23;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    padding: clamp(14px, 3vw, 36px);
+  }
+  main {
+    max-width: 1400px;
+    margin: auto;
+  }
+  header,
+  nav,
+  .toolbar,
+  .row {
+    display: flex;
+    gap: 0.65rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  header {
+    justify-content: space-between;
+  }
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+  h1 {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 620;
+    letter-spacing: -0.035em;
+  }
+  h2 {
+    font-size: 1rem;
+    margin: 1.2rem 0 0.5rem;
+  }
+  button,
+  select,
+  input {
+    font: inherit;
+    color: inherit;
+    border: 1px solid #61717a;
+    border-radius: 0.5rem;
+    background: #202a35;
+    padding: 0.45rem 0.75rem;
+  }
+  button,
+  summary,
+  select {
+    cursor: pointer;
+  }
+  button:hover,
+  summary:hover {
+    color: #fff;
+  }
+  button[aria-pressed="true"],
+  button.primary {
+    background: #bce7cd;
+    border-color: #bce7cd;
+    color: #14271f;
+  }
+  button:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+  :focus-visible {
+    outline: 2px solid #fbce89;
+    outline-offset: 3px;
+  }
+  nav {
+    margin: 0.8rem 0;
+  }
+  article,
+  details,
+  .item {
+    background: #202a35;
+    border: 1px solid #394651;
+    border-radius: 0.65rem;
+    padding: 0.72rem 0.85rem;
+    margin: 0.45rem 0;
+    overflow-wrap: anywhere;
+  }
+  summary {
+    font-weight: 600;
+  }
+  .muted,
+  .empty,
+  .meta {
+    color: #bcc9cd;
+  }
+  .meta {
+    font-size: 0.85rem;
+  }
+  .copy {
+    white-space: pre-wrap;
+    margin-top: 0.55rem;
+  }
+  .empty {
+    padding: 0.75rem 0;
+  }
+  .lanes {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+  .lane {
+    min-width: 0;
+  }
+  .toolbar {
+    margin: 0.75rem 0;
+  }
+  .toolbar input {
+    min-width: 0;
+    flex: 1;
+  }
+  .toolbar select {
+    max-width: 100%;
+  }
+  progress {
+    accent-color: #a7d7ba;
+    width: min(16rem, 100%);
+  }
+  @media (max-width: 780px) {
+    .lanes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 510px) {
+    .lanes {
+      display: block;
+    }
+    button,
+    select,
+    input {
+      min-height: 44px;
+    }
+  }
+</style>
+<script>
+  function el(tag, text, cls) {
+    const node = document.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (cls) node.className = cls;
+    return node;
+  }
+  function action(label, fn) {
+    const node = el("button", label);
+    node.type = "button";
+    node.addEventListener("click", fn);
+    return node;
+  }
+  function records(feed) {
+    return feed?.status === "ok" ? feed.memories || [] : [];
+  }
+  function feedNotice(parent, feed) {
+    if (!feed || feed.status !== "ok")
+      parent.append(el("p", feed?.reason || "Waiting for data…", "empty"));
+    else if (feed.truncated)
+      parent.append(
+        el(
+          "p",
+          "Showing the " +
+            (feed.memories || feed.entries || []).length +
+            " records returned by this feed.",
+          "meta",
+        ),
+      );
+  }
+  function firstLine(m) {
+    return (m.preview || "Untitled").split("\n")[0];
+  }
+  function card(m, related = new Map()) {
+    const box = el("details");
+    box.append(el("summary", firstLine(m)));
+    const w = m.work;
+    if (w) {
+      const fields = [
+        m.project?.name || m.project?.slug,
+        w.type,
+        w.state,
+        w.claim?.label || w.assignee?.name,
+      ];
+      if (w.blocked) fields.push("Blocked");
+      box.append(el("p", fields.filter(Boolean).join(" · "), "meta"));
+      if (w.dependencies?.total) {
+        const d = w.dependencies,
+          total = d.total - d.cancelled,
+          progress = el("progress");
+        progress.max = Math.max(1, total);
+        progress.value = d.done;
+        box.append(
+          el("p", d.done + " of " + total + " dependencies done", "meta"),
+          progress,
+        );
+      }
+      for (const dep of w.blockedBy || [])
+        box.append(
+          el(
+            "p",
+            "Waiting for " +
+              (related.has(dep.id)
+                ? firstLine(related.get(dep.id))
+                : dep.type + " (" + dep.state + ")"),
+            "meta",
+          ),
+        );
+    }
+    if (m.preview?.includes("\n"))
+      box.append(
+        el(
+          "p",
+          m.preview.substring(m.preview.indexOf("\n") + 1).trim(),
+          "copy",
+        ),
+      );
+    if (m.graphId)
+      box.append(action("Open memory", () => rhythm.openStar(m.graphId)));
+    return box;
+  }
+  function choose(nav, options, value, change) {
+    nav.replaceChildren();
+    for (const [key, label] of options) {
+      const b = action(label, () => change(key));
+      b.setAttribute("aria-pressed", String(key === value));
+      nav.append(b);
+    }
+  }
+</script>
