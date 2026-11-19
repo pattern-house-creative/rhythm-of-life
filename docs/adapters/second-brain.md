@@ -84,6 +84,27 @@ sends no cookies.
 
 A failed page leaves the map as it was; it never removes stars.
 
+## Retiring the service after an import
+
+Once `rhythm import-second-brain` has brought the memories into Rhythm's own memories
+([../../cli/README.md](../../cli/README.md#importing-a-second-brain-export)), the service is a fallback only. Retire it in
+this order, each step its own change, and only once the people who used it agree the fallback period is over:
+
+1. **Turn the adapter off**, if the import did not already: `./rhythm disconnect second-brain`. The map drops the
+   service's stars at its next refresh; the imported memories, with their own ids, stay. Insights and dashboards that
+   named the old stars keep those references as they are: each imported memory's Second Brain id is in the origin map
+   (`memory_origins`, origin `second-brain:default`) if you want to re-point one by hand.
+2. **Check the replacement.** In a fresh AI client chat that reaches memory only through Rhythm, recall a few memories
+   you know were in Second Brain, and remove Second Brain's own connector from each AI client.
+3. **Take a last export** (the service's `GET /export`, read only) and keep it as privately as a backup, in case an
+   import needs repeating. A repeated import adds nothing it added before.
+4. **Switch the service off** in its own hosting. Rhythm never writes to it, so this is the service owner's step. Keep its
+   stored data for a while before deleting it, if the host lets you, so the switch can be undone.
+5. **Remove what Rhythm kept for it:** delete `deploy/compose/secrets/adapters/second-brain_token` and the
+   `adapters.second-brain` block in `rhythm.yaml`. With the block gone the adapter is off, as on a fresh install.
+
+Leave `memory.secondBrainImport` off once the last import is written.
+
 ## Limits
 
 - At most `graph.maxMemories` memories (3,000 by default, less what the demo and notes adapters take, Q-141),

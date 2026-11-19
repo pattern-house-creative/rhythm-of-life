@@ -94,6 +94,7 @@ internal fun Launcher(homeSignal: Int, navigation: LauncherNavigation) {
     var insight by remember { mutableStateOf<DailyInsight?>(null) }
     var insightState by remember { mutableStateOf("Connect your household") }
     var insightOpen by remember { mutableStateOf(false) }
+    var insightRefresh by remember { mutableIntStateOf(0) }
     val searchFocus = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
     val focus = LocalFocusManager.current
@@ -202,7 +203,7 @@ internal fun Launcher(homeSignal: Int, navigation: LauncherNavigation) {
     DrawerKeyboardEffects(drawerMotion,searchFocus,drawerScroll,{keyboard?.show()},{keyboard?.hide()},
         {query="";focus.clearFocus()})
     LaunchedEffect(drawer) {if(drawer)editHome=false}
-    LaunchedEffect(origin,visible,online,refresh,web) {
+    LaunchedEffect(origin,visible,online,refresh,web,insightRefresh) {
         insight=null; insightOpen=false
         insightState=when {
             origin.isBlank() -> "Connect your household"
@@ -457,7 +458,21 @@ internal fun Launcher(homeSignal: Int, navigation: LauncherNavigation) {
                 }
             }
         } }, confirmButton = { TextButton(onClick = { previews = false }) { Text("Done") } })
-    if(insightOpen) insight?.let { DailyInsightSheet(it) { insightOpen=false } }
+    if (insightOpen && visible && online && client != null) insight?.let { opened ->
+        key(client, opened.id) {
+            DailyInsightSheet(opened, onSave={ choice, note, until ->
+                try {
+                    client.saveInsightFeedback(opened.id, choice, note, until)
+                    insightOpen=false
+                    insightRefresh++
+                    android.widget.Toast.makeText(context, "Feedback saved", android.widget.Toast.LENGTH_SHORT).show()
+                } catch (_: HouseholdAccessDenied) {
+                    accessLost()
+                    insightState="Household access unavailable"
+                }
+            }, onClose={ insightOpen=false })
+        }
+    }
     selected?.let { tile ->
         val pinned=layout.tiles.any { it.key==tile.key }
         ModalBottomSheet(onDismissRequest={selected=null},containerColor=Color(0xff132b2c)) {

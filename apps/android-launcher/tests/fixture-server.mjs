@@ -13,6 +13,7 @@ import { resolve, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { unavailableHealth } from '../../../app/build/server/healthState.js';
+import { applyFeedback, feedbackInput } from '../../../app/build/src/insights.js';
 
 import { assertGraphPage } from '../../../app/build/src/validation.js';
 
@@ -119,6 +120,7 @@ const feedFor=(board)=>board.id===boards[0].id ? {kind:'log',log:'fixture',statu
 if (boards.some(d=>!cleanDashboard({dashboard:d}))) throw new Error('Invalid fixture dashboard');
 
 let mode='normal'; const reads={};
+let savedInsight = null;
 
 const server = createServer({pfx:readFileSync(certificate),passphrase:'fixture-only'},async(req,res)=>{
 
@@ -126,7 +128,11 @@ const server = createServer({pfx:readFileSync(certificate),passphrase:'fixture-o
 
   const json=(data,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
 
-  if(path==='/__fixture/control') {mode=url.searchParams.get('mode')||'normal';return json({mode});}
+  if(path==='/__fixture/control') {
+    mode=url.searchParams.get('mode')||'normal';
+    if (mode === 'normal') savedInsight=null;
+    return json({mode});
+  }
 
   if(path==='/__fixture/state') return json({mode,reads});
 
@@ -249,7 +255,18 @@ const server = createServer({pfx:readFileSync(certificate),passphrase:'fixture-o
       evidenceLevel:'weak',limitations:'Synthetic test data only.',stars:[],sources:[{kind:'record',title:'Synthetic garden plan',retrievedAt:generatedAt}],
       generatedBy:'fixture',generatedAt,sourcesAsOf:generatedAt,supersedes:null,
       status:mode==='insight-dismissed'?'dismissed':'new',feedback:null,createdAt:generatedAt,updatedAt:generatedAt};
-    return json({insights:mode==='insight-empty'?[]:[insight],runs:[]});
+    if (req.method === 'POST') {
+      if (mode === 'insight-feedback-error') return json({error:'Synthetic save failure'},502);
+      if (req.headers.origin !== 'https://10.0.2.2:' + port) return json({error:'Unexpected origin'},403);
+      let body='';
+      for await (const chunk of req) { body+=chunk; if (body.length>8192) return json({},413); }
+      let input;
+      try { input=feedbackInput(JSON.parse(body)); } catch { return json({},400); }
+      if (!input || input.id !== insight.id) return json({},400);
+      savedInsight=applyFeedback(insight,input.value,input);
+      return json(savedInsight);
+    }
+    return json({insights:mode==='insight-empty'?[]:[savedInsight ?? insight],runs:[]});
   }
 
   if(path==='/api/screens') return json({available:false});

@@ -641,7 +641,58 @@ class CompanionIntegrationTest {
         capture("access-loss")
     }
 
-    @Test fun insightStatesAndRepeatedReadOnlyDetailStayTruthful() {
+    @Test fun insightFeedbackSurvivesRetryAndIsReadBackFromHousehold() {
+        fun open() {
+            rule.waitUntil(15000){rule.onAllNodesWithText("A small window for your garden").fetchSemanticsNodes().isNotEmpty()}
+            rule.onNodeWithTag("daily-insight").performClick()
+        }
+        fun tap(text: String) = rule.onNodeWithText(text).performScrollTo().performClick()
+        fun saved() = runBlocking { HouseholdClient(origin).insights().single() }
+        open()
+        tap("Already handled")
+        rule.onNodeWithText("Save feedback").assertIsNotEnabled()
+        tap("Interesting")
+        rule.onNodeWithTag("insight-note").performScrollTo().performTextInput("Try this in the garden")
+        control("insight-feedback-error")
+        tap("Save feedback")
+        rule.waitUntil(10000){rule.onAllNodesWithText("Couldn’t confirm the save.",substring=true).fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("insight-note").assertTextContains("Try this in the garden")
+        assertNull(saved().feedback)
+        control("normal")
+        tap("Save feedback")
+        rule.waitUntil(10000){rule.onAllNodesWithTag("insight-detail").fetchSemanticsNodes().isEmpty()}
+        assertEquals(InsightChoice.Interesting,saved().feedback)
+        open()
+        rule.onNodeWithText("Interesting").assertIsSelected()
+        rule.onNodeWithTag("insight-note").assertTextContains("Try this in the garden")
+        tap("Remind me later")
+        rule.onNodeWithText("Save feedback").assertIsNotEnabled()
+        tap("Tomorrow morning")
+        tap("Save feedback")
+        rule.waitUntil(15000){rule.onAllNodesWithText("No current insight available").fetchSemanticsNodes().isNotEmpty()}
+        val snoozed=saved()
+        assertEquals(InsightChoice.Later,snoozed.feedback)
+        assertEquals("Try this in the garden",snoozed.feedbackNote)
+        assertTrue(requireNotNull(snoozed.until)>System.currentTimeMillis())
+    }
+    @Test fun insightChoicesSaveTheExpectedOutcome() {
+        for (choice in listOf(InsightChoice.Explore, InsightChoice.NotUseful, InsightChoice.Handled, InsightChoice.Later)) {
+            control("normal"); onMain { it.recreate() }
+            rule.waitUntil(15000){rule.onAllNodesWithText("A small window for your garden").fetchSemanticsNodes().isNotEmpty()}
+            rule.onNodeWithTag("daily-insight").performClick()
+            rule.onNodeWithText(choice.label).performScrollTo().performClick()
+            if (choice == InsightChoice.Handled)
+                rule.onNodeWithTag("insight-note").performScrollTo().performTextInput("Finished planting")
+            if (choice == InsightChoice.Later) rule.onNodeWithText("Next week").performScrollTo().performClick()
+            rule.onNodeWithText("Save feedback").performScrollTo().performClick()
+            rule.waitUntil(15000){rule.onAllNodesWithText("No current insight available").fetchSemanticsNodes().isNotEmpty()}
+            val saved=runBlocking { HouseholdClient(origin).insights().single() }
+            assertEquals(choice,saved.feedback)
+            assertEquals(choice.status,saved.status)
+            assertEquals(if (choice == InsightChoice.Handled) "Finished planting" else "",saved.feedbackNote)
+        }
+    }
+    @Test fun insightStatesAndRepeatedDetailStayTruthful() {
         val before=store.load()
         rule.waitUntil(15000){rule.onAllNodesWithText("A small window for your garden").fetchSemanticsNodes().isNotEmpty()}
         assertEquals("fixture-daily",runBlocking{HouseholdClient(origin).insights()}.single().id)

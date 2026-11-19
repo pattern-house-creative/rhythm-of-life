@@ -150,20 +150,37 @@ class HouseholdClient(
                 val kind=text("kind",20).also { check(it in listOf("focus","discovery","suggestion")) }
                 val title=text("title",120).also { check(it.isNotBlank()) }
                 val status=text("status",20).also { check(it in listOf("new","saved","explored","snoozed","dismissed","superseded","handled")) }
+                val feedback = row.optJSONObject("feedback")
                 val points=row.getJSONArray("points");check(points.length() <= 30)
                 val sources=row.getJSONArray("sources");check(sources.length() <= 30)
                 DailyInsight(id,kind,title,text("summary",600),text("whyItMatters",600),text("nextStep",600),
                     text("limitations",1000),text("evidenceLevel",20),
                     instant(row.getString("generatedAt")) ?: error("Invalid date"),status,
                     row.optString("supersedes").takeIf { it.isNotBlank() && it != "null" },
-                    instant(row.optJSONObject("feedback")?.optString("until").orEmpty()),
+                    instant(feedback?.optString("until").orEmpty()),
                     (0 until points.length()).map {
                         val point=points.getJSONObject(it)
                         val type=point.getString("type").also { t -> check(t in listOf("observed","sourced","inferred","hypothesis")) }
                         type.replaceFirstChar { it.uppercase() }+": "+point.getString("text").also { s -> check(s.length<=1200) }
                     },
-                    (0 until sources.length()).map { sources.getJSONObject(it).getString("title").also { s -> check(s.length<=500) } })
+                    (0 until sources.length()).map { sources.getJSONObject(it).getString("title").also { s -> check(s.length<=500) } },
+                    InsightChoice.entries.firstOrNull { it.value == feedback?.optString("value") },
+                    (feedback?.opt("note") as? String).orEmpty().also { check(it.length <= 500) })
             }.getOrNull()
         }
+    }
+
+    internal suspend fun saveInsightFeedback(id: String, choice: InsightChoice, note: String, until: java.time.Instant?) {
+        require(id.matches(Regex("[A-Za-z0-9_-]{1,100}")) && note.length <= 500)
+        require(choice != InsightChoice.Handled || note.isNotBlank())
+        require((choice == InsightChoice.Later) == (until != null))
+        val body = JSONObject().put("id", id).put("value", choice.value)
+        if (note.isNotBlank()) body.put("note", note.trim())
+        if (until != null) body.put("until", until.toString())
+        val saved = JSONObject(read("/api/insights", body))
+        val feedback = saved.getJSONObject("feedback")
+        check(saved.getString("id") == id && saved.getString("status") == choice.status &&
+            feedback.getString("value") == choice.value && (feedback.opt("note") as? String).orEmpty() == note.trim())
+        if (until != null) check(java.time.Instant.parse(feedback.getString("until")) == until)
     }
 }

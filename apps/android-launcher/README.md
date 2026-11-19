@@ -5,7 +5,7 @@ native Kotlin and Compose app that talks to a Rhythm of Life install you already
 previews sit in the app grid, the sky of stars is behind the screen, and today's insight is at the
 bottom.
 
-> The development build (`0.1.13-dev`) and the owner-signed release (`0.1.13`) can be installed
+> The development build (`0.1.14-dev`) and the owner-signed release (`0.1.14`) can be installed
 > together. See [Prepare a daily-use release](#prepare-a-daily-use-release) for signing and setup.
 
 > **Not a medical device.** The launcher can show a glucose reading from your install. It is for your
@@ -25,11 +25,13 @@ bottom.
 - **The sky.** "More sky" moves the grid down and shows the stars your install gives the launcher, with
   their links. Pinch, pan, touch a star to see what it is linked to, and open it.
 - **Today's insight.** A strip at the bottom opens the day's insight with its points, sources and
-  limitations. It is read-only here.
+  limitations. Choose a response, add a note if you like, and tap **Save feedback** to send it to
+  your household. **Remind me later** offers tomorrow morning or next week. **Already handled**
+  asks what happened.
 - **A built-in glucose card,** offered only when your install says it has one.
 
 Hold a tile to move it, to switch a dashboard between an icon and a preview, or to take it off Home.
-What you arrange is kept on the phone only; nothing is written to your install.
+Your Home layout stays on the phone.
 
 ## What you need
 

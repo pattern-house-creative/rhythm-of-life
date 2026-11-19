@@ -7,7 +7,9 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -25,8 +27,16 @@ internal data class DailyInsight(
     val id: String, val kind: String, val title: String, val summary: String,
     val why: String, val next: String, val limitations: String, val evidence: String,
     val generatedAt: Long, val status: String, val supersedes: String?,
-    val until: Long?, val points: List<String>, val sources: List<String>
+    val until: Long?, val points: List<String>, val sources: List<String>,
+    val feedback: InsightChoice? = null, val feedbackNote: String = ""
 )
+internal enum class InsightChoice(val value: String, val label: String, val status: String) {
+    Interesting("interesting", "Interesting", "saved"),
+    Explore("explore", "Explore", "explored"),
+    NotUseful("not_useful", "Not useful", "dismissed"),
+    Later("later", "Remind me later", "snoozed"),
+    Handled("handled", "Already handled", "handled")
+}
 internal fun currentDailyInsight(rows: List<DailyInsight>, now: Long): DailyInsight? {
     val replaced = rows.mapNotNull { it.supersedes }.toSet()
     return rows.mapNotNull { row ->
@@ -75,14 +85,61 @@ private fun insightColor(kind: String?) = when(kind) {
 private fun Modifier.clipForInsight() = this.background(Color(0x99102526), RoundedCornerShape(18.dp))
     .border(.5.dp, Color(0x26b2e0cc), RoundedCornerShape(18.dp))
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable internal fun DailyInsightSheet(insight: DailyInsight, onClose: () -> Unit) {
-    ModalBottomSheet(onDismissRequest=onClose, containerColor=Color(0xff122a2b)) {
-        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal=24.dp).padding(bottom=28.dp).testTag("insight-detail")) {
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable internal fun DailyInsightSheet(
+    insight: DailyInsight,
+    onSave: suspend (InsightChoice, String, Instant?) -> Unit,
+    onClose: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    var choice by remember { mutableStateOf(insight.feedback) }
+    var note by remember { mutableStateOf(insight.feedbackNote) }
+    var reminderDays by remember { mutableStateOf<Int?>(null) }
+    var saving by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
+    val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true,
+        confirmValueChange = { it != SheetValue.Hidden || !saving })
+    ModalBottomSheet(onDismissRequest={ if (!saving) onClose() }, sheetState=sheet, containerColor=Color(0xff122a2b)) {
+        Column(Modifier.fillMaxWidth().imePadding().verticalScroll(rememberScrollState()).padding(horizontal=24.dp).padding(bottom=28.dp).testTag("insight-detail")) {
             Text("${insight.kind.replaceFirstChar { it.uppercase() }} · ${insightDate(insight.generatedAt)}",
                 color=insightColor(insight.kind), fontSize=12.sp)
             Text(insight.title, fontFamily=ObservatoryTitle, fontSize=24.sp, modifier=Modifier.padding(vertical=12.dp))
-            for((label, value) in listOf("" to insight.summary, "Why it matters" to insight.why, "A possible next step" to insight.next,
+            if (insight.summary.isNotBlank()) Text(insight.summary, fontSize=14.sp, lineHeight=21.sp)
+            Text("Was this useful?", style=MaterialTheme.typography.titleMedium, modifier=Modifier.padding(top=16.dp))
+            FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                InsightChoice.entries.forEach { option ->
+                    FilterChip(selected=choice == option, enabled=!saving,
+                        onClick={ choice=option; failed=false }, label={ Text(option.label) })
+                }
+            }
+            if (choice == InsightChoice.Later) {
+                FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                    for ((days, label) in listOf(1 to "Tomorrow morning", 7 to "Next week")) {
+                        FilterChip(selected=reminderDays == days, enabled=!saving,
+                            onClick={ reminderDays=days; failed=false }, label={ Text(label) })
+                    }
+                }
+            }
+            OutlinedTextField(value=note, onValueChange={ if (it.length <= 500) { note=it; failed=false } },
+                enabled=!saving, label={ Text(if (choice == InsightChoice.Handled) "What happened?" else "Note (optional)") },
+                minLines=1, maxLines=4, modifier=Modifier.fillMaxWidth().testTag("insight-note"))
+            if (failed) Text("Couldn’t confirm the save. Your note is here to retry.", color=MaterialTheme.colorScheme.error)
+            Button(enabled=!saving && choice != null && (choice != InsightChoice.Handled || note.isNotBlank()) &&
+                (choice != InsightChoice.Later || reminderDays != null), onClick={
+                val selected = choice ?: return@Button
+                if (saving) return@Button
+                val until = if (selected == InsightChoice.Later)
+                    java.time.LocalDate.now().plusDays(requireNotNull(reminderDays).toLong())
+                        .atTime(7, 0).atZone(ZoneId.systemDefault()).toInstant() else null
+                saving=true
+                scope.launch {
+                    try { onSave(selected, note.trim(), until) }
+                    catch (e: CancellationException) { throw e }
+                    catch (_: Exception) { failed=true }
+                    finally { saving=false }
+                }
+            }, modifier=Modifier.padding(top=8.dp)) { Text(if (saving) "Saving…" else "Save feedback") }
+            for((label, value) in listOf("Why it matters" to insight.why, "A possible next step" to insight.next,
                 "Evidence · ${insight.evidence}" to insight.points.joinToString("\n\n"), "Limitations" to insight.limitations,
                 "Sources" to insight.sources.joinToString("\n"))) {
                 if(value.isNotBlank()) {
@@ -90,7 +147,7 @@ private fun Modifier.clipForInsight() = this.background(Color(0x99102526), Round
                     Text(value,fontSize=14.sp,lineHeight=21.sp)
                 }
             }
-            TextButton(onClick=onClose,modifier=Modifier.align(Alignment.End).padding(top=12.dp)) { Text("Close insight") }
+            TextButton(onClick=onClose,enabled=!saving,modifier=Modifier.align(Alignment.End).padding(top=12.dp)) { Text("Close insight") }
         }
     }
 }

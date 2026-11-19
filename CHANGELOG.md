@@ -6,9 +6,15 @@ each entry says so under **Upgrading**.
 
 ## Unreleased
 
+- The Second Brain adapter's guide says how to retire the service after importing its memories: the order of steps,
+  what Rhythm keeps and what to remove. See [Second Brain](docs/adapters/second-brain.md#retiring-the-service-after-an-import).
+
 - The web app's full npm audit, build and test tools included, now reports zero findings. The offline
   build plugin's file matcher is pinned to a patched release. See the
   [dependency review](docs/dependency-license-review-20261109.md#18-november-cleared).
+
+- Android launcher 0.1.14 lets you respond to the daily insight from Home, include a note,
+  and choose when a reminder should return.
 
 ## 0.1.0-alpha.3 (18 November 2026)
 
