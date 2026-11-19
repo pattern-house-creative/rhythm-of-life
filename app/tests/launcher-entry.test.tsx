@@ -101,6 +101,14 @@ it("opens a dashboard entry through the existing full-screen sandbox", async () 
   const frame = await screen.findByTitle("Sample training week dashboard");
   expect(frame.getAttribute("sandbox")).toBe("allow-scripts allow-forms");
   expect(frame.closest(".full-screen")).toHaveClass("native-reader");
+  const allow = screen.getByRole("switch", { name: "Allow edits" });
+  expect(allow).toHaveAccessibleDescription(/training log/i);
+  expect(allow).toHaveAttribute("aria-checked", "false");
+  const user = userEvent.setup();
+  await user.click(allow);
+  await waitFor(() => expect(allow).toHaveAttribute("aria-checked", "true"));
+  await user.click(allow);
+  await waitFor(() => expect(allow).toHaveAttribute("aria-checked", "false"));
   expect(
     screen.queryByRole("button", { name: "Exit full screen" }),
   ).not.toBeInTheDocument();

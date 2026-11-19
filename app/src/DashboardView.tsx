@@ -149,6 +149,7 @@ export default function DashboardView({
   // On a phone the status line folds to one row; this unfolds the rest.
   const [more, setMore] = useState(false);
   const moreId = useId();
+  const editTargetsId = useId();
   // Edits as they were set while this version is open (null: as saved), the
   // last change with its Undo, and whether either is on its way.
   const [edits, setEdits] = useState<{ key: string; on: boolean } | null>(null);
@@ -508,6 +509,29 @@ export default function DashboardView({
           ))}
         </ul>
       )}
+      {dashboard.writes.length > 0 && (
+        <div className="dashboard-edits">
+          <button
+            className="dashboard-allow"
+            role="switch"
+            aria-checked={editsOn}
+            aria-describedby={editTargetsId}
+            disabled={pending || !session.dashboardAllowEdits}
+            onClick={() => void allow(!editsOn)}
+          >
+            <span className="switch-track" aria-hidden="true">
+              <span className="switch-thumb" />
+            </span>
+            Allow edits
+          </button>
+          <p id={editTargetsId}>
+            {editsOn ? "It can change " : "When on, it can change "}
+            {dashboard.writes.map((w) => target(w, dashboard)).join("; ")}.
+            {editsOn &&
+              " Every change shows here with Undo and is kept in its history."}
+          </p>
+        </div>
+      )}
       <div className={`dashboard-meta${more ? " open" : ""}`} hidden={bare}>
         <button
           className="dashboard-summary"
@@ -527,11 +551,6 @@ export default function DashboardView({
               {missing.length} of {feeds.length} feeds unavailable
             </span>
           )}{" "}
-          {dashboard.writes.length > 0 && (
-            <span className={editsOn ? "summary-edits" : undefined}>
-              Edits {editsOn ? "on" : "off"}
-            </span>
-          )}
           <ChevronUp size={13} aria-hidden="true" />
         </button>
         <div id={moreId} className="dashboard-details">
@@ -559,28 +578,6 @@ export default function DashboardView({
               ) unavailable: {f.reason ?? "no reason given"}
             </p>
           ))}
-          {dashboard.writes.length > 0 && (
-            <div className="dashboard-edits">
-              <button
-                className="dashboard-allow"
-                role="switch"
-                aria-checked={editsOn}
-                disabled={pending || !session.dashboardAllowEdits}
-                onClick={() => void allow(!editsOn)}
-              >
-                <span className="switch-track" aria-hidden="true">
-                  <span className="switch-thumb" />
-                </span>
-                Allow edits
-              </button>
-              <p>
-                {editsOn ? "It can change " : "When on, it can change "}
-                {dashboard.writes.map((w) => target(w, dashboard)).join("; ")}.
-                {editsOn &&
-                  " Every change shows here with Undo and is kept in its history."}
-              </p>
-            </div>
-          )}
         </div>
         <div className="dashboard-controls">
           <button

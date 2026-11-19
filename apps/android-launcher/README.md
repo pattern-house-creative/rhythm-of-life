@@ -19,7 +19,7 @@ bottom.
   app Android exposes to the launcher, including available work-profile apps with their Android badges.
   Personal and work copies keep distinct pins. Apps remain available if your install or Android System WebView is unavailable.
 - **Dashboard previews on Home.** A preview takes the room of four icons and redraws from fresh data.
-  Touch it and the whole dashboard opens in a reader; Android's Back returns to Home. Visible Home cards stay in memory during drawer and reader navigation, pause when covered, and refresh when due.
+  Touch it and the whole dashboard opens in a reader. On a dashboard that supports changes, **Allow edits** appears below the page alongside the targets it can change. Tap the switch to turn editing on or off. Android's Back returns to Home. Visible Home cards stay in memory during drawer and reader navigation, pause when covered, and refresh when due.
 - **App drawer.** Swipe up to search your apps, dashboards and stars against the sky. Choose Grid or A–Z.
   In A–Z, slide your finger along the letters to jump through the list. The launcher remembers your choice.
   Swipe the top handle down to close, or use Android Back.

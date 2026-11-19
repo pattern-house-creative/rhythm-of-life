@@ -198,11 +198,14 @@
 }
 /* Allow edits: a switch, with what it lets the page change beside it. */
 .dashboard-edits {
-  flex-basis: 100%;
+  flex: none;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 4px 14px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #8fa5b2;
 }
 .dashboard-allow {
   display: inline-flex;
@@ -244,10 +247,20 @@
 }
 .dashboard-edits p {
   flex: 1 1 24ch;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 761px) and (min-height: 501px) {
+  .full-screen:not(.native-reader) .dashboard-edits {
+    display: none;
+  }
+}
+.native-reader .dashboard-allow {
+  min-height: 44px;
 }
 /* On a phone the page gets the screen: its frame loses the rounding, and the
-   status line folds to one row (when it was read, whether edits are on, the
-   version) that unfolds in place, above itself, to say the rest. Elsewhere
+   status line folds to one row (when it was read and the version) that
+   unfolds in place, above itself, to say the rest. Elsewhere
    the row stays out of the way and the rest is always shown. */
 .dashboard-summary {
   display: none;
@@ -285,8 +298,17 @@
     margin-right: 6px;
     color: #5d7280;
   }
-  .dashboard-summary .summary-edits {
-    color: #8fd3c0;
+  .dashboard-allow {
+    min-height: 44px;
+    font-size: 14px;
+  }
+  .dashboard-edits {
+    max-height: 30dvh;
+    overflow: auto;
+  }
+  .full-screen .dashboard-edits {
+    position: relative;
+    z-index: 2;
   }
   .dashboard-summary .summary-missing {
     color: #c1a66d;

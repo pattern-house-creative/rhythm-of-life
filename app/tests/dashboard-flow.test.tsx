@@ -87,12 +87,14 @@ it("shows the demo's dashboard as a star, lists it on the stars it reads, and op
   ).toBeInTheDocument();
   // On a phone that line folds to one row, which unfolds the rest in place.
   const summary = within(reader).getByRole("button", {
-    name: /^Read just now\W+Edits off/,
+    name: /^Read just now/,
   });
   expect(summary).toHaveAttribute("aria-expanded", "false");
-  expect(
-    document.getElementById(summary.getAttribute("aria-controls")!),
-  ).toHaveTextContent(/Read from the engine just now.*Allow edits/);
+  const details = document.getElementById(summary.getAttribute("aria-controls")!);
+  expect(details).toHaveTextContent(/Read from the engine just now/);
+  const allow = within(reader).getByRole("switch", { name: "Allow edits" });
+  expect(allow).toHaveAttribute("aria-checked", "false");
+  expect(details).not.toContainElement(allow);
   await user.click(summary);
   expect(summary).toHaveAttribute("aria-expanded", "true");
   await user.click(summary);
