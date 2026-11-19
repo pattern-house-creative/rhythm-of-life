@@ -7,6 +7,16 @@ applied to this current baseline, then extended to cover the rest of the distrib
 
 ## Dependency findings
 
+### 18 November: cleared
+
+`npm audit` on the app reports zero findings, full and production-only. The picomatch advisory
+no longer appears in the registry's audit data, and the remaining four moderate entries
+(`vite-plugin-pwa -> workbox-build -> glob 11 -> minimatch 10`) are cleared by an `overrides` entry
+in `app/package.json` that gives workbox-build `glob ^14.0.6`, which brings `minimatch 11.0.9`.
+Workbox calls only `globSync(pattern, { cwd, follow, ignore })`, which glob 14 keeps. The lint,
+tests, build (service worker precaches 58 entries) and smoke checks pass with the override.
+Remove the override once workbox-build depends on a patched glob itself.
+
 ### 17 November recheck
 
 With the committed app lockfile on `90d3e288`, `npm audit --json` reported 12 high and two

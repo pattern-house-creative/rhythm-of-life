@@ -5,9 +5,8 @@ native Kotlin and Compose app that talks to a Rhythm of Life install you already
 previews sit in the app grid, the sky of stars is behind the screen, and today's insight is at the
 bottom.
 
-> **Development build** (`0.1.13-dev`). The drawer update was tested on an Android 14 emulator. Local builds produce a debug APK or
-> an unsigned release APK. Release signing and physical-phone acceptance are still outstanding. Read
-> [What it does not do yet](#what-it-does-not-do-yet) first.
+> The development build (`0.1.13-dev`) and the owner-signed release (`0.1.13`) can be installed
+> together. See [Prepare a daily-use release](#prepare-a-daily-use-release) for signing and setup.
 
 > **Not a medical device.** The launcher can show a glucose reading from your install. It is for your
 > information only. Never make treatment decisions from it: use your device's own display and your
@@ -67,8 +66,10 @@ launcher-release-unsigned.apk`, then inspect the result with
 `apksigner verify --verbose --print-certs launcher-release.apk`. Keep the keystore and credentials
 outside the repository. Future updates use the same signing identity and a higher version code.
 
-Android will reject an in-place update of a debug-signed install with a different release certificate.
-Choose the transition and how to preserve the current Home layout before changing an existing phone.
+The signed app appears as **Rhythm OS (Release)** and uses the application ID
+`io.github.pattern_house_creative.rhythm.launcher.release`. Install it alongside **Rhythm OS**.
+Each launcher has its own settings and layout. You can open the release from the app drawer and
+set it up while your existing launcher remains your default Home app.
 Check Home/Back, reader backgrounding, work-profile launching, loss of access and battery use on the
 device before selecting it as the daily Home app.
 

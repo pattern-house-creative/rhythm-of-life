@@ -43,10 +43,18 @@ android {
         minSdk = 28
         targetSdk = 36
         versionCode = 14
-        versionName = "0.1.13-dev"
+        versionName = "0.1.13"
+        manifestPlaceholders["launcherLabel"] = "Rhythm OS"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        getByName("debug") {
+            versionNameSuffix = "-dev"
+        }
+        getByName("release") {
+            applicationIdSuffix = ".release"
+            manifestPlaceholders["launcherLabel"] = "Rhythm OS (Release)"
+        }
         create("fixture") {
             initWith(getByName("debug"))
             applicationIdSuffix = ".fixture"

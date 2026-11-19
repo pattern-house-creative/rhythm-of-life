@@ -1169,15 +1169,15 @@
       "integrity": "sha512-6D5dgokHsWDDMtmXHznKa0hK229NN+1a4BLPmUCLqcO1Pw5EEhWY5RFt0AcXnVRAljFFPfRtLkJePQj6LSsV6g=="
     },
     {
-      "path": "node_modules/@isaacs/cliui",
-      "name": "@isaacs/cliui",
-      "version": "9.0.0",
+      "path": "node_modules/@isaacs/nonrecursive-glob-match",
+      "name": "@isaacs/nonrecursive-glob-match",
+      "version": "1.1.0",
       "license": "BlueOak-1.0.0",
       "direct": false,
       "dev": true,
       "optional": false,
-      "resolved": "https://registry.npmjs.org/@isaacs/cliui/-/cliui-9.0.0.tgz",
-      "integrity": "sha512-AokJm4tuBHillT+FpMtxQ60n8ObyXBatq7jD2/JA9dxbDDokKQm8KMht5ibGzLVU9IJDIKK4TPKgMHEYMn3lMg=="
+      "resolved": "https://registry.npmjs.org/@isaacs/nonrecursive-glob-match/-/nonrecursive-glob-match-1.1.0.tgz",
+      "integrity": "sha512-GPm/Dbvk5RLmhRnxXIa7nTpK0xtl4E0wj0MslsuNiJ1FIROU+2+9lgUC/dgF7Ey4QCWhfEsgxilMRMCdHPfDfw=="
     },
     {
       "path": "node_modules/@jridgewell/gen-mapping",
@@ -2898,13 +2898,13 @@
     {
       "path": "node_modules/brace-expansion",
       "name": "brace-expansion",
-      "version": "5.0.12",
+      "version": "5.0.13",
       "license": "MIT",
       "direct": false,
       "dev": true,
       "optional": false,
-      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.12.tgz",
-      "integrity": "sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ=="
+      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.13.tgz",
+      "integrity": "sha512-Vh3dmFbc4wZeox7M9I/0L9GfFd83Su4+yCck/OF9Gi/P/dAHn0RT7X4K9R7gMNMhDck3DvhR6QXsnQdjjgwNvQ=="
     },
     {
       "path": "node_modules/browserslist",
@@ -3037,17 +3037,6 @@
       "optional": false,
       "resolved": "https://registry.npmjs.org/core-js-compat/-/core-js-compat-3.51.0.tgz",
       "integrity": "sha512-52r6fkXgxv4GLMjmFcMWRx7X9bw071xTTdrDcdyPGRqU2oE+9pCG0bAOMifSBdLw0JRBZKEF0q3B55qPlLuE8g=="
-    },
-    {
-      "path": "node_modules/cross-spawn",
-      "name": "cross-spawn",
-      "version": "7.0.6",
-      "license": "MIT",
-      "direct": false,
-      "dev": true,
-      "optional": false,
-      "resolved": "https://registry.npmjs.org/cross-spawn/-/cross-spawn-7.0.6.tgz",
-      "integrity": "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA=="
     },
     {
       "path": "node_modules/crypto-random-string",
@@ -3754,17 +3743,6 @@
       "integrity": "sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg=="
     },
     {
-      "path": "node_modules/foreground-child",
-      "name": "foreground-child",
-      "version": "3.3.1",
-      "license": "ISC",
-      "direct": false,
-      "dev": true,
-      "optional": false,
-      "resolved": "https://registry.npmjs.org/foreground-child/-/foreground-child-3.3.1.tgz",
-      "integrity": "sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw=="
-    },
-    {
       "path": "node_modules/framer-motion",
       "name": "framer-motion",
       "version": "14.6.0",
@@ -3899,13 +3877,13 @@
     {
       "path": "node_modules/glob",
       "name": "glob",
-      "version": "11.1.0",
+      "version": "14.0.6",
       "license": "BlueOak-1.0.0",
       "direct": false,
       "dev": true,
       "optional": false,
-      "resolved": "https://registry.npmjs.org/glob/-/glob-11.1.0.tgz",
-      "integrity": "sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw=="
+      "resolved": "https://registry.npmjs.org/glob/-/glob-14.0.6.tgz",
+      "integrity": "sha512-OwXjVP2svY5EyLY75Vek96C8qK43gqrt4xsZ+qSILdnaEiJPXkd62mcfUSNx/TQErQRdu5uM5kF67sfONragKw=="
     },
     {
       "path": "node_modules/globalthis",
@@ -4392,28 +4370,6 @@
       "integrity": "sha512-xHjhDr3cNBK0BzdUJSPXZntQUx/mwMS5Rw4A7lPJ90XGAO6ISP/ePDNuo0vhqOZU+UD5JoodwCAAoZQd3FeAKw=="
     },
     {
-      "path": "node_modules/isexe",
-      "name": "isexe",
-      "version": "2.0.0",
-      "license": "ISC",
-      "direct": false,
-      "dev": true,
-      "optional": false,
-      "resolved": "https://registry.npmjs.org/isexe/-/isexe-2.0.0.tgz",
-      "integrity": "sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw=="
-    },
-    {
-      "path": "node_modules/jackspeak",
-      "name": "jackspeak",
-      "version": "4.2.3",
-      "license": "BlueOak-1.0.0",
-      "direct": false,
-      "dev": true,
-      "optional": false,
-      "resolved": "https://registry.npmjs.org/jackspeak/-/jackspeak-4.2.3.tgz",
-      "integrity": "sha512-ykkVRwrYvFm1nb2AJfKKYPr0emF6IiXDYUaFx4Zn9ZuIH7MrzEZ3sD5RlqGXNRpHtvUHJyOnCEFxOlNDtGo7wg=="
-    },
-    {
       "path": "node_modules/jake",
       "name": "jake",
       "version": "10.9.4",
@@ -4757,13 +4713,13 @@
     {
       "path": "node_modules/minimatch",
       "name": "minimatch",
-      "version": "10.2.6",
+      "version": "11.0.9",
       "license": "BlueOak-1.0.0",
       "direct": false,
       "dev": true,
       "optional": false,
-      "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-10.2.6.tgz",
-      "integrity": "sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A=="
+      "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-11.0.9.tgz",
+      "integrity": "sha512-KCFkfyjqerNlSstjlhIGNXIKZGA/6O4V4RlhZ+Dsr621SPPw0mzlypE9D9ZOoPiVefHID+j7/XuMMlqfD/F60Q=="
     },
     {
       "path": "node_modules/minipass",
@@ -4909,17 +4865,6 @@
       "integrity": "sha512-RkTN9EmgIUpLuhNoLhO3OliMGJlvb3Dk7XVjBZnfoMCHrVpuz5ESd97klfiyYeV7XfA2lNLnDCPMkUI+Qw5How=="
     },
     {
-      "path": "node_modules/package-json-from-dist",
-      "name": "package-json-from-dist",
-      "version": "1.0.1",
-      "license": "BlueOak-1.0.0",
-      "direct": false,
-      "dev": true,
-      "optional": false,
-      "resolved": "https://registry.npmjs.org/package-json-from-dist/-/package-json-from-dist-1.0.1.tgz",
-      "integrity": "sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw=="
-    },
-    {
       "path": "node_modules/parse5",
       "name": "parse5",
       "version": "8.0.1",
@@ -4929,17 +4874,6 @@
       "optional": false,
       "resolved": "https://registry.npmjs.org/parse5/-/parse5-8.0.1.tgz",
       "integrity": "sha512-z1e/HMG90obSGeidlli3hj7cbocou0/wa5HacvI3ASx34PecNjNQeaHNo5WIZpWofN9kgkqV1q5YvXe3F0FoPw=="
-    },
-    {
-      "path": "node_modules/path-key",
-      "name": "path-key",
-      "version": "3.1.1",
-      "license": "MIT",
-      "direct": false,
-      "dev": true,
-      "optional": false,
-      "resolved": "https://registry.npmjs.org/path-key/-/path-key-3.1.1.tgz",
-      "integrity": "sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q=="
     },
     {
       "path": "node_modules/path-parse",
@@ -4955,13 +4889,13 @@
     {
       "path": "node_modules/path-scurry",
       "name": "path-scurry",
-      "version": "2.0.2",
+      "version": "3.0.0",
       "license": "BlueOak-1.0.0",
       "direct": false,
       "dev": true,
       "optional": false,
-      "resolved": "https://registry.npmjs.org/path-scurry/-/path-scurry-2.0.2.tgz",
-      "integrity": "sha512-3O/iVVsJAPsOnpwWIeD+d6z/7PmqApyQePUtCndjatj/9I5LylHvt5qluFaBT3I5h3r1ejfR056c+FCv+NnNXg=="
+      "resolved": "https://registry.npmjs.org/path-scurry/-/path-scurry-3.0.0.tgz",
+      "integrity": "sha512-1pTbQqH1wIwMi/eleQ5leFTTCkzFsPcgXNjwOA8YGGW/W4/kHT3dssE7Z6NH+zuqNLOzOB0uaD61yl7cAcVhgg=="
     },
     {
       "path": "node_modules/pdfjs-dist",
@@ -5404,28 +5338,6 @@
       "integrity": "sha512-RJRdvCo6IAnPdsvP/7m6bsQqNnn1FCBX5ZNtFL98MmFF/4xAIJTIg1YbHW5DC2W5SKZanrC6i4HsJqlajw/dZw=="
     },
     {
-      "path": "node_modules/shebang-command",
-      "name": "shebang-command",
-      "version": "2.0.0",
-      "license": "MIT",
-      "direct": false,
-      "dev": true,
-      "optional": false,
-      "resolved": "https://registry.npmjs.org/shebang-command/-/shebang-command-2.0.0.tgz",
-      "integrity": "sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA=="
-    },
-    {
-      "path": "node_modules/shebang-regex",
-      "name": "shebang-regex",
-      "version": "3.0.0",
-      "license": "MIT",
-      "direct": false,
-      "dev": true,
-      "optional": false,
-      "resolved": "https://registry.npmjs.org/shebang-regex/-/shebang-regex-3.0.0.tgz",
-      "integrity": "sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A=="
-    },
-    {
       "path": "node_modules/side-channel",
       "name": "side-channel",
       "version": "1.1.1",
@@ -5468,17 +5380,6 @@
       "optional": false,
       "resolved": "https://registry.npmjs.org/side-channel-weakmap/-/side-channel-weakmap-1.0.2.tgz",
       "integrity": "sha512-WPS/HvHQTYnHisLo9McqBHOJk2FkHO/tlpvldyrnem4aeQp4hai3gythswg6p01oSoTl58rcpiFAjF2br2Ak2A=="
-    },
-    {
-      "path": "node_modules/signal-exit",
-      "name": "signal-exit",
-      "version": "4.1.0",
-      "license": "ISC",
-      "direct": false,
-      "dev": true,
-      "optional": false,
-      "resolved": "https://registry.npmjs.org/signal-exit/-/signal-exit-4.1.0.tgz",
-      "integrity": "sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw=="
     },
     {
       "path": "node_modules/smob",
@@ -6227,17 +6128,6 @@
       "optional": false,
       "resolved": "https://registry.npmjs.org/whatwg-url/-/whatwg-url-17.3.0.tgz",
       "integrity": "sha512-KwOAJrpf+GTgBvcBQJcP38sMF0DsQKdwtG+TxM2pW44P6E5k0hDbWrDmyuJDIF0Uef0aQq0ZoJs+5oI+k8ddhg=="
-    },
-    {
-      "path": "node_modules/which",
-      "name": "which",
-      "version": "2.0.2",
-      "license": "ISC",
-      "direct": false,
-      "dev": true,
-      "optional": false,
-      "resolved": "https://registry.npmjs.org/which/-/which-2.0.2.tgz",
-      "integrity": "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA=="
     },
     {
       "path": "node_modules/which-boxed-primitive",

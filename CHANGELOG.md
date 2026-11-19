@@ -4,6 +4,12 @@ What changed in each version, newest first. Versions follow [Semantic Versioning
 while the project is in alpha, any version may change settings or need a step from the operator, and
 each entry says so under **Upgrading**.
 
+## Unreleased
+
+- The web app's full npm audit, build and test tools included, now reports zero findings. The offline
+  build plugin's file matcher is pinned to a patched release. See the
+  [dependency review](docs/dependency-license-review-20261109.md#18-november-cleared).
+
 ## 0.1.0-alpha.3 (18 November 2026)
 
 - Fresh installs include Projects with an Ideas inbox, Agents, shared agent instructions and editable starter capsules.

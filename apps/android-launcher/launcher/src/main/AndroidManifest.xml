@@ -5,7 +5,7 @@
         <intent><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent>
         <intent><action android:name="android.intent.action.DIAL" /><data android:scheme="tel" /></intent>
     </queries>
-    <application android:allowBackup="false" android:dataExtractionRules="@xml/data_extraction_rules" android:label="Rhythm OS" android:icon="@drawable/rhythm_mark"
+    <application android:allowBackup="false" android:dataExtractionRules="@xml/data_extraction_rules" android:label="${launcherLabel}" android:icon="@drawable/rhythm_mark"
         android:theme="@android:style/Theme.Material.NoActionBar" android:usesCleartextTraffic="false"
         android:supportsRtl="true">
         <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTask"

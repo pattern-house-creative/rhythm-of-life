@@ -59,13 +59,6 @@ Only with `memory.tools: on`.
 - **The CareLink plugin is not published yet.** It is a separate, unofficial repository, and when it is out it can
   stop working whenever the vendor changes its service ([adapters/carelink.md](adapters/carelink.md)).
 
-## Models and dependencies
-
-- **The app's build and test toolchain has outstanding npm advisories.** On 17 November 2026
-  npm flagged 14 dependency entries (12 high and two moderate). The production dependency
-  audit reported zero. The affected graph includes Vite and Vitest as well as the offline
-  build plugin. [Dependency review](dependency-license-review-20261109.md#17-november-recheck)
-
 ## Not in this release
 
 - **A release of the Android launcher.** Its source is in [apps/android-launcher](../apps/android-launcher/README.md)
