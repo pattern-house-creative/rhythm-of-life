@@ -3,7 +3,13 @@
 // giving it back to what opened it, a row that leaves its list handing on to the next, and back from a memory to the row it came from.
 // What jsdom can't measure (sizes, zoom, overflow) is in memory-phone-css.test.ts and tests/memory-browser.tsx. Fictional data only.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Explorer from "../src/Explorer";
 import { emptyGraph } from "../src/liveGraph";
@@ -11,7 +17,7 @@ import type { GraphSession } from "../src/liveGraph";
 import type { BriefTarget } from "../src/memoryScreen";
 import type { MemoryClient } from "../src/memories";
 import type { KnowledgeController } from "../src/useKnowledge";
-import { memory, uuid } from "./memoryFake";
+import { defaultSettings, fakeEngine, memory, uuid } from "./memoryFake";
 import { wholeInstall } from "./phoneFake";
 
 const sizes = {
@@ -96,7 +102,7 @@ async function opened(client: MemoryClient = wholeInstall().client) {
 }
 
 const section = async (region: HTMLElement, name: string | RegExp) => {
-  const strip = within(region).getByRole("toolbar", { name: "Show" });
+  const strip = within(region).getByRole("toolbar", { name: "Memory sections" });
   await userEvent.click(within(strip).getByRole("button", { name }));
 };
 
@@ -157,9 +163,9 @@ const sections: [string, string | RegExp, string, () => Promise<unknown>][] = [
     () => screen.findByText("DEMO: when the Wendle rota comes up, ask Sam."),
   ],
   [
-    "Projects",
-    "Projects",
-    "Projects",
+    "Collections",
+    "Collections",
+    "Collections",
     () => screen.findByRole("button", { name: /^wendle/ }),
   ],
   [
@@ -266,7 +272,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       if (title !== "Memories")
         await waitFor(() => expect(heading).toHaveFocus());
       heading.focus();
-      const strip = within(region).getByRole("toolbar", { name: "Show" });
+      const strip = within(region).getByRole("toolbar", { name: "Memory sections" });
       const stops = within(strip)
         .getAllByRole("button")
         .filter((b) => b.tabIndex === 0);
@@ -324,7 +330,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
   it("walks the strip with the arrow keys, Home and End, chooses with Enter, and is one stop again on leaving", async () => {
     const user = userEvent.setup();
     const { region } = await opened();
-    const strip = within(region).getByRole("toolbar", { name: "Show" });
+    const strip = within(region).getByRole("toolbar", { name: "Memory sections" });
     const button = (name: string | RegExp) =>
       within(strip).getByRole("button", { name });
     await user.tab();
@@ -360,6 +366,24 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     expect(stops).toEqual([button("Due")]);
   });
 
+  it("marks the strip's ends that more sections lie past, as it scrolls", async () => {
+    const { region } = await opened();
+    const strip = within(region).getByRole("toolbar", { name: "Memory sections" });
+    // jsdom lays nothing out: a strip 300 wide holding 900 of sections.
+    Object.defineProperty(strip, "clientWidth", { configurable: true, value: 300 });
+    Object.defineProperty(strip, "scrollWidth", { configurable: true, value: 900 });
+    const at = (left: number) => {
+      strip.scrollLeft = left;
+      fireEvent.scroll(strip);
+      return strip.dataset.more;
+    };
+    expect(at(0)).toBe("end");
+    expect(at(300)).toBe("both");
+    expect(at(600)).toBe("start");
+    Object.defineProperty(strip, "scrollWidth", { configurable: true, value: 300 });
+    expect(at(0)).toBe("none");
+  });
+
   it("keeps the section shown in sight on the strip, also when a count on Home opened one far along it", async () => {
     const memories: BriefTarget = "stale";
     render(
@@ -371,7 +395,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       />,
     );
     const region = await screen.findByRole("region", { name: "Memories" });
-    const strip = within(region).getByRole("toolbar", { name: "Show" });
+    const strip = within(region).getByRole("toolbar", { name: "Memory sections" });
     const shown = within(strip).getByRole("button", { name: /^To check/ });
     expect(shown).toHaveAttribute("aria-pressed", "true");
     expect(scrolled).toHaveBeenCalledWith(shown);
@@ -416,11 +440,11 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       await within(region).findByRole("group", { name: "This memory" });
     };
   const inProject = async (region: HTMLElement) => {
-    await section(region, "Projects");
+    await section(region, "Collections");
     await userEvent.click(
       await within(region).findByRole("button", { name: /^wendle/ }),
     );
-    await within(region).findByRole("group", { name: "This project" });
+    await within(region).findByRole("group", { name: "This collection" });
   };
   // A copy's keep both is offered once what it is close to is read.
   const copyRead = async (region: HTMLElement) => {
@@ -490,8 +514,8 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     },
     {
       label: "a new project",
-      reach: toSection("Projects", /wendle/),
-      open: "New project…",
+      reach: toSection("Collections", /wendle/),
+      open: "New collection…",
       field: "Name",
       keep: "Cancel",
     },
@@ -506,7 +530,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       label: "deleting a project",
       reach: inProject,
       open: "Delete…",
-      group: "Delete this project?",
+      group: "Delete this collection?",
       keep: "Keep it",
     },
     {
@@ -526,8 +550,8 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     {
       label: "a memory's project and tags",
       reach: readerOf(),
-      open: "Project and tags…",
-      field: "Project",
+      open: "Collection and tags…",
+      field: "Collection",
       keep: "Cancel",
     },
     {
@@ -918,7 +942,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     await user.keyboard("{Escape}");
     await within(region).findByRole("heading", { name: "Possible copies" });
     // Gone on along the strip before the rows came.
-    const strip = within(region).getByRole("toolbar", { name: "Show" });
+    const strip = within(region).getByRole("toolbar", { name: "Memory sections" });
     await user.tab();
     expect(strip).toContainElement(document.activeElement as HTMLElement);
     const there = document.activeElement;
@@ -1006,12 +1030,38 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
   });
 
   describe("a capture", () => {
+    it("says before Save where its draft will go, from the memory settings", async () => {
+      const family = await opened(
+        fakeEngine({
+          settings: { ...defaultSettings, scopes: "on", person: "alex" },
+        }).client,
+      );
+      await waitFor(() =>
+        expect(
+          within(family.region).getByLabelText("Save a memory"),
+        ).toHaveAccessibleDescription(
+          "Save adds a draft to Family. You can confirm it later.",
+        ),
+      );
+    });
+    it("says only that the draft is shared while the settings can't be read", async () => {
+      const { region } = await opened(fakeEngine({ settings: null }).client);
+      await within(region).findByLabelText("Save a memory");
+      expect(
+        within(region).getByLabelText("Save a memory"),
+      ).toHaveAccessibleDescription(
+        "Save adds a shared draft. You can confirm it later.",
+      );
+    });
     it("describes its box, and by keyboard goes back to it for the next one", async () => {
       const user = userEvent.setup();
       const { region } = await opened();
       const box = within(region).getByLabelText("Save a memory");
-      expect(box).toHaveAccessibleDescription(
-        "Saved as a draft in Family; you can confirm it later.",
+      // Before Save, what it will do: here per-person scopes are off, so a household draft.
+      await waitFor(() =>
+        expect(box).toHaveAccessibleDescription(
+          "Save adds a household draft. You can confirm it later.",
+        ),
       );
       await user.type(box, "DEMO: a new rota.");
       const save = within(region).getByRole("button", { name: "Save" });

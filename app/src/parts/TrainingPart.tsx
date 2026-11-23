@@ -22,7 +22,7 @@ export function TrainingPart({
   onOpen: () => void;
 }) {
   if (!garminOn(data))
-    return <QuietTile icon={<ArrowDownRight size={15} />} label="TRAINING" />;
+    return <QuietTile icon={<ArrowDownRight size={15} />} label="Training" />;
   const trainingReady = !["missing", "unavailable"].includes(
     data.workoutsStatus ?? "available",
   );
@@ -47,7 +47,7 @@ export function TrainingPart({
       <div className="section-label">
         <span>
           <ArrowDownRight size={15} />
-          TRAINING
+          Training
         </span>
         <ArrowUpRight size={16} />
       </div>
@@ -114,10 +114,10 @@ export function TrainingPart({
         <div className="tile-footer">
           <span>
             {blocked
-              ? "ACTIVITY UNAVAILABLE"
+              ? "Activity unavailable"
               : trainingReady
-                ? `${week.sessions} RECORDED SESSIONS${data.workoutsCoverage && !data.workoutsCoverage.complete ? " · PARTIAL" : ""}`
-                : "ACTIVITY UNAVAILABLE"}
+                ? `${week.sessions} recorded sessions${data.workoutsCoverage && !data.workoutsCoverage.complete ? " · partial" : ""}`
+                : "Activity unavailable"}
           </span>
           <span>
             {blocked ||

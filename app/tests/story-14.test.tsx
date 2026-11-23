@@ -233,7 +233,7 @@ describe.each(["phone", "desktop"] as const)("story 14 on a %s", (size) => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("region", { name: "Knowledge constellation" });
-    await user.click(await screen.findByRole("button", { name: /GLUCOSE 112/ }));
+    await user.click(await screen.findByRole("button", { name: /Glucose 112/ }));
     const dialog = await screen.findByRole("dialog", { name: "glucose" }, { timeout: 10000 });
     expect(within(dialog).getByRole("region", { name: "Current glucose" })).toHaveTextContent("112");
     expect(dialog).toHaveTextContent(/Record demo:/);

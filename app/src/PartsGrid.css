@@ -56,7 +56,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: #465b68 transparent;
+  scrollbar-color: var(--ui-line) transparent;
   /* The width a fold is measured at stays the same whether it scrolls or not. */
   scrollbar-gutter: stable;
 }
@@ -102,10 +102,10 @@
   width: 30px;
   height: 22px;
   padding: 0;
-  color: #c4d4da;
-  background: #0e171ecc;
-  border: 1px solid #93b4c329;
-  border-radius: 11px;
+  color: var(--ui-soft);
+  background: color-mix(in srgb, var(--ui-surface) 88%, transparent);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
   cursor: grab;
   touch-action: none;
   opacity: 0;
@@ -133,8 +133,8 @@
   bottom: 4px;
   width: 8px;
   height: 8px;
-  border-right: 2px solid #93b4c3a6;
-  border-bottom: 2px solid #93b4c3a6;
+  border-right: 2px solid var(--ui-line-strong);
+  border-bottom: 2px solid var(--ui-line-strong);
   border-bottom-right-radius: 3px;
 }
 .parts-part:hover > .parts-grip,
@@ -150,11 +150,11 @@
 .parts-grip:hover,
 .parts-grip:focus-visible,
 .parts-grip[aria-pressed="true"] {
-  color: #e4eef0;
-  border-color: #75d8b980;
+  color: var(--ui-ink);
+  border-color: var(--ui-mint);
 }
 .parts-grip:focus-visible {
-  outline: 2px solid #75d8b9;
+  outline: var(--ui-focus-ring);
   outline-offset: 2px;
 }
 .parts-grip[aria-pressed="true"] {
@@ -187,16 +187,16 @@
   z-index: 3;
   opacity: 0.86;
   box-shadow:
-    0 0 0 1px #75d8b966,
+    0 0 0 1px var(--ui-mint),
     0 18px 40px #02080c99;
-  border-radius: 12px;
+  border-radius: var(--ui-radius-card);
 }
 .parts-ghost {
   z-index: 2;
   pointer-events: none;
-  border: 1px dashed #75d8b999;
-  border-radius: 12px;
-  background: #75d8b912;
+  border: 1px dashed var(--ui-mint);
+  border-radius: var(--ui-radius-card);
+  background: color-mix(in srgb, var(--ui-mint) 8%, transparent);
   animation: parts-ghost-in 0.18s ease both;
 }
 @keyframes parts-ghost-in {

@@ -41,9 +41,14 @@ it("lets the layout be chosen in settings and remembers it on this browser", asy
   await user.click(
     screen.getByRole("button", { name: "Sources and settings" }),
   );
-  const choice = within(
-    await screen.findByRole("group", { name: "Layout of the home screen" }),
+  const group = await screen.findByRole("group", {
+    name: "Wide-screen layout of Home",
+  });
+  // Phones and upright tablets keep their own arrangement.
+  expect(group).toHaveAccessibleDescription(
+    "This choice applies when there’s room for the wide layout.",
   );
+  const choice = within(group);
   expect(choice.getByRole("button", { name: "Tall column" })).toHaveAttribute(
     "aria-pressed",
     "true",

@@ -1,10 +1,10 @@
 /* A data star's readings: the star at a glance, then one quiet card per
    measurement, each with a chart you can read day by day. */
 .data-view {
-  --text: #d7e5e9;
-  --muted: #91aab7;
-  --faint: #718993;
-  --line: #93b4c321;
+  --text: var(--ui-ink);
+  --muted: var(--ui-soft);
+  --faint: var(--ui-faint);
+  --line: var(--ui-divider);
   max-width: 1120px;
   margin: 0 auto;
   padding: 6px 0 32px;
@@ -50,7 +50,7 @@
   white-space: nowrap;
 }
 .data-view .figure b {
-  font: 320 28px/1.1 "Manrope Variable";
+  font: 320 28px/1.1 var(--ui-display);
   letter-spacing: -1px;
   color: var(--text);
   font-variant-numeric: tabular-nums;
@@ -67,13 +67,13 @@
 /* --- At a glance -------------------------------------------------------- */
 .star-summary {
   position: relative;
-  padding: 22px 24px 20px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
+  padding: var(--ui-space-6);
+  border: 1px solid var(--ui-edge);
+  border-radius: var(--ui-radius-card);
   background:
     radial-gradient(110% 130% at 0% 0%, #75d8b914, transparent 55%),
     radial-gradient(90% 120% at 100% 0%, #b6a6cc10, transparent 60%),
-    linear-gradient(160deg, #172229e6, #0e171ecc);
+    var(--ui-card);
   animation: star-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 .insulin-summary .star-row {
@@ -83,12 +83,12 @@
   background:
     radial-gradient(110% 130% at 0% 0%, #75d8b914, transparent 55%),
     radial-gradient(80% 110% at 100% 0%, #c1a66d12, transparent 60%),
-    linear-gradient(160deg, #172229e6, #0e171ecc);
+    var(--ui-card);
 }
 .sleep-summary {
   background:
     radial-gradient(110% 130% at 0% 0%, #b6a6cc1c, transparent 55%),
-    linear-gradient(160deg, #172229e6, #0e171ecc);
+    var(--ui-card);
 }
 @keyframes star-in {
   from {
@@ -127,12 +127,12 @@
   color: color-mix(in srgb, var(--tone) 32%, var(--text));
 }
 .star-label {
-  font-size: 11px;
+  font-size: var(--ui-text-meta);
   color: var(--muted);
 }
 .star-note {
-  font-size: 10px;
-  line-height: 1.6;
+  font-size: var(--ui-text-meta);
+  line-height: 1.5;
   color: var(--faint);
   max-width: 260px;
 }
@@ -152,7 +152,7 @@
 }
 .ring-track {
   fill: none;
-  stroke: #93b4c31c;
+  stroke: color-mix(in srgb, var(--ui-line) 55%, transparent);
   stroke-width: 8;
 }
 .ring-arc {
@@ -180,10 +180,11 @@
   letter-spacing: -0.8px;
 }
 .ring-caption {
-  font-size: 8px;
-  letter-spacing: 1.6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8ca7b4;
+  color: var(--faint);
 }
 .star-legend {
   display: flex;
@@ -196,7 +197,7 @@
   align-items: baseline;
   flex-wrap: wrap;
   gap: 4px 7px;
-  font-size: 11px;
+  font-size: var(--ui-text-meta);
   color: var(--muted);
 }
 .legend-row i,
@@ -213,7 +214,7 @@
   color: var(--text);
 }
 .legend-row small {
-  font-size: 10px;
+  font-size: var(--ui-text-meta);
   color: var(--faint);
 }
 .star-key {
@@ -221,8 +222,8 @@
   flex-wrap: wrap;
   gap: 8px 18px;
   margin-top: 6px;
-  font-size: 10px;
-  color: #8ca7b4;
+  font-size: var(--ui-text-meta);
+  color: var(--faint);
 }
 .star-key span {
   display: flex;
@@ -236,9 +237,9 @@
   border: 1px solid #c1a66d;
 }
 .star-line {
-  margin: 12px 0 0;
-  font-size: 11px;
-  line-height: 1.7;
+  margin: var(--ui-space-3) 0 0;
+  font-size: var(--ui-text-small);
+  line-height: 1.6;
   color: var(--muted);
 }
 
@@ -258,9 +259,9 @@
 .day-chart:focus-visible,
 .insulin-chart:focus-visible,
 .day-strip:focus-visible {
-  outline: 1px solid #88bba980;
+  outline: var(--ui-focus-ring);
   outline-offset: 4px;
-  border-radius: 8px;
+  border-radius: var(--ui-radius-control);
 }
 .insulin-chart {
   margin-top: 18px;
@@ -296,16 +297,18 @@
 }
 .bar-total {
   fill: var(--text);
-  font: 500 10px "DM Sans Variable";
+  font: 500 11px var(--ui-font);
+  font-variant-numeric: tabular-nums;
 }
 .chart-day,
 .chart-date,
 .chart-tick text {
   fill: var(--faint);
-  font: 9px "DM Sans Variable";
+  font: 11px var(--ui-font);
+  font-variant-numeric: tabular-nums;
 }
 .chart-tick line {
-  stroke: #93b4c314;
+  stroke: color-mix(in srgb, var(--ui-divider) 60%, transparent);
 }
 .chart-target {
   fill: #75d8b90c;
@@ -360,7 +363,7 @@
   stroke-linecap: round;
 }
 .chart-cursor circle {
-  fill: #0e171e;
+  fill: var(--ui-night);
   stroke: var(--tone);
   stroke-width: 2;
 }
@@ -376,10 +379,10 @@
   opacity: 0.85;
 }
 .strip-empty {
-  fill: #93b4c333;
+  fill: color-mix(in srgb, var(--ui-line) 70%, transparent);
 }
 .strip-cursor {
-  fill: #d7e5e910;
+  fill: color-mix(in srgb, var(--ui-ink) 6%, transparent);
 }
 
 /* --- Measurements -------------------------------------------------------- */
@@ -388,13 +391,12 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px 20px;
-  margin: 26px 0 4px;
+  gap: var(--ui-space-3) var(--ui-space-4);
+  margin: var(--ui-space-6) 0 var(--ui-space-1);
 }
 .data-hint {
   margin: 0;
-  font-size: 10px;
-  letter-spacing: 0.3px;
+  font-size: var(--ui-text-meta);
   color: var(--faint);
 }
 .hint-touch {
@@ -409,20 +411,20 @@
   }
 }
 .data-section {
-  margin-top: 22px;
+  margin-top: var(--ui-space-6);
 }
 .data-section-title {
-  margin: 0 0 12px;
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 2px;
+  margin: 0 0 var(--ui-space-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #88bba9;
 }
 .data-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
-  gap: 12px;
+  gap: var(--ui-space-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -433,24 +435,24 @@
   flex-direction: column;
   gap: 6px;
   min-width: 0;
-  padding: 15px 16px 12px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border: 1px solid var(--ui-edge);
+  border-radius: var(--ui-radius-card);
   background:
     radial-gradient(90% 70% at 0% 0%, var(--tone-soft), transparent 70%),
-    linear-gradient(165deg, #172229cc, #0e171e99);
+    var(--ui-card);
   cursor: pointer;
   transition:
-    border-color 0.3s ease,
-    background-color 0.3s ease;
+    border-color var(--ui-calm) var(--ui-ease),
+    background-color var(--ui-calm) var(--ui-ease);
 }
 .data-card:hover,
 .data-card.reading {
-  border-color: #93b4c33d;
+  border-color: var(--ui-edge-strong);
 }
 .data-card.open {
   grid-column: 1 / -1;
-  padding: 20px 22px 18px;
+  padding: var(--ui-space-4) var(--ui-space-6);
 }
 .data-card-top {
   display: flex;
@@ -460,33 +462,48 @@
 }
 .data-name {
   margin: 0;
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 1.8px;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--tone) 70%, var(--muted));
+  font: 650 var(--ui-text-title) / 1.3 var(--ui-display);
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+/* The measurement's colour as a dot beside its name. */
+.data-name::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 var(--ui-space-2) 2px 0;
+  border-radius: 50%;
+  background: var(--tone);
 }
 .data-expand {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   margin: -8px -8px -8px 0;
   border-radius: 50%;
-  color: var(--faint);
+  color: var(--muted);
   transition:
-    color 0.2s,
-    background 0.2s;
+    color var(--ui-fast) var(--ui-ease),
+    background-color var(--ui-fast) var(--ui-ease);
+}
+/* A finger's room around the small round control. */
+.data-expand::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
 }
 .data-expand:hover,
 .data-expand:focus-visible {
   color: var(--text);
-  background: #93b4c31a;
+  background: var(--ui-raised);
 }
 .data-about {
   margin: 0;
-  font-size: 11px;
-  line-height: 1.55;
+  font-size: var(--ui-text-small);
+  line-height: 1.5;
   color: var(--muted);
 }
 .data-reading {
@@ -497,40 +514,43 @@
   margin-top: 6px;
 }
 .data-caption {
-  font-size: 10px;
-  color: #8ca7b4;
+  font-size: var(--ui-text-meta);
+  color: var(--faint);
 }
 .data-card .day-chart {
   margin-top: 4px;
 }
 .data-aside {
   margin: 0;
-  font-size: 10px;
+  font-size: var(--ui-text-meta);
+  font-variant-numeric: tabular-nums;
   color: var(--faint);
   min-height: 1.4em;
 }
 .data-period {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px clamp(24px, 4vw, 48px);
-  margin: 10px 0 2px;
-  padding-top: 14px;
+  gap: var(--ui-space-3) clamp(24px, 4vw, 48px);
+  margin: var(--ui-space-2) 0 2px;
+  padding-top: var(--ui-space-3);
   border-top: 1px solid var(--line);
 }
 .data-period dt {
-  font-size: 9px;
-  letter-spacing: 1.4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--faint);
 }
 .data-period dd {
-  margin: 5px 0 0;
-  font: 350 17px "Manrope Variable";
-  letter-spacing: -0.4px;
+  margin: var(--ui-space-1) 0 0;
+  font: 600 17px var(--ui-display);
+  letter-spacing: -0.01em;
   color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 .data-period small {
-  font: 10px "DM Sans Variable";
+  font: var(--ui-text-meta) var(--ui-font);
   letter-spacing: 0;
   color: var(--faint);
 }
@@ -540,8 +560,8 @@
     padding-top: 2px;
   }
   .star-summary {
-    padding: 18px 16px 16px;
-    border-radius: 18px;
+    padding: var(--ui-space-4);
+    border-radius: var(--ui-radius-card);
   }
   .star-row {
     gap: 18px 28px;
@@ -564,7 +584,7 @@
     gap: 16px;
   }
   .data-card.open {
-    padding: 16px 16px 14px;
+    padding: var(--ui-space-4);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -573,7 +593,10 @@
   }
   .ring-arc,
   .chart-dot,
-  .insulin-chart g {
+  .insulin-chart g,
+  .day-strip circle,
+  .data-card,
+  .data-expand {
     transition: none;
   }
 }

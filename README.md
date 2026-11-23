@@ -19,7 +19,7 @@ runs inside it: your AI stays outside and connects in over MCP, with a token you
 > used to make treatment decisions. Always use your device's own display and your care team for
 > those.
 
-> **Alpha** (`0.1.0-alpha.3`). An early release for people comfortable running Docker on their own
+> **Alpha** (`0.1.0-alpha.4`). An early release for people comfortable running Docker on their own
 > machine. It works and is used daily by one household, but it has had no outside security review,
 > and upgrades between alpha versions may need care. Read
 > [Before you rely on it](#before-you-rely-on-it) first.

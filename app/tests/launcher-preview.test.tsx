@@ -69,8 +69,14 @@ it("does not invent meanings for unsupported values, or read unavailable and und
     summary({ ...feed, status: "unavailable", secret: "hidden" }),
   ).toMatchObject({
     kind: "fallback",
-    label: "Sources unavailable",
+    label: "Dashboard data unavailable",
     partial: true,
+  });
+  // A dashboard that declares no feeds has nothing unavailable.
+  expect(launcherSummary({ ...board, feeds: [] }, { ...data, feeds: {} })).toMatchObject({
+    kind: "fallback",
+    label: "Dashboard",
+    partial: false,
   });
   expect(
     launcherSummary(board, { ...data, feeds: { secret: feed } }).kind,
@@ -138,7 +144,14 @@ it("renders an automatic preview with current data and truthful provenance", asy
   };
   render(<LauncherPreview id={board.id} session={session} />);
   expect(await screen.findByText("21 °C")).toBeVisible();
-  expect(screen.getByText("From dashboard feeds")).toBeVisible();
+  // When the dashboard's data was read, and the title with its opening arrow on one line.
+  expect(screen.getByRole("contentinfo")).toHaveTextContent(/^Data read (Nov 1\d, )?\d/);
+  expect(screen.getByRole("contentinfo").querySelector("time")).toHaveAttribute(
+    "datetime",
+    data.asOf,
+  );
+  expect(screen.getByRole("heading", { name: "Garden journal" })).toBeVisible();
+  expect(document.querySelector(".preview-head .lucide-arrow-up-right")).not.toBeNull();
   expect(screen.getByRole("img")).toHaveAccessibleName(/Last 2 values/);
   expect(session.dashboardData).toHaveBeenCalledWith(
     board.id,

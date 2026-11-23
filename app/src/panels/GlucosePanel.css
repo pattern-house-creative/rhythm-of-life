@@ -23,13 +23,13 @@
     300 78px/1 "Manrope Variable",
     sans-serif;
   letter-spacing: -3.5px;
-  color: #e4eef0;
+  color: var(--ui-ink);
 }
 .now-reading > span {
   align-self: flex-end;
   margin-bottom: 10px;
   font-size: 12px;
-  color: #91aab7;
+  color: var(--ui-faint);
 }
 .now-words {
   display: flex;
@@ -43,15 +43,26 @@
     350 20px/1.2 "Manrope Variable",
     sans-serif;
   letter-spacing: -0.3px;
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .now-words span {
   font-size: 12px;
   color: #9bc7b9;
 }
 .now-words small {
-  font-size: 10px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
+}
+/* A stale reading: its state and time beside the value, in amber with the
+   words that say so; the missing trend in soft under it. */
+.now-words .now-stale {
+  font: 600 var(--ui-text-body) / 1.35 var(--ui-font);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-amber);
+}
+.now-words .now-older {
+  color: var(--ui-soft);
 }
 
 /* The day: chart, switch and a line of what it shows. */
@@ -69,7 +80,7 @@
 .chart-empty {
   padding: 40px 0;
   font-size: 12px;
-  color: #8fa9b7;
+  color: var(--ui-faint);
 }
 .day-stats {
   display: flex;
@@ -87,10 +98,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 9px;
-  letter-spacing: 1.6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8fa9b7;
+  color: var(--ui-faint);
 }
 .day-stats dt i {
   width: 6px;
@@ -107,15 +118,15 @@
     350 21px/1.1 "Manrope Variable",
     sans-serif;
   letter-spacing: -0.4px;
-  color: #d7e5e9;
+  color: var(--ui-ink);
   font-variant-numeric: tabular-nums;
 }
 .day-stats dd small,
 .ranges-facts dd small {
   margin-left: 4px;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0;
-  color: #91aab7;
+  color: var(--ui-faint);
 }
 .glucose-day .chart-readings {
   margin: 10px 0 0;
@@ -143,8 +154,8 @@
   color: #88bba9;
 }
 .glucose-head > span {
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 
 /* Time in ranges: the ring and its legend. */
@@ -162,18 +173,18 @@
     300 46px/1 "Manrope Variable",
     sans-serif;
   letter-spacing: -2px;
-  color: #e4eef0;
+  color: var(--ui-ink);
 }
 .ranges-ring .range-ring-center span {
   margin-top: 7px;
-  font-size: 9px;
-  letter-spacing: 1.8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8fa9b7;
+  color: var(--ui-faint);
 }
 .ranges-ring .range-ring-center small {
   margin-top: 9px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--glucose-tight);
 }
 .ranges-legend {
@@ -219,18 +230,18 @@
 }
 .band-name {
   font-size: 12px;
-  color: #c4d4da;
+  color: var(--ui-soft);
 }
 .band-name small {
   margin-left: 8px;
-  font-size: 10px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .ranges-legend b {
   font:
     400 15px "Manrope Variable",
     sans-serif;
-  color: #d7e5e9;
+  color: var(--ui-ink);
   font-variant-numeric: tabular-nums;
 }
 .ranges-legend .inRange b {
@@ -243,7 +254,7 @@
 .ranges-legend .per-day {
   grid-column: 2 / -1;
   margin-top: 3px;
-  font-size: 10px;
+  font-size: 12px;
   color: #d8a3aa;
 }
 .ranges-facts {
@@ -265,11 +276,11 @@
     350 28px/1.1 "Manrope Variable",
     sans-serif;
   letter-spacing: -0.8px;
-  color: #e4eef0;
+  color: var(--ui-ink);
 }
 .ranges-facts > div > small {
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .gri-badge {
   display: inline-grid;
@@ -302,7 +313,7 @@
 }
 .glucose-ranges .history-coverage {
   margin-top: 20px;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 /* GMI: a headline number, its window and coverage. */
@@ -316,13 +327,13 @@
     300 66px/1 "Manrope Variable",
     sans-serif;
   letter-spacing: -3px;
-  color: #e4eef0;
+  color: var(--ui-ink);
 }
 .gmi-value small {
   margin-left: 3px;
   font-size: 26px;
   letter-spacing: 0;
-  color: #91aab7;
+  color: var(--ui-faint);
 }
 .gmi-words {
   display: flex;
@@ -333,11 +344,11 @@
 .gmi-words b {
   font-size: 13px;
   font-weight: 500;
-  color: #c4d4da;
+  color: var(--ui-soft);
 }
 .gmi-words span {
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .gmi-words .partial {
   color: #c1a66d;
@@ -353,8 +364,8 @@
 .daily-means > span {
   display: block;
   margin-top: 6px;
-  font-size: 9px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .dm-range {
   fill: #79dbb5;
@@ -426,15 +437,15 @@
   position: absolute;
   left: -30px;
   transform: translateY(-50%);
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .agp-night-label {
   position: absolute;
   top: 8px;
   left: 10px;
-  font-size: 8px;
-  letter-spacing: 1.6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #9aa6d4a6;
 }
@@ -442,8 +453,8 @@
 .agp-key {
   display: flex;
   margin-left: 30px;
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .agp-x {
   justify-content: space-between;
@@ -497,7 +508,7 @@
     300 38px/1.05 "Manrope Variable",
     sans-serif;
   letter-spacing: -1.4px;
-  color: #e4eef0;
+  color: var(--ui-ink);
 }
 .pair-card.best strong {
   font-size: 28px;
@@ -506,7 +517,7 @@
 .pair-card b {
   font-size: 12px;
   font-weight: 500;
-  color: #c4d4da;
+  color: var(--ui-soft);
 }
 .pair-card.lows b {
   color: #e3b5bb;
@@ -518,8 +529,8 @@
   color: var(--glucose-in-range);
 }
 .pair-card span {
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 
 .glucose-panel .history-method {
@@ -529,7 +540,7 @@
 }
 .glucose-panel .history-method b {
   font-weight: 500;
-  color: #c4d4da;
+  color: var(--ui-soft);
 }
 
 @media (max-width: 760px) {

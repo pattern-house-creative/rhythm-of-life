@@ -54,23 +54,23 @@
   flex-wrap: wrap;
   gap: 8px;
   margin: 0;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 2px;
   color: color-mix(in srgb, var(--kind) 60%, #b6cbd5);
 }
 .insight-eyebrow > span {
   letter-spacing: 1.6px;
-  color: #718993;
+  color: var(--ui-faint);
 }
 .insight-eyebrow .insight-sample {
   margin-left: auto;
   padding: 3px 7px;
   border: 1px solid #93b4c333;
   border-radius: 4px;
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 1.4px;
-  color: #91aab7;
+  color: var(--ui-faint);
 }
 .insight-head h2 {
   position: relative;
@@ -78,7 +78,7 @@
   margin: 16px 0;
   font: 350 34px/1.25 "Manrope Variable";
   letter-spacing: -1.1px;
-  color: #e3eef0;
+  color: var(--ui-ink);
   outline: none;
 }
 .insight-summary {
@@ -87,7 +87,7 @@
   margin: 0;
   font: 350 16px/1.7 "Manrope Variable";
   letter-spacing: -0.1px;
-  color: #b9cad2;
+  color: var(--ui-soft);
 }
 .insight-evidence {
   display: flex;
@@ -95,11 +95,11 @@
   flex-wrap: wrap;
   gap: 10px;
   margin: 20px 0 0;
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .insight-evidence > span:last-child {
-  color: #718993;
+  color: var(--ui-faint);
 }
 .evidence-dots {
   display: flex;
@@ -118,9 +118,9 @@
 
 .insight-panel h3 {
   margin: 0 0 12px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 2px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #88bba9;
 }
@@ -138,7 +138,7 @@
   margin: 0;
   font-size: 13px;
   line-height: 1.85;
-  color: #a9bcc5;
+  color: var(--ui-soft);
 }
 
 /* The next step, held a little apart: what to do with it. */
@@ -158,7 +158,7 @@
 .insight-next p {
   margin: 0;
   font: 350 15px/1.75 "Manrope Variable";
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 
 /* Into the sky: the trail. */
@@ -170,8 +170,8 @@
   padding: 22px 0 28px;
 }
 .insight-sky > span {
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .insight-sky-button {
   display: inline-flex;
@@ -187,7 +187,7 @@
     #14202980
   );
   font-size: 12px;
-  color: #e3eef0;
+  color: var(--ui-ink);
   transition:
     border-color 0.3s,
     background 0.3s;
@@ -270,8 +270,8 @@
   align-items: center;
   gap: 8px;
   height: 22px;
-  font-size: 9px;
-  letter-spacing: 1px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .point-type i {
@@ -310,10 +310,10 @@
   margin: 0;
   font-size: 13px;
   line-height: 1.75;
-  color: #c3d3da;
+  color: var(--ui-soft);
 }
 .insight-point:is(.inferred, .hypothesis) p {
-  color: #a9bcc5;
+  color: var(--ui-soft);
 }
 .insight-point.hypothesis p {
   font-style: italic;
@@ -321,20 +321,20 @@
 .point-source {
   grid-column: 2;
   margin-top: 4px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .point-source :is(a, button, span) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   min-height: 24px;
-  color: #8fa9b7;
+  color: var(--ui-faint);
   text-align: left;
   transition: color 0.2s;
 }
 .point-source :is(a, button):hover,
 .point-source :is(a, button):focus-visible {
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .point-source b {
   font-weight: 500;
@@ -351,7 +351,7 @@
 }
 .source-number {
   font: 350 13px/1.5 "Manrope Variable";
-  color: #718993;
+  color: var(--ui-faint);
 }
 .source-icon {
   margin-top: 2px;
@@ -361,7 +361,7 @@
   display: inline;
   font-size: 13px;
   line-height: 1.5;
-  color: #d7e5e9;
+  color: var(--ui-ink);
   text-align: left;
   transition: color 0.2s;
 }
@@ -369,7 +369,7 @@
   display: inline-block;
   margin-left: 6px;
   vertical-align: -1px;
-  color: #8fa9b7;
+  color: var(--ui-faint);
 }
 .source-title :is(a, button):hover,
 .source-title :is(a, button):focus-visible {
@@ -378,8 +378,8 @@
 .insight-sources small {
   display: block;
   margin-top: 3px;
-  font-size: 10px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 
 /* Feedback: four quiet choices, and "later" opens two more in place. */
@@ -398,8 +398,8 @@
   padding: 0 15px;
   border: 1px solid #93b4c333;
   border-radius: 19px;
-  font-size: 11px;
-  color: #b1c1cd;
+  font-size: 12px;
+  color: var(--ui-soft);
   transition:
     background 0.2s,
     border-color 0.2s,
@@ -411,19 +411,19 @@
 .feedback-later button:focus-visible {
   background: #89bace14;
   border-color: #93b4c35c;
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .feedback-buttons button[aria-pressed="true"] {
   background: #75d8b91a;
   border-color: #75d8b966;
-  color: #e3eef0;
+  color: var(--ui-ink);
 }
 .feedback-buttons button[aria-pressed="true"] svg {
   color: #75d8b9;
 }
 .feedback-buttons button[aria-expanded="true"] {
   border-color: #93b4c35c;
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .feedback-buttons button:disabled:not(.saving) {
   opacity: 0.55;
@@ -465,12 +465,12 @@
   border-radius: 19px;
   background: #0e171e99;
   font-size: 12px;
-  color: #e3eef0;
+  color: var(--ui-ink);
   outline: none;
   transition: border-color 0.2s;
 }
 .feedback-note input::placeholder {
-  color: #718993;
+  color: var(--ui-faint);
 }
 .feedback-note input:focus-visible {
   border-color: #75d8b966;
@@ -481,8 +481,8 @@
   border: 1px solid #75d8b966;
   border-radius: 19px;
   background: #75d8b91a;
-  font-size: 11px;
-  color: #e3eef0;
+  font-size: 12px;
+  color: var(--ui-ink);
   transition: opacity 0.2s;
 }
 .feedback-note button[type="submit"]:disabled {
@@ -493,34 +493,34 @@
 }
 .note-toggle {
   min-height: 28px;
-  font-size: 10px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
   transition: color 0.2s;
 }
 .note-toggle:hover,
 .note-toggle:focus-visible {
-  color: #b1c1cd;
+  color: var(--ui-soft);
 }
 .feedback-saved-note {
   margin: 6px 0 0;
   font-size: 12px;
   font-style: italic;
   line-height: 1.7;
-  color: #a9bcc5;
+  color: var(--ui-soft);
 }
 /* The engine's last run, quietly under the insight's own provenance. */
 .insight-made .insight-run {
-  color: #8ca7b4;
+  color: var(--ui-faint);
 }
 .insight-panel > .insight-run {
   margin: -8px 0 20px;
-  font-size: 10px;
-  color: #8ca7b4;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .feedback-status {
   margin: 14px 0 0;
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .feedback-status:empty {
   margin: 0;
@@ -530,9 +530,9 @@
   margin: 0;
   padding: 18px 0 0;
   border-top: 1px solid #93b4c321;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.7;
-  color: #718993;
+  color: var(--ui-faint);
 }
 
 /* Earlier insights, quietly at the foot. */
@@ -566,28 +566,28 @@
   text-overflow: ellipsis;
   font: 350 14px/1.45 "Manrope Variable";
   letter-spacing: -0.2px;
-  color: #c3d3da;
+  color: var(--ui-soft);
   transition: color 0.2s;
 }
 .insight-history button:hover .history-title,
 .insight-history button:focus-visible .history-title {
-  color: #e3eef0;
+  color: var(--ui-ink);
 }
 .insight-history small {
   grid-area: meta;
-  font-size: 9px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .history-status {
   grid-area: status;
   padding: 3px 8px;
   border: 1px solid #93b4c321;
   border-radius: 10px;
-  font-size: 8px;
-  letter-spacing: 1.2px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: #8fa9b7;
+  color: var(--ui-faint);
 }
 .history-status.new {
   color: #82d0b8;
@@ -599,7 +599,7 @@
   color: #b6a6cc;
 }
 .history-status:is(.dismissed, .superseded, .handled) {
-  color: #718993;
+  color: var(--ui-faint);
 }
 
 /* Phones: a sheet that rises from the card under the health readings. */

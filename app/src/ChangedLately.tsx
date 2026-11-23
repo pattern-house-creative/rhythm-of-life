@@ -117,7 +117,7 @@ export function ChangedLately({
       >
         <span>
           <Sparkles size={14} />
-          CHANGED LATELY
+          Changed lately
         </span>
         <span className="changed-label-end">
           {dots}
@@ -128,7 +128,7 @@ export function ChangedLately({
       <div className="section-label">
         <span>
           <Sparkles size={14} />
-          CHANGED LATELY
+          Changed lately
         </span>
         {dots}
       </div>
@@ -185,7 +185,7 @@ export function ChangedLately({
       )}
       {run}
       <span className="context-foot">
-        {current + 1} OF {items.length} · MOST RECENT FIRST
+        {current + 1} of {items.length} · most recent first
       </span>
     </>
   );

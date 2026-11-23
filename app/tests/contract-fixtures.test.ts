@@ -114,7 +114,9 @@ it("accepts the engine's demo seed only when it is labelled demo", () => {
     sourceId: "demo-live",
     demo: true,
   });
-  expect(demo.sources.find((s) => s.id === "glucose")?.name).toBe("Demo live");
+  expect(demo.sources.find((s) => s.id === "glucose")?.name).toBe(
+    "Sample data live",
+  );
 });
 
 it("keeps live mode for the engine's demo seed, so its history loads too", async () => {
@@ -140,7 +142,7 @@ it("keeps live mode for the engine's demo seed, so its history loads too", async
   });
   expect(
     data.sources.find((s: { id: string }) => s.id === "glucose").name,
-  ).toBe("Demo live");
+  ).toBe("Sample data live");
 });
 
 it("reads the graph, insights, dashboards and refresh examples", async () => {

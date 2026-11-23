@@ -106,6 +106,22 @@ beforeEach(() => {
           preview: state.candidate,
         };
       }
+      // Each check is recorded, as the engine records it (migration 075).
+      if (args.op === "validate")
+        state = {
+          ...state,
+          events: [
+            ...state.events,
+            {
+              seq: state.events.length + 1,
+              op: "validate",
+              revision: state.revision,
+              at: "2026-11-10T12:00:02Z",
+              ok: args.payload.ok,
+              ...(args.payload.message ? { message: args.payload.message } : {}),
+            },
+          ],
+        };
       if (args.op === "feedback")
         state = {
           ...state,
@@ -206,6 +222,9 @@ it("shows received code, validates exact revision, rejects preview writes and ke
       screen.getByRole("button", { name: "Save", exact: true }),
     ).toBeEnabled(),
   );
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "Preview 1 is ready to save.",
+  );
   state = {
     ...state,
     revision: 2,
@@ -225,6 +244,18 @@ it("shows received code, validates exact revision, rejects preview writes and ke
   expect(
     screen.getByRole("button", { name: "Save", exact: true }),
   ).toBeDisabled();
+  // The reason once, in the alert; beside Save, which preview shows instead,
+  // once the last good one has drawn again.
+  expect(screen.getByRole("alert")).toHaveTextContent("Syntax error");
+  await act(async () => {
+    (frames.get(1)!.onDrawn as Function)();
+  });
+  await waitFor(() =>
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Preview 2 couldn’t be validated. Showing preview 1.",
+    ),
+  );
+  expect(screen.getAllByText("Syntax error")).toHaveLength(1);
 });
 it("recovers the persisted good preview, queues steering and fences cancellation", async () => {
   state = {
@@ -240,7 +271,12 @@ it("recovers the persisted good preview, queues steering and fences cancellation
     (frames.get(1)!.onDrawn as Function)();
   });
   expect(screen.getByText("Showing validated preview 1")).toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText("Steer your assistant"), {
+  expect(
+    screen.getByLabelText("Feedback for your assistant"),
+  ).toHaveAccessibleDescription(
+    "Your assistant can read this feedback at its next check-in.",
+  );
+  fireEvent.change(screen.getByLabelText("Feedback for your assistant"), {
     target: { value: "Recovery first" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Send feedback" }));
@@ -546,7 +582,7 @@ it("makes its request ids without crypto.randomUUID, as on a screen served over 
   for (const id of made) expect(id).toMatch(uuid);
   draw();
   await screen.findByText("Actual received code");
-  fireEvent.change(screen.getByLabelText("Steer your assistant"), {
+  fireEvent.change(screen.getByLabelText("Feedback for your assistant"), {
     target: { value: "Calmer colours" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Send feedback" }));

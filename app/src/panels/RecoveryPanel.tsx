@@ -148,11 +148,19 @@ export function RecoveryPanel({
     hasMeasurement(data.glucose) && isLatest
       ? overnightGlucose(data.glucose.samples)
       : null;
+  // The words say what overnightGlucose counts: the readings between midnight
+  // and 6 AM on one date, however few, never matched to when sleep began or
+  // ended. Time below 70 is estimated from the readings' spacing.
+  const glucoseDay = glucose ? dayName(glucose.date) : "";
   const glucoseLabel =
     glucose &&
-    (latest?.date === glucose.date
-      ? "WHILE YOU SLEPT · GLUCOSE 12–6 AM"
-      : `OVERNIGHT GLUCOSE · ${dayName(glucose.date).toUpperCase()}`);
+    `OVERNIGHT GLUCOSE · MIDNIGHT–6 AM · ${glucoseDay.toUpperCase()}`;
+  const glucoseShare = glucose ? Math.round(glucose.inRange * 100) : 0,
+    glucoseCount = glucose?.points.length ?? 0,
+    // Whole minutes; any reading below 70 counts at least one interval.
+    glucoseBelow = glucose ? Math.round(glucose.minutesBelow70) : 0,
+    glucoseLow = !!glucose && glucose.minutesBelow70 > 0;
+  const glucoseReadings = `${glucoseCount} ${glucoseCount === 1 ? "reading" : "readings"}`;
 
   const quiet = [
     { name: "stress_mean", label: "avg stress", unit: "" },
@@ -220,7 +228,7 @@ export function RecoveryPanel({
                 points={glucose.points}
                 start={glucose.start}
                 end={glucose.end}
-                label={`Glucose from midnight to 6 AM: ${Math.round(glucose.inRange * 100)}% in range, lowest ${glucose.lowest} mg/dL.`}
+                label={`Overnight glucose, midnight to 6 AM, ${glucoseDay}: ${glucoseShare}% of ${glucoseReadings} in range, lowest reading ${glucose.lowest} mg/dL, ${glucoseLow ? `about ${glucoseBelow} min below 70 mg/dL` : "no readings below 70 mg/dL"}.`}
               />
               <div className="night-glucose-axis" aria-hidden="true">
                 <span>12 AM</span>
@@ -228,16 +236,20 @@ export function RecoveryPanel({
                 <span>6 AM</span>
               </div>
               <p className="night-glucose-words">
-                <b>{Math.round(glucose.inRange * 100)}%</b> in range
+                <span>
+                  <b>{glucoseShare}%</b> of {glucoseReadings} in range
+                </span>
                 <i />
-                lowest <b>{glucose.lowest}</b>
+                <span>
+                  Lowest reading <b>{glucose.lowest}</b> mg/dL
+                </span>
                 <i />
-                {glucose.minutesBelow70 > 0 ? (
+                {glucoseLow ? (
                   <span className="low-words">
-                    <b>{glucose.minutesBelow70}</b> min below 70
+                    About <b>{glucoseBelow}</b> min below 70 mg/dL
                   </span>
                 ) : (
-                  "no lows"
+                  <span>No readings below 70 mg/dL</span>
                 )}
               </p>
             </div>

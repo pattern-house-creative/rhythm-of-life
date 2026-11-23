@@ -525,13 +525,18 @@ public sealed partial class MemoryStore(NpgsqlDataSource source, RecallLog? foll
     // and no_author; a supersede's (049): held, retracted and protected; and a digest's (054): not_due, and
     // unknown_project, whose known projects the digest's writer adds; and a standing instruction's (065): limit, its words
     // past the constraint on the row, by an update, an append or an undo, and a due date or the task tag, which the row's
-    // other two constraints refuse it, by a snooze or an update.
+    // other two constraints refuse it, by a snooze or an update. P0001, a bare RAISE EXCEPTION, is never the engine's own at
+    // run time (its functions each name a SQLSTATE; only a migration's one-off checks raise bare): it is a check this
+    // installation added, such as a trigger guarding T3 pickup claims, refusing the change on purpose. Its transaction rolls
+    // back, so it answers refused in the check's own words, which say what to do next, never unavailable, which reads as an
+    // outage to retry. A database that does not answer is still no refusal: unavailable.
     internal static MemoryRefused? Refusal(PostgresException e) => e.SqlState switch
     {
+        PostgresErrorCodes.RaiseException => new("refused", Guarded(e.MessageText)),
         "P0002" => new("unknown", "Unknown memory"),
         "42501" => new("forbidden", e.MessageText),
         "22023" when e.Hint is "nothing_to_undo" or "no_version" or "not_visible" or "moved" or "scopes_off" or "held" or "no_author"
-            or "retracted" or "protected" or "not_due" or "unknown_project" or "limit" or "not_offered" or "settled" or "needs_person" or "claimed" =>
+            or "retracted" or "protected" or "not_due" or "unknown_project" or "limit" or "not_offered" or "settled" or "needs_person" or "claimed" or "work_summary_required" =>
             new(e.Hint, e.MessageText),
         "22023" when e.Hint is { } hint && hint.StartsWith("pruned:", StringComparison.Ordinal) && int.TryParse(hint[7..], out var kept) =>
             new("pruned", e.MessageText, kept),
@@ -547,4 +552,18 @@ public sealed partial class MemoryStore(NpgsqlDataSource source, RecallLog? foll
         "23505" when e.ConstraintName is null => new("key_reused", e.MessageText),
         _ => null,
     };
+
+    // The longest guard message a refusal carries: the app's contract takes a reason of at most 500 characters, the tools'
+    // 2000. A longer one is cut on a character boundary; an empty one is said in the engine's words.
+    internal const int GuardedMax = 500;
+    internal const string GuardedNone = "A check this installation added refused the change: nothing was changed";
+
+    static string Guarded(string? message)
+    {
+        var said = string.Concat((message ?? "").Where(c => !char.IsControl(c) || c is '\n')).Trim();
+        if (said.Length == 0) return GuardedNone;
+        if (said.Length <= GuardedMax) return said;
+        var cut = char.IsHighSurrogate(said[GuardedMax - 2]) ? GuardedMax - 2 : GuardedMax - 1;
+        return said[..cut] + "…";
+    }
 }

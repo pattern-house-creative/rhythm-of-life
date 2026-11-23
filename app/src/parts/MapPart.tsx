@@ -201,8 +201,36 @@ export function MapPart({
     return star ? displayTitle(star.title) : undefined;
   };
   const named = wanted ? focusSummary(wanted, title) : "";
+  // What the unfocused sky draws: its stars and the groups they form.
+  const starCount = blocked ? 0 : drawn.nodes.length,
+    groupCount = blocked ? 0 : clusterCount;
   const matched = focused?.matched ?? 0,
     shown = focused?.nodes.length ?? 0;
+  // Home's sky read live with nothing to draw: its first read failed (it is
+  // no longer loading and has no read time), or the map it read has no stars.
+  const skyEmpty = !wanted && !inBrowser && !drawn.nodes.length;
+  const skyFailed = failed || (skyEmpty && !sky.loading && !sky.readAt);
+  // What an empty sky says, from what this part knows: the demo's preview of
+  // an empty, loading or failed source (its notice has the way back), a read
+  // that failed, a read with no stars, or a focus that matches none.
+  const empty = blocked
+    ? {
+        title: "No stars in this preview",
+        message: "Sample stars return when the demo is restored.",
+      }
+    : skyFailed
+      ? {
+          title: "Sky unavailable",
+          message: "Rhythm couldn’t load these records.",
+        }
+      : skyEmpty
+        ? {
+            title: "No stars to show",
+            message: "Rhythm found no records you can view.",
+          }
+        : wanted && focused && !matched
+          ? { title: "Nothing on the map matches this focus", message: named }
+          : undefined;
   const demo =
     drawn.nodes.length > 0 && drawn.nodes.every((n) => n.provenance.demo);
   // A focus that is only a query opens the explorer's search for it.
@@ -234,9 +262,9 @@ export function MapPart({
           </span>
         ) : (
           <span>
-            {blocked ? 0 : drawn.nodes.length}{" "}
-            {drawn.nodes.length === 1 && !blocked ? "idea" : "ideas"} ·{" "}
-            {clusterCount} {clusterCount === 1 ? "cluster" : "clusters"}
+            {starCount
+              ? `${count(starCount)} ${starCount === 1 ? "star" : "stars"} · ${groupCount} ${groupCount === 1 ? "group" : "groups"}`
+              : "0 stars shown"}
           </span>
         )}
       </div>
@@ -244,22 +272,12 @@ export function MapPart({
           stars, shown when focused; a focused part's caption has its own. */}
       {!wanted && (
         <button className="sky-entry" onClick={() => onExplore(null)}>
-          Enter constellation <ArrowRight size={15} />
+          Open Explorer <ArrowRight size={15} />
         </button>
       )}
       <Constellation
-        emptyMessage={
-          failed || (!wanted && !inBrowser && !drawn.nodes.length)
-            ? "No authorized graph records are currently available."
-            : wanted && focused && !matched
-              ? named
-              : undefined
-        }
-        emptyTitle={
-          !failed && wanted && focused && !matched
-            ? "Nothing on the map matches this focus"
-            : undefined
-        }
+        emptyMessage={empty?.message}
+        emptyTitle={empty?.title}
         loading={wanted ? waiting : !inBrowser && sky.loading}
         nodes={blocked ? [] : drawn.nodes}
         edges={drawn.edges}
@@ -275,17 +293,16 @@ export function MapPart({
         still={still}
       />
       <div className="graph-caption">
-        {(failed || (!wanted && !inBrowser && drawn.nodes.length === 0)) && (
-          <p role="status">
-            Knowledge graph unavailable · health sources are independent
-          </p>
+        {skyFailed && (
+          <p role="status">Sky unavailable · health sources are independent</p>
         )}
         {unread && (
           <p role="status">A source couldn’t be read · the rest is shown</p>
         )}
-        {!wanted && drawn.nodes.length > 0 && (
+        {/* No stars drawn, nothing to select. */}
+        {!wanted && starCount > 0 && (
           <p className="sky-hint" aria-hidden="true">
-            Touch a star to explore
+            Select a star to explore
           </p>
         )}
         {wanted && (focused || onShowEverything) && (

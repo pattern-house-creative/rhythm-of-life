@@ -7,8 +7,8 @@ import type { CardShape } from "./dashboardFrame";
 import { dashboardCache } from "./dashboardCache";
 import type { Dashboard, DashboardData } from "./dashboards";
 import type { GraphSession } from "./liveGraph";
-import { stamp } from "./health";
-import { feedObservationTimes } from "./feedObservationTimes";
+import { freshnessPhrases } from "./feedObservationTimes";
+import { FreshnessPhrases } from "./FreshnessPhrases";
 import "./DashboardCard.css";
 
 // A corner's card is read again every five minutes while the screen is on; a
@@ -45,11 +45,13 @@ export default function DashboardCard({
   );
   const [drawn, setDrawn] = useState(false);
   const [broken, setBroken] = useState(false);
+  // The last read this card drew from, and what went wrong since or in it.
   const [feedStatus, setFeedStatus] = useState<{
     id: string;
     version: number;
-    asOf?: string;
-    observations?: string;
+    read?: DashboardData;
+    // The last refresh failed, so the read is the one kept from before.
+    failed?: boolean;
     warning?: string;
   } | null>(null);
   const port = useRef<MessagePort | null>(null),
@@ -118,25 +120,35 @@ export default function DashboardCard({
         result.dashboard.id !== id ||
         result.dashboard.version !== version
       ) {
-        setFeedStatus((before) => ({
-          id,
-          version,
-          ...(before?.id === id && before.version === version ? before : {}),
-          warning: "Feed refresh failed",
-        }));
+        // The page keeps the last data it drew; the line says whether there is any.
+        setFeedStatus((before) => {
+          const kept =
+            before?.id === id && before.version === version
+              ? before.read
+              : undefined;
+          return {
+            id,
+            version,
+            read: kept,
+            failed: true,
+            warning: kept
+              ? "Refresh failed."
+              : "Refresh failed. No data read yet.",
+          };
+        });
         return;
       }
       latest.current = result;
       dashboardCache.keepData(result);
-      const incomplete = Object.values(result.feeds).some(
-        (feed) => feed.status !== "ok",
-      );
+      const feeds = Object.values(result.feeds);
+      const missing = feeds.filter((feed) => feed.status !== "ok").length;
       setFeedStatus({
         id,
         version,
-        asOf: result.asOf,
-        observations: feedObservationTimes(result),
-        warning: incomplete ? "Feed unavailable" : undefined,
+        read: result,
+        warning: missing
+          ? `${missing} of ${feeds.length} feeds unavailable.`
+          : undefined,
       });
       sendRef.current(result);
     };
@@ -200,20 +212,34 @@ export default function DashboardCard({
   };
 
   const shownTitle = dashboard?.title ?? title;
+  // A dashboard this viewer can't read is nothing to open: no button, so no
+  // arrow and no edge under a pointer either.
+  const opens = !(dashboard === null && missing);
   const status =
     dashboard &&
     feedStatus?.id === dashboard.id &&
     feedStatus.version === dashboard.version
       ? feedStatus
       : null;
+  // Drawn yet? Not while its data couldn't be read at all.
+  const waiting =
+    dashboard && !drawn && !broken && !unavailable && !(status && !status.read);
   return (
     <div className={`dashboard-card ${shape}`}>
-      <div className="section-label">
-        <span>
-          <LayoutDashboard size={14} aria-hidden="true" />
-          {shownTitle.toUpperCase()}
+      {/* Rhythm's own frame: the title as its author wrote it, and the
+          opening arrow. The page below it is the author's. */}
+      <div className="dashboard-card-head">
+        <span className="dashboard-card-name">
+          <LayoutDashboard size={15} aria-hidden="true" />
+          <span className="dashboard-card-title">{shownTitle}</span>
         </span>
-        <ArrowUpRight size={16} aria-hidden="true" />
+        {opens && <ArrowUpRight size={16} aria-hidden="true" />}
+        {/* Its page is on its way: said where the page will be. */}
+        {waiting && (
+          <p className="dashboard-card-status dashboard-card-wait">
+            Loading preview…
+          </p>
+        )}
       </div>
       {dashboard && !broken && !unavailable ? (
         <iframe
@@ -229,24 +255,33 @@ export default function DashboardCard({
         />
       ) : (
         <p className="dashboard-card-status">
-          {dashboard === undefined && !unavailable
-            ? "Opening this dashboard…"
-            : dashboard === null && missing
-              ? missing
-              : "This card can’t be drawn right now. Open the dashboard to see it."}
+          {dashboard === undefined && !unavailable ? (
+            "Loading preview…"
+          ) : dashboard === null && missing ? (
+            <strong>{missing}</strong>
+          ) : (
+            <>
+              <strong>Preview unavailable.</strong> Open dashboard.
+            </>
+          )}
         </p>
       )}
       {status && !unavailable && (
         <small className="dashboard-card-freshness">
-          {status.warning && `${status.warning}. `}
-          {status.observations && `${status.observations}. `}
-          {status.asOf
-            ? `Feeds read ${stamp(status.asOf)}`
-            : "No feed read yet"}
+          {status.warning && (
+            <>
+              <span className="dashboard-card-stale">{status.warning}</span>
+              {status.read && " "}
+            </>
+          )}
+          {status.read && (
+            <FreshnessPhrases
+              phrases={freshnessPhrases(status.read, false, status.failed)}
+            />
+          )}
         </small>
       )}
-      {/* A dashboard this viewer can't read is nothing to open. */}
-      {!(dashboard === null && missing) && (
+      {opens && (
         <button
           className="dashboard-card-open"
           aria-label={`Open the ${shownTitle} dashboard`}

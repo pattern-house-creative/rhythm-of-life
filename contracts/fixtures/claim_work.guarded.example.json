@@ -1,0 +1,5 @@
+{
+  "ok": false,
+  "code": "refused",
+  "error": "DEMO: this household's pickup guard refused the claim. The item still names an assignee: clear your own assignment with update_work, then claim again"
+}

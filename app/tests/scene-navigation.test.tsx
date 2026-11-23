@@ -14,7 +14,7 @@ async function explore() {
   const user = userEvent.setup();
   render(<App />);
   await user.click(
-    await screen.findByRole("button", { name: "Enter constellation" }),
+    await screen.findByRole("button", { name: "Open Explorer" }),
   );
   const explorer = await screen.findByRole("region", {
     name: "Knowledge explorer",
@@ -29,7 +29,7 @@ it("is named Rhythm of Life and has no mode switch, tab bar or footer", async ()
   await screen.findByRole("region", { name: "Knowledge constellation" });
   expect(
     screen.getByRole("link", { name: "Rhythm of Life home" }),
-  ).toHaveTextContent("RHYTHM OF LIFE");
+  ).toHaveTextContent("Rhythm of Life");
   expect(
     screen.queryByRole("navigation", { name: "Display mode" }),
   ).not.toBeInTheDocument();
@@ -120,13 +120,13 @@ it("Back returns to the sky, and closing uses the one entry the app added", asyn
       setTimeout(() => window.dispatchEvent(new PopStateEvent("popstate"))),
     );
   const { user } = await explore();
-  await user.click(screen.getByRole("button", { name: "Return to ambient" }));
+  await user.click(screen.getByRole("button", { name: "Back to Home" }));
   expect(back).toHaveBeenCalledTimes(1);
   // A second close (Escape on the ambient sky) never walks further back.
   await user.keyboard("{Escape}");
   expect(back).toHaveBeenCalledTimes(1);
   // The browser's own Back (or a phone's back gesture) also returns.
-  await user.click(screen.getByRole("button", { name: "Enter constellation" }));
+  await user.click(screen.getByRole("button", { name: "Open Explorer" }));
   await screen.findByRole("region", { name: "Knowledge explorer" });
   act(() => {
     window.dispatchEvent(new PopStateEvent("popstate"));
@@ -202,9 +202,7 @@ it("Escape steps back even when focus has left the explorer", async () => {
 it("returns focus to what opened the explorer", async () => {
   const { user } = await explore();
   await user.keyboard("{Escape}");
-  expect(
-    screen.getByRole("button", { name: "Enter constellation" }),
-  ).toHaveFocus();
+  expect(screen.getByRole("button", { name: "Open Explorer" })).toHaveFocus();
 });
 
 it("stays open when idle return is switched off", async () => {
@@ -224,7 +222,7 @@ it("stays open when idle return is switched off", async () => {
     }),
   ).toHaveAttribute("aria-pressed", "false");
   await user.keyboard("{Escape}");
-  await user.click(screen.getByRole("button", { name: "Enter constellation" }));
+  await user.click(screen.getByRole("button", { name: "Open Explorer" }));
   const explorer = await screen.findByRole("region", {
     name: "Knowledge explorer",
   });

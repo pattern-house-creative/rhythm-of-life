@@ -99,7 +99,8 @@ export interface DashboardSummary extends DashboardArrangement {
   editsAllowed: boolean;
   corners: Corner[];
 }
-export type FeedKind = "data" | "contents" | "links" | "log" | "memories";
+export type FeedKind =
+  "data" | "contents" | "links" | "log" | "memories" | "projects";
 export interface DashboardFeed {
   name: string;
   kind: FeedKind;
@@ -164,7 +165,14 @@ const time = (v: unknown): v is string =>
   text(v, 40, 1) && Number.isFinite(Date.parse(v));
 const feedName = (v: unknown): v is string =>
   typeof v === "string" && /^[a-z][A-Za-z0-9_]{0,39}$/.test(v);
-const kinds: FeedKind[] = ["data", "contents", "links", "log", "memories"];
+const kinds: FeedKind[] = [
+  "data",
+  "contents",
+  "links",
+  "log",
+  "memories",
+  "projects",
+];
 const logName = (v: unknown): v is string =>
   typeof v === "string" && /^[a-z][a-z0-9-]{0,39}$/.test(v);
 // A log's subject: a person id from the install's settings, or "household". The engine
@@ -376,6 +384,7 @@ function cleanFeed(v: unknown): DashboardFeed | null {
           ...(count(v.days, 3650) ? { days: v.days } : {}),
         }
       : null;
+  if (v.kind === "projects") return { name: v.name, kind: "projects" };
   if (v.kind === "memories")
     return v.star === undefined &&
       (v.where === undefined || object(v.where)) &&
@@ -444,7 +453,7 @@ export function cleanDashboardData(value: unknown): DashboardData | null {
       (f.status !== "ok" && f.status !== "unavailable") ||
       (f.kind === "log"
         ? f.star !== undefined || !logName(f.log)
-        : f.kind === "memories"
+        : f.kind === "memories" || f.kind === "projects"
           ? f.star !== undefined
           : !object(f.star) ||
             !text(f.star.graphId, 1000, 1) ||

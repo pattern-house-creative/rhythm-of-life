@@ -13,8 +13,9 @@ type Shown =
   | { id: string; state: "ready"; bytes: Uint8Array }
   | { id: string; state: "saved"; why: string };
 
+// Each line says first which copy is on screen, then why, then what can help.
 const unreadable =
-  "The original file can't be read right now, so its saved text is shown. Try again later.";
+  "Showing saved text. The original file couldn’t be opened. Try again later.";
 const mib = (bytes: number) =>
   `${Math.round((bytes / 1024 / 1024) * 10) / 10} MiB`;
 // A Markdown file's YAML front matter (from a first line "---" to the next "---" or "...") holds its
@@ -26,9 +27,9 @@ const body = (text: string) =>
   );
 const why = (file: Exclude<OriginalFile, { ok: true }>) =>
   file.reason === "too_large"
-    ? `This file is larger than this front end passes on${file.maxBytes ? ` (${mib(file.maxBytes)})` : ""}, so its saved text is shown. Open Rhythm at its own address to see the file.`
+    ? `Showing saved text. The original is over the file limit here${file.maxBytes ? ` (${mib(file.maxBytes)})` : ""}. To try the original, open Rhythm at your household address.`
     : file.reason === "missing"
-      ? "The original file is no longer in the archive, so its saved text is shown."
+      ? "Showing saved text. The original file is no longer in the archive."
       : unreadable;
 
 // A document someone added as a file, shown as the file itself: a PDF's pages, a Markdown file
@@ -72,7 +73,7 @@ export default function DocumentView({
     ? {
         id,
         state: "saved",
-        why: "This file is long, so its saved text is shown here. Download it for the whole file.",
+        why: "Showing saved text. This file is too long to open here. Download it for the whole file.",
       }
     : shown?.id === id
       ? shown
@@ -119,7 +120,7 @@ export default function DocumentView({
             setShown({
               id,
               state: "saved",
-              why: "This PDF can't be shown here, so its saved text is shown. Download it to open it elsewhere.",
+              why: "Showing saved text. This PDF can’t be shown here. Download it to open it elsewhere.",
             })
           }
         />

@@ -13,7 +13,7 @@ const followFor = 6 * 60_000;
 const refusedWords: Record<SyncRefusal, string> = {
   running: "It is syncing already; this one wasn’t added.",
   pending: "One is already waiting to start.",
-  "too-soon": "Asked for lately, so not yet.",
+  "too-soon": "A sync was requested recently. Try again later.",
 };
 
 // Sources & settings, live mode: Sync now (SB-P6-09). Each adapter that syncs or imports on the

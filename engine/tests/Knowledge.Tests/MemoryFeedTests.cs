@@ -112,7 +112,7 @@ public sealed class MemoryMatchTests
         Assert.Equal("feeds[0]: a memories feed takes only where, limit and fullText", (Feed() with { Log = "walks" }).Problem(0));
         Assert.Equal("feeds[2].where.status: each is canonical, draft or deprecated", Feed("""{"status":"lost"}""").Problem(2));
         Assert.Equal("feeds[0]: where is for memories feeds", new DashboardFeed("d", "data", "rhythm:x", Where: Where("{}")).Problem(0));
-        Assert.Equal("feeds[0].kind must be data, contents, links, log or memories", new DashboardFeed("d", "board", "rhythm:x").Problem(0));
+        Assert.Equal("feeds[0].kind must be data, contents, links, log, memories or projects", new DashboardFeed("d", "board", "rhythm:x").Problem(0));
         // A links feed's limit is as it was.
         Assert.Equal("feeds[0].limit is 1–60", new DashboardFeed("l", "links", "rhythm:x", Limit: 61).Problem(0));
         Assert.Equal("feeds[0]: limit is for links and memories feeds", new DashboardFeed("d", "contents", "rhythm:x", Limit: 5).Problem(0));

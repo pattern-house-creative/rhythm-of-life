@@ -24,7 +24,7 @@ export function RecoveryPart({
   onOpen: () => void;
 }) {
   if (!garminOn(data))
-    return <QuietTile icon={<Moon size={14} />} label="RECOVERY" />;
+    return <QuietTile icon={<Moon size={14} />} label="Recovery" />;
   const signals = data.recovery.metrics;
   const sleepReady = hasMeasurement(signals?.sleep ?? data.recovery);
   const heartReady = hasMeasurement(signals?.restingHeartRate ?? data.recovery);
@@ -34,7 +34,7 @@ export function RecoveryPart({
       <div className="section-label">
         <span>
           <Moon size={14} />
-          RECOVERY
+          Recovery
         </span>
         <ArrowUpRight size={16} />
       </div>

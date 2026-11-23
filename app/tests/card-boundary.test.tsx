@@ -2,6 +2,7 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeAll, expect, it, vi } from "vitest";
 import App from "../src/App";
+import { FeatureBoundary } from "../src/FeatureBoundary";
 import type * as Card from "../src/DashboardCard";
 import type * as Demo from "../src/demoDashboards";
 
@@ -58,9 +59,7 @@ it("says a corner's card couldn't load in its own place, changes no saved card, 
   ).toBeInTheDocument();
   // No view over Home, and nothing that would take the card away for everyone.
   expect(screen.queryByText("This view could not be opened")).toBeNull();
-  expect(
-    screen.queryByRole("button", { name: "Return to ambient" }),
-  ).toBeNull();
+  expect(screen.queryByRole("button", { name: "Back to Home" })).toBeNull();
   // The other corner's card goes on drawing.
   expect(
     await screen.findByTitle("Sample training week card"),
@@ -84,4 +83,28 @@ it("draws a card that couldn't load again at the next read of the dashboards", a
   act(() => window.dispatchEvent(new Event("pageshow")));
   expect(await screen.findByTitle("Week at a glance card")).toBeInTheDocument();
   expect(screen.queryByText("This card couldn’t load.")).toBeNull();
+});
+
+// The shared error screen any view's render error reaches, live or demo: it names no cause it
+// can't know, and offers only what helps (issue: it told live users about the demo's first visit).
+it("offers a reload or a way back to Home when a view can't open, naming no cause", () => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  const close = vi.fn();
+  function Broken(): never {
+    throw new Error("The view broke while drawing");
+  }
+  render(
+    <FeatureBoundary close={close}>
+      <Broken />
+    </FeatureBoundary>,
+  );
+  const alert = screen.getByRole("alert");
+  expect(alert).toHaveTextContent("This view could not be opened");
+  expect(alert).toHaveTextContent("Reload to try again, or return to Home.");
+  expect(alert).not.toHaveTextContent(/demo|connection|source data/i);
+  screen.getByRole("button", { name: "Back to Home" }).click();
+  expect(close).toHaveBeenCalled();
+  expect(
+    screen.getByRole("button", { name: "Reload and try again" }),
+  ).toBeInTheDocument();
 });

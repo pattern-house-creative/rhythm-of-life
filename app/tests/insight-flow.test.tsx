@@ -66,7 +66,7 @@ it("grows the demo's insight from the corner, takes feedback, and lights its tra
     focus.stars.map((s) => expect.stringContaining(s.title)),
   );
   expect(
-    screen.getByText(`${focus.stars.length} stars lit · tap one to explore`),
+    screen.getByText(`${focus.stars.length} stars lit · select one to explore`),
   ).toBeInTheDocument();
   // A star of the trail opens as usual; clearing it comes back to the trail.
   await user.click(stars[0]);

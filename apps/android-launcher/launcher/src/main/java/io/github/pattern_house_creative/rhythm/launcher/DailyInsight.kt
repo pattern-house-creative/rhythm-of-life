@@ -18,6 +18,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -51,19 +56,29 @@ internal fun currentDailyInsight(rows: List<DailyInsight>, now: Long): DailyInsi
 }
 internal fun insightDate(at: Long): String = DateTimeFormatter.ofPattern("MMM d")
     .withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(at))
+// The kinds of insight keep the web's own marks and colours (InsightCard.css): mint-teal for a focus,
+// lilac for a discovery, the caution gold for a suggestion. The strip itself is the discovery surface.
+private val FocusKind = Color(0xff75d8b9)
+private val SuggestionKind = Color(0xffc1a66d)
 private fun insightColor(kind: String?) = when(kind) {
-    "discovery" -> Color(0xffd0b6e7)
-    "suggestion" -> Color(0xffc1a66d)
-    else -> Color(0xff8dd7bd)
+    "discovery" -> Ui.lilac
+    "suggestion" -> SuggestionKind
+    else -> FocusKind
 }
+/** The strip's height before the refresh at one line of text, kept so a Home page holds the rows it did. */
+private val INSIGHT_MIN_HEIGHT = 62.dp
 @Composable internal fun DailyInsightBar(insight: DailyInsight?, state: String, onOpen: () -> Unit) {
-    Row(Modifier.fillMaxWidth().testTag("daily-insight")
-        .clipForInsight().clickable(enabled=insight != null, onClick=onOpen)
-        .padding(horizontal=14.dp, vertical=11.dp), verticalAlignment=Alignment.CenterVertically) {
+    val found = insight != null
+    val shape = RoundedCornerShape(Ui.radiusCard)
+    Row(Modifier.fillMaxWidth().heightIn(min=INSIGHT_MIN_HEIGHT).testTag("daily-insight")
+        .clip(shape).background(if(found) Ui.lilacFill.copy(alpha=.94f) else Ui.surface.copy(alpha=.86f), shape)
+        .border(1.dp, if(found) Ui.lilac.copy(alpha=.45f) else Ui.edge, shape)
+        .clickable(enabled=found, onClick=onOpen)
+        .padding(horizontal=Ui.space4, vertical=Ui.space3), verticalAlignment=Alignment.CenterVertically) {
         // Same three marks as the site's InsightCard: focus, connected discovery,
         // and suggestion. Vector geometry avoids device-dependent font symbols.
-        Canvas(Modifier.padding(end=12.dp).size(22.dp)) {
-            val s=size.width/14f;val color=insightColor(insight?.kind)
+        Canvas(Modifier.padding(end=Ui.space3).size(22.dp)) {
+            val s=size.width/14f;val color=if(found) insightColor(insight?.kind) else Ui.faint
             when(insight?.kind) {
                 "focus" -> { drawCircle(color,5.3f*s,style=Stroke(s));drawCircle(color,1.8f*s) }
                 "discovery" -> {
@@ -75,15 +90,16 @@ private fun insightColor(kind: String?) = when(kind) {
         }
         Column(Modifier.weight(1f)) {
             Text(if(insight == null) "DAILY INSIGHT" else "${insight.kind.uppercase()} · ${insightDate(insight.generatedAt)}",
-                color=insightColor(insight?.kind), fontSize=9.sp, letterSpacing=1.sp)
-            Text(insight?.title ?: state, fontSize=12.sp, lineHeight=16.sp, maxLines=2,
-                overflow=TextOverflow.Ellipsis, color=Color(0xffd6e7e1))
+                color=if(found) Ui.lilac else Ui.soft, fontSize=Ui.textEyebrow, lineHeight=16.sp, letterSpacing=Ui.eyebrowTracking,
+                fontWeight=FontWeight.Medium, maxLines=1, overflow=TextOverflow.Ellipsis)
+            Spacer(Modifier.height(2.dp))
+            Text(insight?.title ?: state, fontSize=Ui.textBody, lineHeight=18.sp, maxLines=2,
+                fontWeight=if(found) FontWeight.Medium else FontWeight.Normal,
+                overflow=TextOverflow.Ellipsis, color=if(found) Ui.ink else Ui.soft)
         }
-        if(insight != null) Text("›", fontSize=22.sp, color=Color(0xff9ab7ad), modifier=Modifier.padding(start=8.dp))
+        if(found) Text("›", fontSize=22.sp, color=Ui.lilac, modifier=Modifier.padding(start=Ui.space2).clearAndSetSemantics{})
     }
 }
-private fun Modifier.clipForInsight() = this.background(Color(0x99102526), RoundedCornerShape(18.dp))
-    .border(.5.dp, Color(0x26b2e0cc), RoundedCornerShape(18.dp))
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable internal fun DailyInsightSheet(
@@ -99,31 +115,33 @@ private fun Modifier.clipForInsight() = this.background(Color(0x99102526), Round
     var failed by remember { mutableStateOf(false) }
     val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true,
         confirmValueChange = { it != SheetValue.Hidden || !saving })
-    ModalBottomSheet(onDismissRequest={ if (!saving) onClose() }, sheetState=sheet, containerColor=Color(0xff122a2b)) {
+    ModalBottomSheet(onDismissRequest={ if (!saving) onClose() }, sheetState=sheet, containerColor=Ui.surface,
+        shape=RoundedCornerShape(topStart=Ui.radiusCard+Ui.space1, topEnd=Ui.radiusCard+Ui.space1)) {
         Column(Modifier.fillMaxWidth().imePadding().verticalScroll(rememberScrollState()).padding(horizontal=24.dp).padding(bottom=28.dp).testTag("insight-detail")) {
             Text("${insight.kind.replaceFirstChar { it.uppercase() }} · ${insightDate(insight.generatedAt)}",
-                color=insightColor(insight.kind), fontSize=12.sp)
-            Text(insight.title, fontFamily=ObservatoryTitle, fontSize=24.sp, modifier=Modifier.padding(vertical=12.dp))
-            if (insight.summary.isNotBlank()) Text(insight.summary, fontSize=14.sp, lineHeight=21.sp)
-            Text("Was this useful?", style=MaterialTheme.typography.titleMedium, modifier=Modifier.padding(top=16.dp))
+                color=Ui.lilac, fontSize=Ui.textMeta, fontWeight=FontWeight.Medium)
+            Text(insight.title, fontFamily=ObservatoryTitle, fontWeight=FontWeight.SemiBold, fontSize=Ui.textPage, lineHeight=28.sp,
+                color=Ui.ink, modifier=Modifier.padding(top=Ui.space2, bottom=Ui.space3))
+            if (insight.summary.isNotBlank()) Text(insight.summary, fontSize=Ui.textBody, lineHeight=21.sp, color=Ui.ink)
+            Text("Was this useful?", style=MaterialTheme.typography.titleMedium, color=Ui.ink, modifier=Modifier.padding(top=Ui.space6, bottom=Ui.space1))
             FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                 InsightChoice.entries.forEach { option ->
                     FilterChip(selected=choice == option, enabled=!saving,
-                        onClick={ choice=option; failed=false }, label={ Text(option.label) })
+                        onClick={ choice=option; failed=false }, label={ Text(option.label) }, border=chipBorder(choice == option, !saving))
                 }
             }
             if (choice == InsightChoice.Later) {
                 FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                     for ((days, label) in listOf(1 to "Tomorrow morning", 7 to "Next week")) {
                         FilterChip(selected=reminderDays == days, enabled=!saving,
-                            onClick={ reminderDays=days; failed=false }, label={ Text(label) })
+                            onClick={ reminderDays=days; failed=false }, label={ Text(label) }, border=chipBorder(reminderDays == days, !saving))
                     }
                 }
             }
             OutlinedTextField(value=note, onValueChange={ if (it.length <= 500) { note=it; failed=false } },
                 enabled=!saving, label={ Text(if (choice == InsightChoice.Handled) "What happened?" else "Note (optional)") },
                 minLines=1, maxLines=4, modifier=Modifier.fillMaxWidth().testTag("insight-note"))
-            if (failed) Text("Couldn’t confirm the save. Your note is here to retry.", color=MaterialTheme.colorScheme.error)
+            if (failed) Text("Couldn’t confirm the save. Your note is here to retry.", color=Ui.alert, fontSize=Ui.textSmall)
             Button(enabled=!saving && choice != null && (choice != InsightChoice.Handled || note.isNotBlank()) &&
                 (choice != InsightChoice.Later || reminderDays != null), onClick={
                 val selected = choice ?: return@Button
@@ -143,11 +161,16 @@ private fun Modifier.clipForInsight() = this.background(Color(0x99102526), Round
                 "Evidence · ${insight.evidence}" to insight.points.joinToString("\n\n"), "Limitations" to insight.limitations,
                 "Sources" to insight.sources.joinToString("\n"))) {
                 if(value.isNotBlank()) {
-                    if(label.isNotEmpty()) Text(label, color=Color(0xff9fc7b8),fontSize=11.sp,modifier=Modifier.padding(top=14.dp,bottom=6.dp))
-                    Text(value,fontSize=14.sp,lineHeight=21.sp)
+                    if(label.isNotEmpty()) Text(label, color=Ui.soft,fontSize=Ui.textMeta,fontWeight=FontWeight.Medium,
+                        modifier=Modifier.padding(top=Ui.space4,bottom=Ui.space1).semantics{heading()})
+                    Text(value,fontSize=Ui.textBody,lineHeight=21.sp,color=Ui.ink)
                 }
             }
             TextButton(onClick=onClose,enabled=!saving,modifier=Modifier.align(Alignment.End).padding(top=12.dp)) { Text("Close insight") }
         }
     }
 }
+
+/** A chosen chip has a mint edge as well as its fill, so the choice reads in greyscale. */
+@Composable private fun chipBorder(selected: Boolean, enabled: Boolean) = FilterChipDefaults.filterChipBorder(enabled = enabled,
+    selected = selected, borderColor = Ui.line, selectedBorderColor = Ui.mintEdge, selectedBorderWidth = 1.dp)

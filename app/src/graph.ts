@@ -474,12 +474,184 @@ export const nodeHitRadius = (theme: boolean, pixelsPerUnit: number) =>
   Math.max(theme ? 20 : 9, (theme ? 28 : 22) / Math.max(pixelsPerUnit, 0.05));
 
 // Label text size, in graph units, for a fixed on-screen size at every width
-// and zoom: 13px for records and 16px for themes, 1px less on phones.
+// and zoom: 13px for records and 16px for themes, 1px less on phones, times
+// the sky's labelScale.
 export const labelFontSize = (
   theme: boolean,
   pixelsPerUnit: number,
   compact = false,
-) => ((theme ? 16 : 13) - Number(compact)) / Math.max(pixelsPerUnit, 0.05);
+  scale = 1,
+) =>
+  (((theme ? 16 : 13) - Number(compact)) * scale) /
+  Math.max(pixelsPerUnit, 0.05);
+
+// The band, in graph units, kept free of names at the bottom of a sky
+// `skyWidth` screen pixels wide: 64px on screen in the explorer, over its
+// controls and legend; 28px on an ambient sky, over its one-line hint, so a
+// phone's landmarks low in the sky keep their names.
+export function labelFloor(interactive: boolean, skyWidth: number) {
+  const px = interactive ? 64 : 28;
+  return Math.max(interactive ? 60 : 26, (px * 820) / Math.max(1, skyWidth));
+}
+
+// Whether a sky names only its landmarks at rest, as a phone's does: one
+// narrower than 520px, or shorter than 420px (a phone on its side, a small
+// map part).
+export function quietSky(skyWidth: number, skyHeight: number) {
+  return skyWidth < 520 || skyHeight < 420;
+}
+
+// A rectangle on screen, in CSS pixels.
+export interface ScreenRect {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+// How the sky's own units land on screen: the layer's screen matrix, whose
+// a and d scale and e and f move (the sky is never rotated or skewed).
+export interface SkyMatrix {
+  a: number;
+  d: number;
+  e: number;
+  f: number;
+}
+// A rectangle on screen in the sky's own units.
+export function skyRect(rect: ScreenRect, m: SkyMatrix): ScreenRect {
+  return {
+    left: (rect.left - m.e) / m.a,
+    right: (rect.right - m.e) / m.a,
+    top: (rect.top - m.f) / m.d,
+    bottom: (rect.bottom - m.f) / m.d,
+  };
+}
+// Names fit the part of the sky that shows, not only the part it draws: the
+// drawn bounds (graph units) cut to the sky's visible rectangle on screen,
+// kept `inset` px clear of its bottom edge, so no name is painted half off a
+// short sky.
+export function visibleBounds(
+  bounds: { left: number; right: number; top: number; bottom: number },
+  visible: ScreenRect,
+  m: SkyMatrix,
+  inset = 4,
+) {
+  const v = skyRect({ ...visible, bottom: visible.bottom - inset }, m);
+  return {
+    left: Math.max(bounds.left, v.left),
+    right: Math.min(bounds.right, v.right),
+    top: Math.max(bounds.top, v.top),
+    bottom: Math.min(bounds.bottom, v.bottom),
+  };
+}
+// The lowest a name may reach on screen: the sky's visible bottom, or the
+// top of the first line drawn across its lower half (Home's hint, a part's
+// status), so a name sits above that band, never beside the hint in it. A
+// still sky (reduced motion) keeps its names where they are first put, so
+// this holds from the first placement.
+export function skyFloor(visible: ScreenRect, under: ScreenRect[]) {
+  const middle = (visible.top + visible.bottom) / 2;
+  return Math.min(
+    visible.bottom,
+    ...under
+      .filter(
+        (u) =>
+          u.right > visible.left &&
+          u.left < visible.right &&
+          u.top >= middle &&
+          u.top < visible.bottom,
+      )
+      .map((u) => u.top),
+  );
+}
+// Something drawn over the sky (the explorer's zoom controls, the heading
+// above Home's sky) as a box names keep `clearance` px clear of.
+export function overSky(
+  rect: ScreenRect,
+  m: SkyMatrix,
+  clearance = 4,
+): LabelBox {
+  const r = skyRect(
+    {
+      left: rect.left - clearance,
+      top: rect.top - clearance,
+      right: rect.right + clearance,
+      bottom: rect.bottom + clearance,
+    },
+    m,
+  );
+  return { x: r.left, y: r.top, w: r.right - r.left, h: r.bottom - r.top };
+}
+// A sky with less than this much height showing (CSS px): a short phone's,
+// between two previews. It paints only names that matter most there.
+export const shortSkyHeight = 88;
+// The names a short sky paints, each only where it fits whole: its landmarks
+// (topics, folders and projects), a pinned star's, the selection's, and the
+// star a pointer or the keyboard rests on.
+export function namedInShortSky(t: LabelTraits) {
+  return !!(t.selected || t.emphasis || t.pinned || t.theme || t.folder);
+}
+
+// How much larger names are drawn on a large sky, so a wall display reads from
+// across the room: unchanged up to a sky 1000px wide, then growing to 1.45
+// times (the tiles' own largest zoom) on a sky about 2100px wide.
+export function labelScale(skyWidth: number) {
+  return Math.min(1.45, Math.max(1, 1 + (skyWidth - 1000) / 2500));
+}
+
+// What a sky knows about a star when it decides whose name to show.
+export interface LabelTraits {
+  selected?: boolean;
+  // A pointer or the keyboard rests on it.
+  emphasis?: boolean;
+  pinned?: boolean;
+  // In the explorer, lit by the focus: a selection's links, a search's
+  // matches, a traced path.
+  lit?: boolean;
+  theme?: boolean;
+  // A folder or a project star.
+  folder?: boolean;
+  dashboard?: boolean;
+  priority?: "primary" | "secondary";
+  memory?: boolean;
+  // A memory linked to two or more records.
+  memoryHub?: boolean;
+  loose?: boolean;
+}
+// Who keeps a name when two would collide; higher places first. The selection,
+// then the star a pointer or keyboard rests on, pinned stars, what the
+// explorer's focus lights, then landmarks (topics, folders and projects),
+// dashboards, each cluster's hub and runner-up, memories, linked records and
+// last unlinked ones.
+export function labelWeight(t: LabelTraits) {
+  return (
+    Number(!!t.selected) * 10000 +
+    Number(!!t.emphasis) * 5000 +
+    Number(!!t.pinned) * 2000 +
+    Number(!!t.lit) * 1000 +
+    Number(!!t.theme) * 400 +
+    Number(!!t.folder) * 300 +
+    Number(!!t.dashboard) * 200 +
+    (t.priority === "primary" ? 100 : t.priority === "secondary" ? 60 : 0) +
+    Number(!!t.memoryHub) * 30 +
+    Number(!!t.memory) * 2 +
+    Number(!t.loose)
+  );
+}
+// Whether the ambient sky names a star at rest, before collisions decide.
+// Every sky names its landmarks, dashboards, pinned stars and memories that
+// tie records together; a sky larger than a phone's (quietSky) also names each
+// cluster's hub and runner-up, so a wall display says what it shows. The rest
+// are named on selection, hover, focus, zoom or the label control.
+export function namedAtRest(t: LabelTraits, quiet: boolean) {
+  return (
+    !!t.theme ||
+    !!t.folder ||
+    !!t.dashboard ||
+    !!t.pinned ||
+    !!t.memoryHub ||
+    (!quiet && t.priority !== undefined)
+  );
+}
 
 // Record titles can be long excerpts with raw links. Short surfaces show the
 // title without links; the full title stays in the tooltip and details panel.
@@ -546,9 +718,15 @@ export interface LabelBox {
 }
 // Below, above, right, left, then further below. Side labels are vertically
 // centred so narrow viewports can keep them above the controls. Offsets clear
-// the drawn star (graph units) by a gap that scales with the on-screen text.
-export function labelCandidates(theme: boolean, font: number, height: number) {
-  const star = theme ? 19 : 8,
+// the drawn star (graph units), or `clear` units round its centre (a
+// selection's ring), by a gap that scales with the on-screen text.
+export function labelCandidates(
+  theme: boolean,
+  font: number,
+  height: number,
+  clear?: number,
+) {
+  const star = clear ?? (theme ? 19 : 8),
     gap = font * 0.3;
   return [
     { x: 0, y: star + gap + font, a: "middle" },
@@ -567,8 +745,14 @@ export function placeLabel(
   bounds: { left: number; right: number; top: number; bottom: number },
   preferred = 0,
   spacing: { x: number; y: number; reserved?: number } = { x: 7, y: 5 },
+  clear?: number,
 ) {
-  const candidates = labelCandidates(point.theme, size.font, size.height);
+  const candidates = labelCandidates(
+    point.theme,
+    size.font,
+    size.height,
+    clear,
+  );
   const box = (c: (typeof candidates)[number]): LabelBox => ({
     x:
       point.x +
@@ -671,10 +855,14 @@ export interface LabelRequest {
   id: string;
   point: Pick<GraphPoint, "x" | "y" | "theme">;
   size: { width: number; height: number; font: number };
-  // Higher places first: selection, themes, named hubs, linked records.
+  // Higher places first (labelWeight): selection, landmarks, dashboards, hubs.
   weight: number;
-  // Shown even when nothing fits (the selected record).
+  // Shown even when nothing fits: the selected record, or every record while
+  // the label control asks for all names.
   forced?: boolean;
+  // Graph units the name keeps from the star's centre, when more than the
+  // drawn star: the selected star's ring.
+  clear?: number;
 }
 // One placement pass. Labels shown last pass go first within their weight and
 // tolerate a tighter gutter than newcomers, so stars drifting by a few pixels
@@ -707,6 +895,7 @@ export function placeLabels(
         y: (4 + slack) / unit,
         reserved: Math.min(0, slack) / unit,
       },
+      r.clear,
     );
     if (placed.choice < 0 && !r.forced) continue;
     preferred.set(r.id, Math.max(0, placed.choice));

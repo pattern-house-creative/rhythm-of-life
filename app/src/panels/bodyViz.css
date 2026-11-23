@@ -18,8 +18,8 @@
   margin-bottom: 18px;
 }
 .body-heading > span {
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .body-grid {
   display: grid;
@@ -47,8 +47,8 @@
   grid-column: 1 / -1;
 }
 .body-card > small {
-  font-size: 10px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
   letter-spacing: 0.2px;
 }
 .body-number {
@@ -59,25 +59,25 @@
 .body-number strong {
   font: 300 40px/1.05 "Manrope Variable";
   letter-spacing: -1.6px;
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .body-number strong small {
   font-size: 15px;
   letter-spacing: 0;
-  color: #8fa9b7;
+  color: var(--ui-faint);
 }
 .body-number > span {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .word {
   font-style: normal;
-  font-size: 9px;
-  letter-spacing: 1.4px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #d0b6e7;
   border: 1px solid #d0b6e740;
@@ -93,8 +93,8 @@
   border-color: #c1a66d40;
 }
 .band-word {
-  font-size: 10px;
-  letter-spacing: 2.2px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #d0b6e7;
 }
@@ -119,8 +119,8 @@
   color: #c7d8de;
 }
 .quiet-stats span {
-  font-size: 10px;
-  color: #8ca7b4;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 
 /* Glucose through a night or a workout. */

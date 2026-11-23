@@ -146,7 +146,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     at(size);
     const fake = fakeEngine({ memories: [memory(1, "DEMO: the list.")] });
     const region = await opened(fake.client);
-    const strip = within(region).getByRole("toolbar", { name: "Show" });
+    const strip = within(region).getByRole("toolbar", { name: "Memory sections" });
     expect(
       within(strip)
         .getAllByRole("button")
@@ -157,7 +157,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       "Due",
       "Decisions",
       "Standing",
-      "Projects",
+      "Collections",
       "AI changes",
       "Review",
       "Copies",
@@ -169,7 +169,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       "Settings",
     ]);
     for (const [name, title] of [
-      ["Projects", "Projects"],
+      ["Collections", "Collections"],
       ["AI changes", "AI changes"],
       ["Settings", "Memory settings"],
       ["Recent", "Memories"],
@@ -216,7 +216,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     });
     // With scopes off there is no scope to filter by; an archived project isn't offered.
     expect(within(filters).queryByLabelText("Scope")).not.toBeInTheDocument();
-    const project_ = within(filters).getByLabelText("Project");
+    const project_ = within(filters).getByLabelText("Collection");
     await waitFor(() =>
       expect(
         within(project_).getByRole("option", { name: "Wendle" }),
@@ -531,7 +531,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     });
     const said = await within(region).findByRole("status");
     expect(said).toHaveTextContent("Shared 2 memories with Family");
-    expect(said).toHaveTextContent("1 left its project behind");
+    expect(said).toHaveTextContent("1 left its collection behind");
   });
 
   it("says when a memory couldn't be taken back, and the rest of the step still went", async () => {
@@ -640,14 +640,16 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       ],
     });
     const region = await opened(fake.client);
-    await section(region, "Projects");
-    const list = await within(region).findByRole("list", { name: "Projects" });
+    await section(region, "Collections");
+    const list = await within(region).findByRole("list", {
+      name: "Collections",
+    });
     expect(
       await within(list).findByRole("button", { name: /Wendle/ }),
     ).toHaveTextContent("also plot");
 
     await userEvent.click(
-      within(region).getByRole("button", { name: "New project…" }),
+      within(region).getByRole("button", { name: "New collection…" }),
     );
     const name = within(region).getByLabelText("Name");
     await userEvent.type(name, "Canal Walks!");
@@ -663,7 +665,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       "Towpath, walks",
     );
     await userEvent.click(
-      within(region).getByRole("button", { name: "Make the project" }),
+      within(region).getByRole("button", { name: "Make the collection" }),
     );
     await waitFor(() => expect(fake.asked("project_create")).toHaveLength(1));
     expect(fake.asked("project_create")[0]).toEqual({
@@ -674,15 +676,15 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       scope: "shared",
     });
     expect(await within(region).findByRole("status")).toHaveTextContent(
-      "Made the project Canal Walks!: it is known as canal-walks.",
+      "Made the collection Canal Walks!: it is known as canal-walks.",
     );
     // A name taken is the engine's to say, and the form stays.
     await userEvent.click(
-      within(region).getByRole("button", { name: "New project…" }),
+      within(region).getByRole("button", { name: "New collection…" }),
     );
     await userEvent.type(within(region).getByLabelText("Name"), "Wendle");
     await userEvent.click(
-      within(region).getByRole("button", { name: "Make the project" }),
+      within(region).getByRole("button", { name: "Make the collection" }),
     );
     expect(await within(region).findByRole("status")).toHaveTextContent(
       "Another project in this scope already answers to wendle",
@@ -700,7 +702,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       await within(region).findByText("1 memory in it."),
     ).toBeInTheDocument();
     const capsule = await within(region).findByRole("region", {
-      name: "The wendle project's capsule",
+      name: "The wendle collection’s capsule",
     });
     expect(capsule).toHaveTextContent("1 of 3 slots filled");
     expect(fake.asked("capsule_status").at(-1)).toEqual({
@@ -710,7 +712,9 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       scope: "shared",
     });
 
-    const actions = within(region).getByRole("group", { name: "This project" });
+    const actions = within(region).getByRole("group", {
+      name: "This collection",
+    });
     await userEvent.click(
       within(actions).getByRole("button", { name: "Edit" }),
     );
@@ -718,12 +722,16 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     expect(editName).toHaveValue("Wendle");
     await userEvent.clear(editName);
     await userEvent.type(editName, "Wendle Plot");
+    await userEvent.click(
+      within(region).getByRole("checkbox", { name: "Show in Projects" }),
+    );
     await userEvent.click(within(region).getByRole("button", { name: "Save" }));
     await waitFor(() => expect(fake.asked("project_update")).toHaveLength(1));
     expect(fake.asked("project_update")[0]).toEqual({
       op: "project_update",
       id: uuid(50),
       name: "Wendle Plot",
+      showInProjects: true,
       description: "DEMO: the allotment.",
       aliases: ["plot"],
       expected: 1,
@@ -735,7 +743,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       await within(region).findByRole("button", { name: "Archive" }),
     );
     const archived = await within(region).findByRole("list", {
-      name: "Archived projects",
+      name: "Archived collections",
     });
     expect(
       within(archived).getByRole("button", { name: /Wendle Plot/ }),
@@ -771,26 +779,26 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     expect(
       within(region).getByRole("heading", { name: "Memories" }),
     ).toBeInTheDocument();
-    expect(within(region).getByLabelText("Project")).toHaveValue(
+    expect(within(region).getByLabelText("Collection")).toHaveValue(
       "shared:wendle",
     );
 
     // Deleted behind a confirmation in the same flow: its memories stay.
-    await section(region, "Projects");
+    await section(region, "Collections");
     await userEvent.click(
       await within(region).findByRole("button", { name: "Delete…" }),
     );
     expect(fake.asked("project_delete")).toEqual([]);
     const ask = within(region).getByRole("group", {
-      name: "Delete this project?",
+      name: "Delete this collection?",
     });
-    expect(ask).toHaveTextContent("Its memories stay, in no project");
+    expect(ask).toHaveTextContent("Its memories stay, in no collection");
     await userEvent.click(
-      within(ask).getByRole("button", { name: "Delete the project" }),
+      within(ask).getByRole("button", { name: "Delete the collection" }),
     );
     await waitFor(() => expect(fake.asked("project_delete")).toHaveLength(1));
     expect(await within(region).findByRole("status")).toHaveTextContent(
-      "2 memories left it and stay as they were, in no project.",
+      "2 memories left it and stay as they were, in no collection.",
     );
     expect(fake.live.has(uuid(1))).toBe(true);
   });
@@ -801,13 +809,13 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       projects: [project(50, "wendle", { name: "Wendle" })],
     });
     const region = await opened(fake.client);
-    await section(region, "Projects");
+    await section(region, "Collections");
     await userEvent.click(
-      within(region).getByRole("button", { name: "New project…" }),
+      within(region).getByRole("button", { name: "New collection…" }),
     );
     await userEvent.type(within(region).getByLabelText("Name"), "!!!");
     const make = within(region).getByRole("button", {
-      name: "Make the project",
+      name: "Make the collection",
     });
     expect(make).toBeDisabled();
     await userEvent.type(
@@ -821,7 +829,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
 
     // A slug typed for a name that made none is not sent once the name makes one: the preview's is the one it gets.
     await userEvent.click(
-      await within(region).findByRole("button", { name: "New project…" }),
+      await within(region).findByRole("button", { name: "New collection…" }),
     );
     const named = within(region).getByLabelText("Name");
     await userEvent.type(named, "!!!");
@@ -835,21 +843,21 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       within(region).getByText(/It will be known as canal-walks/),
     ).toBeInTheDocument();
     await userEvent.click(
-      within(region).getByRole("button", { name: "Make the project" }),
+      within(region).getByRole("button", { name: "Make the collection" }),
     );
     await waitFor(() => expect(fake.asked("project_create")).toHaveLength(2));
     expect(fake.asked("project_create")[1].name).toBe("Canal Walks");
     expect(fake.asked("project_create")[1]).not.toHaveProperty("slug");
 
     await section(region, "Recent");
-    const filter = await within(region).findByLabelText("Project");
+    const filter = await within(region).findByLabelText("Collection");
     await waitFor(() =>
       expect(
         within(filter).getByRole("option", { name: "Wendle" }),
       ).toBeInTheDocument(),
     );
     await userEvent.selectOptions(filter, "shared:wendle");
-    await section(region, "Projects");
+    await section(region, "Collections");
     await userEvent.click(
       await within(region).findByRole("button", { name: /Wendle/ }),
     );
@@ -857,14 +865,14 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       await within(region).findByRole("button", { name: "Delete…" }),
     );
     await userEvent.click(
-      within(region).getByRole("button", { name: "Delete the project" }),
+      within(region).getByRole("button", { name: "Delete the collection" }),
     );
     await waitFor(() => expect(fake.asked("project_delete")).toHaveLength(1));
     await section(region, "Recent");
     await waitFor(() =>
       expect(fake.asked("list").at(-1)).toEqual({ op: "list", limit: 20 }),
     );
-    expect(await within(region).findByLabelText("Project")).toHaveValue("");
+    expect(await within(region).findByLabelText("Collection")).toHaveValue("");
   });
 
   it("keeps the choice when a step of several is refused whole", async () => {
@@ -900,7 +908,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       forbidden: [uuid(50)],
     });
     const region = await opened(fake.client);
-    await section(region, "Projects");
+    await section(region, "Collections");
     await userEvent.click(
       await within(region).findByRole("button", { name: /Wendle/ }),
     );
@@ -1174,7 +1182,11 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     expect(within(history).getAllByRole("listitem")[2]).toHaveTextContent(
       "30 October 2026",
     );
-    expect(within(region).getByText(/some earlier revisions can no longer be opened/i)).toBeInTheDocument();
+    expect(
+      within(region).getByText(
+        /some earlier revisions can no longer be opened/i,
+      ),
+    ).toBeInTheDocument();
   });
 
   it("never lets a client's own name read as a person or the terminal", async () => {
@@ -1208,6 +1220,38 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     );
   });
 
+  it("starts a project from the exact idea revision with its original scope", async () => {
+    at(size);
+    const idea = memory(1, "DEMO: grow herbs", { tags: ["project-idea"] });
+    const fake = fakeEngine({ memories: [idea] });
+    const region = await opened(fake.client);
+    await userEvent.click(
+      await within(region).findByRole("button", { name: /grow herbs/ }),
+    );
+    await userEvent.click(
+      await within(region).findByRole("button", { name: "Start a project…" }),
+    );
+    await userEvent.type(
+      within(region).getByLabelText("Project name"),
+      "Herb garden",
+    );
+    await userEvent.click(
+      within(region).getByRole("button", { name: "Start project" }),
+    );
+    await waitFor(() =>
+      expect(fake.asked("project_create")).toEqual([
+        {
+          op: "project_create",
+          id: idea.id,
+          expected: idea.revision,
+          scope: idea.scope,
+          name: "Herb garden",
+          showInProjects: true,
+        },
+      ]),
+    );
+  });
+
   it("gives a memory its project and tags, sending only what changed", async () => {
     at(size);
     const fake = fakeEngine({
@@ -1235,9 +1279,11 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       await within(region).findByRole("button", { name: /organise me/ }),
     );
     await userEvent.click(
-      await within(region).findByRole("button", { name: "Project and tags…" }),
+      await within(region).findByRole("button", {
+        name: "Collection and tags…",
+      }),
     );
-    const pick = within(region).getByLabelText("Project");
+    const pick = within(region).getByLabelText("Collection");
     await waitFor(() =>
       expect(
         within(pick).getByRole("option", { name: "Canal" }),
@@ -1255,10 +1301,12 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     expect(fake.asked("update")).toEqual([]);
 
     await userEvent.click(
-      await within(region).findByRole("button", { name: "Project and tags…" }),
+      await within(region).findByRole("button", {
+        name: "Collection and tags…",
+      }),
     );
     await userEvent.selectOptions(
-      within(region).getByLabelText("Project"),
+      within(region).getByLabelText("Collection"),
       "canal",
     );
     await userEvent.click(within(region).getByRole("button", { name: "Save" }));
@@ -1271,9 +1319,14 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     });
 
     await userEvent.click(
-      await within(region).findByRole("button", { name: "Project and tags…" }),
+      await within(region).findByRole("button", {
+        name: "Collection and tags…",
+      }),
     );
-    await userEvent.selectOptions(within(region).getByLabelText("Project"), "");
+    await userEvent.selectOptions(
+      within(region).getByLabelText("Collection"),
+      "",
+    );
     const again = within(region).getByLabelText("Tags, separated by commas");
     await userEvent.clear(again);
     await userEvent.type(again, "#Rota, bins");
@@ -1296,7 +1349,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     );
     await within(region).findByRole("group", { name: "This memory" });
     expect(
-      within(region).queryByRole("button", { name: "Project and tags…" }),
+      within(region).queryByRole("button", { name: "Collection and tags…" }),
     ).not.toBeInTheDocument();
   });
 
@@ -1477,7 +1530,7 @@ describe("the explorer's way in", () => {
     });
     const region = await opened(fake.client, { selected: star.id }, [star]);
     expect(
-      within(region).getByRole("heading", { name: "Projects" }),
+      within(region).getByRole("heading", { name: "Collections" }),
     ).toBeInTheDocument();
     const row = await within(region).findByRole("button", { name: /Wendle/ });
     expect(row).toHaveAttribute("aria-expanded", "true");

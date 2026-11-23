@@ -29,6 +29,7 @@ type Draft = {
   description: string;
   aliases: string;
   scope: MemoryScope;
+  showInProjects: boolean;
 };
 
 function Fields({
@@ -50,6 +51,16 @@ function Fields({
         maxLength={120}
         onChange={(e) => setDraft({ ...draft, name: e.target.value })}
       />
+      <label>
+        <input
+          type="checkbox"
+          checked={draft.showInProjects}
+          onChange={(event) =>
+            setDraft({ ...draft, showInProjects: event.target.checked })
+          }
+        />
+        Show in Projects
+      </label>
       <label htmlFor="memory-project-description">What it is</label>
       <textarea
         id="memory-project-description"
@@ -68,7 +79,7 @@ function Fields({
         onChange={(e) => setDraft({ ...draft, aliases: e.target.value })}
       />
       <span className="memory-hint">
-        A memory tagged with one of these is in the project too.
+        A memory tagged with one of these is in the collection too.
         {making &&
           projectSlug(draft.name) &&
           ` It will be known as ${projectSlug(draft.name)}, which never changes.`}
@@ -180,12 +191,13 @@ export function MemoryProjects({
       description: making.description.trim(),
       aliases: aliasList(making.aliases),
       scope: making.scope,
+      ...(making.showInProjects ? { showInProjects: true } : {}),
     });
     if (!reply) return;
     setMaking(null);
     setOpened(reply.project.id);
     tools.say({
-      text: `Made the project ${reply.project.name}: it is known as ${reply.project.slug}.`,
+      text: `Made the collection ${reply.project.name}: it is known as ${reply.project.slug}.`,
     });
     await load();
   }
@@ -205,6 +217,9 @@ export function MemoryProjects({
       name: editing.name.trim(),
       description: editing.description.trim(),
       aliases: aliasList(editing.aliases),
+      ...(editing.showInProjects !== Boolean(p.showInProjects)
+        ? { showInProjects: editing.showInProjects }
+        : {}),
     });
     if (!reply) {
       await load();
@@ -225,8 +240,8 @@ export function MemoryProjects({
     }
     tools.say({
       text: archived
-        ? `Archived ${p.name}: its memories stay, and it leaves the lists of projects.`
-        : `${p.name} is back among the projects.`,
+        ? `Archived ${p.name}: its memories stay, and it leaves the lists of collections.`
+        : `${p.name} is back among the collections.`,
       action: reply.unchanged
         ? undefined
         : {
@@ -263,7 +278,7 @@ export function MemoryProjects({
     setOpened(null);
     deleted(p);
     tools.say({
-      text: `Deleted the project ${p.name}: ${counted(reply.memories, "memory", "memories")} left it and ${reply.memories === 1 ? "stays" : "stay"} as ${reply.memories === 1 ? "it was" : "they were"}, in no project.`,
+      text: `Deleted the collection ${p.name}: ${counted(reply.memories, "memory", "memories")} left it and ${reply.memories === 1 ? "stays" : "stay"} as ${reply.memories === 1 ? "it was" : "they were"}, in no collection.`,
     });
     tools.saved();
     await load();
@@ -284,10 +299,15 @@ export function MemoryProjects({
         }}
       >
         <span className="memory-preview">{p.name}</span>
+        {p.updatedAt && (
+          <time className="memory-when" dateTime={p.updatedAt}>
+            {when(p.updatedAt)}
+          </time>
+        )}
         <span className="memory-meta">
           {p.slug} · {scopeName(p)}
+          {p.showInProjects ? " · Shown in Projects" : ""}
           {p.aliases.length > 0 ? ` · also ${p.aliases.join(", ")}` : ""}
-          {p.updatedAt ? ` · ${when(p.updatedAt)}` : ""}
         </span>
       </button>
       {opened === p.id && (
@@ -328,18 +348,18 @@ export function MemoryProjects({
                 <span
                   className="memory-confirm"
                   role="group"
-                  aria-label="Delete this project?"
+                  aria-label="Delete this collection?"
                 >
                   <span>
-                    Delete this project? Its memories stay, in no project, and
-                    any tagged with its other names keep their tags. This can't
-                    be undone.
+                    Delete this collection? Its memories stay, in no collection,
+                    and any tagged with its other names keep their tags. This
+                    can't be undone.
                   </span>
                   <button
                     className="memory-danger"
                     onClick={() => void remove(p)}
                   >
-                    Delete the project
+                    Delete the collection
                   </button>
                   <button onClick={() => setDeleting(null)}>Keep it</button>
                 </span>
@@ -347,7 +367,7 @@ export function MemoryProjects({
                 <div
                   className="memory-actions"
                   role="group"
-                  aria-label="This project"
+                  aria-label="This collection"
                 >
                   <button onClick={() => showMemories(p)}>
                     Show its memories
@@ -361,6 +381,7 @@ export function MemoryProjects({
                         description: p.description,
                         aliases: p.aliases.join(", "),
                         scope: p.scope,
+                        showInProjects: Boolean(p.showInProjects),
                       });
                     }}
                   >
@@ -379,7 +400,7 @@ export function MemoryProjects({
                 </div>
               )}
               <MemoryCapsuleCard
-                name={`The ${p.slug} project's capsule`}
+                name={`The ${p.slug} collection’s capsule`}
                 request={{
                   capsule: "project",
                   project: p.slug,
@@ -440,7 +461,7 @@ export function MemoryProjects({
                 (!projectSlug(making.name) && !making.slug.trim())
               }
             >
-              Make the project
+              Make the collection
             </button>
           </div>
         </form>
@@ -455,24 +476,26 @@ export function MemoryProjects({
               description: "",
               aliases: "",
               scope: person ? "private" : "shared",
+              showInProjects: false,
             });
           }}
         >
-          New project…
+          New collection…
         </button>
       )}
-      <ul className="memory-list" aria-label="Projects">
+      <ul className="memory-list" aria-label="Collections">
         {active.map(row)}
       </ul>
       {projects && !active.length && !archived.length && (
         <p className="memory-empty">
-          No projects yet. A memory saved with a project makes one too.
+          No collections yet. Saving a memory with a new collection name creates
+          one.
         </p>
       )}
       {archived.length > 0 && (
         <>
           <h3 className="memory-subhead">Archived</h3>
-          <ul className="memory-list" aria-label="Archived projects">
+          <ul className="memory-list" aria-label="Archived collections">
             {archived.map(row)}
           </ul>
         </>

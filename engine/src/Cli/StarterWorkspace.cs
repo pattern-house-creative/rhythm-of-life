@@ -74,12 +74,17 @@ public static class StarterWorkspace
             await Note(slug, "project-guide", "Project context: record the outcome, source of truth and how to verify the work here. The Projects dashboard shows this project's live work.", "current-state");
             await Note(slug, "project-guide", "Decisions: record agreed choices and why they were made here.", "decisions");
             await Note(slug, "project-guide", "Open questions: record choices that need an owner's answer here.", "open-questions");
+            await Query("""
+                SELECT update_memory_project(@p,p.id,'{"show_in_projects":true}'::jsonb,NULL,'cli','rhythm')
+                FROM memory_projects p WHERE p.subject_id='household'
+                  AND (p.slug=@slug OR EXISTS (SELECT 1 FROM memory_project_aliases a WHERE a.project_id=p.id AND a.alias=@slug))
+                """, ("p", person), ("slug", slug));
         }
 
         async Task Board(string asset)
         {
             var draft = JsonSerializer.Deserialize<DashboardDraft>(Asset(asset + ".json"), DashboardDraft.Json)! with
-                { Html = Asset("style.html") + Asset(asset + ".html") };
+                { Html = Asset("style.html") + (asset == "agents" ? Asset("team.html") : "") + Asset(asset + ".html") };
             if (draft.Problem() is { } problem) throw new ConfigException("Invalid starter dashboard: " + problem);
             if (await Query("""
                 SELECT 1 FROM dashboards d JOIN LATERAL

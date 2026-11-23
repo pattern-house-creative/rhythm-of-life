@@ -1,0 +1,9 @@
+/* A freshness line's phrases (FreshnessPhrases.tsx): each phrase wraps as a whole where it can,
+   and a date, time and zone stay together, so a zone never takes a line of its own. */
+.freshness-phrase {
+  display: inline-block;
+  max-width: 100%;
+}
+.freshness-phrase time {
+  white-space: nowrap;
+}

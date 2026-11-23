@@ -80,7 +80,7 @@ async function opened(client: MemoryClient) {
 }
 const section = async (region: HTMLElement, name: string | RegExp) =>
   userEvent.click(
-    within(within(region).getByRole("toolbar", { name: "Show" })).getByRole(
+    within(within(region).getByRole("toolbar", { name: "Memory sections" })).getByRole(
       "button",
       { name },
     ),
@@ -114,7 +114,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     });
     // Nothing is asked on each key: only once a person says Find.
     await userEvent.type(
-      within(find).getByRole("searchbox", { name: "Words in it" }),
+      within(find).getByRole("searchbox", { name: "Search memory text" }),
       "  wendle ferry ",
     );
     expect(fake.asked("list").some((c) => "query" in c)).toBe(false);
@@ -155,15 +155,15 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
 
     // Words nobody wrote say so; Clear filters clears the words too.
     await userEvent.clear(
-      within(find).getByRole("searchbox", { name: "Words in it" }),
+      within(find).getByRole("searchbox", { name: "Search memory text" }),
     );
     await userEvent.type(
-      within(find).getByRole("searchbox", { name: "Words in it" }),
+      within(find).getByRole("searchbox", { name: "Search memory text" }),
       "nobody wrote this{Enter}",
     );
     expect(
       await within(region).findByText(
-        "No memory you read holds “nobody wrote this” with these filters.",
+        "No memories match “nobody wrote this” with these filters.",
       ),
     ).toBeVisible();
     await userEvent.click(
@@ -173,14 +173,14 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       expect(within(list).getAllByRole("listitem")).toHaveLength(4),
     );
     expect(
-      within(find).getByRole("searchbox", { name: "Words in it" }),
+      within(find).getByRole("searchbox", { name: "Search memory text" }),
     ).toHaveValue("");
     expect(fake.asked("list").at(-1)).not.toHaveProperty("query");
     expect(fake.asked("list").at(-1)).not.toHaveProperty("kind");
 
     // Words typed but never looked for go too: nothing left in the box is looked for at the next Find.
     await userEvent.type(
-      within(find).getByRole("searchbox", { name: "Words in it" }),
+      within(find).getByRole("searchbox", { name: "Search memory text" }),
       "never looked for",
     );
     await userEvent.selectOptions(
@@ -195,7 +195,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       within(filters).getByRole("button", { name: "Clear filters" }),
     );
     expect(
-      within(find).getByRole("searchbox", { name: "Words in it" }),
+      within(find).getByRole("searchbox", { name: "Search memory text" }),
     ).toHaveValue("");
     await waitFor(() =>
       expect(within(list).getAllByRole("listitem")).toHaveLength(4),
@@ -907,7 +907,13 @@ describe("a finger's room and no zoom for the new controls, upright or sideways"
         .map((r) => r.style);
     for (const selector of [".memory-find button", ".memory-note select"])
       expect(
-        said(selector).some((s) => parseInt(s.minHeight) >= 40),
+        // The app's least touch target by its token (index.css: --ui-target, 44px), or in pixels.
+        said(selector).some(
+          (s) =>
+            (s.minHeight.trim() === "var(--ui-target)"
+              ? 44
+              : parseInt(s.minHeight)) >= 40,
+        ),
         selector,
       ).toBe(true);
     expect(said(".memory-note select").map((s) => s.fontSize)).toContain(

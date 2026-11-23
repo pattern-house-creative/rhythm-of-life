@@ -55,7 +55,7 @@ export function GlucosePart({
       <div className="section-label">
         <span>
           <Activity size={14} />
-          GLUCOSE
+          Glucose
         </span>
         <ArrowUpRight size={16} />
       </div>

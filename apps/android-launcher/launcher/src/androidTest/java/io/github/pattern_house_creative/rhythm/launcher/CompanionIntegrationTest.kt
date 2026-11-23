@@ -131,9 +131,10 @@ class CompanionIntegrationTest {
             control(mode);onMain{it.recreate()};waitPreviewText(expected);capture(mode)
             assertEquals(pinned,store.load())
         }
-        for(mode in listOf("offline","denied")) {
+        // An unreachable household and a refused one are told apart on Home's status line.
+        for((mode,status) in listOf("offline" to "Household unavailable · you can still open apps","denied" to "Household access denied")) {
             control(mode);onMain{it.recreate()};rule.mainClock.autoAdvance=true
-            rule.waitUntil(15000){rule.onAllNodesWithText("Household unavailable",substring=true).fetchSemanticsNodes().isNotEmpty()}
+            rule.waitUntil(15000){rule.onAllNodesWithText(status).fetchSemanticsNodes().isNotEmpty()}
             assertEquals(pinned,store.load())
             control("glucose-fresh");onMain{it.recreate()};waitPreviewText("123")
         }
@@ -143,7 +144,7 @@ class CompanionIntegrationTest {
         control("glucose-fresh");onMain{it.recreate()};waitPreviewText("123")
         rule.mainClock.autoAdvance=true
         rule.onNodeWithTag("tile:$key").performTouchInput { longClick(center) }
-        rule.onNodeWithText("−  Remove from Home").performClick()
+        rule.onNodeWithText("Remove from Home").performClick()
         assertEquals(before,store.load())
         onMain{it.recreate()};rule.waitForIdle()
         rule.waitUntil(15000){rule.onAllNodesWithTag("swipe-search").fetchSemanticsNodes().isNotEmpty()}
@@ -195,7 +196,7 @@ class CompanionIntegrationTest {
             for((index,id) in listOf(board,"00000000-0000-4000-8000-000000000002").withIndex()) {
                 repeat(2) { round ->
                     rule.mainClock.autoAdvance=true
-                    rule.onNodeWithTag("home-grid").performScrollToNode(hasTestTag("tile:DASHBOARD:$id"))
+                    rule.showOnHome("tile:DASHBOARD:$id")
                     rule.onNodeWithTag("tile:DASHBOARD:$id").performClick()
                     waitText(if(index==0)"Garden overview" else "Reading overview")
                     assertReaderViewport(true)
@@ -220,7 +221,7 @@ class CompanionIntegrationTest {
                 .put("feeds",org.json.JSONArray().put(org.json.JSONObject().put("name","progress").put("kind","contents").put("star","second-brain:fixture:note-2")))
             postFixture("/__fixture/create",draft.toString())
             store.save(saved.showPreview(id));onMain{it.recreate()};rule.mainClock.autoAdvance=true
-            rule.onNodeWithTag("home-grid").performScrollToNode(hasTestTag("tile:DASHBOARD:$id"));rule.onNodeWithTag("tile:DASHBOARD:$id").performClick()
+            rule.showOnHome("tile:DASHBOARD:$id");rule.onNodeWithTag("tile:DASHBOARD:$id").performClick()
             waitText("Reader viewport test");assertReaderViewport(true)
             rule.mainClock.autoAdvance=true;rule.waitForIdle();Thread.sleep(1200)
             capture("reader-before-first-touch")
@@ -267,19 +268,19 @@ class CompanionIntegrationTest {
             rule.waitUntil(15000){rule.onAllNodesWithTag("preview-choice:$newId").fetchSemanticsNodes().isNotEmpty()}
             rule.onNodeWithTag("preview-choice:$newId").performClick()
             val key="DASHBOARD:$newId"
-            rule.onNodeWithTag("home-grid").performScrollToNode(hasTestTag("tile:$key"))
+            rule.showOnHome("tile:$key")
             waitPreviewText("Meet at the lake entrance")
             capture("created-preview")
             repeat(2) {
                 rule.mainClock.autoAdvance=true
                 rule.onNodeWithTag("tile:$key").performClick();waitText("Weekend plan");back()
-                rule.onNodeWithTag("home-grid").performScrollToNode(hasTestTag("tile:$key"))
+                rule.showOnHome("tile:$key")
                 waitPreviewText("Meet at the lake entrance")
             }
             // Existing dashboards with no preview metadata, missing supported
             // data, a throwing authored renderer and a failed data endpoint.
             store.save(oldLayout)
-            for((mode,expected) in listOf("preview-absent" to "Basic preview","preview-broken" to "authored preview failed","preview-error" to "Preview unavailable","preview-denied" to "Sources unavailable")) {
+            for((mode,expected) in listOf("preview-absent" to "Basic preview","preview-broken" to "authored preview failed","preview-error" to "Preview unavailable","preview-denied" to "Dashboard data unavailable")) {
                 control(mode);onMain{it.recreate()};waitPreviewText(expected);capture(mode)
             }
             control("normal");onMain{it.recreate()};waitPreviewText("28 min")
@@ -344,7 +345,7 @@ class CompanionIntegrationTest {
             waitPreviewText("28 min")
             rule.mainClock.autoAdvance=true
             rule.onNodeWithText("More sky").performClick()
-            rule.waitUntil(20000){rule.onAllNodesWithTag("sky-map").fetchSemanticsNodes().any { it.config[androidx.compose.ui.semantics.SemanticsProperties.StateDescription].startsWith("$count loaded") }}
+            rule.waitUntil(20000){rule.onAllNodesWithTag("sky-map").fetchSemanticsNodes().any { it.config[androidx.compose.ui.semantics.SemanticsProperties.StateDescription].startsWith("$count stars shown") }}
             capture("geometry-$mode-sky")
             if(mode=="hub") {
                 rule.onNodeWithText("Stars").performClick()
@@ -433,6 +434,58 @@ class CompanionIntegrationTest {
         assertEquals("Backgrounding should pause the same documents", original, cardViews())
     }
 
+    @Test fun swipingHomePagesKeepsLoadedPreviewDocuments() {
+        val preview = Tile(TileKind.PREVIEW, "00000000-0000-4000-8000-000000000002")
+        val other = Tile(TileKind.PREVIEW, board)
+        store.save(HomeLayout(listOf(preview, previous.tiles.first { it.kind == TileKind.APP }, other),
+            dock = previous.dock, breaks = listOf(1, 2)))
+        store.still = true
+        onMain { it.recreate() }
+        waitPreviewText("28 min")
+
+        fun previewView(tile: Tile): WebView? {
+            var view: WebView? = null
+            onMain { activity -> view = webViews(activity.window.decorView).find { it.url == webDestination(origin, tile, true) } }
+            return view
+        }
+        fun evaluate(view: WebView, script: String): String {
+            val result = java.util.concurrent.CompletableFuture<String>()
+            onMain { view.evaluateJavascript(script) { value -> result.complete(value) } }
+            return result.get(5, java.util.concurrent.TimeUnit.SECONDS)
+        }
+        fun swipe(forward: Boolean) {
+            rule.mainClock.autoAdvance = true
+            rule.onNodeWithTag("home-grid").performTouchInput {
+                if (forward) swipeLeft() else swipeRight()
+            }
+            rule.waitForIdle()
+        }
+
+        val first = requireNotNull(previewView(preview))
+        assertNull("An unvisited page should load on demand", previewView(other))
+        assertEquals("true", evaluate(first, "window.__swipeMarker = true"))
+        swipe(true)
+        rule.onNodeWithTag("tile:${preview.key}").assertDoesNotExist()
+        onMain { assertEquals("The offscreen preview must be paused and hidden", View.INVISIBLE, first.visibility) }
+        swipe(true)
+        rule.waitUntil(15000) { previewView(other) != null }
+        val third = requireNotNull(previewView(other))
+        rule.waitUntil(15000) {
+            evaluate(third, "Boolean(document.querySelector('[data-preview-ready=true],.launcher-authored.drawn'))") == "true"
+        }
+        assertEquals("true", evaluate(third, "window.__swipeMarker = true"))
+        repeat(2) {
+            swipe(false)
+            swipe(false)
+            assertSame("Swiping back should keep the first WebView", first, previewView(preview))
+            assertEquals("true", evaluate(first, "window.__swipeMarker === true && !document.hidden"))
+            swipe(true)
+            swipe(true)
+            assertSame("The other dashboard should also stay warm", third, previewView(other))
+            assertEquals("true", evaluate(third, "window.__swipeMarker === true && !document.hidden"))
+        }
+    }
+
     @Test fun readerRetainsItsDocumentAcrossPauseAndChecksAccessOnResume() {
         rule.onNodeWithTag("tile:DASHBOARD:$board").performClick()
         waitText("Garden overview")
@@ -494,7 +547,7 @@ class CompanionIntegrationTest {
         control("graph-denied")
         rule.onNodeWithTag("swipe-search").performClick()
         rule.onNodeWithTag("search-input").performTextInput("garden")
-        rule.waitUntil(15000) { rule.onAllNodesWithText("Household access unavailable").fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(15000) { rule.onAllNodesWithText("Household access denied").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("drawer-handle").performClick()
         onMain { assertTrue(webViews(it.window.decorView).isEmpty()) }
     }
@@ -557,7 +610,7 @@ class CompanionIntegrationTest {
 
     @Test fun failuresLoadingAndInterruptedOpenStayRecoverable() {
         control("slow")
-        rule.onNodeWithTag("tile:STAR:$star").performScrollTo().performTouchInput { click(center) }
+        rule.showOnHome("tile:STAR:$star");rule.onNodeWithTag("tile:STAR:$star").performTouchInput { click(center) }
         rule.onAllNodesWithText("Opening household…").onLast().assertExists(); capture("loading")
         back(); Thread.sleep(2200)
         rule.onNodeWithText("Rhythm OS").assertExists()
@@ -606,7 +659,7 @@ class CompanionIntegrationTest {
     @Test fun largeDisconnectedAndAccessLossKeepTheSkyHonest() {
         control("large"); onMain { it.recreate() }
         rule.onNodeWithText("More sky").performClick()
-        rule.waitUntil(20000) { rule.onAllNodesWithText("362 loaded · discovery").fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(20000) { rule.onAllNodesWithText("362 stars shown").fetchSemanticsNodes().isNotEmpty() }
         capture("large-graph"); Thread.sleep(2000);rule.mainClock.advanceTimeBy(64); Thread.sleep(50); capture("large-breath")
         val map=rule.onNodeWithTag("sky-map")
         rule.onNodeWithText("Stars").performClick()
@@ -622,21 +675,21 @@ class CompanionIntegrationTest {
         rule.onNodeWithTag("open-sky-selection").assertDoesNotExist()
         capture("large-zoom")
         rule.onNodeWithContentDescription("Fit sky").performClick()
-        rule.onNodeWithText("362 loaded · discovery").performClick()
+        rule.onNodeWithText("362 stars shown").performClick()
         rule.onNodeWithText("The server reports more or incomplete results.",substring=true).assertExists()
         rule.onNodeWithText("Close").performClick()
         control("disconnected"); onMain { it.recreate() }
         rule.onNodeWithText("More sky").performClick()
-        rule.waitUntil(20000) { rule.onAllNodesWithText("66 loaded · discovery").fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(20000) { rule.onAllNodesWithText("66 stars shown").fetchSemanticsNodes().isNotEmpty() }
         capture("disconnected")
         store.still=true; onMain { it.recreate() }
         rule.onNodeWithText("More sky").performClick()
-        rule.waitUntil(20000) { rule.onAllNodesWithText("66 loaded · discovery").fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(20000) { rule.onAllNodesWithText("66 stars shown").fetchSemanticsNodes().isNotEmpty() }
         capture("reduced-motion")
         store.still=false
         control("denied"); onMain { it.recreate() }
         rule.onNodeWithText("More sky").performClick()
-        rule.waitUntil(15000) { rule.onAllNodesWithText("0 loaded · discovery").fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(15000) { rule.onAllNodesWithText("0 stars shown").fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("sky:second-brain:fixture:large-1").assertDoesNotExist()
         capture("access-loss")
     }
@@ -706,7 +759,7 @@ class CompanionIntegrationTest {
         }
         for((mode,text) in listOf("insight-slow" to "A small window for your garden",
             "insight-empty" to "No current insight available","insight-old" to "No current insight available",
-            "insight-dismissed" to "No current insight available","insight-error" to "Insight unavailable · try reconnecting",
+            "insight-dismissed" to "No current insight available","insight-error" to "Daily insight unavailable",
             "insight-long" to "A little time outside can make room for the next chapter in your garden plan",
             "normal" to "A small window for your garden")) {
             control(mode);onMain{it.recreate()}
@@ -714,7 +767,7 @@ class CompanionIntegrationTest {
             assertEquals(before,store.load());capture(mode)
         }
         control("denied");onMain{it.recreate()}
-        rule.waitUntil(15000){rule.onAllNodesWithText("Household access unavailable").fetchSemanticsNodes().isNotEmpty()}
+        rule.waitUntil(15000){rule.onAllNodesWithText("Household access denied").fetchSemanticsNodes().isNotEmpty()}
         rule.onNodeWithText("A small window for your garden").assertDoesNotExist()
         control("normal");onMain{it.recreate()}
         rule.waitUntil(15000){rule.onAllNodesWithText("A small window for your garden").fetchSemanticsNodes().isNotEmpty()}

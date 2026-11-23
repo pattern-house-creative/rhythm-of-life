@@ -57,7 +57,7 @@ async function reader() {
   const user = userEvent.setup();
   render(<App />);
   await user.click(
-    await screen.findByRole("button", { name: "Enter constellation" }),
+    await screen.findByRole("button", { name: "Open Explorer" }),
   );
   const explorer = await screen.findByRole("region", {
     name: "Knowledge explorer",

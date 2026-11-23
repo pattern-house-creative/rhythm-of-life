@@ -20,7 +20,7 @@ inSandbox();
 // The Memories view from Home, as a person goes: into the sky, Memories, and the strip's button for the list.
 async function toList(strip: string | RegExp) {
   const opened = await memoriesView();
-  const bar = within(opened.region).getByRole("toolbar", { name: "Show" });
+  const bar = within(opened.region).getByRole("toolbar", { name: "Memory sections" });
   // The strip names a queue with its count once the counts are in, a moment after the view opens: wait for that name.
   await opened.user.click(
     await within(bar).findByRole(

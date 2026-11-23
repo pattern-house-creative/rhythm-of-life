@@ -274,6 +274,7 @@ public sealed class MemoryArchiveTests
     {
         await using var a = await Install.Make();
         var s = await Seed(a);
+        await a.Run("UPDATE memory_projects SET show_in_projects=true WHERE subject_id='alex'");
         var file = await a.Export("alex");
         await using var b = await Install.Make();
         // Alex is Family's admin there, so the Family memory Sam wrote is hers to bring too (section 5's author lock).
@@ -286,6 +287,7 @@ public sealed class MemoryArchiveTests
         Assert.Equal(before, await b.Rows());
 
         var report = await b.Import(file, "alex", family: true);
+        Assert.Equal(1L, await b.Scalar("SELECT count(*) FROM memory_projects WHERE subject_id='alex' AND show_in_projects"));
         Assert.Equal((11, 2, 3, false), (report.Count("memory", "added"), report.Count("project", "added"), report.Count("link", "added"), report.SameInstall));
         Assert.Equal((4, 0, 1, 0), (report.VersionsKept, report.VersionsLeftOut, report.HeldHere, report.AliasesLeftOut));
         // Exported again, it is the same file but for the one memory a person released there: its words read like

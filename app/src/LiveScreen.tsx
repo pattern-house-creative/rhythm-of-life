@@ -889,11 +889,11 @@ export function LiveScreen({
             )
           }
         >
-          <Undo2 size={13} aria-hidden="true" /> Undo
+          <Undo2 size={15} aria-hidden="true" /> Undo
         </button>
       )}
       <button aria-label="Dismiss" onClick={() => setNote(null)}>
-        <X size={13} />
+        <X size={16} aria-hidden="true" />
       </button>
     </p>
   );

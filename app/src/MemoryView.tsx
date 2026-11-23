@@ -149,6 +149,7 @@ type Step =
   | "release"
   | "share"
   | "organise"
+  | "startProject"
   | "classify"
   | null;
 // The view's sections, in the order they are offered: its label on the strip and its title once chosen. A later section is one
@@ -159,7 +160,7 @@ const sections = [
   { id: "due", label: "Due", title: "Due" },
   { id: "decisions", label: "Decisions", title: "Decisions" },
   { id: "standing", label: "Standing", title: "Standing instructions" },
-  { id: "projects", label: "Projects", title: "Projects" },
+  { id: "projects", label: "Collections", title: "Collections" },
   { id: "changes", label: "AI changes", title: "AI changes" },
   { id: "review", label: "Review", title: "Held for review" },
   { id: "copies", label: "Copies", title: "Possible copies" },
@@ -207,7 +208,7 @@ const linkable = [
 const capsuleName = (m: Memory, c: MemoryCapsule) =>
   c.kind === "core"
     ? `${whose(m)} core capsule`
-    : `the ${m.project?.slug ?? "project"} project's capsule`;
+    : `the ${m.project?.slug ?? "project"} collection’s capsule`;
 // How the write that held a memory came, in words. An AI client's name is the one it gave itself, so it is shown as
 // an AI client's, never as a channel of its own (a client calling itself "the terminal" stays an AI client here).
 const heldHow = (i: ReviewItem) =>
@@ -737,6 +738,35 @@ export default function MemoryView({
       ?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, tab]);
+  // Sections past either end of the strip: that end fades (MemoryView.css), so a strip that scrolls never looks
+  // complete. Said on the strip itself, read as it scrolls or changes size, without drawing the view again.
+  useEffect(() => {
+    const el = strip.current;
+    if (!el) return;
+    const mark = () => {
+      const before = el.scrollLeft > 1;
+      const after = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+      el.dataset.more =
+        before && after ? "both" : before ? "start" : after ? "end" : "none";
+    };
+    // A section given focus at a fading end is brought clear of the fade (the strip's scroll padding), ring and all.
+    const clear = (event: FocusEvent) =>
+      (event.target as HTMLElement).scrollIntoView?.({
+        block: "nearest",
+        inline: "nearest",
+      });
+    mark();
+    el.addEventListener("scroll", mark, { passive: true });
+    el.addEventListener("focusin", clear);
+    const resized =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(mark);
+    resized?.observe(el);
+    return () => {
+      el.removeEventListener("scroll", mark);
+      el.removeEventListener("focusin", clear);
+      resized?.disconnect();
+    };
+  }, [open, off]);
   useEffect(() => {
     if (!notice || notice.busy || notice.failed || notice.action) return;
     const timer = setTimeout(() => setNotice(null), 12_000);
@@ -822,7 +852,7 @@ export default function MemoryView({
       setNotice({
         text: w.held
           ? `Saved ${where}, and held for review: ${holdWhy[w.held.reason]}. Open it to look and release it.`
-          : `${w.replayed ? "Saved already" : "Saved"} as a draft ${where}.${w.project?.created ? ` Made the project ${w.project.slug}.` : ""}`,
+          : `${w.replayed ? "Saved already" : "Saved"} as a draft ${where}.${w.project?.created ? ` Made the collection ${w.project.slug}.` : ""}`,
         action: {
           label: "Open",
           run: () => {
@@ -1085,10 +1115,10 @@ export default function MemoryView({
           : "Nothing changed: it is private already."
         : [
             scope === "shared"
-              ? "Shared with Family: every member reads it now, with its author."
-              : `Taken back to ${personName(w.owner)}'s own memories: Family's members no longer read it.`,
+              ? "Shared with Family. Family members can read it now and see its author."
+              : `Made private to ${personName(w.owner)}. Family members can no longer read it.`,
             w.projectLeft
-              ? "Its project stayed behind, so it is in no project now."
+              ? "Its collection stayed behind, so it is in no collection now."
               : "",
             m.capsule ? "It left its capsule slot." : "",
           ]
@@ -1280,6 +1310,53 @@ export default function MemoryView({
   }
 
   // A memory's project and tags, what a person changes beside its words: the projects of its scope to choose from.
+  function isProjectIdea(m: Memory) {
+    const inbox = ["project-ideas", "projects-for-others"].includes(
+      m.project?.slug ?? "",
+    );
+    const tagged = m.tags.some((tag) =>
+      [
+        "project-idea",
+        "idea-stage",
+        "third-party-project",
+        "portfolio-idea",
+      ].includes(tag),
+    );
+    return (
+      (inbox || tagged) &&
+      !m.held &&
+      !m.work &&
+      !m.capsule &&
+      m.status !== "deprecated" &&
+      m.state === "current" &&
+      !m.tags.some((tag) =>
+        [
+          "project-overview",
+          "portfolio-project",
+          "capture-rule",
+          "capture-workflow",
+          "standing",
+          "idea-inbox",
+          "inbox-guide",
+        ].includes(tag),
+      )
+    );
+  }
+
+  async function promoteIdea(m: Memory) {
+    const reply = await call({
+      op: "project_create",
+      name: text.trim(),
+      scope: m.scope,
+      showInProjects: true,
+      id: m.id,
+      expected: m.revision,
+    });
+    if (!reply) return;
+    setStep(null);
+    await read(m.id, "Started the project. This idea is now its overview.");
+  }
+
   async function startOrganising(m: Memory) {
     setOrganising({
       project: m.project?.slug ?? "",
@@ -1414,7 +1491,7 @@ export default function MemoryView({
             ref={strip}
             className="memory-tabs"
             role="toolbar"
-            aria-label="Show"
+            aria-label="Memory sections"
             onKeyDown={walkStrip}
             onBlur={leaveStrip}
           >
@@ -1481,8 +1558,14 @@ export default function MemoryView({
                 }}
               />
               <div className="memory-row">
+                {/* What Save will do, before it is done: a shared capture lands in Family with per-person scopes on,
+                    for the whole household with them off, and is said only as shared until the settings are read. */}
                 <span id="memory-new-hint" className="memory-hint">
-                  Saved as a draft in Family; you can confirm it later.
+                  {settings?.scopes === "on"
+                    ? "Save adds a draft to Family. You can confirm it later."
+                    : settings?.scopes === "off"
+                      ? "Save adds a household draft. You can confirm it later."
+                      : "Save adds a shared draft. You can confirm it later."}
                 </span>
                 <button
                   type="submit"
@@ -1582,11 +1665,12 @@ export default function MemoryView({
                         ? ` (${item.signals.join(", ")})`
                         : ""}
                     </span>
+                    <time className="memory-when" dateTime={item.heldAt}>
+                      {when(item.heldAt)}
+                    </time>
                     <span className="memory-meta">
                       {scopeName(item)} · from {heldHow(item)}
-                      {item.heldBy
-                        ? ` for ${personName(item.heldBy)}`
-                        : ""} · {when(item.heldAt)}
+                      {item.heldBy ? ` for ${personName(item.heldBy)}` : ""}
                     </span>
                     {read && (
                       <p
@@ -1601,7 +1685,7 @@ export default function MemoryView({
                     {read && (read.project || read.tags.length > 0) && (
                       <p className="memory-meta">
                         {read.project
-                          ? `Project ${visibleText(read.project.slug)}`
+                          ? `Collection ${visibleText(read.project.slug)}`
                           : ""}
                         {read.project && read.tags.length ? " · " : ""}
                         {read.tags.map((t) => `#${visibleText(t)}`).join(" ")}
@@ -1609,7 +1693,7 @@ export default function MemoryView({
                     )}
                     {read && read.project && item.reason === "held_project" && (
                       <p className="memory-hint">
-                        Releasing it lets the project{" "}
+                        Releasing it lets the collection{" "}
                         {visibleText(read.project.slug)} into every list too.
                       </p>
                     )}
@@ -2017,7 +2101,7 @@ export default function MemoryView({
             {(m.tags.length > 0 || m.project) && (
               <p className="memory-meta">
                 {m.project
-                  ? `Project ${m.held ? visibleText(m.project.slug) : m.project.slug}`
+                  ? `Collection ${m.held ? visibleText(m.project.slug) : m.project.slug}`
                   : ""}
                 {m.project && m.tags.length ? " · " : ""}
                 {m.tags.map((t) => `#${m.held ? visibleText(t) : t}`).join(" ")}
@@ -2103,6 +2187,37 @@ export default function MemoryView({
                 </div>
               </form>
             )}
+            {step === "startProject" && (
+              <form
+                className="memory-edit"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  if (text.trim()) void promoteIdea(m);
+                }}
+              >
+                <label htmlFor="idea-project-name">Project name</label>
+                <input
+                  id="idea-project-name"
+                  className="memory-input"
+                  value={text}
+                  maxLength={120}
+                  onChange={(event) => setText(event.target.value)}
+                  required
+                />
+                <p className="memory-hint">
+                  This idea becomes the project overview and keeps its history
+                  and source links.
+                </p>
+                <div className="memory-row">
+                  <button type="button" onClick={() => setStep(null)}>
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={!text.trim()}>
+                    Start project
+                  </button>
+                </div>
+              </form>
+            )}
             {step === "organise" && organising && (
               <form
                 className="memory-edit"
@@ -2111,7 +2226,7 @@ export default function MemoryView({
                   void saveOrganised(m);
                 }}
               >
-                <label htmlFor="memory-project">Project</label>
+                <label htmlFor="memory-project">Collection</label>
                 <select
                   id="memory-project"
                   className="memory-input"
@@ -2120,7 +2235,7 @@ export default function MemoryView({
                     setOrganising({ ...organising, project: e.target.value })
                   }
                 >
-                  <option value="">In no project</option>
+                  <option value="">In no collection</option>
                   {m.project &&
                     !projects?.some(
                       (p) => p.slug === m.project!.slug && p.scope === m.scope,
@@ -2259,13 +2374,13 @@ export default function MemoryView({
                 aria-label={
                   m.scope === "private"
                     ? "Share it with Family?"
-                    : "Take it back from Family?"
+                    : "Make this memory private?"
                 }
               >
                 <span>
                   {m.scope === "private"
-                    ? "Share it with Family? Every member reads it from now on, with its author; its earlier history stays its author's. Its author or a Family admin can take it back."
-                    : `Take it back to ${personName(m.author ?? m.owner)}'s own memories? Family's members stop reading it. Only its author or a Family admin can.`}
+                    ? "Share it with Family? Family members will be able to read this memory and see its author. Its earlier history stays private to the author. The author or a Family admin can make it private again."
+                    : `Make this memory private to ${personName(m.author ?? m.owner)}? It will disappear from Family. The author or a Family admin can do this.`}
                 </span>
                 <button
                   className="memory-danger"
@@ -2273,7 +2388,7 @@ export default function MemoryView({
                     void move(m, m.scope === "private" ? "shared" : "private")
                   }
                 >
-                  {m.scope === "private" ? "Share with Family" : "Take it back"}
+                  {m.scope === "private" ? "Share with Family" : "Make private"}
                 </button>
                 <button onClick={() => setStep(null)}>
                   {m.scope === "private"
@@ -2304,9 +2419,19 @@ export default function MemoryView({
                 >
                   Add an update
                 </button>
+                {isProjectIdea(m) && (
+                  <button
+                    onClick={() => {
+                      setText("");
+                      setStep("startProject");
+                    }}
+                  >
+                    Start a project…
+                  </button>
+                )}
                 {!m.held && (
                   <button onClick={() => void startOrganising(m)}>
-                    Project and tags…
+                    Collection and tags…
                   </button>
                 )}
                 {!m.held && (
@@ -2348,7 +2473,9 @@ export default function MemoryView({
                       ))}
                     </optgroup>
                     {m.project && (
-                      <optgroup label={`${m.project.slug} project's capsule`}>
+                      <optgroup
+                        label={`${m.project.slug} collection’s capsule`}
+                      >
                         {capsuleSlots.project.map((s) => (
                           <option key={s} value={`project:${s}`}>
                             {slotNames[s]}

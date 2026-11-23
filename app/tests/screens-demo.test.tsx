@@ -509,7 +509,7 @@ it("keeps a view a command opened past the idle minutes, until someone uses the 
 it("shows a star on another open screen from its panel, and says how it went", async () => {
   const { user, claim, kitchen } = await beside();
   await user.click(
-    await screen.findByRole("button", { name: "Enter constellation" }),
+    await screen.findByRole("button", { name: "Open Explorer" }),
   );
   const opened = await screen.findByRole("region", {
     name: "Knowledge explorer",
@@ -548,7 +548,7 @@ it("says so when no other screen is open, and renames this one in Details", asyn
   const user = userEvent.setup();
   render(<App />);
   await user.click(
-    await screen.findByRole("button", { name: "Enter constellation" }),
+    await screen.findByRole("button", { name: "Open Explorer" }),
   );
   const opened = await screen.findByRole("region", {
     name: "Knowledge explorer",

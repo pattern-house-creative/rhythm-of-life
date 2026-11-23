@@ -11,6 +11,7 @@ import { dataStar } from "../src/panels/readings";
 import {
   addDays,
   batteryBand,
+  dayName,
   effectWord,
   hm,
   hrvStatus,
@@ -580,6 +581,69 @@ describe("Sleep & recovery panel", () => {
     expect(screen.queryByText("TRAINING READINESS")).not.toBeInTheDocument();
   });
 
+  // The panel claims what overnightGlucose counts and no more: readings between midnight and 6 AM
+  // on one date (as few as three), never matched to sleep, with time below 70 an estimate.
+  it("says how many overnight readings its glucose share rests on, and estimates time below 70", async () => {
+    const today = localDay();
+    const readData = reader({
+      [dataStar("garmin", "recovery")]: recoveryReadings(today),
+    });
+    const night = (values: number[], minutes: number) => ({
+      ...sampleHealth,
+      glucose: {
+        ...sampleHealth.glucose,
+        samples: values.map((value, i) => ({
+          hour: 0,
+          value,
+          timestamp: local(today, 0, i * minutes),
+        })),
+      },
+    });
+    const { unmount } = render(
+      <RecoveryPanel
+        data={night([120, 96, 86, 104, 131, 150], 60)}
+        selectNode={vi.fn()}
+        readData={readData}
+      />,
+    );
+    const day = dayName(today);
+    expect(
+      await screen.findByText(
+        `OVERNIGHT GLUCOSE · MIDNIGHT–6 AM · ${day.toUpperCase()}`,
+      ),
+    ).toBeInTheDocument();
+    const words = document.querySelector<HTMLElement>(".night-glucose-words")!;
+    expect(words).toHaveTextContent("100% of 6 readings in range");
+    expect(words).toHaveTextContent("Lowest reading 86 mg/dL");
+    expect(words).toHaveTextContent("No readings below 70 mg/dL");
+    expect(words).not.toHaveTextContent(/no lows|while you slept/i);
+    expect(
+      screen.getByRole("img", {
+        name: `Overnight glucose, midnight to 6 AM, ${day}: 100% of 6 readings in range, lowest reading 86 mg/dL, no readings below 70 mg/dL.`,
+      }),
+    ).toBeInTheDocument();
+    unmount();
+
+    // Every five minutes, with four readings below 70: about 20 minutes.
+    render(
+      <RecoveryPanel
+        data={night(
+          Array.from({ length: 72 }, (_, i) => (i >= 36 && i < 40 ? 62 : 120)),
+          5,
+        )}
+        selectNode={vi.fn()}
+        readData={readData}
+      />,
+    );
+    const low = await screen.findByText(/min below 70 mg\/dL/);
+    expect(low.closest("span")).toHaveTextContent(
+      "About 20 min below 70 mg/dL",
+    );
+    expect(document.querySelector(".night-glucose-words")).toHaveTextContent(
+      "94% of 72 readings in range",
+    );
+  });
+
   it("falls back to the summary when the nightly readings are unavailable", async () => {
     const readData = reader({});
     render(
@@ -711,6 +775,33 @@ describe("Training panel", () => {
     // The swim's training load. The week's vigorous minutes, counted from today, can come to the same figure, so
     // more than one element may hold it.
     expect(screen.getAllByText("142").length).toBeGreaterThan(0);
+  });
+
+  // Two counts, two periods: the header falls back to the recorded workouts' own week when this
+  // week has none, and each count names the week it counts.
+  it("names the week behind each session count", async () => {
+    render(
+      <TrainingPanel
+        data={sampleHealth}
+        selectNode={vi.fn()}
+        readData={reader({})}
+      />,
+    );
+    // The fictional swim, ride and run belong to the week of October 12.
+    expect(
+      await screen.findByText(
+        "Swim, bike, run · 3 recorded sessions · week of Oct 12",
+      ),
+    ).toBeInTheDocument();
+    const start = intensityWeek(null, localDay()).start;
+    const hero = screen.getByRole("region", { name: "This week" });
+    expect(
+      within(hero).getByText(
+        `THIS WEEK · SINCE ${dayName(start).toUpperCase()}`,
+      ),
+    ).toBeInTheDocument();
+    expect(within(hero).getByText("recorded sessions")).toBeInTheDocument();
+    expect(screen.queryByText(/sessions this week/)).not.toBeInTheDocument();
   });
 
   it("stays calm when the activity source is unavailable", async () => {

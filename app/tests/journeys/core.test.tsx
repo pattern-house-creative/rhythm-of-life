@@ -106,7 +106,7 @@ journey(
             ).toBeNull(),
           );
           await user.click(
-            await screen.findByRole("button", { name: /GLUCOSE 137/ }),
+            await screen.findByRole("button", { name: /Glucose 137/ }),
           );
           const panel = await screen.findByRole("dialog", { name: "glucose" });
           expect(

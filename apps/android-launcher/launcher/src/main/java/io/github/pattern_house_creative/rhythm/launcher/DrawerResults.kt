@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
@@ -20,6 +20,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.*
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.Collator
@@ -28,21 +29,28 @@ import java.util.Locale
 
 @Composable internal fun DrawerToolbar(alphabetical: Boolean, onLayoutChange: (Boolean) -> Unit, onAddPreview: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        TextButton(onClick = onAddPreview, modifier = Modifier.testTag("add-preview")) { Text("+  Add preview") }
+        TextButton(onClick = onAddPreview, modifier = Modifier.testTag("add-preview")) { Text("+  Add preview", fontSize = Ui.textBody) }
         Spacer(Modifier.weight(1f))
         Row(Modifier.selectableGroup(), verticalAlignment = Alignment.CenterVertically) {
-            for (list in listOf(false, true)) {
-                val selected = alphabetical == list
-                val color = MaterialTheme.colorScheme.primary
-                Box(Modifier.clip(CircleShape)
-                    .selectable(selected = selected, role = Role.RadioButton, onClick = { if (!selected) onLayoutChange(list) })
-                    .sizeIn(minWidth = 52.dp, minHeight = 48.dp), contentAlignment = Alignment.Center) {
-                    Text(if (list) "A–Z" else "Grid", color = if (selected) color else MaterialTheme.colorScheme.onSurface,
-                        fontSize = 14.sp, modifier = Modifier.background(if (selected) color.copy(alpha = .16f) else Color.Transparent,
-                            CircleShape).padding(horizontal = 12.dp, vertical = 3.dp))
-                }
-            }
+            for (list in listOf(false, true)) Choice(if (list) "A–Z" else "Grid", alphabetical == list) { onLayoutChange(list) }
         }
+    }
+}
+
+/**
+ * One option of a small set (Grid or A–Z, an icon style): 48 dp to touch. The chosen one has a mint fill and a mint
+ * edge as well as brighter words, so it reads in greyscale.
+ */
+@Composable internal fun Choice(label: String, selected: Boolean, modifier: Modifier = Modifier, onChoose: () -> Unit) {
+    val shape = RoundedCornerShape(Ui.radiusControl)
+    Box(modifier.clip(shape)
+        .selectable(selected = selected, role = Role.RadioButton, onClick = { if (!selected) onChoose() })
+        .sizeIn(minWidth = Ui.target, minHeight = Ui.target), contentAlignment = Alignment.Center) {
+        Text(label, color = if (selected) Ui.ink else Ui.soft, fontSize = Ui.textBody,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            modifier = Modifier.background(if (selected) Ui.mintFill else Color.Transparent, shape)
+                .border(1.dp, if (selected) Ui.mintEdge else Color.Transparent, shape)
+                .padding(horizontal = Ui.space3, vertical = Ui.space1 + 2.dp))
     }
 }
 
@@ -71,7 +79,7 @@ private fun initial(title: String): String {
     Row(Modifier.fillMaxSize()) {
         LazyVerticalGrid(columns = GridCells.Fixed(if (alphabetical) 1 else 4), state = scroll,
             modifier = Modifier.weight(1f).fillMaxHeight().testTag("drawer-grid").onGloballyPositioned { drawer.grid = it },
-            horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(if (alphabetical) 0.dp else 12.dp)) {
+            horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(if (alphabetical) 0.dp else Ui.space3)) {
             items(tiles, key = { it.key }) { tile -> tileContent(tile, Modifier.height(if (alphabetical) 56.dp else 80.dp)) }
         }
         if (alphabetical && starts.isNotEmpty()) AlphabetIndex(starts, scroll)
@@ -115,8 +123,9 @@ private fun initial(title: String): String {
                 val center = maxHeight * ((index + .5f) / sections.size)
                 val y = (center - labelHeight / 2).coerceIn(0.dp, (maxHeight - labelHeight).coerceAtLeast(0.dp))
                 Box(Modifier.offset(y = y).fillMaxWidth().height(labelHeight), contentAlignment = Alignment.Center) {
-                    Text(letter, fontSize = 11.sp, lineHeight = 12.sp, maxLines = 1,
-                        color = if (index == current) Color.White else MaterialTheme.colorScheme.primary)
+                    Text(letter, fontSize = Ui.textMeta, lineHeight = 14.sp, maxLines = 1,
+                        fontWeight = if (index == current) FontWeight.Bold else FontWeight.Medium,
+                        color = if (index == current) Ui.ink else Ui.mint)
                 }
             }
         }

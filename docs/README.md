@@ -63,6 +63,8 @@ One page per adapter: what it does, what to set up first, its settings and limit
 - [dev/connection-ideas.md](dev/connection-ideas.md): ways the map could find more links, kept for later.
 - [dev/screens.md](dev/screens.md): live screens, the contract between the engine, the app and the docs.
 - [dev/studio.md](dev/studio.md): Studio, an AI client drafting a dashboard live on one screen before it is saved.
+- [dev/design-system.md](dev/design-system.md): the app's design tokens (palette, type, space, focus, touch, motion), the
+  frame Rhythm draws around a dashboard and what its author owns, and the launcher's matching names.
 - [dev/second-brain-parity/](dev/second-brain-parity/README.md): the design notes of the memory and search work: measurements, rules and verdicts.
 - [dev/memory.md](dev/memory.md): memory scopes, identity and ownership: who may read and change what once memories can
   be private, the `memory.scopes` switch, what each read path filters, and who owns each record.

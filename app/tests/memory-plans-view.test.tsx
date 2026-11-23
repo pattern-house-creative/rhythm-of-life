@@ -791,7 +791,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
     );
     await user.click(await screen.findByRole("button", { name: "Memories" }));
     const region = await screen.findByRole("region", { name: "Memories" });
-    const strip = within(region).getByRole("toolbar", { name: "Show" });
+    const strip = within(region).getByRole("toolbar", { name: "Memory sections" });
     await user.click(within(strip).getByRole("button", { name: "Tasks" }));
     expect(
       await within(region).findByRole("list", { name: "You owe" }),

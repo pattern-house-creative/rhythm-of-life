@@ -31,8 +31,17 @@ export const connectHints: Record<string, { what: string; command: string }> = {
     command: "./rhythm connect calendar",
   },
 };
+// A source's state in words: off (not connected), the demo's sample, or how
+// its last read went.
+const statusWords: Record<SourceStatus["status"], string> = {
+  disconnected: "Not connected",
+  demo: "Sample",
+  available: "Available",
+  stale: "Stale",
+  unavailable: "Unavailable",
+};
 export const statusLabel = (s: Pick<SourceStatus, "status">) =>
-  s.status === "disconnected" ? "Not connected" : s.status;
+  statusWords[s.status] ?? s.status;
 
 export function stamp(iso: string | null | undefined) {
   return iso && Number.isFinite(Date.parse(iso))

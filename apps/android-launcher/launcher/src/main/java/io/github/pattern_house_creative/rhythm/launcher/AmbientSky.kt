@@ -83,8 +83,8 @@ internal fun AmbientSky(graph: SkyGraph, links: List<SkyLink>, reduced: Boolean,
         val dash=PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(),5.dp.toPx()))
         val line=androidx.compose.ui.graphics.drawscope.Stroke(.55.dp.toPx())
         val suggested=androidx.compose.ui.graphics.drawscope.Stroke(.55.dp.toPx(),pathEffect=dash)
-        val upperLight=Brush.radialGradient(listOf(Color(0x80376c5d),Color.Transparent),Offset(size.width*.76f,size.height*.24f),size.height*.45f)
-        val lowerLight=Brush.radialGradient(listOf(Color(0x6524594f),Color.Transparent),Offset(size.width*.32f,size.height*.75f),size.height*.48f)
+        val upperLight=Brush.radialGradient(listOf(SkyArt.upperLight,Color.Transparent),Offset(size.width*.76f,size.height*.24f),size.height*.45f)
+        val lowerLight=Brush.radialGradient(listOf(SkyArt.lowerLight,Color.Transparent),Offset(size.width*.32f,size.height*.75f),size.height*.48f)
         // Low, quiet silhouettes from the approved motion study, never graph nodes.
         val ridges=listOf(
             listOf(0f to 95f,45f to 110f,98f to 65f,148f to 103f,195f to 75f,240f to 101f,293f to 58f,351f to 96f,400f to 70f,440f to 91f),
@@ -95,12 +95,12 @@ internal fun AmbientSky(graph: SkyGraph, links: List<SkyLink>, reduced: Boolean,
                 if(i==0)moveTo(px,py) else lineTo(px,py) }
             lineTo(size.width,size.height);lineTo(0f,size.height);close()
         } }
-        val ridgeColors=listOf(Color(0xff102d2c),Color(0xff061b1f),Color(0xff031216))
+        val ridgeColors=SkyArt.ridges
         // Static, non-sensitive lighting only. Rasterize once per cache build;
         // the real graph and dust remain live drawings above it. Never disk cached.
         val backdrop=ImageBitmap(size.width.toInt().coerceAtLeast(1),size.height.toInt().coerceAtLeast(1))
         CanvasDrawScope().draw(this,layoutDirection,Canvas(backdrop),size) {
-            drawRect(Brush.verticalGradient(listOf(Color(0xff07181d),Color(0xff0b292b),Color(0xff071e24))))
+            drawRect(Brush.verticalGradient(listOf(SkyArt.top,SkyArt.middle,SkyArt.bottom)))
             drawRect(upperLight);drawRect(lowerLight)
             ridges.forEachIndexed { i,path -> drawPath(path,ridgeColors[i].copy(alpha=.38f)) }
         }
@@ -108,14 +108,14 @@ internal fun AmbientSky(graph: SkyGraph, links: List<SkyLink>, reduced: Boolean,
         onDrawBehind {
             val time=seconds.value;val strength=if(expanded) .12f else 1f
             drawImage(backdrop)
-            dustPaths.forEachIndexed { i,path -> drawPath(path,Color(0xffb3cfc9).copy(alpha=.14f+(if(reduced) .15f else (1+sin(time/5+i))*.14f))) }
+            dustPaths.forEachIndexed { i,path -> drawPath(path,SkyArt.dust.copy(alpha=.14f+(if(reduced) .15f else (1+sin(time/5+i))*.14f))) }
             withTransform({ if(!reduced) translate(sin(time/5.2f)*driftX,sin(time/6.8f)*driftY) }) {
-                drawPath(edges[0],Color(0xff88c5b5).copy(alpha=.10f*strength),style=line)
-                drawPath(edges[1],Color(0xff88c5b5).copy(alpha=.10f*strength),style=suggested)
+                drawPath(edges[0],SkyArt.link.copy(alpha=.10f*strength),style=line)
+                drawPath(edges[1],SkyArt.link.copy(alpha=.10f*strength),style=suggested)
                 cores.forEachIndexed { i,path ->
                     val breath=if(reduced) .5f else (sin(time/4.8f+i*1.7f)+1)/2
-                    drawPath(halos[i],Color(0xffa9ebd5).copy(alpha=(.025f+.035f*breath)*strength))
-                    drawPath(path,Color(0xffa3d7cb).copy(alpha=(.3f+.25f*breath)*strength))
+                    drawPath(halos[i],SkyArt.halo.copy(alpha=(.025f+.035f*breath)*strength))
+                    drawPath(path,SkyArt.star.copy(alpha=(.3f+.25f*breath)*strength))
                 }
             }
         }

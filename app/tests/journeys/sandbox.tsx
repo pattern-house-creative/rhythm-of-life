@@ -158,7 +158,7 @@ export async function home() {
 export async function explorer() {
   const { user, view } = await home();
   await user.click(
-    await screen.findByRole("button", { name: "Enter constellation" }),
+    await screen.findByRole("button", { name: "Open Explorer" }),
   );
   const region = await screen.findByRole("region", {
     name: "Knowledge explorer",
@@ -180,7 +180,7 @@ export async function section(
   region: HTMLElement,
   name: string | RegExp,
 ) {
-  const strip = within(region).getByRole("toolbar", { name: "Show" });
+  const strip = within(region).getByRole("toolbar", { name: "Memory sections" });
   await user.click(await within(strip).findByRole("button", { name }));
 }
 // A row of a list, by words it holds.

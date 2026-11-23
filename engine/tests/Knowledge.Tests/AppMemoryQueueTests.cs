@@ -109,7 +109,7 @@ public sealed class AppMemoryQueueTests
         var enums = schema["oneOf"]!.AsArray().Last()!["properties"]!["code"]!["enum"]!.AsArray().Select(c => (string)c!).ToArray();
         var engine = Path.Combine([AppContext.BaseDirectory, "..", "..", "..", "..", ".."]);
         // What only an AI client's tools answer, which no op of the app's reaches: a citation's (MemoryCitations), and a share's with its setting off.
-        string[] toolsOnly = ["source_unavailable", "unknown_document", "off"];
+        string[] toolsOnly = ["source_unavailable", "unknown_document", "off", "work_summary_required"];
         var hints = Directory.GetFiles(Path.Combine(engine, "migrations"), "*.sql")
             .SelectMany(f => Regex.Matches(File.ReadAllText(f), "HINT='([a-z_]+:?)'").Select(m => m.Groups[1].Value)).Except(toolsOnly).ToHashSet();
         Assert.Contains("needs_person", hints);
@@ -122,7 +122,7 @@ public sealed class AppMemoryQueueTests
             // Each is its own code, or a new one would pass as invalid; a date refused on a decision is said as invalid, in its words.
             if (hint != "decision") Assert.Equal(hint.TrimEnd(':'), code);
         }
-        foreach (var state in new[] { "P0002", "42501", "22023", "54000", "40001", "23505" }) Assert.Contains(Refused(state).Code, enums);
+        foreach (var state in new[] { "P0001", "P0002", "42501", "22023", "54000", "40001", "23505" }) Assert.Contains(Refused(state).Code, enums);
         var named = Directory.GetFiles(Path.Combine(engine, "src", "Core"), "*.cs", SearchOption.AllDirectories)
             .SelectMany(f => Regex.Matches(File.ReadAllText(f), "new MemoryRefused\\(\"([a-z_]+)\"").Select(m => m.Groups[1].Value)).Except(toolsOnly).ToHashSet();
         Assert.Contains("too_many_candidates", named);

@@ -1,17 +1,20 @@
 <style>
+  /* An optional example of Rhythm's own style: the app's palette (its --ui-* tokens, written out because a page has
+     only the --rhythm-* names), Manrope for names and DM Sans for reading, three levels of text, and a mint focus ring.
+     Change any of it; the page is yours. */
   :root {
     color-scheme: dark;
     font:
-      15px/1.5 var(--rhythm-font);
-    color: #f6f4ef;
-    background: #151b23;
+      14px/1.5 var(--rhythm-font);
+    color: #eef4f3;
+    background: #101a22;
   }
   * {
     box-sizing: border-box;
   }
   body {
     margin: 0;
-    padding: clamp(14px, 3vw, 36px);
+    padding: clamp(16px, 3vw, 32px);
   }
   main {
     max-width: 1400px;
@@ -22,7 +25,7 @@
   .toolbar,
   .row {
     display: flex;
-    gap: 0.65rem;
+    gap: 8px;
     align-items: center;
     flex-wrap: wrap;
   }
@@ -35,89 +38,132 @@
   p {
     margin: 0;
   }
+  h1,
+  h2,
+  summary {
+    font-family: var(--rhythm-display);
+    letter-spacing: -0.01em;
+  }
   h1 {
-    font-size: clamp(1.6rem, 3vw, 2.4rem);
-    font-weight: 620;
-    letter-spacing: -0.035em;
+    font-size: clamp(21px, 3vw, 28px);
+    font-weight: 650;
   }
   h2 {
-    font-size: 1rem;
-    margin: 1.2rem 0 0.5rem;
+    font-size: 15px;
+    font-weight: 650;
+    margin: 24px 0 8px;
+    font-variant-numeric: tabular-nums;
   }
   button,
   select,
   input {
     font: inherit;
-    color: inherit;
-    border: 1px solid #61717a;
-    border-radius: 0.5rem;
-    background: #202a35;
-    padding: 0.45rem 0.75rem;
+    font-size: 13px;
+    color: #eef4f3;
+    border: 1px solid #415560;
+    border-radius: 8px;
+    background: #20303b;
+    padding: 7px 12px;
+    min-height: 36px;
+  }
+  select,
+  input {
+    font-size: 14px;
   }
   button,
   summary,
   select {
     cursor: pointer;
   }
-  button:hover,
+  button:hover {
+    border-color: #678490;
+  }
   summary:hover {
     color: #fff;
   }
-  button[aria-pressed="true"],
+  /* A chosen view is filled and bordered, so it reads without colour; a primary action is the one mint control. */
+  button[aria-pressed="true"] {
+    background: #244039;
+    border-color: #6a9589;
+    color: #eef4f3;
+  }
   button.primary {
-    background: #bce7cd;
-    border-color: #bce7cd;
-    color: #14271f;
+    background: #a4daca;
+    border-color: #a4daca;
+    color: #0b1015;
+    font-weight: 600;
   }
   button:disabled {
     opacity: 0.55;
     cursor: default;
   }
   :focus-visible {
-    outline: 2px solid #fbce89;
+    outline: 2px solid #b5e7da;
     outline-offset: 3px;
   }
+  label {
+    color: #b8c8cc;
+    font-size: 13px;
+  }
   nav {
-    margin: 0.8rem 0;
+    margin: 12px 0;
   }
   article,
   details,
   .item {
-    background: #202a35;
-    border: 1px solid #394651;
-    border-radius: 0.65rem;
-    padding: 0.72rem 0.85rem;
-    margin: 0.45rem 0;
+    background: #17252e;
+    border: 1px solid #435a64;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 8px 0;
     overflow-wrap: anywhere;
   }
   summary {
+    font-size: 14px;
     font-weight: 600;
+    color: #eef4f3;
+  }
+  summary:focus-visible {
+    outline-offset: 2px;
+    border-radius: 4px;
   }
   .muted,
-  .empty,
-  .meta {
-    color: #bcc9cd;
+  .empty {
+    color: #b8c8cc;
   }
   .meta {
-    font-size: 0.85rem;
+    color: #9cafb5;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    margin-top: 4px;
   }
   .copy {
     white-space: pre-wrap;
-    margin-top: 0.55rem;
+    margin-top: 8px;
+    color: #b8c8cc;
   }
   .empty {
-    padding: 0.75rem 0;
+    padding: 12px 0;
   }
+  /* The lanes share one line for their names and counts, and each lane's cards start at the same height. */
   .lanes {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 0.6rem;
+    gap: 12px;
+    align-items: start;
   }
   .lane {
     min-width: 0;
   }
+  .lane h2 {
+    margin: 16px 0 4px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgb(89 118 126 / 0.31);
+    font-size: 13px;
+    color: #b8c8cc;
+  }
   .toolbar {
-    margin: 0.75rem 0;
+    margin: 12px 0;
   }
   .toolbar input {
     min-width: 0;
@@ -126,9 +172,30 @@
   .toolbar select {
     max-width: 100%;
   }
+  /* Progress spans its card, so milestones' bars line up under one another. */
   progress {
-    accent-color: #a7d7ba;
-    width: min(16rem, 100%);
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 6px;
+    margin-top: 6px;
+    border: 0;
+    border-radius: 3px;
+    background: #20303b;
+    accent-color: #a4daca;
+  }
+  progress::-webkit-progress-bar {
+    border-radius: 3px;
+    background: #20303b;
+  }
+  progress::-webkit-progress-value {
+    border-radius: 3px;
+    background: #a4daca;
+  }
+  progress::-moz-progress-bar {
+    border-radius: 3px;
+    background: #a4daca;
   }
   @media (max-width: 780px) {
     .lanes {
@@ -143,6 +210,11 @@
     select,
     input {
       min-height: 44px;
+    }
+    /* 16px in a field, under which a phone zooms the page when it takes focus. */
+    select,
+    input {
+      font-size: 16px;
     }
   }
 </style>

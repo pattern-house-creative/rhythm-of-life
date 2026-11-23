@@ -42,8 +42,8 @@ android {
         applicationId = "io.github.pattern_house_creative.rhythm.launcher"
         minSdk = 28
         targetSdk = 36
-        versionCode = 15
-        versionName = "0.1.14"
+        versionCode = 18
+        versionName = "0.1.17"
         manifestPlaceholders["launcherLabel"] = "Rhythm OS"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

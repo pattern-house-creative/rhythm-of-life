@@ -122,7 +122,7 @@ public static partial class AppMemories
     static JsonObject ProjectRow(MemoryProject p) => new()
     {
         ["id"] = p.Id.ToString(), ["slug"] = p.Slug, ["name"] = p.Name, ["scope"] = p.Scope, ["owner"] = p.Subject,
-        ["aliases"] = Strings(p.Aliases), ["status"] = p.Status, ["description"] = p.Description, ["author"] = p.Author, ["revision"] = p.Revision,
+        ["showInProjects"] = p.ShowInProjects, ["aliases"] = Strings(p.Aliases), ["status"] = p.Status, ["description"] = p.Description, ["author"] = p.Author, ["revision"] = p.Revision,
         ["createdAt"] = p.CreatedAt, ["updatedAt"] = p.UpdatedAt,
     };
 

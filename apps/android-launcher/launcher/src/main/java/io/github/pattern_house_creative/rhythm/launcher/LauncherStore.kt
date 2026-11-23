@@ -15,6 +15,9 @@ class LauncherStore(context: Context) {
     var alphabeticalDrawer: Boolean
         get() = prefs.getBoolean("alphabetical-drawer", false)
         set(value) { prefs.edit().putBoolean("alphabetical-drawer", value).apply() }
+    internal var iconStyle: IconStyle
+        get() = IconStyle.of(prefs.getString("icon-style", null))
+        set(value) { prefs.edit().putString("icon-style", value.name).apply() }
     val initialized get() = prefs.contains("layout")
     fun initialPreviews(layout: HomeLayout, dashboardIds: List<String>): HomeLayout {
         if (origin.isBlank() || dashboardIds.isEmpty() || prefs.getString("preview-setup-origin", null) == origin) return layout
@@ -50,14 +53,29 @@ class LauncherStore(context: Context) {
                 Tile(TileKind.valueOf(row.getString("kind")), target)
             }.getOrNull() }
         }
-        HomeLayout(read("tiles"), read("dock")).normalized()
+        HomeLayout(read("tiles"), read("dock"), readBreaks(json)).normalized()
     }.getOrDefault(HomeLayout())
+    // "tiles" keeps every Home pin in reading order, as before pages existed, so an older build still
+    // finds them all. "pages" says how many of them each page holds and what kind of page it is. A layout
+    // saved without pages loads as one page, which the Home screen then splits to fit.
+    private fun readBreaks(json: JSONObject): List<Int> {
+        val pages = json.optJSONArray("pages") ?: return emptyList()
+        var at = 0
+        return (0 until pages.length()).mapNotNull { i ->
+            val row = pages.optJSONObject(i) ?: return@mapNotNull null
+            if (HomePageKind.entries.none { it.name == row.optString("kind") }) return@mapNotNull null
+            at += row.optInt("size", 0).coerceAtLeast(0); at
+        }.dropLast(1)
+    }
     fun save(layout: HomeLayout) {
         fun rows(tiles: List<Tile>) = JSONArray().apply { tiles.forEach {
             put(JSONObject().put("kind", it.kind.name).put("target", it.target))
         } }
         val clean = layout.normalized()
-        prefs.edit().putString("layout", JSONObject().put("tiles", rows(clean.tiles))
+        val pages = JSONArray().apply { clean.pageLists().forEach {
+            put(JSONObject().put("kind", HomePageKind.GRID.name).put("size", it.size))
+        } }
+        prefs.edit().putString("layout", JSONObject().put("tiles", rows(clean.tiles)).put("pages", pages)
             .put("dock", rows(clean.dock)).toString()).apply()
     }
 }

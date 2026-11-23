@@ -23,6 +23,8 @@ import {
 } from "./studioProtocol";
 import type { StudioSession, StudioDraft } from "./studioProtocol";
 import { screenRunning } from "./screenRunner";
+import { FreshnessPhrases } from "./FreshnessPhrases";
+import { stamp } from "./health";
 import "./Studio.css";
 
 // A session open here is read every second and a half. With none, an agent's open_studio command wakes Studio at once
@@ -331,9 +333,8 @@ export function Studio({
           .filter((p) => p.revision === revision),
       );
     else {
-      setError(
-        message ?? "Candidate did not draw. Keeping the last valid preview.",
-      );
+      // The reason, said once here; the status beside Save says which preview shows instead.
+      setError(message ?? "The page didn’t draw.");
       setPreviews((before) => before.filter((p) => p.revision !== revision));
     }
     try {
@@ -387,6 +388,11 @@ export function Studio({
     session.valid_revision === session.revision &&
     previews.some((p) => p.ready && p.revision === session.revision);
   const shown = previews.filter((p) => p.ready).at(-1)?.revision;
+  // What this screen's check of the newest revision said, when it has said.
+  const checked = session.events.findLast(
+    (e) => e.op === "validate" && e.revision === session.revision,
+  );
+  const n = session.revision;
   const feedRead = previews.find((p) => p.revision === shown)?.data;
   const unavailable = Object.entries(feedRead?.feeds ?? {}).filter(
     ([, f]) => f.status === "unavailable",
@@ -399,39 +405,57 @@ export function Studio({
       onCancel={(e) => e.preventDefault()}
     >
       <header>
-        <div>
+        <div className="studio-title">
           <strong>Studio</strong>
           <span>
             {session.candidate?.title ?? "Waiting for your assistant"}
           </span>
         </div>
-        <nav aria-label="Studio controls">
-          <button aria-pressed={watch} onClick={() => setWatch(!watch)}>
-            Watch code
-          </button>
-          <button disabled={!canSave} onClick={() => void finish("save")}>
-            Save
-          </button>
-          <button disabled={busy} onClick={() => void finish("discard")}>
-            Discard
-          </button>
-          <button disabled={busy} onClick={() => void finish("cancel")}>
-            Cancel
-          </button>
-        </nav>
+        {/* What validation says sits beside the actions it decides, Save first among them when it may be used. */}
+        <div className="studio-actions">
+          <div
+            className={`studio-progress${connected ? "" : " studio-offline"}`}
+            role="status"
+          >
+            {!connected
+              ? "Disconnected — retaining the preview. Reconnecting…"
+              : stopping
+                ? "Stopping this session; awaiting confirmation…"
+                : readingFeeds
+                  ? "Reading draft feeds…"
+                  : session.valid_revision === n && n > 0
+                    ? canSave
+                      ? `Preview ${n} is ready to save.`
+                      : previews.some((p) => p.ready && p.revision === n)
+                        ? `Saving preview ${n}…`
+                        : `Preparing preview ${n}…`
+                    : checked?.ok === false
+                      ? `Preview ${n} couldn’t be validated. ${shown ? `Showing preview ${shown}.` : "No preview available yet."}`
+                      : (session.events.at(-1)?.message ??
+                        (session.candidate
+                          ? `Validating preview ${n}…`
+                          : "Waiting for a draft to preview"))}
+          </div>
+          <nav aria-label="Studio controls">
+            <button aria-pressed={watch} onClick={() => setWatch(!watch)}>
+              Watch code
+            </button>
+            <button
+              className="studio-save"
+              disabled={!canSave}
+              onClick={() => void finish("save")}
+            >
+              Save
+            </button>
+            <button disabled={busy} onClick={() => void finish("discard")}>
+              Discard
+            </button>
+            <button disabled={busy} onClick={() => void finish("cancel")}>
+              Cancel
+            </button>
+          </nav>
+        </div>
       </header>
-      <div className="studio-progress" role="status">
-        {!connected
-          ? "Disconnected — retaining the preview. Reconnecting…"
-          : stopping
-            ? "Stopping this session; awaiting confirmation…"
-            : readingFeeds
-              ? "Reading draft feeds…"
-              : session.valid_revision === session.revision &&
-                  session.revision > 0
-                ? `Preview ${session.revision} validated. Ready to save.`
-                : `${session.events.at(-1)?.message ?? (session.candidate ? `Validating received revision ${session.revision}` : "Waiting for a renderable update")}`}
-      </div>
       {error && (
         <p role="alert" className="studio-error">
           {error}
@@ -484,14 +508,21 @@ export function Studio({
       </main>
       <footer>
         {feedRead && (
-          <span>
-            Feeds read {new Date(feedRead.asOf).toLocaleTimeString()}
+          <span className="studio-freshness">
+            <FreshnessPhrases
+              phrases={[
+                {
+                  words: "Data read ",
+                  time: { dateTime: feedRead.asOf, text: stamp(feedRead.asOf) },
+                },
+              ]}
+            />
             {unavailable.length
               ? ` · ${unavailable.map(([name, f]) => `${name}: ${f.reason ?? "unavailable"}`).join("; ")}`
               : ""}
           </span>
         )}
-        <span>
+        <span className="studio-shown">
           {shown
             ? `Showing validated preview ${shown}`
             : "No validated preview yet"}
@@ -509,17 +540,21 @@ export function Studio({
             }
           }}
         >
-          <label htmlFor="studio-feedback">Steer your assistant</label>
+          <label htmlFor="studio-feedback">Feedback for your assistant</label>
           <input
             id="studio-feedback"
             maxLength={1000}
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
-            placeholder="Read at the assistant’s next checkpoint"
+            placeholder="Suggest a change"
+            aria-describedby="studio-feedback-help"
           />
           <button disabled={!connected || !feedback.trim()}>
             Send feedback
           </button>
+          <span id="studio-feedback-help" className="studio-feedback-help">
+            Your assistant can read this feedback at its next check-in.
+          </span>
         </form>
       </footer>
     </dialog>

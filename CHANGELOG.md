@@ -4,7 +4,58 @@ What changed in each version, newest first. Versions follow [Semantic Versioning
 while the project is in alpha, any version may change settings or need a step from the operator, and
 each entry says so under **Upgrading**.
 
-## Unreleased
+## 0.1.0-alpha.4 (23 November 2026)
+
+- The whole app and the Android launcher (0.1.17) have one refreshed look. One set of design tokens (palette, type
+  scale, spacing, corners, focus ring) draws everything the app itself draws: Home and its sky, the health tiles and
+  panels, the Explorer, Sources & settings, Memories, Studio, the readers and the launcher. Text a person reads is at
+  least 12 px, the app's own controls show keyboard focus, touch targets are 44 px on the web and 48 dp on Android
+  wherever the layout has room, and closing a Home panel returns focus to what opened it. A dashboard's card on Home has a frame with its name, an opening arrow and a
+  freshness line. What its author wrote inside is untouched, and the `--rhythm-*` names a page reads are unchanged.
+  A wide sky names more stars at rest and scales names up on a wall display; a phone's sky lets names that would
+  collide go quiet, and the selected star's name always shows. Wording says more exactly what a reading, a time, a
+  permission or an action means: a dashboard's footer says when its data was recorded and when it was read, Allow
+  edits says what each write may do, and the launcher's Settings says what saving a new household address clears
+  before it is saved. The starter Projects, Agents and Groceries dashboards take the same look on new installs;
+  pages already installed are not rewritten. See [the design system](docs/dev/design-system.md) and
+  [the launcher](apps/android-launcher/README.md#what-you-get).
+
+- Android launcher 0.1.16 draws app icons to fit the sky. On Home, in the dock and in the drawer, each app is a
+  glyph on a dark glass tile in the launcher's own colours instead of a stock icon on a white circle. Settings,
+  **App icons**, switches between **Sky** (the default), **Glass** (the app's own colours on the tile) and
+  **Original**. See [the launcher](apps/android-launcher/README.md#what-you-get).
+
+- When a check an install adds to the database refuses a memory or work write, such as a trigger that guards which
+  agent session may claim a ticket, the agent is told `refused` with that check's own words instead of
+  `unavailable`, which read as an outage and led agents to carry on without a claim. A database that does not answer
+  is still `unavailable`. See [the contracts](contracts/README.md) and [harness/memory.md](harness/memory.md).
+
+- Rhythm checks the final size before an agent appends to a work item. When an update would push the ticket over 32 KiB, the ticket stays usable and the agent receives instructions to consolidate it. The previous text remains in version history when the agent saves the summary.
+
+- The Android launcher's Home is now a set of fixed-height pages instead of a scrolling grid. Apps and
+  previews that do not fit go on the next page; swipe left and right between pages, or hold a lifted
+  tile at the screen's edge to move it to another page. An existing Home is split into pages on first
+  start without losing or reordering any pin. Launcher 0.1.15 keeps previews on the three most recently
+  visited preview pages in memory so swiping back resumes the loaded dashboards.
+  See [the launcher](apps/android-launcher/README.md#what-you-get).
+
+- The starter Agents dashboard has a **T3 team** view: the orchestrator, project leads and their workers as a
+  connected dispatcher reports them, each worker linked to its original ticket. It tells a ticket's claim, the
+  session's last observed state and an overdue report apart. A fresh workspace shows a waiting message until a
+  dispatcher connects. See [starter setup](harness/starter-workspace.md#t3-team-reporting).
+
+- Collections and the Projects dashboard are now separate. A collection groups memories, tickets and capsule
+  entries; **Memories → Collections**, **Edit → Show in Projects** lists it on the Projects dashboard, even with no
+  tickets, and archiving hides it until it is restored. In Memories, **Start a project** on an idea gives it a
+  collection of its own, with the original note as its overview and its links and history kept. Agent tools still
+  take the collection's slug as `project`. See
+  [starter setup](harness/starter-workspace.md#collections-and-the-projects-dashboard).
+
+- **Upgrading:** the engine applies migrations 087 to 090 on startup. 087 turns **Show in Projects** on for
+  collections that have open work, a tagged project overview or a starter project guide. 088 and 089 give the
+  starter's Projects and Agents dashboards a new version, with the designated collections and the T3 team view,
+  when their page is one of the known published shapes; the earlier version is kept, and a page customized
+  separately is left as it is. 090 adds the 32 KiB check on agent updates to work items.
 
 - The Second Brain adapter's guide says how to retire the service after importing its memories: the order of steps,
   what Rhythm keeps and what to remove. See [Second Brain](docs/adapters/second-brain.md#retiring-the-service-after-an-import).

@@ -161,7 +161,7 @@ it("puts the designed Home back when a layout is chosen, and says Home is arrang
     screen.getByRole("button", { name: "Sources and settings" }),
   );
   const layouts = await screen.findByRole("group", {
-    name: "Layout of the home screen",
+    name: "Wide-screen layout of Home",
   });
   expect(
     screen.getByText(

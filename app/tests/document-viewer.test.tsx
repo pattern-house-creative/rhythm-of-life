@@ -153,15 +153,15 @@ it("shows a text file as it is", async () => {
 it.each([
   [
     { ok: false, reason: "too_large", maxBytes: 4 * 1024 * 1024 } as const,
-    /larger than this front end passes on \(4 MiB\), so its saved text is shown/,
+    /^Showing saved text\. The original is over the file limit here \(4 MiB\)\. To try the original, open Rhythm at your household address\.$/,
   ],
   [
     { ok: false, reason: "missing" } as const,
-    /no longer in the archive, so its saved text is shown/,
+    /^Showing saved text\. The original file is no longer in the archive\.$/,
   ],
   [
     { ok: false, reason: "unavailable" } as const,
-    /can't be read right now, so its saved text is shown/,
+    /^Showing saved text\. The original file couldn’t be opened\. Try again later\.$/,
   ],
 ])("falls back to the saved text and says why: %o", async (file, why) => {
   setup({}, file);
@@ -180,7 +180,11 @@ it("shows the saved text when a PDF can't be drawn, or a text file is very long"
   await user.click(
     await screen.findByRole("button", { name: "Fail this PDF" }),
   );
-  expect(screen.getByText(/This PDF can't be shown here/)).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "Showing saved text. This PDF can’t be shown here. Download it to open it elsewhere.",
+    ),
+  ).toBeInTheDocument();
   expect(
     screen.getByText("Fictional saved text of the document."),
   ).toBeInTheDocument();
@@ -192,7 +196,11 @@ it("doesn't fetch a very long text file, and shows its saved text", async () => 
     { ok: true, bytes: bytes("never read") },
   );
   await openIt();
-  expect(await screen.findByText(/This file is long/)).toBeInTheDocument();
+  expect(
+    await screen.findByText(
+      "Showing saved text. This file is too long to open here. Download it for the whole file.",
+    ),
+  ).toBeInTheDocument();
   expect(read).not.toHaveBeenCalled();
 });
 

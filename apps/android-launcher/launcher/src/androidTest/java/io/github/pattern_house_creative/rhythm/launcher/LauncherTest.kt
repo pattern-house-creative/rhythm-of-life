@@ -40,28 +40,32 @@ class LauncherTest {
             assertEquals(before,store.load())
         }
     }
-    @Test fun stationaryHoldLiftsBeforeReleaseAndEdgeDragScrollsWithoutSavingACancel() {
+    @Test fun stationaryHoldLiftsBeforeReleaseAndEdgeDragTurnsThePageWithoutSavingACancel() {
         val store=LauncherStore(InstrumentationRegistry.getInstrumentation().targetContext)
         rule.waitUntil(10000){store.load().tiles.size>=4}
         val old=store.load()
-        val many=old.copy(tiles=old.tiles.take(4)+(0 until 44).map{Tile(TileKind.STAR,"synthetic-drag-$it")})
+        val many=old.copy(tiles=old.tiles.take(4)+(0 until 44).map{Tile(TileKind.STAR,"synthetic-drag-$it")},breaks=emptyList())
         try {
             store.save(many);rule.activityRule.scenario.recreate();rule.waitForIdle()
+            // Home splits the long list into pages that fit, keeping every pin in order.
+            rule.waitUntil(5000){store.load().pageCount>1}
+            val paged=store.load();assertEquals(many.tiles,paged.tiles)
             val first=rule.onNodeWithTag("tile:"+many.tiles.first().key)
             val grid=rule.onNodeWithTag("home-grid")
             val start=first.fetchSemanticsNode().boundsInRoot.center
-            val bottom=grid.fetchSemanticsNode().boundsInRoot.bottom-8
+            val bounds=grid.fetchSemanticsNode().boundsInRoot
             first.performTouchInput{down(center)}
             rule.mainClock.advanceTimeBy(700);Thread.sleep(600)
             rule.onNodeWithText("Release for Home options").assertExists()
             captureGesture("held-icon")
-            assertEquals(many,store.load()) // hold itself never saves or reorders
-            first.performTouchInput{moveBy(androidx.compose.ui.geometry.Offset(0f,bottom-start.y))}
-            repeat(30){rule.mainClock.advanceTimeBy(32);Thread.sleep(16)}
-            assertTrue(grid.fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.VerticalScrollAxisRange].value()>0f)
+            assertEquals(paged,store.load()) // hold itself never saves or reorders
+            first.performTouchInput{moveBy(androidx.compose.ui.geometry.Offset(bounds.right-4-start.x,bounds.center.y-start.y))}
+            repeat(60){rule.mainClock.advanceTimeBy(32);Thread.sleep(16)}
+            // Held at the edge, the pages keep turning (an empty page waits past the last one).
+            assertNotEquals("Home page 1 of ${paged.pageCount+1}",grid.fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.StateDescription])
             captureGesture("edge-drag")
             grid.performTouchInput{cancel()}
-            rule.waitForIdle();assertEquals(many,store.load())
+            rule.waitForIdle();assertEquals(paged,store.load())
         } finally {
             store.save(old);rule.activityRule.scenario.recreate()
         }
@@ -105,6 +109,28 @@ class LauncherTest {
         rule.onNodeWithText("Rhythm OS").assertExists()
         rule.onNodeWithTag("home-search").assertDoesNotExist()
         rule.onNodeWithText("Swipe up to search",substring=true).assertExists()
+    }
+    @Test fun settingsSaysWhatANewAddressDoesBeforeItIsSaved() {
+        val store=LauncherStore(InstrumentationRegistry.getInstrumentation().targetContext)
+        val origin=store.origin;val before=store.load()
+        rule.onNodeWithContentDescription("Settings").performClick()
+        val field=rule.onNode(hasSetTextAction())
+        field.performTextReplacement("https://household.example/app")
+        rule.onNodeWithTag("address-change-notice").assertDoesNotExist()
+        rule.onNodeWithText("Save address").performClick()
+        // Heard as the field's own error; the same words are drawn under it.
+        field.assert(SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.Error,ADDRESS_ERROR))
+        field.performTextReplacement("https://other.example")
+        field.assert(SemanticsMatcher.keyNotDefined(androidx.compose.ui.semantics.SemanticsProperties.Error))
+        rule.onNodeWithTag("address-change-notice").assertTextContains("Saving a new address clears the launcher’s web session",substring=true)
+        rule.onNodeWithText("Save address").assertExists()
+        if(origin.isNotEmpty()) {
+            field.performTextReplacement(origin)
+            rule.onNodeWithTag("address-change-notice").assertDoesNotExist()
+            rule.onNodeWithText("Save").assertExists()
+        }
+        rule.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+        assertEquals(origin,store.origin);assertEquals(before,store.load())
     }
     @Test fun interruptedSkyRevealKeepsDockAndHomeOrder() {
         val store=LauncherStore(InstrumentationRegistry.getInstrumentation().targetContext)

@@ -84,7 +84,7 @@ public sealed class StudioStore(NpgsqlDataSource source, DashboardStore dashboar
         }
         // As save_dashboard: a memories feed names no star, and a draft that has one needs none (DashboardDraft.Unanchored).
         if (feeds.Unserved(draft.Feeds) is { } off) throw new ArgumentException(off);
-        var named = draft.Feeds.Where(f => f.Kind is not ("log" or "memories")).Select(f => f.Star)
+        var named = draft.Feeds.Where(f => f.Kind is not ("log" or "memories" or "projects")).Select(f => f.Star)
             .Concat((draft.Writes ?? []).Where(w => w.Kind != "log").Select(w => w.Star!))
             .Concat((layout?.Parts ?? []).Select(p => p.Focus?.Near?.Star).OfType<string>()).Distinct().ToArray();
         if (named.Length > 12 || DashboardDraft.Unanchored(draft.Feeds, named) is not null) throw new ArgumentException("A draft names 1-12 readable stars");

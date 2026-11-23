@@ -14,7 +14,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,6 +52,8 @@ internal fun RestrictedWeb(
     modifier: Modifier,
     active: Boolean = true,
     createWebView: (Context) -> WebView = { WebView(it) },
+    /** What shows while the page starts or after it fails: the reader's night, or a preview card's own fill. */
+    backdrop: Brush = SolidColor(Ui.night),
     accessLost: () -> Unit,
 ) {
     val lost by rememberUpdatedState(accessLost)
@@ -67,7 +71,7 @@ internal fun RestrictedWeb(
                 }
             } catch (e: CancellationException) { throw e }
             catch (_: HouseholdAccessDenied) {
-                error = "Household access unavailable. Open household sign-in in settings."
+                error = "Household access denied. Open household sign-in in Settings."
                 loading = false; lost(); return@LaunchedEffect
             }
             catch (_: Exception) {
@@ -79,8 +83,9 @@ internal fun RestrictedWeb(
     }
     LaunchedEffect(ready, loading, attempt) {
         if (ready && loading) {
+            // Only the time is known here; a WebView that fails says so through its own branches below.
             delay(25_000)
-            error = "Page could not start. Check access and update Android System WebView."; loading = false
+            error = "The page took too long to open."; loading = false
         }
     }
     Box(modifier) {
@@ -136,7 +141,7 @@ internal fun RestrictedWeb(
                                 }
                                 override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, response: WebResourceResponse) {
                                     if (response.statusCode == 401 || response.statusCode == 403) {
-                                        error = "Household access unavailable. Open household sign-in in settings."; loading = false; lost()
+                                        error = "Household access denied. Open household sign-in in Settings."; loading = false; lost()
                                     } else if (request.isForMainFrame) {
                                         error = "Page unavailable (HTTP ${response.statusCode})"; loading = false
                                     }
@@ -199,14 +204,14 @@ internal fun RestrictedWeb(
                     page?.apply { stopLoading(); destroy() }
                 })
         }
-        if (loading || error != null) Column(Modifier.fillMaxSize().background(Color(0xff101b20)).padding(12.dp),
+        if (loading || error != null) Column(Modifier.fillMaxSize().background(backdrop).padding(Ui.space3),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             if (loading) {
-                CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
-                Text("Opening household…", fontSize = 12.sp, modifier = Modifier.padding(top = 12.dp))
+                CircularProgressIndicator(Modifier.size(22.dp), color = Ui.mint, trackColor = Ui.line, strokeWidth = 2.dp)
+                Text("Opening household…", fontSize = Ui.textMeta, color = Ui.soft, modifier = Modifier.padding(top = Ui.space3))
             } else {
-                Text(error.orEmpty(), fontSize = 12.sp)
-                TextButton(onClick = { attempt++ }) { Text("Try again") }
+                Text(error.orEmpty(), fontSize = Ui.textSmall, lineHeight = 18.sp, color = Ui.ink, textAlign = TextAlign.Center)
+                TextButton(onClick = { attempt++ }, modifier = Modifier.padding(top = Ui.space1)) { Text("Try again", fontSize = Ui.textBody) }
             }
         }
     }

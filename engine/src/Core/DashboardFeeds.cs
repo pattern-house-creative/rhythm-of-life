@@ -43,7 +43,7 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
         // The map is read only for feeds that name a star: a log and a memories feed read none.
         RelationshipHostConfiguration? config = null;
         var records = new Dictionary<string, DiscoveryRecord>(StringComparer.Ordinal);
-        if (feeds.Any(f => f.Kind is not ("log" or "memories")))
+        if (feeds.Any(f => f.Kind is not ("log" or "memories" or "projects")))
         {
             (var view, config) = await host.Readable(principal, ct);
             records = Shown(view);
@@ -52,12 +52,13 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
         // Every feed is read at once; the size budget then applies in the dashboard's own order.
         var read = await Task.WhenAll(feeds.Select(f => f.Normalized()).Select(async feed =>
         {
-            var record = feed.Kind is "log" or "memories" ? null : records.GetValueOrDefault(feed.Star);
+            var record = feed.Kind is "log" or "memories" or "projects" ? null : records.GetValueOrDefault(feed.Star);
             var payload = feed.Kind == "log" ? await LogFeed(principal, feed, ct)
+                : feed.Kind == "projects" ? await Portfolio(principal, ct)
                 : feed.Kind == "memories" ? await MemoriesFeed(principal, feed, preview, ct)
                 : record is null ? Unavailable(feed, null, "This star isn't on the map now.")
                 : await One(principal, feed, record, config!, ct);
-            return (feed, record, payload: preview && feed.Kind != "memories" ? Preview(payload) : payload);
+            return (feed, record, payload: preview && feed.Kind is not ("memories" or "projects") ? Preview(payload) : payload);
         }));
         foreach (var (feed, record, read1) in read)
         {
@@ -66,6 +67,7 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
             if (used + size > MaxBytes)
             {
                 payload = feed.Kind == "memories" ? Memories(feed, "unavailable", MemoriesTooLarge)
+                    : feed.Kind == "projects" ? new JsonObject { ["kind"] = "projects", ["status"] = "unavailable", ["asOf"] = Instant(DateTimeOffset.UtcNow), ["reason"] = "Dashboard data limit exceeded." }
                     : Unavailable(feed, record, "Too much data for one dashboard: ask for by day, fewer days or fewer metrics.");
                 size = Encoding.UTF8.GetByteCount(payload.ToJsonString());
             }
@@ -73,6 +75,33 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
             result[feed.Name] = payload;
         }
         return new JsonObject { ["asOf"] = Instant(DateTimeOffset.UtcNow), ["feeds"] = result };
+    }
+
+    async Task<JsonObject> Portfolio(Guid principal, CancellationToken ct)
+    {
+        var payload = new JsonObject { ["kind"] = "projects", ["asOf"] = Instant(DateTimeOffset.UtcNow) };
+        if (!MemorySettings.ToolsOn(Settings))
+        {
+            payload["status"] = "unavailable";
+            payload["reason"] = "Collections are unavailable while memory tools are off.";
+            return payload;
+        }
+        try
+        {
+            var projects = await new MemoryStore(db.Source).Projects(principal, new(PortfolioOnly: true), ct);
+            payload["status"] = "ok";
+            payload["projects"] = new JsonArray([.. projects.Select(p => (JsonNode)new JsonObject
+            {
+                ["id"] = p.Id, ["slug"] = p.Slug, ["name"] = p.Name,
+                ["graphId"] = MemoryStars.ProjectKey(p.Subject, p.Id).GraphId
+            })]);
+        }
+        catch (Exception e) when (e is not OperationCanceledException || !ct.IsCancellationRequested)
+        {
+            payload["status"] = "unavailable";
+            payload["reason"] = "The project collections cannot be read right now.";
+        }
+        return payload;
     }
 
     Dictionary<string, DiscoveryRecord> Shown(SnapshotView view) => view.Records.Where(r => adapters.Shows(r.Key.Provider))
@@ -330,6 +359,7 @@ public sealed class DashboardFeeds(Database db, RelationshipHost host, AdapterRe
     {
         for (var i = 0; i < feeds.Count; i++)
         {
+            if (feeds[i].Kind == "projects" && !MemorySettings.ToolsOn(Settings)) return $"feeds[{i}]: collections are off in this install (memory.tools)";
             if (feeds[i].Kind != "memories") continue;
             if (!MemorySettings.ToolsOn(Settings)) return $"feeds[{i}]: a memories feed reads native memories, which are off in this install (memory.tools)";
             if (feeds[i].Matched().Worked && !MemorySettings.WorkOn(Settings)) return $"feeds[{i}].where: work items are off in this install (memory.work)";

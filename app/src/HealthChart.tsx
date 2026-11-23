@@ -139,7 +139,7 @@ export function HealthChart({
                   domain={["dataMin", "dataMax"]}
                   ticks={ticks}
                   tickFormatter={(t) => hourLabel(Number(t))}
-                  tick={{ fill: "#8fa9b7", fontSize: 10 }}
+                  tick={{ fill: "#9cafb5", fontSize: 11 }}
                   tickLine={false}
                   axisLine={false}
                 />
@@ -148,7 +148,7 @@ export function HealthChart({
                   ticks={[
                     ...new Set([domain[0], ...reference, domain[1]]),
                   ].sort((a, b) => a - b)}
-                  tick={{ fill: "#8fa9b7", fontSize: 10 }}
+                  tick={{ fill: "#9cafb5", fontSize: 11 }}
                   tickLine={false}
                   axisLine={false}
                 />
@@ -173,10 +173,10 @@ export function HealthChart({
                 <Tooltip
                   cursor={{ stroke: "#93b4c355" }}
                   contentStyle={{
-                    background: "#17232a",
-                    border: "1px solid #33454e",
-                    borderRadius: 12,
-                    color: "#edf3f3",
+                    background: "var(--ui-surface)",
+                    border: "1px solid var(--ui-line)",
+                    borderRadius: "var(--ui-radius-panel)",
+                    color: "var(--ui-ink)",
                     fontSize: 12,
                   }}
                   labelFormatter={(t) =>

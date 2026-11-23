@@ -91,7 +91,7 @@ describe("real-capable health contract using fictional inputs", () => {
   it("renders independently missing health without fake values, history or demo controls", async () => {
     withEngine();
     render(<App />);
-    const glucose = await screen.findByRole("button", { name: /GLUCOSE —/ });
+    const glucose = await screen.findByRole("button", { name: /Glucose —/ });
     expect(glucose).toHaveTextContent("Source unavailable");
     expect(glucose).not.toHaveTextContent("112");
     await userEvent.click(glucose);
@@ -106,10 +106,10 @@ describe("real-capable health contract using fictional inputs", () => {
   it("clears visible data on access loss and revalidates after page restoration", async () => {
     withSampleHealth();
     render(<App />);
-    await screen.findByRole("button", { name: /GLUCOSE 112/ });
+    await screen.findByRole("button", { name: /Glucose 112/ });
     act(() => window.dispatchEvent(new Event("pagehide")));
     expect(
-      screen.queryByRole("button", { name: /GLUCOSE 112/ }),
+      screen.queryByRole("button", { name: /Glucose 112/ }),
     ).not.toBeInTheDocument();
     vi.mocked(fetch).mockResolvedValue(
       new Response("Unauthorized", { status: 401 }),
@@ -117,7 +117,7 @@ describe("real-capable health contract using fictional inputs", () => {
     act(() => window.dispatchEvent(new Event("pageshow")));
     await screen.findByText(/Access or source unavailable/);
     expect(
-      screen.queryByRole("button", { name: /GLUCOSE 112/ }),
+      screen.queryByRole("button", { name: /Glucose 112/ }),
     ).not.toBeInTheDocument();
     await waitFor(() =>
       expect(fetch).toHaveBeenCalledWith(
@@ -134,7 +134,7 @@ describe("real-capable health contract using fictional inputs", () => {
     withSampleHealth();
     const working = vi.mocked(fetch).getMockImplementation()!;
     render(<App />);
-    await screen.findByRole("button", { name: /GLUCOSE 112/ });
+    await screen.findByRole("button", { name: /Glucose 112/ });
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     try {
       vi.mocked(fetch).mockResolvedValue(

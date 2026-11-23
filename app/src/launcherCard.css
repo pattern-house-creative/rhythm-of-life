@@ -14,27 +14,39 @@ body,
 #root {
   position: fixed;
   inset: 0;
-  color: #d8eee5;
+  color: var(--ui-ink);
+  font-family: var(--ui-font);
 }
+/* The same title, freshness style and colours as the app's dashboard frame,
+   at the launcher card's size. */
 .launcher-summary {
   box-sizing: border-box;
   height: 100%;
-  padding: 12px 13px 5px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 .launcher-summary header {
   display: flex;
   align-items: center;
-  gap: 5px;
-  min-height: 25px;
-  margin-bottom: 3px;
+  gap: 6px;
+  min-height: 24px;
+  margin-bottom: 2px;
+}
+/* Text never shrinks under its words; only a chart gives way. */
+.launcher-summary > :not(svg, .glucose-preview-chart) {
+  flex-shrink: 0;
+}
+.launcher-summary header svg {
+  flex: none;
+  color: var(--ui-mint);
 }
 .launcher-summary h1 {
   font:
-    500 11px/1.25 "DM Sans Variable",
-    sans-serif;
+    650 var(--ui-text-small) / 1.25 var(--ui-display);
+  letter-spacing: -0.015em;
+  color: var(--ui-ink);
   margin: 0;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -42,22 +54,19 @@ body,
   overflow: hidden;
 }
 .preview-mark {
-  color: #a9dfca;
+  color: var(--ui-mint);
   font-size: 15px;
 }
 .preview-label {
-  color: #a9c9bc;
-  font-size: 10px;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: var(--ui-soft);
+  font-size: var(--ui-text-meta);
+  line-height: 1.25;
 }
 .preview-value {
   font:
-    500 22px/1.15 "Manrope Variable",
-    sans-serif;
-  letter-spacing: -0.7px;
+    550 22px/1.2 var(--ui-display);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -65,13 +74,24 @@ body,
 }
 .preview-detail {
   margin: 0;
-  font-size: 10px;
-  line-height: 1.35;
-  color: #bdd4c9;
+  font-size: var(--ui-text-meta);
+  line-height: 1.3;
+  color: var(--ui-soft);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
+}
+/* A date is never broken at its hyphens. */
+.preview-detail-date {
+  white-space: nowrap;
+}
+/* "Open for details" on a preview Rhythm can't summarise is a message, not a reading. */
+.launcher-summary[data-preview-kind="fallback"] .preview-value {
+  font:
+    500 var(--ui-text-small) / 1.35 var(--ui-font);
+  letter-spacing: 0;
+  color: var(--ui-ink);
 }
 .preview-chart {
   width: 100%;
@@ -82,7 +102,7 @@ body,
 }
 .preview-chart polyline {
   fill: none;
-  stroke: #9fd7c0;
+  stroke: var(--ui-mint);
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
   stroke-linecap: round;
@@ -90,12 +110,23 @@ body,
 }
 .launcher-summary footer {
   margin-top: auto;
-  font-size: 8px;
-  line-height: 1.2;
-  color: #9bb9ab;
+  font-size: var(--ui-text-meta);
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-soft);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* A footer wraps rather than being cut; its time, a range and "partial" each stay whole. */
+.launcher-summary footer {
+  white-space: normal;
+  overflow: visible;
+}
+.launcher-summary footer time,
+.preview-partial,
+.glucose-preview-why {
+  white-space: nowrap;
 }
 .launcher-authored {
   display: block;
@@ -109,30 +140,65 @@ body,
 }
 .preview-wait {
   position: absolute;
-  padding: 14px;
-  font-size: 11px;
+  margin: 0;
+  padding: 12px;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-soft);
 }
 .preview-state {
-  padding: 16px;
-  font-size: 12px;
+  padding: 8px;
+  font-size: var(--ui-text-meta);
   line-height: 1.4;
-  color: #bed1c9;
-}
-.preview-state > span {
-  font-size: 24px;
-  color: #96cbb5;
-}
-.preview-state h1 {
-  font:
-    500 11px/1.25 "DM Sans Variable",
-    sans-serif;
-  margin: 4px 0 8px;
+  color: var(--ui-soft);
 }
 .preview-state p {
-  font-size: 11px;
+  margin: 4px 0 0;
+  font-size: var(--ui-text-meta);
+}
+/* The header Rhythm draws on its own previews (LauncherPreview.tsx), as on the native frame: one
+   line, the title in Manrope 650 at 15 px within the tile's 8 px insets, and the 14 px mint
+   opening arrow at the end. The mark is the first to go, on a narrow tile or with enlarged text
+   (the width is measured in the title's own em, which grows with the text). */
+.preview-head {
+  container-type: inline-size;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  margin-bottom: 2px;
+  font-size: var(--ui-text-title);
+}
+.launcher-summary .preview-head h1,
+.preview-state .preview-head h1 {
+  flex: 1;
+  display: block;
+  min-width: 0;
+  margin: 0;
+  font:
+    650 var(--ui-text-title) / 1.28 var(--ui-display);
+  letter-spacing: -0.015em;
+  color: var(--ui-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: none;
+}
+.preview-head .preview-mark {
+  flex: none;
+  font-size: var(--ui-text-title);
+  line-height: 1;
+}
+.preview-head .preview-open {
+  flex: none;
+  color: var(--ui-mint);
+}
+@container (max-width: 10.5em) {
+  .preview-head .preview-mark {
+    display: none;
+  }
 }
 .launcher-glucose header {
-  color: #b7dfce;
+  color: var(--ui-ink);
 }
 .glucose-preview-reading {
   display: flex;
@@ -143,16 +209,16 @@ body,
 }
 .glucose-preview-reading strong {
   font:
-    500 32px/1.1 "Manrope Variable",
-    sans-serif;
-  letter-spacing: -1px;
+    550 32px/1.1 var(--ui-display);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
 }
 .glucose-preview-reading span {
-  font-size: 11px;
-  color: #bdd4c9;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-soft);
 }
 .launcher-glucose.stale .preview-label {
-  color: #f0ca91;
+  color: var(--ui-amber);
   font-weight: 600;
 }
 .launcher-glucose.stale .glucose-preview-reading strong {
@@ -160,17 +226,14 @@ body,
 }
 .launcher-summary.launcher-glucose {
   padding: 8px 10px;
-  display: grid;
-  grid-template-rows: 14px 10px 29px 11px minmax(24px, 1fr) 14px 10px;
-  gap: 2px;
 }
 .launcher-glucose header {
   min-height: 0;
   margin: 0;
 }
 .launcher-glucose .preview-label {
-  font-size: 9px;
-  line-height: 10px;
+  font-size: var(--ui-text-meta);
+  line-height: 1.25;
 }
 .launcher-glucose .glucose-preview-reading {
   margin: 0;
@@ -179,22 +242,21 @@ body,
 }
 .launcher-glucose .glucose-preview-reading strong {
   font-size: 28px;
-  line-height: 29px;
+  line-height: 1.05;
 }
 .launcher-glucose .glucose-preview-reading span {
-  font-size: 9px;
+  font-size: var(--ui-text-meta);
 }
 .glucose-preview-age {
-  font-size: 9px;
-  line-height: 11px;
-  color: #b6cdc1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: var(--ui-text-meta);
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-soft);
 }
+/* The chart takes the room left over, and none when there is none. */
 .launcher-glucose .glucose-preview-chart {
+  flex: 1 1 0;
   width: 100%;
-  height: 100%;
   min-height: 0;
   display: block;
   overflow: hidden;
@@ -214,29 +276,45 @@ body,
   stroke: none;
 }
 .launcher-glucose .glucose-preview-chart.empty {
+  flex: 1 0 auto;
   display: flex;
   align-items: center;
-  font-size: 10px;
-  color: #9bb9ab;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-faint);
 }
 .glucose-preview-tir {
   margin: 0;
   display: flex;
   align-items: baseline;
   gap: 5px;
-  line-height: 14px;
+  line-height: 1.3;
 }
 .glucose-preview-tir strong {
-  font-size: 13px;
-  font-weight: 500;
-  color: #c7e8d8;
+  font: 600 var(--ui-text-small) / 1.3 var(--ui-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
 }
 .glucose-preview-tir span {
-  font-size: 9px;
-  color: #b6cdc1;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-soft);
 }
 .launcher-glucose footer {
   margin: 0;
-  font-size: 8px;
-  line-height: 10px;
+  font-size: var(--ui-text-meta);
+  line-height: 1.25;
+}
+/* What a preview Rhythm draws gives up, in turn, while its words are more than its tile holds
+   (usePreviewFit.ts): a generated preview its chart, then a detail's kind (its date stays), then
+   its footer, then a detail in words; the glucose preview its chart, then its coverage line, then
+   "Reading unavailable" under a label that says so, then the time in range. */
+.launcher-summary[data-drop~="chart"]
+  :is(.preview-chart, .glucose-preview-chart, .glucose-preview-chart.empty),
+.launcher-summary[data-drop~="kind"] .preview-detail-kind,
+.launcher-summary:not(.launcher-glucose)[data-drop~="footer"] footer,
+.launcher-summary[data-drop~="words"] .preview-detail-words,
+.launcher-summary.launcher-glucose[data-drop~="coverage"] footer,
+.launcher-summary.launcher-glucose[data-drop~="age"]:is(.unavailable, .missing)
+  .glucose-preview-age,
+.launcher-summary[data-drop~="tir"] .glucose-preview-tir {
+  display: none;
 }

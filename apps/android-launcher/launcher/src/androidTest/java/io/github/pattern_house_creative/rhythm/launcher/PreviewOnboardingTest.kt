@@ -54,7 +54,7 @@ class PreviewOnboardingTest {
             rule.activityRule.scenario.recreate()
             rule.onNodeWithContentDescription("Settings").performClick()
             rule.onNode(hasSetTextAction()).performTextReplacement("https://10.0.2.2:9443")
-            rule.onNodeWithText("Save").performClick()
+            rule.onNodeWithText("Save address").performClick()
             rule.waitUntil(20000){store.load().tiles.count{it.kind==TileKind.PREVIEW}==2}
             rule.mainClock.autoAdvance=false
             rule.waitUntil(25000){rule.mainClock.advanceTimeBy(100);drawnPreviews()==2}
@@ -68,7 +68,7 @@ class PreviewOnboardingTest {
             rule.onNodeWithTag("tile:${store.load().tiles.filter{it.kind==TileKind.PREVIEW}[1].key}").assertIsDisplayed()
             rule.onNodeWithTag("tile:${preview.key}").performTouchInput { longClick(center) }
             capture("v018-longhold-debug.png")
-            rule.onNodeWithText("▦  Show as icon").assertExists()
+            rule.onNodeWithText("Show as icon").assertExists()
             rule.onNodeWithText("Done").performClick()
             val density=InstrumentationRegistry.getInstrumentation().targetContext.resources.displayMetrics.density
             val searchBounds=rule.onNodeWithTag("home-grid").fetchSemanticsNode().boundsInRoot
@@ -89,7 +89,7 @@ class PreviewOnboardingTest {
             source.performTouchInput { down(center);advanceEventTime(700);moveBy(delta);cancel() }
             rule.waitForIdle();assertEquals(beforeDrag,store.load())
             rule.onNodeWithTag("tile:${preview.key}").performTouchInput { longClick(center) }
-            rule.onNodeWithText("▦  Show as icon").performClick()
+            rule.onNodeWithText("Show as icon").performClick()
             assertEquals(TileKind.DASHBOARD,store.load().tiles.first{it.key==preview.key}.kind)
             rule.onNodeWithTag("swipe-search").performClick()
             rule.onNodeWithTag("add-preview").performClick()

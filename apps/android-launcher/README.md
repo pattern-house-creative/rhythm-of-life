@@ -5,7 +5,7 @@ native Kotlin and Compose app that talks to a Rhythm of Life install you already
 previews sit in the app grid, the sky of stars is behind the screen, and today's insight is at the
 bottom.
 
-> The development build (`0.1.14-dev`) and the owner-signed release (`0.1.14`) can be installed
+> The development build (`0.1.17-dev`) and the owner-signed release (`0.1.17`) can be installed
 > together. See [Prepare a daily-use release](#prepare-a-daily-use-release) for signing and setup.
 
 > **Not a medical device.** The launcher can show a glucose reading from your install. It is for your
@@ -17,6 +17,12 @@ bottom.
 - **Your apps, as a launcher.** A four-column Home grid, a dock with six places and a drawer of every
   app Android exposes to the launcher, including available work-profile apps with their Android badges.
   Personal and work copies keep distinct pins. Apps remain available if your install or Android System WebView is unavailable.
+- **App icons that belong to the sky.** Settings, **App icons**, offers three styles for Home, the dock and the
+  drawer. **Sky**, the default, draws each app as a glyph on a dark glass tile, inked in the launcher colour
+  nearest the app's own: the app's themed (monochrome) icon when it has one, otherwise a glyph traced from its
+  artwork. **Glass** keeps each app's colours and swaps its white or coloured backdrop for the same tile.
+  **Original** shows icons as Android draws them. An icon with no clear glyph, such as a photo, is set whole in
+  the tile and dimmed a little. Work apps keep their badge.
 - **Dashboard previews on Home.** A preview takes the room of four icons and redraws from fresh data.
   Touch it and the whole dashboard opens in a reader. On a dashboard that supports changes, **Allow edits** appears below the page alongside the targets it can change. Tap the switch to turn editing on or off. Android's Back returns to Home. Visible Home cards stay in memory during drawer and reader navigation, pause when covered, and refresh when due.
 - **App drawer.** Swipe up to search your apps, dashboards and stars against the sky. Choose Grid or A–Z.
@@ -30,8 +36,17 @@ bottom.
   asks what happened.
 - **A built-in glucose card,** offered only when your install says it has one.
 
+- **Home pages.** Home never scrolls up and down. It holds as many rows as fit above the insight bar
+  and the dock; apps and previews that do not fit go on another page. Swipe left for the next page and
+  right to go back; the dots under the grid show where you are. Pressing Home while Home is showing
+  returns to the first page. The three most recently visited pages with previews stay in memory.
+  Swiping back resumes those cards and lets them refresh when due.
+
 Hold a tile to move it, to switch a dashboard between an icon and a preview, or to take it off Home.
-Your Home layout stays on the phone.
+Hold a lifted tile at the left or right edge of the screen to carry it to the previous or next page;
+past the last page is a new, empty one. With a screen reader, each tile also offers **Move to previous
+page** and **Move to next page**, and Home offers **Next Home page** and **Previous Home page**.
+A new pin goes on the first page with room for it. Your Home layout, pages included, stays on the phone.
 
 ## What you need
 
@@ -77,9 +92,14 @@ device before selecting it as the daily Home app.
 
 ## Connect it to your install
 
-Open the launcher's settings and enter your install's address, such as `https://rhythm.<tailnet>.ts.net`.
-It must be `https`, with no user name, path, query or fragment. Nothing about your install is built
-into the APK: no address, no token and no pairing secret.
+Open the launcher's settings and enter your install's address under **Household address**, such as
+`https://rhythm.<tailnet>.ts.net`, then **Save address**. It must be `https`, with no user name, path,
+query or fragment. Nothing about your install is built into the APK: no address, no token and no
+pairing secret.
+
+Saving an address that differs from the saved one clears the launcher's web session and removes the
+stars, dashboards and previews pinned to Home; your apps stay on Home and in the dock. Settings says
+so under the field before you save. **Save** on the address already saved only refreshes Home.
 
 On the first connection Home gets up to two dashboard previews. After that you choose: "Add preview"
 in the drawer, or hold an empty place on Home. A preview you remove stays removed.
@@ -182,6 +202,10 @@ computer (`10.0.2.2`). It is a separate app (`io.github.pattern_house_creative.r
 Never install it on a phone you use.
 
 ## Fonts and licences
+
+Everything the launcher draws itself takes its colours, type sizes, spacing and corners from one Kotlin
+object, `Ui` in `UiTokens.kt`, under the web app's token names (`--ui-edge-strong` is `Ui.edgeStrong`).
+Change a value there and in `app/src/index.css` together. Installed apps keep their own artwork.
 
 The launcher uses Manrope and DM Sans, both under the SIL Open Font License 1.1. They are not kept in
 this repository. Each build fetches them from the commit of

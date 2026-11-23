@@ -164,6 +164,7 @@ export function Details({
 }) {
   const ref = useRef<HTMLElement>(null);
   const automaticNote = useId();
+  const layoutNote = useId();
   const workNote = useId();
   const [installMessage, setInstallMessage] = useState("");
   useEffect(() => {
@@ -317,8 +318,10 @@ export function Details({
                       className="dashboard-full"
                       onClick={dashboard.onReader}
                     >
-                      <PanelRight size={14} aria-hidden="true" /> Open in the
-                      explorer
+                      <PanelRight size={14} aria-hidden="true" />{" "}
+                      <span className="dashboard-full-label">
+                        Open in the explorer
+                      </span>
                     </button>
                   )}
                   {dashboard.screen && (
@@ -326,6 +329,7 @@ export function Details({
                       id={dashboard.id}
                       screen={dashboard.screen}
                       className="dashboard-full"
+                      label="dashboard-full-label"
                     />
                   )}
                 </div>
@@ -444,8 +448,11 @@ export function Details({
                       {s.detail && <small>{s.detail}</small>}
                       <small>
                         {s.calendarDate
-                          ? `Source calendar date: ${s.calendarDate}`
-                          : `Observed: ${stamp(s.sampleAt)}`}
+                          ? `Source day: ${s.calendarDate}`
+                          : s.sampleAt &&
+                              Number.isFinite(Date.parse(s.sampleAt))
+                            ? `Observed: ${stamp(s.sampleAt)}`
+                            : stamp(s.sampleAt)}
                       </small>
                       {s.lastSyncedAt && (
                         <small>
@@ -461,10 +468,16 @@ export function Details({
                         </small>
                       )}
                     </span>
+                    {/* Two facts: the source's state, and only what is known
+                        of its access (a successful read proves it; a failed
+                        one says nothing either way). */}
                     <span className="source-status">
                       {statusLabel(s).toUpperCase()}
-                      {s.status !== "disconnected" &&
-                        ` · ${s.connected ? "AUTHORIZED" : "DISCONNECTED"}`}
+                      {s.status === "demo"
+                        ? " · NO ACCOUNT CONNECTED"
+                        : s.status !== "disconnected" && s.connected
+                          ? " · ACCESS AUTHORIZED"
+                          : ""}
                     </span>
                   </div>
                 ))}
@@ -514,11 +527,12 @@ export function Details({
               )}
               {setLayout && (
                 <div className="layout-choice">
-                  <h3>Layout</h3>
+                  <h3>Wide-screen layout</h3>
                   <div
                     className="segmented"
                     role="group"
-                    aria-label="Layout of the home screen"
+                    aria-label="Wide-screen layout of Home"
+                    aria-describedby={layoutNote}
                   >
                     {(
                       [
@@ -536,6 +550,11 @@ export function Details({
                       </button>
                     ))}
                   </div>
+                  {/* Phones and upright tablets keep their own arrangement
+                      (App.tsx: wide), so the choice says where it applies. */}
+                  <p className="chart-note" id={layoutNote}>
+                    This choice applies when there’s room for the wide layout.
+                  </p>
                   {arranged && (
                     <p className="chart-note">
                       This screen's Home is arranged by hand. Choosing a layout
@@ -552,7 +571,10 @@ export function Details({
                 />
               )}
               {cards?.onOpen && cards.dashboards.length > 0 && (
-                <section aria-label="Dashboards">
+                <section
+                  className="settings-dashboards"
+                  aria-label="Dashboards"
+                >
                   <h3>Dashboards</h3>
                   <div className="settings-actions">
                     {cards.dashboards.map((board) => (
@@ -690,11 +712,11 @@ function CornerCards({
   };
   return (
     <div className="corner-cards">
-      <h3>Corner cards</h3>
+      <h3>Home previews</h3>
       <p className="chart-note">
         {dashboards.length
-          ? "Each corner shows its own tile, or a dashboard's card instead: tall in the main slot on the left, compact in the others."
-          : "Once your AI saves a dashboard, its card can go in a corner here: tall in the main slot on the left, compact in the others."}
+          ? "Choose what appears in each Home position. A dashboard preview opens the full dashboard."
+          : "After your assistant saves a dashboard, you can choose its preview for Home."}
       </p>
       {dashboards.length > 0 &&
         corners.map((corner) => (

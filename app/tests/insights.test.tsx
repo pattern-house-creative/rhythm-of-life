@@ -618,7 +618,7 @@ it("puts the current insight in the corner, with recent changes a tap away", asy
   const open = screen.getByRole("button", {
     name: `Open insight · Discovery: ${discovery.title}`,
   });
-  expect(open).toHaveTextContent("DISCOVERY");
+  expect(open).toHaveTextContent("Discovery");
   expect(open).toHaveTextContent(discovery.summary);
   await user.click(open);
   expect(onInsight).toHaveBeenCalled();
@@ -897,7 +897,7 @@ it("notes the last run in the corner when no insight is current", () => {
   expect(screen.queryByText(/Last run/)).not.toBeInTheDocument();
 });
 
-it("gives sideways phones the slim insight card at the foot of the readings", () => {
+it("gives sideways phones the slim insight card at the head of the sky's column", () => {
   const css = readFileSync("src/InsightCard.css", "utf8").replace(/\r/g, "");
   const landscape = "(max-height: 500px) and (orientation: landscape)";
   // The card shows in both phone layouts...
@@ -908,9 +908,10 @@ it("gives sideways phones the slim insight card at the foot of the readings", ()
   expect(css.slice(shared, css.indexOf("}", shared))).toContain(
     "display: flex",
   );
-  // ...and sideways it takes the readings' column, under training.
+  // ...and sideways it heads the sky's column, beside the main slot, so the
+  // readings' column keeps its whole height for the readings and the cards.
   const grid = css.slice(css.indexOf(`@media ${landscape} {`));
   expect(grid).toMatch(
-    /\.observatory:has\(> \.insight-card\) \{[^}]*"training sky"\s*"insight sky";/,
+    /\.observatory:has\(> \.insight-card\) \{[^}]*"main insight"\s*"main sky"\s*"recovery sky"\s*"training sky";/,
   );
 });

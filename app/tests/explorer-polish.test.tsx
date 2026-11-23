@@ -78,7 +78,6 @@ it("filters by every provider on the map, by its display name", async () => {
     ["carelink-csv", "CareLink CSV"],
     ["carelink-live", "CareLink live"],
     ["csv", "CSV import"],
-    ["demo", "Demo"],
     ["documents", "Documents"],
     ["fictional-sync", "fictional-sync"],
     ["garmin", "Garmin"],
@@ -86,6 +85,7 @@ it("filters by every provider on the map, by its display name", async () => {
     ["nightscout", "Nightscout"],
     ["notes", "Notes"],
     ["rhythm", "Rhythm engine"],
+    ["demo", "Sample data"],
     ["second-brain", "Second Brain"],
   ]);
   const user = userEvent.setup();

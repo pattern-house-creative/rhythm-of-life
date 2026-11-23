@@ -9,11 +9,7 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import { Check, ChevronUp, RefreshCw } from "lucide-react";
-import type {
-  Dashboard,
-  DashboardWrite,
-  DashboardWriteRecord,
-} from "./dashboards";
+import type { Dashboard, DashboardWriteRecord } from "./dashboards";
 import type { GraphSession } from "./liveGraph";
 import {
   arrangeable,
@@ -34,7 +30,8 @@ import {
 } from "./arranging";
 import type { DashboardGrid } from "./arranging";
 import { PageFrame } from "./PageFrame";
-import { feedObservationTimes } from "./feedObservationTimes";
+import { freshnessPhrases, recordedSentence } from "./feedObservationTimes";
+import { FreshnessPhrases } from "./FreshnessPhrases";
 import type { WriteAnswer } from "./PageFrame";
 import { PartsGrid } from "./PartsGrid";
 import type { GridChange, GridOutcome } from "./PartsGrid";
@@ -47,23 +44,72 @@ const day = (iso: string) =>
 const when = (iso: string) =>
   `${day(iso)}, ${new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
 
-// What a write may change, in words, for the Allow edits switch.
-function target(w: DashboardWrite, d: Dashboard) {
-  const title = d.stars.find((s) => s.graphId === w.star)?.title ?? "a file";
-  if (w.kind === "log")
-    return `the ${w.log} log${w.subject && instance().people.length > 1 ? ` for ${personName(w.subject)}` : ""}`;
-  if (w.kind === "sheet")
-    return [
-      w.range && `cells ${w.range.replace(/^'?(.*?)'?!/, "$1 ")} in ${title}`,
-      w.appendTo && `new rows in ${title} › ${w.appendTo}`,
-    ]
-      .filter(Boolean)
-      .join(" and ");
-  return w.section !== undefined
-    ? `the “${w.section}” section of ${title}`
-    : w.table !== undefined
-      ? `table ${w.table + 1} of ${title}`
-      : `the end of ${title}`;
+// What the declared writes let this dashboard do, in words, for the Allow edits switch: each
+// write as the operations the engine allows it (DashboardWrite in engine/src/Core/Dashboards.cs,
+// Adapters/Drive/DriveWrites.cs). A log write adds entries; a sheet write sets cells within its
+// range and adds rows to the end of a tab; a doc write replaces the text under one heading or in
+// a cell of one table, or adds to the end. A file's operations are named together, the file once,
+// in words no longer than the switch's description took before on a phone.
+const listed = (items: string[], last = "and") =>
+  items.length < 2
+    ? (items[0] ?? "")
+    : `${items.slice(0, -1).join(", ")} ${last} ${items.at(-1)}`;
+interface FileChanges {
+  title: string;
+  cells: string[];
+  rows: string[];
+  replace: string[];
+  end: boolean;
+}
+function allowedChanges(d: Dashboard) {
+  // In the order declared; a file where its first write is.
+  const changes: (string | FileChanges)[] = [];
+  const files = new Map<string, FileChanges>();
+  for (const w of d.writes) {
+    if (w.kind === "log") {
+      changes.push(
+        `add to the ${w.log} log${w.subject && instance().people.length > 1 ? ` for ${personName(w.subject)}` : ""}`,
+      );
+      continue;
+    }
+    const key = `${w.kind}:${w.star ?? w.name}`;
+    let file = files.get(key);
+    if (!file) {
+      file = {
+        title: d.stars.find((s) => s.graphId === w.star)?.title ?? "a file",
+        cells: [],
+        rows: [],
+        replace: [],
+        end: false,
+      };
+      files.set(key, file);
+      changes.push(file);
+    }
+    if (w.kind === "sheet") {
+      // A declared range is a tab and its cells: 'My tab'!B2:D40 or Budget!B2:D40.
+      const range = w.range?.match(/^(?:'((?:[^']|'')+)'|([^!]+))!(.+)$/);
+      if (range)
+        file.cells.push(
+          `set cells ${range[3]} on the ${range[1]?.replace(/''/g, "'") ?? range[2]} tab`,
+        );
+      else if (w.range) file.cells.push(`set cells ${w.range}`);
+      if (w.appendTo) file.rows.push(`add rows to the ${w.appendTo} tab`);
+    } else if (w.section !== undefined)
+      file.replace.push(`under “${w.section}”`);
+    else if (w.table !== undefined)
+      file.replace.push(`in a cell of table ${w.table + 1}`);
+    else file.end = true;
+  }
+  return changes
+    .map((c) => {
+      if (typeof c === "string") return c;
+      if (c.cells.length || c.rows.length)
+        return `${listed([...c.cells, ...c.rows])} of ${c.title}`;
+      if (!c.replace.length) return `add to the end of ${c.title}`;
+      const replace = `replace the text ${listed(c.replace, "or")} in ${c.title}`;
+      return c.end ? `${replace}, and add to its end` : replace;
+    })
+    .join("; ");
 }
 type Notice =
   | { kind: "done" | "undone"; write: DashboardWriteRecord }
@@ -324,6 +370,8 @@ export default function DashboardView({
       </p>
     );
   const feeds = current?.read ? Object.entries(current.read.feeds) : [];
+  // When each feed's measurements were recorded, named, for the status line's details.
+  const recorded = current?.read ? recordedSentence(current.read, true) : [];
   const missing = feeds.filter(([, f]) => f.status !== "ok");
   const broken = failed && failed.version === dashboard.version && !drawn;
   // Arranged by hand only on the newest version, drawn and read whole, with
@@ -405,12 +453,25 @@ export default function DashboardView({
     <div className="dashboard-view">
       {controls.ui}
       {(bare || current?.refreshFailed) && (
+        // When the measurements were recorded, then when the data was read; full screen says
+        // it as a card does, the reader names each feed.
         <p className="dashboard-freshness" role="status">
-          {current?.refreshFailed && "Feed refresh failed. "}
-          {current?.read && feedObservationTimes(current.read)}{" "}
-          {current?.at
-            ? `Last read ${when(new Date(current.at).toISOString())}`
-            : "No feed read yet"}
+          {current?.refreshFailed &&
+            (current.read
+              ? "Refresh failed. "
+              : "Refresh failed. No data read yet.")}
+          {current?.read ? (
+            <FreshnessPhrases
+              phrases={freshnessPhrases(
+                current.read,
+                !bare,
+                current.refreshFailed,
+              )}
+            />
+          ) : (
+            !current?.refreshFailed &&
+            (busy ? "Reading dashboard data…" : "No data read yet")
+          )}
           {missing.length > 0 &&
             ` · ${missing.length} of ${feeds.length} feeds unavailable`}
         </p>
@@ -525,10 +586,10 @@ export default function DashboardView({
             Allow edits
           </button>
           <p id={editTargetsId}>
-            {editsOn ? "It can change " : "When on, it can change "}
-            {dashboard.writes.map((w) => target(w, dashboard)).join("; ")}.
+            {editsOn ? "It can " : "When on, it can "}
+            {allowedChanges(dashboard)}.
             {editsOn &&
-              " Every change shows here with Undo and is kept in its history."}
+              " Changes are kept in its history; the latest made here has Undo."}
           </p>
         </div>
       )}
@@ -539,27 +600,35 @@ export default function DashboardView({
           aria-controls={moreId}
           onClick={() => setMore((m) => !m)}
         >
-          <span>
-            {current?.at
-              ? `Read ${ago(current.at, now)}`
-              : busy
-                ? "Reading…"
-                : "Not read yet"}
+          {/* Its words as one run, so they wrap on a narrow phone instead of being cut. */}
+          <span className="summary-text">
+            <span>
+              {current?.at
+                ? `Data read ${ago(current.at, now)}`
+                : busy
+                  ? "Reading dashboard data…"
+                  : "No data read yet"}
+            </span>{" "}
+            {missing.length > 0 && (
+              <span className="summary-missing">
+                {missing.length} of {feeds.length} feeds unavailable
+              </span>
+            )}
           </span>{" "}
-          {missing.length > 0 && (
-            <span className="summary-missing">
-              {missing.length} of {feeds.length} feeds unavailable
-            </span>
-          )}{" "}
           <ChevronUp size={13} aria-hidden="true" />
         </button>
         <div id={moreId} className="dashboard-details">
           <p>
+            {recorded.length > 0 && (
+              <>
+                <FreshnessPhrases phrases={recorded} />{" "}
+              </>
+            )}
             {current?.at
-              ? `Read from the engine ${ago(current.at, now)}`
+              ? `Data read ${ago(current.at, now)}`
               : busy
-                ? "Reading its feeds…"
-                : "Not read yet"}
+                ? "Reading dashboard data…"
+                : "No data read yet"}
             {feeds.length > 0 &&
               (missing.length
                 ? ` · ${feeds.length - missing.length} of ${feeds.length} feeds`
@@ -574,7 +643,9 @@ export default function DashboardView({
                 ? `the ${String(f.log)} log`
                 : f.kind === "memories"
                   ? "its memories"
-                  : (f.star?.title ?? "a star")}
+                  : f.kind === "projects"
+                    ? "its project collections"
+                    : (f.star?.title ?? "a star")}
               ) unavailable: {f.reason ?? "no reason given"}
             </p>
           ))}

@@ -244,11 +244,11 @@ describe("exploration journeys", () => {
       configurable: true,
     });
     await user.click(
-      await screen.findByRole("button", { name: "Enter constellation" }),
+      await screen.findByRole("button", { name: "Open Explorer" }),
     );
     await screen.findByRole("region", { name: "Knowledge explorer" });
     expect(document.body.style.top).toBe("-1096px");
-    await user.click(screen.getByRole("button", { name: "Return to ambient" }));
+    await user.click(screen.getByRole("button", { name: "Back to Home" }));
     expect(document.body.style.position).toBe("");
     expect(window.scrollTo).toHaveBeenLastCalledWith({
       top: 1096,
@@ -260,7 +260,7 @@ describe("exploration journeys", () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(
-      await screen.findByRole("button", { name: "Enter constellation" }),
+      await screen.findByRole("button", { name: "Open Explorer" }),
     );
     const explorer = await screen.findByRole("region", {
       name: "Knowledge explorer",
@@ -315,7 +315,7 @@ describe("exploration journeys", () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(
-      await screen.findByRole("button", { name: "Enter constellation" }),
+      await screen.findByRole("button", { name: "Open Explorer" }),
     );
     const explorer = await screen.findByRole("region", {
       name: "Knowledge explorer",

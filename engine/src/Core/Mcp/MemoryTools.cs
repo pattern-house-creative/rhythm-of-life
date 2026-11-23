@@ -1183,7 +1183,7 @@ public sealed class MemoryTools(IHttpContextAccessor accessor)
         {
             var projects = await store.Projects(principal, new(workspace, include_archived), cancellationToken);
             return new MemoryToolProjects(true, [.. projects.Select(p => new MemoryToolProjectRow(p.Id, p.Slug, p.Name, p.Scope, p.Subject,
-                FirstLine(p.Description), p.Aliases, p.Status, p.Author, p.Revision, p.UpdatedAt))], DataNotice);
+                FirstLine(p.Description), p.Aliases, p.Status, p.Author, p.Revision, p.UpdatedAt, p.ShowInProjects))], DataNotice);
         });
 
     [McpServerTool(Name = "list_teams", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false)]
@@ -2386,7 +2386,7 @@ public sealed record MemoryToolHistory(bool Ok, Guid Id, int Revision, IReadOnly
     int Kept, int OldestKept, bool Pruned, string Notice);
 
 public sealed record MemoryToolProjectRow(Guid Id, string Slug, string Name, string Scope, string Owner, string Description, IReadOnlyList<string> Aliases,
-    string Status, string? Author, int Revision, DateTimeOffset UpdatedAt);
+    string Status, string? Author, int Revision, DateTimeOffset UpdatedAt, bool ShowInProjects = false);
 
 public sealed record MemoryToolProjects(bool Ok, IReadOnlyList<MemoryToolProjectRow> Projects, string Notice);
 

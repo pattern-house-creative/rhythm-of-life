@@ -1,0 +1,88 @@
+
+<style>
+  .rhythm-team { display:grid; gap:0.75rem; min-width:0; color:inherit; }
+  .rhythm-team section { margin-block:0.25rem; }
+  .rhythm-team ul { list-style:none; padding-inline-start:1rem; border-inline-start:2px solid currentColor; }
+  .rhythm-team li { margin-block:0.7rem; }
+  .rhythm-team p { margin-block:0.35rem; overflow-wrap:anywhere; }
+  .rhythm-team .team-meta { font-size:.875em; opacity:.82; overflow-wrap:anywhere; }
+  .rhythm-team button { max-width:100%; text-align:start; overflow-wrap:anywhere; }
+</style>
+<script>
+  window.renderRhythmTeam = function (target, feeds, now = Date.now()) {
+    target.replaceChildren();
+    target.classList.add("rhythm-team");
+    function add(parent, tag, text, style) {
+      const child = document.createElement(tag);
+      if (text !== undefined) child.textContent = text;
+      if (style) child.className = style;
+      parent.append(child);
+      return child;
+    }
+    const label = {
+      running:"Running", starting:"Starting", queued:"Queued", completed:"Run completed", failed:"Failed",
+      interrupted:"Interrupted", cancelled:"Cancelled", idle:"Idle", stopped:"Stopped", waiting:"Waiting for input",
+      blocked:"Blocked", error:"Error", unknown:"Status unknown", archived:"Archived", reserved:"Awaiting a session",
+      unavailable:"Session unavailable"
+    };
+    function when(time) {
+      return new Date(time).toLocaleString([], {dateStyle:"short",timeStyle:"short"});
+    }
+    function session(parent, role, data) {
+      if (!data || typeof data !== "object") return;
+      const expired = ["running","starting"].includes(data.state) && data.at && now-data.at > 45*60000;
+      const line = add(parent,"p");
+      add(line,"strong",role+" · "+(data.closed ? "Assignment closed" : expired ? "No recent activity" : label[data.state] || "Status unknown"));
+      const details = [];
+      if (Number.isFinite(data.at) && data.at > 0) details.push("Last activity "+when(data.at));
+      if (typeof data.branch === "string") details.push(data.branch);
+      if (details.length) add(parent,"p",details.join(" · "),"team-meta");
+    }
+    add(target,"h2","T3 team");
+    const runtime = feeds.teamStatus, work = feeds.teamWork;
+    if (runtime?.status !== "ok" || work?.status !== "ok") {
+      add(target,"p","Team status is unavailable."); return;
+    }
+    const records = (runtime.memories || []).filter(m => m.scope === "shared" && m.state === "current" &&
+      !m.truncated && m.tags?.includes("t3-team-status") && m.project?.slug === "agent-handoffs");
+    if (!records.length) { add(target,"p","Waiting for the first T3 report."); return; }
+    let status;
+    try {
+      const prefix="T3 team status\n";
+      if (records.length!==1 || !records[0].preview.startsWith(prefix)) throw new Error();
+      status=JSON.parse(records[0].preview.slice(prefix.length));
+      if (status?.v!==1 || !Number.isFinite(status.observed) || !Array.isArray(status.groups)) throw new Error();
+    } catch { add(target,"p","The latest T3 report could not be read."); return; }
+    if (!status.observed) { add(target,"p","Waiting for the first T3 report."); return; }
+    const stale = now-status.observed > 45*60000;
+    add(target,"p",(stale ? "Last report · updates overdue · " : "Last checked ")+when(status.observed),"team-meta");
+    session(target,"Master orchestrator",status.master);
+    const tickets = new Map((work.memories || []).filter(m => m.scope==="shared" && m.state==="current").map(m=>[m.id,m]));
+    let visible=0;
+    for (const group of status.groups) {
+      if (!group || !Array.isArray(group.workers)) continue;
+      const rows=group.workers.filter(row=>tickets.has(row?.ticket) && tickets.get(row.ticket).project?.slug===group.project);
+      if (!rows.length) continue;
+      visible++;
+      const block = add(target,"section");
+      add(block,"h3",tickets.get(rows[0].ticket).project.name || group.project);
+      if (group.lead) session(block,"Project lead",group.lead);
+      else add(block,"p","Reporting directly to the master","team-meta");
+      const list=add(block,"ul");
+      for (const row of rows) {
+        const entry=add(list,"li"), ticket=tickets.get(row.ticket);
+        session(entry,"Worker",row);
+        const button=add(entry,"button",String(ticket.preview || "Open work item").split("\n")[0].slice(0,160));
+        button.type="button";
+        button.addEventListener("click",()=>window.rhythm.openStar(ticket.graphId));
+        let summary=ticket.work?.state || "";
+        if (ticket.work?.blocked) summary+=" · blocked";
+        if (row.report==="rework" && ticket.work?.state!=="done") summary+=" · check needs rework";
+        if (row.report==="decision" && ticket.work?.state==="review") summary+=" · owner decision";
+        if (summary) add(entry,"p",summary,"team-meta");
+      }
+    }
+    if (!visible) add(target,"p","No team assignments are visible.");
+    if (work.truncated) add(target,"p","Older tickets may be outside this dashboard’s work feed.","team-meta");
+  };
+</script>

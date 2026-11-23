@@ -62,9 +62,9 @@ it("draws what Home's sky draws when it has no focus", async () => {
   const user = userEvent.setup();
   const { container, onExplore } = drawMap({});
   expect(screen.getByText(/^KNOWLEDGE/)).toHaveTextContent("KNOWLEDGE · DEMO");
-  expect(screen.getByText(/12 ideas ·/)).toBeInTheDocument();
+  expect(screen.getByText(/12 stars ·/)).toBeInTheDocument();
   expect(stars(container)).toHaveLength(12);
-  await user.click(screen.getByRole("button", { name: /Enter constellation/ }));
+  await user.click(screen.getByRole("button", { name: /Open Explorer/ }));
   expect(onExplore).toHaveBeenCalledWith(null);
 });
 
@@ -96,9 +96,7 @@ it("filters the demo's map in the browser, which holds all of it", () => {
     "matching “idea 1” · 3 stars",
   );
   // A focused part's caption has its own way in; the sky's entry is Home's.
-  expect(screen.queryByRole("button", { name: /Enter constellation/ })).toBe(
-    null,
-  );
+  expect(screen.queryByRole("button", { name: /Open Explorer/ })).toBe(null);
 });
 
 it("says when nothing on the map matches its focus, naming the focus", () => {
@@ -126,7 +124,7 @@ it("asks the engine for a live focused part, and counts every match", async () =
   });
   expect(read).toHaveBeenCalledWith(null, expect.any(AbortSignal));
   // Waiting is never shown as unavailable.
-  expect(screen.getByText("Loading knowledge")).toBeInTheDocument();
+  expect(screen.getByText("Loading the sky")).toBeInTheDocument();
   expect(screen.queryByText(/Knowledge graph unavailable/)).toBeNull();
   await act(async () => answer(page(map.nodes.slice(0, 2), 1240)));
   expect(stars(container)).toHaveLength(2);
@@ -186,18 +184,51 @@ it("says the map can't be read when the engine can't answer", async () => {
     }),
   });
   expect(
-    await screen.findByText(
-      "Knowledge graph unavailable · health sources are independent",
-    ),
+    await screen.findByText("Sky unavailable · health sources are independent"),
   ).toBeInTheDocument();
   failing.unmount();
   // An engine older than piece 3 has no focused read.
   drawMap({ sky: sky({ demo: false }), focus: { providers: ["drive"] } });
   expect(
-    await screen.findByText(
-      "Knowledge graph unavailable · health sources are independent",
-    ),
+    await screen.findByText("Sky unavailable · health sources are independent"),
   ).toBeInTheDocument();
+});
+
+// An empty sky says what this part knows (issue: an empty Home told people to search and touch
+// stars it didn't have): the demo's preview of an empty, loading or failed source, a first read
+// that failed, and a read that found no stars, each with no gesture hint.
+it("tells a preview, a failed read and an empty read apart, with nothing to select", () => {
+  const preview = drawMap({ own: false, blocked: true });
+  expect(screen.getByText("0 stars shown")).toBeInTheDocument();
+  expect(screen.getByText("No stars in this preview")).toBeInTheDocument();
+  expect(
+    screen.getByText("Sample stars return when the demo is restored."),
+  ).toBeInTheDocument();
+  expect(screen.queryByText("Select a star to explore")).toBeNull();
+  expect(screen.queryByText(/groups?$/)).toBeNull();
+  expect(screen.queryByText(/search|filters/)).toBeNull();
+  preview.unmount();
+
+  const nothing = { ...map, nodes: [], edges: [] };
+  const live = (readAt: string | null) =>
+    sky({ demo: false, page: nothing, overview: nothing, readAt });
+  const failed = drawMap({ own: false, sky: live(null) });
+  expect(screen.getByText("Sky unavailable")).toBeInTheDocument();
+  expect(
+    screen.getByText("Rhythm couldn’t load these records."),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Sky unavailable · health sources are independent"),
+  ).toBeInTheDocument();
+  failed.unmount();
+
+  drawMap({ own: false, sky: live("2026-11-08T09:00:00Z") });
+  expect(screen.getByText("No stars to show")).toBeInTheDocument();
+  expect(
+    screen.getByText("Rhythm found no records you can view."),
+  ).toBeInTheDocument();
+  expect(screen.queryByText(/unavailable/)).toBeNull();
+  expect(screen.queryByText("Select a star to explore")).toBeNull();
 });
 
 it("says when a source couldn't be read, and draws the rest", async () => {
@@ -332,7 +363,7 @@ it("holds still in a fold: a swipe scrolls the column and a tap opens a star", a
   expect(constellation).toHaveClass("is-fixed", "is-still");
   const svg = container.querySelector("svg.graph-svg");
   expect(svg).toHaveAccessibleName(
-    "Knowledge constellation. Select an item to explore its connections.",
+    "Knowledge constellation. Select a star to explore its connections.",
   );
   const star = container.querySelector<SVGGElement>("g.graph-node")!;
   await user.click(star);

@@ -62,7 +62,9 @@ export function CardPart({
         // Missing from this viewer's whole list: deleted since, or one this
         // viewer can't read, which the list doesn't tell apart. Either way it
         // names nothing.
-        <p className="dashboard-card-status">That dashboard is unavailable</p>
+        <p className="dashboard-card-status">
+          <strong>Dashboard unavailable</strong>
+        </p>
       ) : (
         // Not among the dashboards read so far: it says itself whether it
         // can be read, and names nothing when it can't.
@@ -75,7 +77,7 @@ export function CardPart({
               session={session}
               shape={shape}
               unavailable={blocked}
-              missing="That dashboard is unavailable"
+              missing="Dashboard unavailable"
               onOpen={() => onOpen(dashboard)}
             />
           </Suspense>

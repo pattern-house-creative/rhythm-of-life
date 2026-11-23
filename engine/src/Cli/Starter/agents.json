@@ -3,6 +3,19 @@
   "description": "Current claims, reviews, activity and open handoffs.",
   "feeds": [
     {
+      "name": "teamStatus",
+      "kind": "memories",
+      "where": { "project": "agent-handoffs", "tag": "t3-team-status", "work": false },
+      "fullText": true,
+      "limit": 2
+    },
+    {
+      "name": "teamWork",
+      "kind": "memories",
+      "where": { "work": true },
+      "limit": 200
+    },
+    {
       "name": "work",
       "kind": "memories",
       "where": {

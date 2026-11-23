@@ -64,6 +64,7 @@ export function InsightCorner({
   onChanged?: () => void;
 }) {
   const kind = kindNames[insight.kind];
+  const when = dayName(insight.generatedAt);
   return (
     <div className={`insight-corner kind-${insight.kind}`}>
       <button
@@ -74,10 +75,10 @@ export function InsightCorner({
         <span className="section-label">
           <span className="insight-kind">
             <KindMark kind={insight.kind} />
-            {kind.toUpperCase()}
+            {kind}
           </span>
           <span className="insight-when">
-            {dayName(insight.generatedAt).toUpperCase()}
+            {when.charAt(0).toUpperCase() + when.slice(1)}
             <ArrowUpRight size={16} />
           </span>
         </span>

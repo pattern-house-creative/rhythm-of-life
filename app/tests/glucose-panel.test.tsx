@@ -4,7 +4,9 @@ import userEvent from "@testing-library/user-event";
 import App from "../src/App";
 import { TrendArrows } from "../src/TrendArrows";
 import type { GlucoseTrend } from "../src/trend";
-import { withSampleHealth } from "./sampleHealth";
+import { GlucosePanel } from "../src/panels/GlucosePanel";
+import { observationLabel } from "../src/health";
+import { sampleHealth, withSampleHealth } from "./sampleHealth";
 
 // A household with a fictional glucose source connected, its 90-day archive,
 // and the glucose tile kept in the main slot: the demo itself connects none.
@@ -70,7 +72,7 @@ describe("glucose tile and panel", () => {
 
   it("shows the ring and the 90-day GMI on the tile", async () => {
     render(<App />);
-    const tile = await screen.findByRole("button", { name: /GLUCOSE 112/ });
+    const tile = await screen.findByRole("button", { name: /Glucose 112/ });
     expect(within(tile).getByText("Time in range")).toBeInTheDocument();
     expect(
       await within(tile).findByText("90-day estimate"),
@@ -79,11 +81,38 @@ describe("glucose tile and panel", () => {
     expect(within(tile).getByText(/^Steady · /)).toBeInTheDocument();
   });
 
+  // A known older reading keeps its number, unit and time, and says beside the value that it is
+  // stale: never named or styled as the current one.
+  it("names a stale reading as the last recorded one, with its time beside the value", () => {
+    const current = { ...sampleHealth.current, status: "stale" as const };
+    render(
+      <GlucosePanel
+        data={{ ...sampleHealth, current }}
+        state="stale"
+        selectNode={vi.fn()}
+      />,
+    );
+    expect(
+      screen.queryByRole("region", { name: "Current glucose" }),
+    ).not.toBeInTheDocument();
+    const last = screen.getByRole("region", { name: "Last recorded glucose" });
+    expect(last).toHaveTextContent("112");
+    expect(last).toHaveTextContent("mg/dL");
+    const state = within(last).getByText(
+      `Stale reading · ${observationLabel(current.provenance)}`,
+    );
+    expect(state).toHaveClass("now-stale");
+    expect(
+      within(last).getByText("Trend unavailable for this older reading"),
+    ).toBeInTheDocument();
+    expect(last).not.toHaveTextContent("A stale reading gets no arrow");
+  });
+
   it("leads with the reading and the day, then the longer view", async () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("region", { name: "Knowledge constellation" });
-    await user.click(screen.getByRole("button", { name: /GLUCOSE 112/ }));
+    await user.click(screen.getByRole("button", { name: /Glucose 112/ }));
     const dialog = await screen.findByRole(
       "dialog",
       { name: "glucose" },

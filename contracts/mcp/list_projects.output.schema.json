@@ -57,6 +57,7 @@
                 "type": "string",
                 "maxLength": 200
               },
+              "show_in_projects": { "type": "boolean" },
               "aliases": {
                 "type": "array",
                 "maxItems": 16,

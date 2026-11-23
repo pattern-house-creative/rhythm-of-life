@@ -15,11 +15,15 @@
   width: 100%;
   align-self: center;
   margin-bottom: 8px;
-  color: #d7e5e9;
-  border: 1px solid #93b4c321;
-  border-radius: 14px;
-  background: linear-gradient(100deg, #172229e6, #0e171ecc);
-  font-size: 12px;
+  color: var(--ui-ink);
+  border: 1px solid var(--ui-edge);
+  border-radius: var(--ui-radius-card);
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--ui-surface) 92%, transparent),
+    color-mix(in srgb, var(--ui-night) 85%, transparent)
+  );
+  font-size: var(--ui-text-small);
 }
 .resurface-line {
   display: flex;
@@ -33,15 +37,15 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
-  min-height: 32px;
+  min-height: 36px;
   padding: 4px 4px 4px 12px;
   text-align: left;
   color: inherit;
 }
 .resurface-says small {
   flex: none;
-  font-size: 10px;
-  color: #8fa5b2;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-faint);
 }
 .resurface-says span {
   flex: 1 1 auto;
@@ -53,7 +57,7 @@
 .resurface-says svg {
   flex: none;
   margin-left: auto;
-  color: #6c828e;
+  color: var(--ui-mint);
   transition: transform 0.2s ease;
 }
 .resurface-says svg[data-open] {
@@ -63,12 +67,12 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  color: #6c828e;
+  width: 36px;
+  height: 36px;
+  color: var(--ui-faint);
 }
 .resurface-dismiss:hover:not(:disabled) {
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .resurface-open {
   flex: 1 1 auto;
@@ -93,13 +97,13 @@
   display: contents;
 }
 .resurface-card :is(button, [tabindex]):focus-visible {
-  outline: 2px solid #95d2d9;
+  outline: var(--ui-focus-ring);
   outline-offset: 1px;
 }
 .resurface-failed {
   flex: none;
   padding: 0 12px 8px;
-  font-size: 10px;
+  font-size: var(--ui-text-meta);
   color: #c1a66d;
 }
 /* An upright phone's sky runs to the screen's edges; the card keeps the page's gutter. */
@@ -111,11 +115,11 @@
 /* A finger's room on any phone, as the Memories view gives. */
 @media (max-width: 760px), (max-height: 500px) {
   .resurface-says {
-    min-height: 40px;
+    min-height: 44px;
   }
   .resurface-dismiss {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

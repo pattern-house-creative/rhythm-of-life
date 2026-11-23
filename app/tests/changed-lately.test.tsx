@@ -197,7 +197,7 @@ it("stays within the list when a refresh makes it shorter", () => {
     "Fictional older memory",
   );
   view.rerender(<ChangedLately nodes={[r.memory, r.doc]} {...props} />);
-  expect(screen.getByText(/OF 2/)).toHaveTextContent("1 OF 2");
+  expect(screen.getByText(/of 2/)).toHaveTextContent("1 of 2");
   expect(screen.getByRole("heading")).toHaveTextContent("Fictional memory");
 });
 

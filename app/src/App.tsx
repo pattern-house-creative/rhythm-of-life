@@ -521,10 +521,15 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
   useEffect(() => {
     if (layered) return;
     // Back on the sky, focus returns to what opened the view (a star, a tile
-    // or the keyboard entry) instead of the top of the page.
+    // or the keyboard entry) instead of the top of the page. A panel still
+    // closing holds it until it has gone, so focus there counts as lost too.
     const target = returnFocus.current;
     returnFocus.current = null;
-    if (target?.isConnected && document.activeElement === document.body)
+    const focused = document.activeElement;
+    if (
+      target?.isConnected &&
+      (focused === document.body || focused?.closest(".detail-backdrop"))
+    )
       target.focus({ preventScroll: true });
   }, [layered]);
   // The entries follow what is shown once it is drawn, so a view that gives way
@@ -1486,7 +1491,7 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
               <span className="brand-mark">
                 <RhythmMark />
               </span>
-              <span>{instance().name.toUpperCase()}</span>
+              <span className="brand-name">{instance().name}</span>
             </a>
             <div className="top-status">
               {demo && <span className="demo-badge">DEMO</span>}
@@ -1521,7 +1526,7 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
             <button onClick={() => open("sources")}>
               {online ? <i /> : <WifiOff size={12} aria-label="Offline" />}
               {!online
-                ? "Offline · revalidation required"
+                ? "Offline · access needs to be checked again"
                 : sources.some((s) => s.connected)
                   ? "Source status"
                   : "Your sources"}
@@ -1560,7 +1565,7 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
                 <Suspense
                   fallback={
                     <div role="status" className="sr-only">
-                      Opening constellation…
+                      Opening Explorer…
                     </div>
                   }
                 >
@@ -1757,19 +1762,19 @@ export default function App({ launcher = false }: { launcher?: boolean }) {
                   {state === "stale"
                     ? "Stale sample preview"
                     : state === "empty"
-                      ? "No records available"
+                      ? "No records in this preview"
                       : state === "loading"
-                        ? "Loading sample preview…"
-                        : "Unable to load sample preview"}
+                        ? "Loading sample records…"
+                        : "Sample records couldn’t load"}
                 </b>
                 <span>
                   {state === "stale"
                     ? "Older readings stay visible with their timestamp."
                     : state === "empty"
-                      ? "Authorized records will appear after an integration is connected."
+                      ? "Choose Restore demo to see the sample records."
                       : state === "loading"
-                        ? "This is a paused loading-state preview."
-                        : "This simulates an adapter error. No data has been lost."}
+                        ? "This preview stays paused until you choose Restore demo."
+                        : "A simulated source error; no data has been lost. Choose Retry demo to restore the sample."}
                 </span>
                 <button onClick={() => setState("ready")}>
                   {state === "error" ? "Retry demo" : "Restore demo"}

@@ -62,6 +62,7 @@ public sealed class MemoryArchive(NpgsqlDataSource source)
           'slug',p.slug,'name',p.name,'description',p.description,'status',p.status,'author',p.author_id,
           'aliases',to_jsonb(ARRAY(SELECT a.alias FROM memory_project_aliases a WHERE a.project_id=p.id ORDER BY a.alias)),
           'revision',p.revision,'createdAt',p.created_at,'updatedAt',p.updated_at)
+          ||CASE WHEN p.show_in_projects THEN jsonb_build_object('showInProjects',true) ELSE '{}'::jsonb END
           ||CASE WHEN p.held THEN jsonb_build_object('held',true,'heldFor',p.held_for) ELSE '{}'::jsonb END)
         """;
 

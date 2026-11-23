@@ -139,7 +139,7 @@ describe("primary journeys", () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("region", { name: "Knowledge constellation" });
-    await user.click(screen.getByRole("button", { name: /GLUCOSE 112/ }));
+    await user.click(screen.getByRole("button", { name: /Glucose 112/ }));
     // The full suite runs files in parallel; allow a loaded runner to finish
     // rendering the dashboard before the dialog appears.
     const dialog = await screen.findByRole(
@@ -177,17 +177,42 @@ describe("primary journeys", () => {
     render(<App />);
     await screen.findByRole("region", { name: "Knowledge constellation" });
     await user.click(
-      screen.getByRole("button", { name: "Enter constellation" }),
+      screen.getByRole("button", { name: "Open Explorer" }),
     );
     await user.type(
       await screen.findByRole("textbox", { name: "Search knowledge" }),
       "zzzz",
     );
-    expect(screen.getByText("No matching constellations")).toBeInTheDocument();
+    expect(screen.getByText("No stars match your search")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Reset filters" }));
     expect(
-      screen.queryByText("No matching constellations"),
+      screen.queryByText("No stars match your search"),
     ).not.toBeInTheDocument();
+  });
+  // The demo's sources read as a working sample, not a failed connection: its own provider is
+  // "Sample data", each sample says no account is connected, and a source with no time says so once.
+  it("names the demo's sources as a sample with no account connected", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("region", { name: "Knowledge constellation" });
+    const strip = screen.getByLabelText("Fictional per-source timestamps");
+    expect(strip).toHaveTextContent("Sample data");
+    expect(strip).toHaveTextContent("SAMPLE");
+    expect(strip).not.toHaveTextContent("DEMO");
+    await user.click(
+      screen.getByRole("button", { name: "Sources and settings" }),
+    );
+    const sources = await screen.findByRole("dialog", {
+      name: "Sources & settings",
+    });
+    const row = within(sources).getByText("Sample data").closest("div")!;
+    expect(row).toHaveTextContent("SAMPLE · NO ACCOUNT CONNECTED");
+    expect(row).toHaveTextContent(/Observed: /);
+    expect(sources).not.toHaveTextContent(/DISCONNECTED|AUTHORIZED/);
+    const garmin = within(sources).getByText("Garmin").closest("div")!;
+    expect(garmin).toHaveTextContent("NOT CONNECTED");
+    expect(garmin).toHaveTextContent("Observation time unavailable");
+    expect(garmin).not.toHaveTextContent("Observed:");
   });
   it("previews stale and error states, then recovers", async () => {
     withSampleHealth();
@@ -212,6 +237,10 @@ describe("primary journeys", () => {
     );
     await user.click(screen.getByRole("button", { name: "Close sources" }));
     expect(screen.getByText("Source unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Sample records couldn’t load")).toBeInTheDocument();
+    expect(screen.getByText("No stars in this preview")).toBeInTheDocument();
+    expect(screen.getByText("0 stars shown")).toBeInTheDocument();
+    expect(screen.queryByText("Select a star to explore")).toBeNull();
     await user.click(screen.getByRole("button", { name: "Retry demo" }));
     expect(screen.getByText("Demo reading")).toBeInTheDocument();
   });

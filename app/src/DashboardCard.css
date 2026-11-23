@@ -1,17 +1,68 @@
-/* A dashboard's card in a corner: the corner's label, then the page drawn in
-   card mode, filling what the stat card would. The whole card is one button. */
+/* A dashboard's card in a corner (the dashboard frame, docs/dev/design-system.md):
+   Rhythm draws the edge, the header with the title and the opening arrow, and
+   the freshness line; the author's page fills the room between them, drawn in
+   card mode and untouched. The whole card is one button. */
 .dashboard-card {
+  /* The header's and the footer's inset from the card's edge, and the
+     page's: the same on wide screens, the page's narrower on phones so an
+     author keeps their width. */
+  --card-inset: var(--ui-space-4);
+  --card-page-inset: var(--card-inset);
+  --card-gap: var(--ui-space-3);
   position: relative;
   height: 100%;
   min-height: 180px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  color: var(--ui-ink);
+  background: var(--ui-card);
+  border: 1px solid var(--ui-edge);
+  border-radius: var(--ui-radius-card);
+  overflow: hidden;
+  transition: border-color var(--ui-fast) var(--ui-ease);
+}
+.dashboard-card:has(.dashboard-card-open:hover) {
+  border-color: var(--ui-edge-strong);
+}
+.dashboard-card-head {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-2);
+  min-height: 54px;
+  padding: 0 var(--card-inset);
+  background: color-mix(in srgb, var(--ui-surface) 61%, transparent);
+  border-bottom: 1px solid var(--ui-divider);
+}
+.dashboard-card-name {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-width: 0;
+}
+.dashboard-card-head svg {
+  flex: none;
+  color: var(--ui-mint);
+}
+/* As its author wrote it, on one line. */
+.dashboard-card-title {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font:
+    650 var(--ui-text-title) / 1.28 var(--ui-display);
+  letter-spacing: -0.015em;
+  color: var(--ui-ink);
 }
 .dashboard-card-frame {
   flex: 1 1 auto;
+  align-self: stretch;
   min-height: 140px;
-  width: 100%;
+  width: auto;
+  margin: var(--card-gap) var(--card-page-inset);
   border: 0;
   background: transparent;
   color-scheme: dark;
@@ -22,29 +73,111 @@
 .dashboard-card-frame.drawn {
   opacity: 1;
 }
+/* A compact card keeps a corner short: its page has a corner's room (150 px,
+   as before the frame), and more only where its slot gives the card more. Its
+   header and footer sit a little closer to the page instead. */
+.dashboard-card.compact {
+  --card-gap: var(--ui-space-2);
+}
+.compact > .dashboard-card-frame {
+  height: 150px;
+  min-height: 0;
+}
+/* The existing freshness words, with any warning in amber beside them. */
 .dashboard-card-freshness {
   flex: none;
-  font-size: 12px;
-  color: #c5d3dc;
+  display: block;
+  padding: var(--ui-space-3) var(--card-inset);
+  border-top: 1px solid var(--ui-divider);
+  font-size: var(--ui-text-meta);
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-soft);
 }
+.dashboard-card-stale {
+  color: var(--ui-amber);
+}
+/* Opening, unavailable or missing: the message in soft, its first line in ink. */
 .dashboard-card-status {
+  flex: 1 1 auto;
   margin: 0;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #8fa5b2;
+  padding: var(--card-gap) var(--card-inset);
+  font-size: var(--ui-text-small);
+  line-height: 1.55;
+  color: var(--ui-soft);
+}
+.dashboard-card-status strong {
+  display: block;
+  margin-bottom: var(--ui-space-1);
+  font-weight: 600;
+  color: var(--ui-ink);
+}
+/* While the page draws: just under the header, over the room the page will
+   fill, so nothing moves when it appears. */
+.dashboard-card-wait {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  pointer-events: none;
 }
 .dashboard-card-open {
   position: absolute;
   inset: 0;
-  border-radius: 12px;
+  z-index: 1;
+  border-radius: inherit;
   background: transparent;
   cursor: pointer;
 }
 .dashboard-card-open:focus-visible {
-  outline: 1px solid #9ccfe0;
-  outline-offset: 4px;
+  outline: 3px solid var(--ui-focus);
+  outline-offset: -4px;
+}
+/* Wall displays (2200 px and wider, App.css's larger --z): the title and the
+   freshness line read across a room, the header and footer 24 px in from the
+   edge. The author's page keeps its own inset and width. */
+@media (min-width: 2200px) {
+  .dashboard-card {
+    --card-inset: var(--ui-space-6);
+    --card-page-inset: var(--ui-space-4);
+  }
+  .dashboard-card-title {
+    font-size: var(--ui-text-page);
+  }
+  .dashboard-card-freshness {
+    font-size: var(--ui-text-section);
+  }
+}
+/* Phones: the frame gives way before the author's page and the sky. A 40 px
+   header (the whole card is the touch target), a closer footer and gaps, and
+   an 8 px side inset for the page, so an author keeps their width. */
+@media (max-width: 760px), (max-height: 500px) {
+  .dashboard-card,
+  .dashboard-card.compact {
+    --card-inset: var(--ui-space-3);
+    --card-page-inset: var(--ui-space-2);
+    --card-gap: var(--ui-space-1);
+  }
+  .dashboard-card-head {
+    min-height: 40px;
+  }
+  /* The page gives way first, so the freshness line always shows. */
+  .dashboard-card-frame {
+    min-height: 0;
+  }
+  .dashboard-card-freshness {
+    padding-block: 6px;
+  }
+}
+/* Short phones, and phones on their side: the column is short, so the footer
+   keeps to less. */
+@media (max-height: 500px), (max-width: 760px) and (max-height: 700px) {
+  .dashboard-card-freshness {
+    padding-block: var(--ui-space-1);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
+  .dashboard-card,
   .dashboard-card-frame {
     transition: none;
   }

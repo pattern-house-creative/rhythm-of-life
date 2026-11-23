@@ -95,23 +95,23 @@
 .intensity-centre strong {
   font: 300 58px/1 "Manrope Variable";
   letter-spacing: -2.6px;
-  color: #e3eef0;
+  color: var(--ui-ink);
 }
 .intensity-centre span {
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .intensity-centre small {
   margin-top: 6px;
-  font-size: 8px;
-  letter-spacing: 1.6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #88bba9;
 }
 .intensity-centre em {
   font-style: normal;
-  font-size: 9px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
   margin-top: 2px;
 }
 .training-week {
@@ -129,14 +129,14 @@
   display: block;
   font: 300 36px/1 "Manrope Variable";
   letter-spacing: -1.4px;
-  color: #d7e5e9;
+  color: var(--ui-ink);
   white-space: nowrap;
 }
 .week-numbers span {
   display: block;
   margin-top: 8px;
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .week-dots {
   display: grid;
@@ -176,18 +176,18 @@
   border-color: #7bdcbb80;
 }
 .week-dots small {
-  font-size: 9px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .week-dots li.today small {
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .streak {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .streak svg {
   color: #c1a66d;
@@ -215,12 +215,12 @@
 }
 .load-head small {
   text-align: center;
-  font-size: 9px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .load-label {
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .load-row ol {
   display: grid;
@@ -293,23 +293,23 @@
   margin: 23px 0;
 }
 .load-dot b {
-  font: 600 10px "Manrope Variable";
+  font: 600 12px "Manrope Variable";
   color: #0e171e;
 }
 .load-day small {
-  font-size: 9px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .load-day.today small {
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .load-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 18px;
   margin: 10px 0 0 74px;
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .load-legend span {
   display: flex;
@@ -324,7 +324,7 @@
 }
 .load-legend .legend-size {
   margin-left: auto;
-  color: #718993;
+  color: var(--ui-faint);
 }
 
 /* Swim, bike, run. */
@@ -376,17 +376,17 @@
 .sport-line b {
   font-size: 13px;
   font-weight: 500;
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .sport-line span {
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .sport-line strong {
   margin-left: auto;
   font: 350 20px "Manrope Variable";
   letter-spacing: -0.5px;
-  color: #d7e5e9;
+  color: var(--ui-ink);
   white-space: nowrap;
 }
 .sport-track {
@@ -406,13 +406,13 @@
   );
 }
 .sport-main small {
-  font-size: 10px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .quiet-note {
   margin-top: 12px;
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 
 /* Workouts. */
@@ -446,24 +446,24 @@
 .workout-main header b {
   font-size: 14px;
   font-weight: 500;
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .workout-main header em {
   font-style: normal;
   font-weight: 400;
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .workout-main header small {
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .workout-stats {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 22px;
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .workout-stats span {
   display: flex;
@@ -477,7 +477,7 @@
 .workout-stats strong {
   font: 350 20px "Manrope Variable";
   letter-spacing: -0.5px;
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .effects {
   display: grid;
@@ -489,8 +489,8 @@
   grid-template-columns: 66px auto 26px minmax(0, 1fr);
   align-items: center;
   gap: 8px;
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .effect-bars {
   display: flex;
@@ -513,12 +513,12 @@
 }
 .effect > b {
   font: 400 12px "Manrope Variable";
-  color: #d7e5e9;
+  color: var(--ui-ink);
   text-align: right;
 }
 .effect small {
-  font-size: 10px;
-  color: #a4b9c4;
+  font-size: 12px;
+  color: var(--ui-faint);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -530,19 +530,19 @@
 }
 .workout-glucose p {
   margin-top: 6px;
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .workout-glucose b {
   font: 400 13px "Manrope Variable";
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .low-words {
   color: #eaa3ad;
 }
 .show-more {
   margin-top: 14px;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.4px;
   color: #88bba9;
   border: 1px solid #88bba933;
@@ -583,9 +583,9 @@
     display: none;
   }
   .load-label {
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0.4px;
-    color: #718993;
+    color: var(--ui-faint);
   }
   .load-legend {
     margin-left: 0;

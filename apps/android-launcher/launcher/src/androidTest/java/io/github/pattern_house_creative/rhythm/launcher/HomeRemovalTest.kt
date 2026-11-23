@@ -1,6 +1,7 @@
 package io.github.pattern_house_creative.rhythm.launcher
 
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
@@ -43,10 +44,28 @@ class HomeRemovalTest {
         rule.activityRule.scenario.recreate()
         assertEquals(pins.tiles.filterNot{it.key==preview.key},LauncherStore(context).load().tiles)
     }
+    @Test fun talkBackIsToldWhatActivatingATileOrAnEmptyDockSlotDoes(){
+        val app=saved.tiles.first{it.kind==TileKind.APP}
+        val preview=Tile(TileKind.PREVIEW,"synthetic-label-preview")
+        store.save(HomeLayout(listOf(app,preview),saved.dock.filter{it.kind==TileKind.APP}.take(5)));rule.activityRule.scenario.recreate()
+        fun label(tag:String)=rule.onNodeWithTag(tag).fetchSemanticsNode().config[SemanticsActions.OnClick].label
+        assertTrue(label("tile:${app.key}")!!.startsWith("Open "))
+        assertEquals("Open dashboard",label("tile:${preview.key}"))
+        val slot=rule.onNodeWithTag("dock-slot:5").fetchSemanticsNode().config
+        assertEquals(listOf("Empty dock slot 6"),slot[SemanticsProperties.ContentDescription])
+        assertEquals("Open apps",slot[SemanticsActions.OnClick].label)
+        // While Home is edited, a tap opens the tile's Home options, and that is what it says.
+        rule.onNodeWithContentDescription("Settings").performClick()
+        rule.onNodeWithText("Edit Home").performClick()
+        assertTrue(label("tile:${app.key}")!!.startsWith("Edit "))
+        assertEquals("Edit Dashboard",label("tile:${preview.key}"))
+        rule.onNodeWithTag("tile:${app.key}").performClick()
+        rule.onNodeWithTag("tile-actions").assertExists()
+    }
     @Test fun holdReleaseMenuAndDirectAccessibilityRemovalDoNotDeleteOrUndock(){
         val app=saved.tiles.first{it.kind==TileKind.APP}
         rule.onNodeWithTag("tile:${app.key}").performTouchInput{longClick()}
-        rule.onNodeWithText("−  Remove from Home").assertIsDisplayed().performClick()
+        rule.onNodeWithText("Remove from Home").assertIsDisplayed().performClick()
         assertFalse(store.load().tiles.any{it.key==app.key});assertEquals(saved.dock,store.load().dock)
         val component=android.content.ComponentName.unflattenFromString(app.target)!!
         assertNotNull(context.packageManager.getActivityInfo(component,0))

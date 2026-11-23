@@ -121,9 +121,14 @@ export function launcherSummary(
       };
     }
   }
+  // A dashboard that declares no feeds has nothing unavailable; one whose declared feeds all
+  // failed says so.
   return {
     kind: "fallback",
-    label: available.length ? "Dashboard" : "Sources unavailable",
+    label:
+      available.length || !dashboard.feeds.length
+        ? "Dashboard"
+        : "Dashboard data unavailable",
     value: "Open for details",
     detail:
       short(dashboard.description, 140) ||

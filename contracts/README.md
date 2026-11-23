@@ -244,7 +244,7 @@ yet.
 | retrieval | `get_related_resources` | R | core | links in both directions with evidence and status |
 | memory | `get_prompt_capsule` | R | `memory.capsules` on | one scope's core or project prompt capsule and its strong ETag (`kind`, `project_id`, `workspace`, `if_none_match`) |
 | memory | `remember` | W | `memory.tools` on | save one memory, always a draft, in the caller's own scope unless `workspace` names one |
-| memory | `append` | W | `memory.tools` on | add a dated update to a memory; the text before kept as a version |
+| memory | `append` | W | `memory.tools` on | add a dated update and keep the previous version. If an agent's work-item text would exceed 32 KiB including the dated prefix, `work_summary_required` leaves the ticket untouched. Read it with `get`, combine its current facts and the pending update into a concise `content`, then `update` with the revision read. A conflict requires reconciling the latest version. |
 | memory | `update` | W | `memory.tools` on | replace a memory's text, tags or fields; capsule tags refused |
 | memory | `get` | R | `memory.tools` on | one memory whole, or one of its states by `version`; a held one without its words |
 | memory | `list_recent` | R | `memory.tools` on | memories newest first with filters and a cursor, or with `in_trash` the trash the caller may restore (and, to an AI client, what a disconnect moved there, reason `disconnect`, which only a person restores) |
@@ -427,14 +427,19 @@ Memory tools (SB-P3-09, `docs/dev/memory.md` sections 5 to 7; upstream's names a
   `claim_id`) on every channel, and `done` or `cancelled` with it ends the claim (`claim_ended`); type, priority and
   assignee stay free to change. Another session's claim is refused `claimed`, naming its label and when it ends; an
   item `done` or `cancelled` is not claimed (`invalid`); a claim on one in `backlog` or `ready` moves it to `active`,
-  a change of the memory as any other. `release_work` (`id`, `claim_id`; `mcp/release_work.output.schema.json`) ends
+  a change of the memory as any other. A check an install adds to the database, such as a household trigger that
+  guards T3 pickup claims, refuses with a bare `RAISE EXCEPTION` (SQLSTATE `P0001`): the whole call rolls back and is
+  refused `refused`, its `error` the check's own words, never `unavailable`, which says only that the store did not
+  answer. A pickup guard refuses an item that still names an assignee, the claiming session's own included: clear it
+  (`update_work`, `clear: ["assignee"]`) and claim again. `release_work` (`id`, `claim_id`; `mcp/release_work.output.schema.json`) ends
   the caller's claim (`released`: its label and times), or answers `unchanged` with none live; another's is refused
   (`claimed`), and a person releases any claim from the app (`app_memories` op `release_claim`). A claim is no
   version: it moves no revision, `undo` neither makes nor ends one, and no export carries it; history notes each claim
   made and ended (`work_claimed`, `work_released`), which moves no revision. `list_work` names each item's `assignee`
   (`{kind: person|agent, name}`, or null) and its live `claim` (`label`, `claimed_at`, `expires_at`, or null; never
   its id), and filters by `assignee` (exact) and `claimed` (`true`, `false`); `get` names both on `work`. Fixtures
-  `claim_work.example.json`, `claim_work.refused.example.json` and `release_work.example.json`.
+  `claim_work.example.json`, `claim_work.refused.example.json`, `claim_work.guarded.example.json` and
+  `release_work.example.json`.
 - `create_work`, `list_work` and `update_work` (migration 079) are made and listed only with `memory.work` on beside
   `memory.tools`, off by default: off, absent or empty (every `rhythm.yaml` written before it), or with `memory.tools`
   off, none exists, a call naming one is answered as a call naming no tool, and no memory has work properties. A work
@@ -998,7 +1003,8 @@ Memory tools (SB-P3-09, `docs/dev/memory.md` sections 5 to 7; upstream's names a
   `conflict`, the oldest kept for `pruned`) or `known_projects` (for `unknown_project`, up to 10, with `notice`). Codes: `unknown` (no
   memory the caller reads by that id: one in another scope, one in the trash and one that never was answer alike),
   `forbidden`, `invalid`, `too_large`, `conflict`, `key_reused`, `unknown_project`, `taken`, `nothing_to_undo`,
-  `no_version`, `not_visible`, `pruned`, `moved`, `unavailable` (the store did not answer), `off` (a tool called
+  `no_version`, `not_visible`, `pruned`, `moved`, `unavailable` (the store did not answer), `refused` (a check the
+  install added to the database refused the change on purpose, `error` its own words; nothing was changed), `off` (a tool called
   while `memory.tools` is off, or `share` while `memory.share` is) and a share's `scopes_off` (`memory.scopes` is off),
   `held` (a memory held for review, shared only once a person releases it) and `no_author` (a Family memory no person
   wrote, which stays in Family), and a supersede's `held`, `retracted` (a memory marked wrong) and `protected` (a

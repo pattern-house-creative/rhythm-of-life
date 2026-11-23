@@ -1,4 +1,5 @@
 import {
+  act,
   createEvent,
   fireEvent,
   render,
@@ -32,6 +33,48 @@ const controller = (page: GraphPage): KnowledgeController => ({
   },
 });
 
+// A still sky places its names again once the webfonts are in: a pass made with the fallback
+// font's widths would otherwise stay, and two names could touch.
+it("places a still sky's names again once the webfonts have loaded", async () => {
+  let loaded!: () => void;
+  const ready = new Promise<void>((resolve) => (loaded = resolve));
+  Object.defineProperty(document, "fonts", {
+    configurable: true,
+    value: { ready },
+  });
+  try {
+    const a = record("fictional-a"),
+      b = record("fictional-b");
+    const { container } = render(
+      <Constellation
+        nodes={[a, b]}
+        edges={[relation(a, b)]}
+        selected={null}
+        onSelect={vi.fn()}
+        interactive={false}
+        healthFocus={false}
+        paused
+      />,
+    );
+    const names = () =>
+      [...container.querySelectorAll(".graph-label text")].filter((t) =>
+        t.hasAttribute("data-collision"),
+      ).length;
+    // The first pass has placed (or hidden) each name.
+    expect(names()).toBeGreaterThan(0);
+    for (const t of container.querySelectorAll(".graph-label text"))
+      t.removeAttribute("data-collision");
+    expect(names()).toBe(0);
+    await act(async () => {
+      loaded();
+      await ready;
+    });
+    expect(names()).toBeGreaterThan(0);
+  } finally {
+    delete (document as { fonts?: unknown }).fonts;
+  }
+});
+
 it("distinguishes a loading graph from an unavailable or empty one", () => {
   const common = {
     nodes: [],
@@ -46,14 +89,14 @@ it("distinguishes a loading graph from an unavailable or empty one", () => {
   const { rerender } = render(
     <Constellation {...common} emptyMessage={unavailable} loading />,
   );
-  expect(screen.getByText("Loading knowledge")).toBeInTheDocument();
-  expect(screen.queryByText("Knowledge unavailable")).not.toBeInTheDocument();
+  expect(screen.getByText("Loading the sky")).toBeInTheDocument();
+  expect(screen.queryByText("Sky unavailable")).not.toBeInTheDocument();
   expect(screen.queryByText(unavailable)).not.toBeInTheDocument();
   rerender(<Constellation {...common} emptyMessage={unavailable} />);
-  expect(screen.getByText("Knowledge unavailable")).toBeInTheDocument();
+  expect(screen.getByText("Sky unavailable")).toBeInTheDocument();
   expect(screen.getByText(unavailable)).toBeInTheDocument();
   rerender(<Constellation {...common} />);
-  expect(screen.getByText("No matching constellations")).toBeInTheDocument();
+  expect(screen.getByText("No stars match your search")).toBeInTheDocument();
 });
 
 it.each(["pointer", "keyboard"] as const)(
@@ -294,10 +337,19 @@ it("shows long record titles as short labels while keeping the full title availa
     part("graph-hit").querySelector(".node-hit")?.getAttribute("r"),
   );
   expect(r * k).toBeCloseTo(Math.max(22, 9 * k), 6);
-  // Label text and its outline are 13px and 3px on screen at the same zoom.
+  // Label text and its outline are 13px and 3px on screen at the same zoom;
+  // the selected record's name comes forward a size up.
   const text = part("graph-label").querySelector("text") as SVGTextElement;
-  expect(parseFloat(text.style.fontSize) * k).toBeCloseTo(13, 6);
+  expect(parseFloat(text.style.fontSize) * k).toBeCloseTo(13 * 1.12, 6);
   expect(parseFloat(text.style.strokeWidth) * k).toBeCloseTo(3, 6);
+  expect(part("graph-label")).toHaveClass("is-selected");
+  const other = [
+    ...container.querySelectorAll<SVGGElement>(".graph-label"),
+  ].find((g) => g.dataset.id === b.id)!;
+  expect(other).not.toHaveClass("is-selected");
+  expect(
+    parseFloat(other.querySelector("text")!.style.fontSize) * k,
+  ).toBeCloseTo(13, 6);
 });
 
 it("captions folder groups but not groups already named by a theme star", () => {

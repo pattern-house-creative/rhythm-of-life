@@ -545,7 +545,7 @@ describe.each(["phone", "desktop"] as const)("at a %s's size", (size) => {
       "1",
     );
     await userEvent.selectOptions(
-      within(filters).getByLabelText("Project"),
+      within(filters).getByLabelText("Collection"),
       "shared:wendle",
     );
     await waitFor(() =>

@@ -28,20 +28,24 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  padding: 12px 0 8px;
+  padding: 0 0 8px;
   overflow: hidden;
 }
 .native-part[data-fold] .tile-button {
   height: auto;
-  padding: 10px 0 6px;
+  padding: 0 0 6px;
 }
 .native-part .section-label {
   flex: none;
-  font-size: 8px;
-  letter-spacing: 1.4px;
 }
 .native-part :is(.spark-axis, .quiet-copy, .tile-footer) {
   display: none;
+}
+/* Glucose's trend in words shows with its reading, in any cell. */
+.native-part.part-glucose .quiet-copy {
+  display: block;
+  grid-column: 1 / -1;
+  margin-top: 4px;
 }
 .native-part .tile-footer {
   margin-top: auto;
@@ -157,14 +161,14 @@
 }
 .native-part .recovery-pair {
   gap: 16px;
-  font-size: 8px;
+  font-size: 12px;
 }
 .native-part .recovery-pair b {
   font-size: clamp(15px, 9cqh, 20px);
   margin-top: 4px;
 }
 .native-part .recovery-pair small {
-  font-size: 8px;
+  font-size: 12px;
 }
 .native-part .recovery-pair svg {
   display: none;
@@ -186,7 +190,7 @@
 
 /* Training: the latest activity, the week, the steps. */
 .native-part .workout-title {
-  font-size: 11px;
+  font-size: 12px;
   margin: 8px 0 2px;
 }
 .native-part .run-value {
@@ -196,7 +200,7 @@
 .native-part .run-value > span {
   display: block;
   margin: 4px 0 0;
-  font-size: 9px;
+  font-size: 12px;
 }
 .native-part .week-activity {
   display: none;
@@ -223,9 +227,9 @@
 .dashboard-zone .part-quiet {
   display: block;
   margin-top: 12px;
-  font-size: 11px;
+  font-size: var(--ui-text-meta);
   line-height: 1.6;
-  color: #7d949e;
+  color: var(--ui-faint);
 }
 .part-quiet .part-again {
   margin-left: 6px;
@@ -245,17 +249,17 @@
 .native-part:is(.part-changed, .part-insights) {
   display: flex;
   flex-direction: column;
-  padding-top: 14px;
-  border-top: 1px solid #90b9c523;
+  padding-top: 0;
+  border-top: 1px solid var(--ui-divider);
 }
 /* Nothing squeezes: what doesn’t fit runs out of the cell’s bottom. */
 .native-part:is(.part-changed, .part-insights) > * {
   flex-shrink: 0;
 }
 .native-part.part-insights > p {
-  font-size: 11px;
-  line-height: 1.9;
-  color: #8da1ac;
+  font-size: var(--ui-text-meta);
+  line-height: 1.7;
+  color: var(--ui-soft);
 }
 .native-part:is(.part-changed, .part-insights)[data-fold] {
   padding-bottom: 10px;
@@ -263,7 +267,7 @@
 .native-part.part-changed h2 {
   font-size: clamp(17px, 10cqh, 23px);
   max-width: none;
-  margin: 12px 0 8px;
+  margin: 4px 0 8px;
   -webkit-line-clamp: 2;
   line-clamp: 2;
 }
@@ -299,7 +303,7 @@
 .native-part .insight-corner-title {
   font-size: clamp(17px, 10cqh, 23px);
   max-width: none;
-  margin: 12px 0 8px;
+  margin: 4px 0 8px;
   -webkit-line-clamp: 2;
   line-clamp: 2;
 }
@@ -347,8 +351,6 @@
 }
 .native-part .dashboard-card {
   min-height: 0;
-  gap: 8px;
-  padding-top: 12px;
 }
 .native-part .dashboard-card-frame {
   min-height: 0;
@@ -369,7 +371,7 @@
   padding: 0 12px;
 }
 .native-part.part-map .graph-heading > span:last-child {
-  font-size: 8px;
+  font-size: 11px;
 }
 .native-part.part-map .map-focus {
   min-width: 0;
@@ -396,19 +398,32 @@
 .map-actions button {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 28px;
-  padding: 4px 12px;
-  border: 1px solid #779eb540;
-  border-radius: 14px;
-  background: #0f1920cc;
-  font-size: 10px;
-  color: #b1c1cd;
+  gap: var(--ui-space-2);
+  min-height: 36px;
+  padding: 0 var(--ui-space-3);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  background: color-mix(in srgb, var(--ui-surface) 88%, transparent);
+  font-size: var(--ui-text-meta);
+  color: var(--ui-soft);
+  transition:
+    border-color var(--ui-fast) var(--ui-ease),
+    color var(--ui-fast) var(--ui-ease);
 }
 .map-actions button:hover,
 .map-actions button:focus-visible {
-  border-color: #9ccfe066;
-  color: #dce3e8;
+  border-color: var(--ui-edge-strong);
+  color: var(--ui-ink);
+}
+@media (any-pointer: coarse) {
+  .map-actions button {
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-actions button {
+    transition: none;
+  }
 }
 /* Folded, the sky holds still: a vertical swipe on it scrolls the column. It
    outweighs App.css's touch-action: none for a sky that isn't interactive,

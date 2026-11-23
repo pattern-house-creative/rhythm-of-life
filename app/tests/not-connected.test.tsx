@@ -38,9 +38,9 @@ it("leaves sources the household doesn't use off the home screen, and lists them
   // The main slot says, once and quietly, that a dashboard can live there.
   const hint = await screen.findByText(/A dashboard can live here/);
   expect(hint).toHaveTextContent("Ask your AI to build one");
-  expect(screen.queryByRole("button", { name: /^GLUCOSE/ })).toBeNull();
-  expect(screen.queryByRole("button", { name: /^RECOVERY/ })).toBeNull();
-  expect(screen.queryByRole("button", { name: /^TRAINING/ })).toBeNull();
+  expect(screen.queryByRole("button", { name: /^Glucose/ })).toBeNull();
+  expect(screen.queryByRole("button", { name: /^Recovery/ })).toBeNull();
+  expect(screen.queryByRole("button", { name: /^Training/ })).toBeNull();
   expect(screen.queryByText("Not connected")).toBeNull();
   expect(screen.queryByText("NOT CONNECTED")).toBeNull();
   // Their corners give their room to the tiles beside them.
@@ -75,21 +75,21 @@ it("waits for Garmin's part before showing its tiles", async () => {
   });
   render(<App />);
   // A connected glucose source that fails still shows, as unavailable.
-  expect(await tile(/^GLUCOSE/)).toHaveTextContent("Source unavailable");
-  expect(screen.queryByRole("button", { name: /^RECOVERY/ })).toBeNull();
-  expect(screen.queryByRole("button", { name: /^TRAINING/ })).toBeNull();
+  expect(await tile(/^Glucose/)).toHaveTextContent("Source unavailable");
+  expect(screen.queryByRole("button", { name: /^Recovery/ })).toBeNull();
+  expect(screen.queryByRole("button", { name: /^Training/ })).toBeNull();
 });
 
 it("keeps Source unavailable for a connected source that fails", async () => {
   withEngine({ tools: allAppTools });
   routes();
   render(<App />);
-  const glucose = await tile(/^GLUCOSE/);
+  const glucose = await tile(/^Glucose/);
   expect(await within(glucose).findByText("Source unavailable")).toBeVisible();
-  const recovery = await tile(/^RECOVERY/);
+  const recovery = await tile(/^Recovery/);
   expect(recovery).toHaveTextContent(/Source unavailable/);
-  expect(await tile(/^TRAINING/)).toHaveTextContent("Activity unavailable");
-  for (const name of [/^GLUCOSE/, /^RECOVERY/, /^TRAINING/])
+  expect(await tile(/^Training/)).toHaveTextContent("Activity unavailable");
+  for (const name of [/^Glucose/, /^Recovery/, /^Training/])
     expect(await tile(name)).not.toHaveTextContent("Not connected");
 });
 

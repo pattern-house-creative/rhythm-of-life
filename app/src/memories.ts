@@ -172,6 +172,7 @@ export interface TrashedMemory {
 // A project as the registry holds it (SB-P3-07, SB-P6-01). What an engine from before the project writes sends none of: no
 // description, no author and no revision, so no change names a revision it read.
 export interface MemoryProject {
+  showInProjects?: boolean;
   id: string;
   slug: string;
   name: string;
@@ -1173,10 +1174,28 @@ const shapes: Record<MemoryOp, [string[], string[]]> = {
   delete_all: [["memories"], []],
   // A share of several, which the engine takes only with memory.share on, as one (the facade checks its listing).
   share_all: [["memories"], ["scope"]],
-  project_create: [["name"], ["slug", "description", "aliases", "scope"]],
+  project_create: [
+    ["name"],
+    [
+      "slug",
+      "description",
+      "aliases",
+      "scope",
+      "showInProjects",
+      "id",
+      "expected",
+    ],
+  ],
   project_update: [
     ["id"],
-    ["name", "description", "aliases", "archived", "expected"],
+    [
+      "name",
+      "description",
+      "aliases",
+      "archived",
+      "showInProjects",
+      "expected",
+    ],
   ],
   project_delete: [["id"], ["expected"]],
   // A person's review queues (SB-P6-01): how many wait, the lists, an insight's history, a review, and one resolve.
@@ -1443,6 +1462,7 @@ const checks: Record<string, (v: unknown, op: string) => boolean> = {
   workType: (v) => one(v, workTypes),
   workPriority: (v) => count(v, 0, 4),
   project: (v) => text(v, 64),
+  showInProjects: (v) => typeof v === "boolean",
   archived: (v) => typeof v === "boolean",
   content: (v) => text(v, maxMemoryBytes),
   text: (v) => text(v, maxMemoryBytes),
@@ -1530,6 +1550,11 @@ export function memoryRequest(body: unknown): Record<string, unknown> | null {
     (body.capsule === "none") === Object.hasOwn(body, "slot")
   )
     return null;
+  if (
+    op === "project_create" &&
+    Object.hasOwn(body, "id") !== Object.hasOwn(body, "expected")
+  )
+    return null;
   // A capsule's status names core, or project with its project.
   if (
     op === "capsule_status" &&
@@ -1560,8 +1585,8 @@ export function memoryRequest(body: unknown): Record<string, unknown> | null {
   // A project's change names at least one thing to change.
   if (
     op === "project_update" &&
-    !["name", "description", "aliases", "archived"].some((n) =>
-      Object.hasOwn(body, n),
+    !["name", "description", "aliases", "archived", "showInProjects"].some(
+      (n) => Object.hasOwn(body, n),
     )
   )
     return null;
@@ -1829,6 +1854,9 @@ function cleanProject(v: unknown): MemoryProject | null {
     owner: v.owner,
     aliases: [...v.aliases],
     status: v.status as string,
+    ...(typeof v.showInProjects === "boolean"
+      ? { showInProjects: v.showInProjects }
+      : {}),
     description,
     author,
     revision,
@@ -2920,6 +2948,9 @@ const codes = [
   "not_due",
   // A work item another session's claim holds (migration 081): the store's answer to a change of its state without that claim.
   "claimed",
+  // A check the install added to the database (a bare RAISE EXCEPTION, such as a pickup guard) refused the change on purpose,
+  // in its own words: no outage.
+  "refused",
 ];
 
 // A person's review queues' answers (SB-P6-01), each in the contract's shape; null when one doesn't check out.
@@ -4172,7 +4203,7 @@ export const holdWhy: Record<HoldReason, string> = {
   burst:
     "it came in a burst of writes from one AI client, faster than a person works",
   held_project:
-    "it is in a project that a memory held for review made, which no person has let in yet",
+    "it is in a collection that a memory held for review made, which no person has let in yet",
 };
 
 // A capsule slot in a person's words.

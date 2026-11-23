@@ -48,7 +48,7 @@ export function InsightsPart({
       <div className="section-label">
         <span>
           <Lightbulb size={14} />
-          DAILY INSIGHTS
+          Daily insights
         </span>
       </div>
       {!earlier && <p>Nothing yet</p>}

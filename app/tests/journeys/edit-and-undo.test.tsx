@@ -147,10 +147,12 @@ journey("changing a memory and taking it back", () => {
       }),
     );
     await user.click(
-      await within(region).findByRole("button", { name: /Project and tags/ }),
+      await within(region).findByRole("button", {
+        name: /Collection and tags/,
+      }),
     );
     await user.selectOptions(
-      await within(region).findByLabelText("Project"),
+      await within(region).findByLabelText("Collection"),
       made.project.slug,
     );
     await user.click(within(region).getByRole("button", { name: "Save" }));

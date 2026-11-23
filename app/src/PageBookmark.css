@@ -2,16 +2,16 @@
 .page-bookmark {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 13px;
-  color: #c9dbe1;
+  gap: var(--ui-space-2);
+  font-size: var(--ui-text-small);
+  color: var(--ui-soft);
 }
 .page-bookmark summary {
-  min-height: 32px;
+  min-height: 36px;
   display: flex;
   align-items: center;
-  font-size: 12px;
-  color: #a8cddc;
+  font-size: var(--ui-text-small);
+  color: var(--ui-mint);
   cursor: pointer;
 }
 .page-bookmark[open] > :not(summary) {
@@ -20,19 +20,19 @@
 .page-bookmark-link {
   display: inline-flex;
   align-items: center;
-  min-height: 32px;
-  padding: 0 12px;
-  border-radius: 16px;
-  color: #0b1418;
-  background: #a6dccd;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 18px;
+  color: var(--ui-sky);
+  background: var(--ui-mint);
   font-weight: 600;
   text-decoration: none;
   cursor: grab;
 }
 .page-bookmark-hint {
-  font-size: 12px;
+  font-size: var(--ui-text-meta);
   line-height: 1.5;
-  color: #8fa5b2;
+  color: var(--ui-faint);
 }
 .page-bookmark-row {
   display: flex;
@@ -46,19 +46,20 @@
 }
 .page-bookmark summary:focus-visible,
 .page-bookmark-code:focus-visible {
-  outline: 2px solid #95d2d9;
+  outline: var(--ui-focus-ring);
   outline-offset: 1px;
 }
 .page-bookmark-row button {
   min-height: 36px;
-  padding: 0 12px;
+  padding: 0 14px;
   border-radius: 18px;
-  font-size: 12px;
-  color: #c9e2ea;
-  background: #accde414;
+  font-size: var(--ui-text-small);
+  color: var(--ui-ink);
+  background: var(--ui-raised);
+  transition: background-color var(--ui-fast) var(--ui-ease);
 }
 .page-bookmark-row button:hover {
-  background: #accde426;
+  background: color-mix(in srgb, var(--ui-raised) 70%, var(--ui-edge));
 }
 .page-bookmark-code {
   width: 100%;
@@ -66,10 +67,10 @@
   font:
     12px/1.4 ui-monospace,
     monospace;
-  color: #c9dbe1;
-  background: #0a1217cc;
-  border: 1px solid #93b4c333;
-  border-radius: 10px;
+  color: var(--ui-soft);
+  background: var(--ui-sky);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-panel);
   overflow-wrap: anywhere;
   resize: none;
 }
@@ -78,9 +79,14 @@
   .page-bookmark summary,
   .page-bookmark-link,
   .page-bookmark-row button {
-    min-height: 40px;
+    min-height: 44px;
   }
   .page-bookmark-code {
     font-size: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-bookmark-row button {
+    transition: none;
   }
 }

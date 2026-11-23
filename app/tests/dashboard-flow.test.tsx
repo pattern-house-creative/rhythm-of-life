@@ -14,7 +14,7 @@ it("shows the demo's dashboard as a star, lists it on the stars it reads, and op
   const user = userEvent.setup();
   render(<App />);
   await user.click(
-    await screen.findByRole("button", { name: "Enter constellation" }),
+    await screen.findByRole("button", { name: "Open Explorer" }),
   );
   const explorer = await screen.findByRole("region", {
     name: "Knowledge explorer",
@@ -83,15 +83,17 @@ it("shows the demo's dashboard as a star, lists it on the stars it reads, and op
   expect(pill).toHaveTextContent(/^Version 2latest· Oct 18$/);
   expect(pill).toHaveAttribute("aria-expanded", "false");
   expect(
-    await within(reader).findByText(/Read from the engine just now · all 4 feeds/),
+    await within(reader).findByText(/Data read just now · all 4 feeds/),
   ).toBeInTheDocument();
   // On a phone that line folds to one row, which unfolds the rest in place.
   const summary = within(reader).getByRole("button", {
-    name: /^Read just now/,
+    name: /^Data read just now/,
   });
   expect(summary).toHaveAttribute("aria-expanded", "false");
   const details = document.getElementById(summary.getAttribute("aria-controls")!);
-  expect(details).toHaveTextContent(/Read from the engine just now/);
+  expect(details).toHaveTextContent(/Data read just now/);
+  // Beside it, when the measurements were recorded, named by feed.
+  expect(details).toHaveTextContent(/^workouts recorded .+\. Data read just now/);
   const allow = within(reader).getByRole("switch", { name: "Allow edits" });
   expect(allow).toHaveAttribute("aria-checked", "false");
   expect(details).not.toContainElement(allow);

@@ -1108,7 +1108,7 @@ describe.each(["phone", "desktop"] as const)(
       expect(fake.live.get(uuid(11))!.memory.held).toBeNull();
     });
 
-    it("puts a memory into a capsule slot of its scope's or its project's capsule, and takes it out", async () => {
+    it("puts a memory into a capsule slot of its scope's or its collection’s capsule, and takes it out", async () => {
       at(size);
       const fake = engine([
         memory(21, "DEMO: the household gardens at the Wendle plot.", {
@@ -1130,7 +1130,7 @@ describe.each(["phone", "desktop"] as const)(
       ).toBeInTheDocument();
       expect(
         within(pick).getByRole("group", {
-          name: "wendle-plot project's capsule",
+          name: "wendle-plot collection’s capsule",
         }),
       ).toBeInTheDocument();
       fireEvent.change(pick, { target: { value: "core:identity" } });
@@ -1157,7 +1157,7 @@ describe.each(["phone", "desktop"] as const)(
       await waitFor(() =>
         expect(
           within(region).getByText(
-            "In the wendle-plot project's capsule as decisions",
+            "In the wendle-plot collection’s capsule as decisions",
           ),
         ).toBeInTheDocument(),
       );
@@ -1190,7 +1190,7 @@ describe.each(["phone", "desktop"] as const)(
       );
       const draft = await within(region).findByLabelText("Capsule slot");
       expect(
-        within(draft).queryByRole("group", { name: /project's capsule/ }),
+        within(draft).queryByRole("group", { name: /collection’s capsule/ }),
       ).not.toBeInTheDocument();
       fireEvent.change(draft, { target: { value: "core:preferences" } });
       expect(
@@ -1264,7 +1264,7 @@ describe.each(["phone", "desktop"] as const)(
       expect(queue).not.toHaveTextContent("ignore-previous-instructions");
       expect(queue).not.toHaveTextContent("#bins");
       const planted = within(queue)
-        .getByText(/in a project that a memory held for review made/)
+        .getByText(/in a collection that a memory held for review made/)
         .closest("li")!;
       // A client that calls itself the terminal is still shown as an AI client.
       expect(planted).toHaveTextContent("from an AI client (the terminal)");
@@ -1278,12 +1278,12 @@ describe.each(["phone", "desktop"] as const)(
       );
       expect(
         await within(planted).findByText(
-          "Project ignore-previous-instructions · #rota[U+200B]",
+          "Collection ignore-previous-instructions · #rota[U+200B]",
         ),
       ).toBeInTheDocument();
       expect(
         within(planted).getByText(
-          /Releasing it lets the project ignore-previous-instructions into every list too/,
+          /Releasing it lets the collection ignore-previous-instructions into every list too/,
         ),
       ).toBeInTheDocument();
       expect(
@@ -1293,7 +1293,7 @@ describe.each(["phone", "desktop"] as const)(
         within(burst).getByRole("button", { name: "Read it" }),
       );
       expect(await within(burst).findByText("#bins")).toBeInTheDocument();
-      expect(burst).not.toHaveTextContent(/Releasing it lets the project/);
+      expect(burst).not.toHaveTextContent(/Releasing it lets the collection/);
     });
 
     it("lets no more be chosen than one release takes, and says so", async () => {
@@ -1503,7 +1503,9 @@ describe.each(["phone", "desktop"] as const)(
       const confirm = within(region).getByRole("group", {
         name: "Share it with Family?",
       });
-      expect(confirm).toHaveTextContent("Every member reads it from now on");
+      expect(confirm).toHaveTextContent(
+        "Share it with Family? Family members will be able to read this memory and see its author. Its earlier history stays private to the author. The author or a Family admin can make it private again.",
+      );
       await userEvent.click(
         within(confirm).getByRole("button", { name: "Keep it private" }),
       );
@@ -1516,7 +1518,7 @@ describe.each(["phone", "desktop"] as const)(
       );
       expect(
         await within(region).findByText(
-          "Shared with Family: every member reads it now, with its author. It left its capsule slot.",
+          "Shared with Family. Family members can read it now and see its author. It left its capsule slot.",
         ),
       ).toBeInTheDocument();
       expect(fake.asked("share")[0]).toEqual({
@@ -1538,15 +1540,17 @@ describe.each(["phone", "desktop"] as const)(
       );
       expect(
         within(region).getByRole("group", {
-          name: "Take it back from Family?",
+          name: "Make this memory private?",
         }),
-      ).toHaveTextContent("Take it back to Alex's own memories?");
+      ).toHaveTextContent(
+        "Make this memory private to Alex? It will disappear from Family. The author or a Family admin can do this.",
+      );
       fake.refuseNext(
         "forbidden",
         "Only this memory's author or a Family admin may change it",
       );
       await userEvent.click(
-        within(region).getByRole("button", { name: "Take it back" }),
+        within(region).getByRole("button", { name: "Make private" }),
       );
       expect(await within(region).findByRole("status")).toHaveTextContent(
         "Only this memory's author or a Family admin may change it",
@@ -1555,11 +1559,11 @@ describe.each(["phone", "desktop"] as const)(
         within(region).getByRole("button", { name: "Make private…" }),
       );
       await userEvent.click(
-        within(region).getByRole("button", { name: "Take it back" }),
+        within(region).getByRole("button", { name: "Make private" }),
       );
       expect(
         await within(region).findByText(
-          "Taken back to Alex's own memories: Family's members no longer read it.",
+          "Made private to Alex. Family members can no longer read it.",
         ),
       ).toBeInTheDocument();
       expect(fake.asked("share")[2]).toEqual({
@@ -1643,8 +1647,9 @@ describe.each(["phone", "desktop"] as const)(
       at(size);
       const fake = engine(seed());
       const { region } = await opened(fake);
+      // The row's time stands on its own (the list's right edge); its metadata says the rest.
       expect(await item(region, /on Tuesdays/)).toHaveTextContent(
-        /Confirmed · Family · .* · replaced$/,
+        /Confirmed · Family · replaced$/,
       );
       expect(await item(region, /ferry ran until October/)).toHaveTextContent(
         / · ended$/,
@@ -1657,7 +1662,7 @@ describe.each(["phone", "desktop"] as const)(
       );
       // Marked wrong: its status says so already.
       expect(await item(region, /hall is booked/)).toHaveTextContent(
-        /^.*Marked wrong · Family · [^·]+$/,
+        /^.*Marked wrong · Family$/,
       );
 
       // Replaced: no longer true, and the way to what replaced it.
@@ -1760,9 +1765,24 @@ describe.each(["phone", "desktop"] as const)(
       const fake = engine(seed().slice(0, 2));
       const plain = fake.client.call;
       const cascades: Record<string, Record<string, string[]>> = {
-        status: { reopened: [uuid(1)], reclosed: [], flagged: [uuid(4), uuid(6)], unflagged: [] },
-        forget: { reopened: [uuid(1)], reclosed: [], flagged: [], unflagged: [] },
-        restore: { reopened: [], reclosed: [uuid(1)], flagged: [], unflagged: [uuid(4)] },
+        status: {
+          reopened: [uuid(1)],
+          reclosed: [],
+          flagged: [uuid(4), uuid(6)],
+          unflagged: [],
+        },
+        forget: {
+          reopened: [uuid(1)],
+          reclosed: [],
+          flagged: [],
+          unflagged: [],
+        },
+        restore: {
+          reopened: [],
+          reclosed: [uuid(1)],
+          flagged: [],
+          unflagged: [uuid(4)],
+        },
       };
       let cascading = false;
       fake.client.call = vi.fn(async (request: Record<string, unknown>) => {
@@ -1807,7 +1827,9 @@ describe.each(["phone", "desktop"] as const)(
         // Its Undo button follows the words.
         /unless you bring it back\. 1 memory it had replaced is current again\.Undo$/,
       );
-      await userEvent.click(within(region).getByRole("button", { name: "Undo" }));
+      await userEvent.click(
+        within(region).getByRole("button", { name: "Undo" }),
+      );
       await waitFor(() =>
         expect(within(region).getByRole("status")).toHaveTextContent(
           "Brought back from the trash. 1 memory it had replaced is replaced by it again. 1 memory built on it is no longer flagged.",

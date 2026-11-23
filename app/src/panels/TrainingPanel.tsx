@@ -113,6 +113,13 @@ export function TrainingPanel({
     !sportWeekStart || sportWeekStart === intensity.start
       ? "THIS WEEK BY SPORT"
       : `WEEK OF ${dayName(sportWeekStart, { month: "short", day: "numeric" }).toUpperCase()} BY SPORT`;
+  // The header's count: this week's, or with none this week, the recorded
+  // workouts' own week, named by the Monday of the week it counts.
+  const headerFromWorkouts = !totals.sessions && week.sessions > 0;
+  const headerCount = headerFromWorkouts ? week.sessions : totals.sessions;
+  const headerStart = headerFromWorkouts ? sportWeekStart : intensity.start;
+  const sessionWord = (n: number) =>
+    `recorded ${n === 1 ? "session" : "sessions"}`;
 
   const [showAll, setShowAll] = useState(false);
   const sorted = workouts
@@ -137,11 +144,11 @@ export function TrainingPanel({
           <h2>Training</h2>
           <p>
             {trainingReady
-              ? `Swim, bike, run · ${totals.sessions || week.sessions} ${
-                  (totals.sessions || week.sessions) === 1
-                    ? "session"
-                    : "sessions"
-                } this week`
+              ? `Swim, bike, run · ${headerCount} ${sessionWord(headerCount)}${
+                  headerStart
+                    ? ` · week of ${dayName(headerStart, { month: "short", day: "numeric" })}`
+                    : ""
+                }`
               : "Activity source unavailable"}
           </p>
         </div>
@@ -160,11 +167,13 @@ export function TrainingPanel({
           reading={daily === undefined}
         />
         <div className="training-week">
-          <p className="eyebrow">THIS WEEK · SINCE MONDAY</p>
+          <p className="eyebrow">
+            THIS WEEK · SINCE {dayName(intensity.start).toUpperCase()}
+          </p>
           <div className="week-numbers">
             <div>
               <strong>{totals.sessions}</strong>
-              <span>{totals.sessions === 1 ? "session" : "sessions"}</span>
+              <span>{sessionWord(totals.sessions)}</span>
             </div>
             <div>
               <strong>{totals.minutes ? hm(totals.minutes * 60) : "—"}</strong>

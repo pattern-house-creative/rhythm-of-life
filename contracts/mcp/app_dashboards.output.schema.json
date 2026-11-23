@@ -169,7 +169,7 @@
       "required": ["name", "kind"],
       "properties": {
         "name": { "$ref": "#/$defs/name" },
-        "kind": { "enum": ["data", "contents", "links", "log", "memories"] },
+        "kind": { "enum": ["data", "contents", "links", "log", "memories", "projects"] },
         "star": { "type": "string", "maxLength": 1000 },
         "days": { "type": "integer", "minimum": 1, "maximum": 3650 },
         "by": { "enum": ["reading", "day"] },
@@ -210,6 +210,7 @@
           "propertyNames": { "$ref": "#/$defs/name" },
           "additionalProperties": {
             "oneOf": [
+              { "$ref": "#/$defs/projects-payload" },
               { "$ref": "#/$defs/memories-payload" },
               { "$ref": "#/$defs/payload" }
             ]
@@ -406,6 +407,16 @@
             }
           ]
         }
+      }
+    },
+    "projects-payload": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "status", "asOf"],
+      "properties": {
+        "kind": { "const": "projects" }, "status": { "enum": ["ok", "unavailable"] }, "asOf": { "$ref": "#/$defs/instant" },
+        "reason": { "type": "string" }, "projects": { "type": "array", "items": {
+          "type": "object", "additionalProperties": false, "required": ["id", "slug", "name", "graphId"],
+          "properties": { "id": { "$ref": "#/$defs/uuid" }, "slug": { "type": "string" }, "name": { "type": "string" }, "graphId": { "type": "string" } }
+        } }
       }
     },
     "memories-payload": {

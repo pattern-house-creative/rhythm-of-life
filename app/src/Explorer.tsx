@@ -1185,7 +1185,7 @@ export default function Explorer({
             {blocked
               ? "Sample unavailable"
               : filteredView
-                ? `${filtered.length} ${filtered.length === 1 ? "match" : "matches"} lit · tap one to explore`
+                ? `${filtered.length} ${filtered.length === 1 ? "match" : "matches"} lit · select one to explore`
                 : mode === "trace"
                   ? "Verified links in the loaded graph · traversed in either direction"
                   : mode === "discover"
@@ -1193,15 +1193,24 @@ export default function Explorer({
                     : node
                       ? `${depth === 1 ? "Direct" : "Direct + second-degree"} connections · ${Math.max(0, (distances?.size ?? 1) - 1)} linked`
                       : trailView
-                        ? `${trailIds.length} ${trailIds.length === 1 ? "star" : "stars"} lit · tap one to explore`
-                        : `${visible.length} items · tap a star or browse the list`}
+                        ? `${trailIds.length} ${trailIds.length === 1 ? "star" : "stars"} lit · select one to explore`
+                        : `${visible.length} ${visible.length === 1 ? "star" : "stars"} · select one or browse the list`}
           </small>
         </div>
         <Constellation
           pinned={knowledge.pins}
+          // Nothing read: a read that never succeeded failed; one that did
+          // found no stars this person can view.
           emptyMessage={
             !session?.demo && !page.nodes.length
-              ? "No authorized graph records are currently available."
+              ? knowledge.lastRefresh
+                ? "Rhythm found no records you can view."
+                : "Rhythm couldn’t load these records."
+              : undefined
+          }
+          emptyTitle={
+            !session?.demo && !page.nodes.length && knowledge.lastRefresh
+              ? "No stars to show"
               : undefined
           }
           loading={!session?.demo && !knowledge.lastRefresh && !knowledge.error}
@@ -1283,8 +1292,8 @@ export default function Explorer({
         <button
           className="icon-button"
           onClick={close}
-          aria-label="Return to ambient"
-          title="Back to the ambient view (Esc)"
+          aria-label="Back to Home"
+          title="Back to Home (Esc)"
         >
           <X size={18} />
         </button>
@@ -1588,7 +1597,7 @@ export default function Explorer({
                 ? `${filtered.length} ${filtered.length === 1 ? "match" : "matches"}`
                 : recallStars.length
                   ? `${recallStars.length} found by words and meaning`
-                  : "No matching constellations"}
+                  : "No stars match your search"}
             </h2>
             {!filtered.length && !recallStars.length && (
               <p>

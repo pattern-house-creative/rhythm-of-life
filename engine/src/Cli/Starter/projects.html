@@ -45,10 +45,9 @@
       ).values(),
     ];
     const projects = new Map(
-      [...allWork, ...ideas, ...records(feeds.projectGuides)]
-        .filter((m) => m.project)
-        .map((m) => [m.project.id, m.project.name || m.project.slug]),
+      (feeds.portfolio?.projects || []).map((p) => [p.id, p.name || p.slug]),
     );
+    select.parentElement.hidden = view === "ideas";
     if (!projects.has(project)) project = "";
     select.replaceChildren(
       new Option("All projects", ""),
@@ -61,7 +60,7 @@
     if (view === "ideas") {
       feedNotice(board, feeds.ideas);
       feedNotice(board, feeds.inbox);
-      const list = ideas.filter(visible);
+      const list = ideas;
       if (!list.length)
         board.append(
           el(
@@ -74,8 +73,23 @@
       return;
     }
     feedNotice(board, feeds.work);
-    const work = allWork.filter(visible),
+    feedNotice(board, feeds.portfolio);
+    const work = allWork.filter((m) => projects.has(m.project?.id) && visible(m)),
       related = new Map(allWork.map((m) => [m.id, m]));
+    if (!project) {
+      const list = el("ul");
+      for (const [id, name] of projects) {
+        const item = el("li"), open = el("button", name);
+        open.onclick = () => { project = id; draw(); };
+        item.append(open);
+        list.append(item);
+      }
+      board.append(list);
+    }
+    if (project) {
+      for (const overview of records(feeds.projectGuides).filter(visible))
+        board.append(card(overview));
+    }
     if (!work.length) {
       board.append(
         el(

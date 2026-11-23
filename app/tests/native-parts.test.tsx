@@ -69,7 +69,7 @@ it("draws Home's glucose tile in a part, and opens its panel from the part", asy
   const user = userEvent.setup();
   const c = context();
   const { container } = draw(part("glucose"), c);
-  const tile = screen.getByRole("button", { name: /GLUCOSE 112/ });
+  const tile = screen.getByRole("button", { name: /Glucose 112/ });
   expect(tile.closest(".native-part")).toHaveClass("part-glucose");
   expect(screen.getByTestId("dashboard-glucose")).toHaveAttribute(
     "data-demo",
@@ -94,7 +94,7 @@ it("draws the same glucose, recovery and training tiles Home draws", async () =>
   };
   withSampleHealth();
   const home = render(<App />);
-  await screen.findByRole("button", { name: /GLUCOSE 112/ });
+  await screen.findByRole("button", { name: /Glucose 112/ });
   const atHome = ["glucose", "recovery", "training"].map((k) =>
     text(home.container.querySelector(`.${k}-zone .tile-button`)),
   );
@@ -120,7 +120,7 @@ it("keeps its place and says so quietly when the data isn't there", async () => 
   for (const kind of ["recovery", "training"] as const) {
     const { container, unmount } = draw(part(kind), c);
     const cell = container.querySelector(`.part-${kind}`)!;
-    expect(cell).toHaveTextContent(kind.toUpperCase());
+    expect(cell).toHaveTextContent(kind[0].toUpperCase() + kind.slice(1));
     expect(cell).toHaveTextContent(
       "Appears once a training source is connected",
     );
@@ -145,7 +145,7 @@ it("says Nothing yet for changes and insights, with the last run", () => {
   changed.unmount();
   const insights = draw(part("insights", { w: 3, h: 2 }), c);
   const own = insights.container.querySelector(".part-insights")!;
-  expect(own).toHaveTextContent("DAILY INSIGHTS");
+  expect(own).toHaveTextContent("Daily insights");
   expect(own).toHaveTextContent("Nothing yet");
   expect(own.querySelector(".insight-run")).not.toBeNull();
 });
@@ -248,7 +248,7 @@ it("says a card's dashboard is unavailable, with no title, when it was deleted o
     }),
   );
   expect(
-    deleted.getByText("That dashboard is unavailable"),
+    deleted.getByText("Dashboard unavailable"),
   ).toBeInTheDocument();
   expect(deleted.queryByText(/deleted/)).toBeNull();
   expect(deleted.queryByRole("button", { name: /^Open the/ })).toBeNull();
@@ -262,9 +262,11 @@ it("says a card's dashboard is unavailable, with no title, when it was deleted o
     }),
   );
   expect(
-    await screen.findByText("That dashboard is unavailable"),
+    await screen.findByText("Dashboard unavailable"),
   ).toBeInTheDocument();
   expect(screen.queryByRole("button", { name: /^Open the/ })).toBeNull();
+  // Nothing to open, so no opening arrow either.
+  expect(document.querySelector(".dashboard-card-head .lucide-arrow-up-right")).toBeNull();
   await waitFor(() => expect(screen.queryByTitle(/ card$/)).toBeNull());
 });
 

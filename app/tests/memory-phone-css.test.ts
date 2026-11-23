@@ -49,6 +49,9 @@ const top = (sheet: CSSStyleSheet, selector: string) =>
   styleRules(sheet.cssRules)
     .filter((r) => selectors(r).includes(selector))
     .map((r) => r.style);
+// A length as a rule says it: the app's least touch target by its token (index.css: --ui-target, 44px), or in pixels.
+const px = (value?: string) =>
+  value?.trim() === "var(--ui-target)" ? 44 : parseInt(value ?? "0");
 
 describe("a finger's room and no zoom, upright or sideways", () => {
   it.each([
@@ -81,7 +84,7 @@ describe("a finger's room and no zoom, upright or sideways", () => {
     ["src/PageBookmark.css", ".page-bookmark-row button"],
   ])("%s %s is tall enough to tap", (file, selector) => {
     const [style] = said(sheets[file], touch, selector);
-    expect(parseInt(style?.minHeight ?? "0")).toBeGreaterThanOrEqual(40);
+    expect(px(style?.minHeight)).toBeGreaterThanOrEqual(40);
   });
 
   it("a card's dismiss and a notice's are wide enough too, and a box to choose with is no smaller than the rules ask", () => {
@@ -90,16 +93,21 @@ describe("a finger's room and no zoom, upright or sideways", () => {
       touch,
       ".resurface-dismiss",
     );
-    expect(dismiss.width).toBe("40px");
-    expect(dismiss.height).toBe("40px");
+    expect(dismiss.width).toBe("44px");
+    expect(dismiss.height).toBe("44px");
     const view = sheets["src/MemoryView.css"];
     for (const selector of [
       ".memory-version .memory-meta button",
       '.memory-view .upload-status button[aria-label="Dismiss"]',
     ])
-      expect(said(view, touch, selector).map((s) => s.minWidth)).toContain(
-        "40px",
-      );
+      expect(
+        Math.max(
+          ...said(view, touch, selector)
+            .map((s) => s.minWidth)
+            .filter(Boolean)
+            .map(px),
+        ),
+      ).toBeGreaterThanOrEqual(40);
     for (const selector of [".memory-pick", ".memory-choose input"]) {
       const boxes = said(view, touch, selector);
       expect(boxes.map((s) => s.width)).toContain("24px");
@@ -171,10 +179,16 @@ describe("motion", () => {
 describe("a focus ring that shows whole", () => {
   it("stands inside what scrolls", () => {
     const view = sheets["src/MemoryView.css"];
+    // A row that opens is a card, and takes a card's ring: 3px, inset 4px.
     for (const selector of [
-      ".memory-tabs button:focus-visible",
       ".memory-list > li > button:focus-visible",
       ".memory-project-head:focus-visible",
+    ]) {
+      expect(top(view, selector)[0].outlineOffset, selector).toBe("-4px");
+      expect(top(view, selector)[0].outlineWidth, selector).toBe("3px");
+    }
+    for (const selector of [
+      ".memory-tabs button:focus-visible",
       ".memory-change-items button:focus-visible",
       ".memory-view .memory-notice button:focus-visible",
       ".memory-view textarea:focus-visible",
@@ -188,7 +202,7 @@ describe("a focus ring that shows whole", () => {
     expect(
       near(
         "src/MemoryView.css",
-        ".memory-view :is(button, a, input, select, textarea, summary, [tabindex]):focus-visible",
+        ".memory-view :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible",
       ),
     ).toBe("1px");
     expect(

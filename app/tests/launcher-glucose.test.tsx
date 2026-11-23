@@ -167,3 +167,9 @@ it("clears on offline, aborts outstanding reads and rejects late results before 
   await act(async () => window.dispatchEvent(new Event("online")));
   expect(screen.getByText("123")).toBeInTheDocument();
 });
+it("says why there is no history once, not after \"No history\"", () => {
+  render(view(fixture()));
+  const footer = screen.getByRole("contentinfo");
+  expect(footer).toHaveTextContent(/^History unavailable$/);
+  expect(footer).not.toHaveTextContent(/No history/);
+});

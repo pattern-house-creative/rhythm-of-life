@@ -277,9 +277,11 @@ public sealed class SchemaTests
     [InlineData("update_work.unchanged.example.json", "update_work.output.schema.json")]
     [InlineData("update_work.refused.example.json", "update_work.output.schema.json")]
     [InlineData("get.work.example.json", "get.output.schema.json")]
-    // Claims (migration 081): a claim made, one another session holds, and a claim let go.
+    // Claims (migration 081): a claim made, one another session holds, one a check the install added refused, and a
+    // claim let go.
     [InlineData("claim_work.example.json", "claim_work.output.schema.json")]
     [InlineData("claim_work.refused.example.json", "claim_work.output.schema.json")]
+    [InlineData("claim_work.guarded.example.json", "claim_work.output.schema.json")]
     [InlineData("release_work.example.json", "release_work.output.schema.json")]
     // supersede (SB-P4-06): the plan with its confirmation, the plan applied, and a confirmed memory protected.
     [InlineData("supersede.plan.example.json", "supersede.output.schema.json")]

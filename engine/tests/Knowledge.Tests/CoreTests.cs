@@ -385,7 +385,7 @@ public sealed class MigrationTests
     [Fact] public void Migrations_keep_their_recorded_names_and_order()
     {
         var names = Database.Migrations().Select(m => m.Version).ToArray();
-        Assert.Equal(86, names.Length);
+        Assert.Equal(90, names.Length);
         Assert.Equal("Knowledge.Migrations.077_oauth.sql", names[76]);
         Assert.Equal("Knowledge.Migrations.078_capsule_clients.sql", names[77]);
         Assert.Equal("Knowledge.Migrations.079_work.sql", names[78]);
@@ -396,6 +396,10 @@ public sealed class MigrationTests
         Assert.Equal("Knowledge.Migrations.084_work_dependency_counts.sql", names[83]);
         Assert.Equal("Knowledge.Migrations.085_memory_history_retention.sql", names[84]);
         Assert.Equal("Knowledge.Migrations.086_token_use_and_expiry.sql", names[85]);
+        Assert.Equal("Knowledge.Migrations.087_collection_projects.sql", names[86]);
+        Assert.Equal("Knowledge.Migrations.088_projects_dashboard.sql", names[87]);
+        Assert.Equal("Knowledge.Migrations.089_agents_team_view.sql", names[88]);
+        Assert.Equal("Knowledge.Migrations.090_work_summary_guard.sql", names[89]);
         Assert.Equal("Knowledge.Migrations.001_foundation.sql", names[0]);
         Assert.Equal("Knowledge.Migrations.021_lexical_search.sql", names[20]);
         Assert.Equal("Knowledge.Migrations.022_composable_layouts.sql", names[21]);

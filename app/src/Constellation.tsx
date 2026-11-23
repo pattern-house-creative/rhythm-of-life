@@ -35,12 +35,22 @@ import {
   graphEdgeGeometry,
   labelCandidates,
   labelFontSize,
+  labelFloor,
   labelLines,
+  labelScale,
   labelText,
+  labelWeight,
+  namedAtRest,
+  namedInShortSky,
   nodeHitRadius,
+  overSky,
   placeCaptions,
   placeLabels,
+  quietSky,
   restorePositions,
+  shortSkyHeight,
+  skyFloor,
+  visibleBounds,
 } from "./graph";
 import {
   clusterColor,
@@ -58,7 +68,7 @@ import {
   workLabel,
   workOf,
 } from "./graphView";
-import type { GraphPoint, LabelBox, SkySeed } from "./graph";
+import type { GraphPoint, LabelBox, ScreenRect, SkySeed } from "./graph";
 import type { KnowledgeEdge, KnowledgeNode } from "./model";
 // Where the ambient sky last drew each star. The explorer opens on this same
 // sky: touching a star brings it forward with the camera moving to it, so a
@@ -70,6 +80,75 @@ const settleMs = 400;
 // What a pointer rests on when it rests on a star: its target, its glyph or
 // its name.
 const starParts = ".graph-node, .graph-label, .graph-hit";
+// Graph units the selected star's name keeps from its centre: outside the
+// ring of dots (r 25) drawn round it.
+const selectionClear = 27;
+
+// What shows of a sky on screen (CSS px), for its names to fit: the svg's
+// rectangle cut by each ancestor that clips it (`clips`, found once), and
+// what is drawn over it: the heading above Home's sky (its words, not its
+// full-width row) and the explorer's zoom controls. The lines under it
+// (Home's hint, a part's status and actions) set its floor. Null where
+// nothing is laid out (a test's document, a hidden sky).
+function skyOnScreen(
+  svg: SVGSVGElement,
+  clips: Element[],
+  over: (Element | null | undefined)[],
+  under: Element | null | undefined,
+) {
+  const box = svg.getBoundingClientRect();
+  if (box.width <= 0 || box.height <= 0) return null;
+  const rect: ScreenRect = {
+    left: box.left,
+    top: box.top,
+    right: box.right,
+    bottom: box.bottom,
+  };
+  for (const clip of clips) {
+    const b = clip.getBoundingClientRect();
+    rect.left = Math.max(rect.left, b.left);
+    rect.top = Math.max(rect.top, b.top);
+    rect.right = Math.min(rect.right, b.right);
+    rect.bottom = Math.min(rect.bottom, b.bottom);
+  }
+  const covers = over.flatMap((el) => {
+    const boxes = [
+      ...(el?.classList.contains("graph-heading")
+        ? el.children
+        : el
+          ? [el]
+          : []),
+    ]
+      .map((c) => c.getBoundingClientRect())
+      .filter((b) => b.width > 0 && b.height > 0);
+    if (!boxes.length) return [];
+    const b: ScreenRect = {
+      left: Math.min(...boxes.map((x) => x.left)),
+      top: Math.min(...boxes.map((x) => x.top)),
+      right: Math.max(...boxes.map((x) => x.right)),
+      bottom: Math.max(...boxes.map((x) => x.bottom)),
+    };
+    return b.right > rect.left &&
+      b.left < rect.right &&
+      b.bottom > rect.top &&
+      b.top < rect.bottom
+      ? [b]
+      : [];
+  });
+  // The height a name has: under a heading that lies over the sky's top.
+  const head = Math.max(
+    rect.top,
+    ...covers.filter((c) => c.top <= rect.top + 1).map((c) => c.bottom),
+  );
+  const height = rect.bottom - head;
+  rect.bottom = skyFloor(
+    rect,
+    [...(under?.children ?? [])]
+      .map((c) => c.getBoundingClientRect())
+      .filter((b) => b.width > 0 && b.height > 0),
+  );
+  return { rect, covers, height };
+}
 export function Constellation({
   nodes: givenNodes,
   edges: givenEdges,
@@ -123,7 +202,7 @@ export function Constellation({
   minHeight?: number;
   // A finger has started moving the sky (not a tap, pinch or held star).
   onPanStart?: () => void;
-  // Stars pinned to the sky: always named, with a soft ring.
+  // Stars pinned to the sky: named first after the selection, with a soft ring.
   pinned?: string[];
   // Screen pixels at the bottom of the sky covered by a resting panel: the
   // camera frames records above it.
@@ -152,7 +231,8 @@ export function Constellation({
 }) {
   const frame = useRef<HTMLDivElement>(null),
     svg = useRef<SVGSVGElement>(null),
-    layer = useRef<SVGGElement>(null);
+    layer = useRef<SVGGElement>(null),
+    controls = useRef<HTMLDivElement>(null);
   const controller =
     useRef<ReturnType<typeof zoom<SVGSVGElement, unknown>>>(null);
   const [scale, setScale] = useState(1),
@@ -171,6 +251,10 @@ export function Constellation({
   const [unit, setUnit] = useState(1);
   // Phones get shorter, slightly smaller labels so more of them fit.
   const compact = width < 520;
+  // A wall-sized sky draws its names larger, to read from across the room;
+  // a phone's (narrow, or short on its side) names only its landmarks at rest.
+  const textScale = labelScale(width);
+  const quiet = quietSky(width, (height * width) / 820);
   const lastCamera = useRef("");
   const cameraFrame = useRef(0);
   // A star picked up by a press and hold: the sky's layout moves it.
@@ -232,6 +316,11 @@ export function Constellation({
   // The star a mouse or pen rests on: a calm sky lights its lines as it does
   // a selected star's. Touch has no hover; a tap selects.
   const [hovered, setHovered] = useState<string | null>(null);
+  // The star keyboard focus rests on. With a hovered star, it brings that
+  // star's name forward, lighter than a selection's: shown where it fits.
+  const [focused, setFocused] = useState<string | null>(null);
+  const emphasis = hovered ?? focused;
+  const emphasisRef = useRef(emphasis);
   // At rest, the ambient sky names folders and memories linked to two or
   // more records; everything else is named on hover, selection or zoom.
   const memoryHubs = useMemo(() => {
@@ -298,9 +387,15 @@ export function Constellation({
       : null;
   useEffect(() => {
     if (!frame.current) return;
-    let settle = 0;
+    let settle = 0,
+      placed = 0;
     const observer = new ResizeObserver(([entry]) => {
       if (entry.contentRect.width <= 0) return;
+      // Once the sky's size settles, its names are placed once more: a still
+      // sky (reduced motion, paused) has no frame loop to move a name the
+      // first pass put where the settled layout has no room.
+      window.clearTimeout(placed);
+      placed = window.setTimeout(() => redraw.current(), settleMs);
       setWidth(entry.contentRect.width);
       const next = Math.max(
         minHeight ?? (interactive ? 300 : 220),
@@ -324,9 +419,25 @@ export function Constellation({
     observer.observe(frame.current);
     return () => {
       window.clearTimeout(settle);
+      window.clearTimeout(placed);
       observer.disconnect();
     };
   }, [interactive, minHeight, own]);
+  // Names are measured as drawn: placed again once the webfonts have loaded,
+  // and once a zoom's new name size has rendered (the zoom handler places
+  // them before React draws that size). A moving sky does this every frame.
+  useEffect(() => {
+    let live = true;
+    void document.fonts?.ready.then(() => {
+      if (live) redraw.current();
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+  useEffect(() => {
+    redraw.current();
+  }, [unit]);
   useEffect(() => {
     if (!svg.current || !layer.current) return;
     const behavior = zoom<SVGSVGElement, unknown>()
@@ -821,7 +932,6 @@ export function Constellation({
     const edgeElements = root.selectAll<SVGPathElement, unknown>(
       ".graph-edge, .graph-edge-hit",
     );
-    const rank = { primary: 2, secondary: 1 } as const;
     const types = new Map(nodes.map((n) => [n.id, n.type]));
     const folders = new Set(
       nodes.filter((n) => isFolder(n) || isProjectStar(n)).map((n) => n.id),
@@ -833,22 +943,23 @@ export function Constellation({
       ...(layer.current?.querySelectorAll<SVGGElement>(".graph-label") ?? []),
     ].map((element) => {
       const point = graph.byId.get(element.dataset.id!)!;
-      const priority = labelPriorities.get(point.id);
+      // What labelWeight reads; the focus's light and the star a pointer or
+      // keyboard rests on are added at each placement pass.
       return {
         element,
         text: element.querySelector("text")!,
         point,
-        // Selected, dashboards, themes, named hubs, memories, linked records,
-        // then loose.
-        weight:
-          Number(point.id === selected) * 1000 +
-          Number(dashboards.has(point.id)) * 500 +
-          Number(pinnedSet.has(point.id)) * 400 +
-          Number(point.theme) * 100 +
-          Number(folders.has(point.id)) * 50 +
-          (priority ? rank[priority] : 0) * 10 +
-          Number(types.get(point.id) === "memory") * 2 +
-          Number(!graph.loose.has(point.id)),
+        traits: {
+          selected: point.id === selected,
+          pinned: pinnedSet.has(point.id),
+          theme: point.theme,
+          folder: folders.has(point.id),
+          dashboard: dashboards.has(point.id),
+          priority: labelPriorities.get(point.id),
+          memory: types.get(point.id) === "memory",
+          memoryHub: memoryHubs.has(point.id),
+          loose: graph.loose.has(point.id),
+        },
       };
     });
     const captionElements = [
@@ -867,6 +978,8 @@ export function Constellation({
     // not make neighbouring labels trade places and blink.
     let shown = new Set<string>();
     let lastLabels = -Infinity;
+    // The ancestors that clip the sky, found at the first placement pass.
+    let clips: Element[] | null = null;
     const draw = () => {
       containGraph(graph.points, height);
       for (const point of graph.points)
@@ -888,10 +1001,46 @@ export function Constellation({
           right = (812 - camera.x) / camera.k;
         const top = (8 - camera.y) / camera.k,
           bottom =
-            (height - Math.max(60, (64 * 820) / width) - camera.y) / camera.k;
-        const bounds = { left, right, top, bottom };
-        const occupied: LabelBox[] = [];
+            (height - labelFloor(interactive, width) - camera.y) / camera.k;
         const ctm = layer.current?.getScreenCTM?.();
+        // Names fit what shows of the sky, below Home's heading and clear of
+        // the explorer's zoom controls; a sky with little showing paints only
+        // the names that matter most there (graph.ts namedInShortSky).
+        if (svg.current && clips === null) {
+          clips = [];
+          for (
+            let el = svg.current.parentElement;
+            el && el !== document.body;
+            el = el.parentElement
+          ) {
+            const style = getComputedStyle(el);
+            if (/hidden|clip/.test(style.overflowX + style.overflowY))
+              clips.push(el);
+          }
+        }
+        const onScreen =
+          svg.current && ctm && ctm.a > 0 && ctm.d > 0
+            ? skyOnScreen(
+                svg.current,
+                clips ?? [],
+                [
+                  frame.current?.parentElement?.querySelector(
+                    ":scope > .graph-heading",
+                  ),
+                  controls.current,
+                ],
+                frame.current?.parentElement?.querySelector(
+                  ":scope > .graph-caption",
+                ),
+              )
+            : null;
+        const bounds = onScreen
+          ? visibleBounds({ left, right, top, bottom }, onScreen.rect, ctm!)
+          : { left, right, top, bottom };
+        const short = !!onScreen && onScreen.height < shortSkyHeight;
+        const occupied: LabelBox[] = onScreen
+          ? onScreen.covers.map((c) => overSky(c, ctm!))
+          : [];
         const pixelsPerUnit = Math.max(
           ctm && ctm.a > 0 ? ctm.a : (width / 820) * camera.k,
           0.05,
@@ -941,7 +1090,7 @@ export function Constellation({
               owner: p.id,
             });
         // Folder names go first; labels then keep clear of them.
-        const captionFont = 11 / pixelsPerUnit;
+        const captionFont = (11 * textScale) / pixelsPerUnit;
         const captionPlacements = placeCaptions(
           captionElements.map(({ text, members }) => ({
             id: text.dataset.group!,
@@ -969,11 +1118,13 @@ export function Constellation({
         // Measure every label before positioning any of them, so the browser
         // lays text out once per pass instead of once per label. Collisions
         // hide labels with visibility, never opacity, so opacity says only
-        // whether the view wants this label at all.
+        // whether the view wants this label at all. A star just hovered or
+        // focused is wanted while its name is still fading in.
+        const resting = emphasisRef.current;
         const measured = labelElements.map((label) => {
-          const { text } = label;
+          const { text, point } = label;
           const style = getComputedStyle(text);
-          if (Number(style.opacity) === 0)
+          if (Number(style.opacity) === 0 && point.id !== resting)
             return { ...label, size: null, lines: null };
           const font = parseFloat(style.fontSize) || 13;
           const lines = [...text.querySelectorAll("tspan")];
@@ -994,26 +1145,30 @@ export function Constellation({
           path ?? highlightedIds ?? (selected ? [selected, ...neighbors] : []),
         );
         const placements = placeLabels(
-          measured.flatMap(({ point, size, weight }) =>
-            size
+          measured.flatMap(({ point, size, traits }) =>
+            size &&
+            (!short ||
+              namedInShortSky({ ...traits, emphasis: point.id === resting }))
               ? [
                   {
                     id: point.id,
                     point,
                     size,
-                    weight,
-                    // "Show all labels" names every star, overlapping where
-                    // there is no free spot. In the explorer, a focus names
-                    // the selection and everything it lights up (its links,
-                    // a search's matches, a traced path), even on a phone
-                    // where they would not all fit beside each other.
-                    // A dashboard is always named, so it reads as one.
-                    forced:
-                      allLabels ||
-                      point.id === selected ||
-                      dashboards.has(point.id) ||
-                      pinnedSet.has(point.id) ||
-                      (interactive && lit.has(point.id)),
+                    // In the explorer, a focus names what it lights up (its
+                    // links, a search's matches, a traced path) before
+                    // anything else, as many as fit beside each other.
+                    weight: labelWeight({
+                      ...traits,
+                      emphasis: point.id === resting,
+                      lit: interactive && lit.has(point.id),
+                    }),
+                    // The selection is always named. "Show all labels" names
+                    // every star, overlapping where there is no free spot.
+                    // Everything else gives way in a collision, so two names
+                    // never sit on each other.
+                    forced: allLabels || point.id === selected,
+                    // The selected name sits outside its star's ring.
+                    clear: point.id === selected ? selectionClear : undefined,
                   },
                 ]
               : [],
@@ -1188,9 +1343,17 @@ export function Constellation({
     captions,
     compact,
     pinnedSet,
+    memoryHubs,
+    textScale,
     own,
     still,
   ]);
+  // A star a pointer or the keyboard comes to rest on is named at once, also
+  // on a still or paused sky; the next placement pass keeps it in place.
+  useEffect(() => {
+    emphasisRef.current = emphasis;
+    redraw.current();
+  }, [emphasis]);
   // Zoom buttons and keys take the camera from a glide in progress.
   const adjust = (factor: number) => {
     cancelAnimationFrame(cameraFrame.current);
@@ -1235,6 +1398,15 @@ export function Constellation({
               : null;
           setHovered(next?.dataset.id ?? null);
         }}
+        // Focus only marks which star's name to bring forward; it moves,
+        // selects and opens nothing.
+        onFocus={(e) =>
+          setFocused(
+            (e.target as Element).closest<SVGGElement>(".graph-node")?.dataset
+              .id ?? null,
+          )
+        }
+        onBlur={() => setFocused(null)}
         onKeyDown={(e) => {
           if (
             still ||
@@ -1273,10 +1445,10 @@ export function Constellation({
         viewBox={`0 0 820 ${height}`}
         aria-label={
           interactive
-            ? "Knowledge constellation. Drag or pinch to navigate. Arrow keys pan, plus and minus zoom, zero resets. Tab to explore nodes and links."
+            ? "Knowledge constellation. Drag or pinch to navigate. Arrow keys pan, plus and minus zoom, zero resets. Tab to explore stars and connections."
             : still
-              ? "Knowledge constellation. Select an item to explore its connections."
-              : "Knowledge constellation. Drag stars to move them, drag the sky to pan, or pinch to zoom. Arrow keys pan, plus and minus zoom, zero resets. Select an item to explore its connections."
+              ? "Knowledge constellation. Select a star to explore its connections."
+              : "Knowledge constellation. Drag stars to move them, drag the sky to pan, or pinch to zoom. Arrow keys pan, plus and minus zoom, zero resets. Select a star to explore its connections."
         }
         className="graph-svg"
       >
@@ -1429,7 +1601,23 @@ export function Constellation({
               // memory's glyph, quieter once the work is finished.
               const work: GraphWork | null = workOf(n);
               const finished = work !== null && workFinished(work);
-              const font = labelFontSize(theme, unit, compact);
+              // The selected star's name comes forward: a size up and heavier
+              // (App.css), and never hidden by a collision.
+              const chosen = selected === n.id;
+              const font =
+                labelFontSize(theme, unit, compact, textScale) *
+                (chosen ? 1.12 : 1);
+              const atRest = namedAtRest(
+                {
+                  theme,
+                  folder: folder || project,
+                  dashboard,
+                  pinned: pinnedSet.has(n.id),
+                  memoryHub: memoryHubs.has(n.id),
+                  priority: labelPriorities.get(n.id),
+                },
+                quiet,
+              );
               return (
                 <g
                   key={`${part}-${n.id}`}
@@ -1448,7 +1636,7 @@ export function Constellation({
                       onSelect(n.id);
                     }
                   }}
-                  className={`${label ? "graph-label" : hit ? "graph-hit" : "graph-node"} ${theme ? "theme-node" : ""} ${related ? "related-node" : ""} ${path?.includes(n.id) ? "path-node" : ""} ${labelPriorities.has(n.id) ? `label-${labelPriorities.get(n.id)}` : ""} ${graph.loose.has(n.id) ? "loose-node" : ""} ${folder ? "folder-node" : ""} ${project ? "project-star" : ""} ${dashboard ? "dashboard-star" : ""} ${pinnedSet.has(n.id) ? "pinned-star" : ""} ${memoryHubs.has(n.id) ? "memory-hub" : ""}${replaced ? " replaced-star" : ""}${work ? ` work-star work-${work.state}` : ""}`}
+                  className={`${label ? "graph-label" : hit ? "graph-hit" : "graph-node"} ${theme ? "theme-node" : ""} ${related ? "related-node" : ""} ${path?.includes(n.id) ? "path-node" : ""} ${labelPriorities.has(n.id) ? `label-${labelPriorities.get(n.id)}` : ""} ${graph.loose.has(n.id) ? "loose-node" : ""} ${folder ? "folder-node" : ""} ${project ? "project-star" : ""} ${dashboard ? "dashboard-star" : ""} ${pinnedSet.has(n.id) ? "pinned-star" : ""} ${memoryHubs.has(n.id) ? "memory-hub" : ""}${replaced ? " replaced-star" : ""}${work ? ` work-star work-${work.state}` : ""}${atRest ? " rest-name" : ""}${chosen ? " is-selected" : ""}${emphasis === n.id ? " is-emphasis" : ""}`}
                   style={{
                     opacity: faded
                       ? 0.22
@@ -1629,27 +1817,45 @@ export function Constellation({
                           strokeWidth="1"
                         />
                       )}
-                      {selected === n.id && (
-                        <circle
-                          r="25"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeDasharray="2 5"
-                          opacity=".7"
-                        />
+                      {chosen && (
+                        // The selection, by shape as well as colour: a solid
+                        // outline close round the star and a ring of dots
+                        // (App.css .selection-ring, .selection-outline).
+                        <>
+                          <circle
+                            className="selection-outline"
+                            r={theme ? 21.5 : dashboard ? 13.5 : 11}
+                            fill="none"
+                          />
+                          <circle
+                            className="selection-ring"
+                            r="25"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeDasharray="2 5"
+                            opacity=".7"
+                          />
+                        </>
                       )}
                     </>
                   )}
                   {label && (
                     <text
-                      y={labelCandidates(theme, font, 0)[0].y}
+                      y={
+                        labelCandidates(
+                          theme,
+                          font,
+                          0,
+                          chosen ? selectionClear : undefined,
+                        )[0].y
+                      }
                       textAnchor="middle"
                       fill={theme ? "#dce9ed" : "#93a7b2"}
                       // Text and its 3px outline keep one on-screen size at
                       // every width and zoom; CSS does not set either.
                       style={{
                         fontSize: font,
-                        strokeWidth: 3 / Math.max(unit, 0.05),
+                        strokeWidth: (3 * textScale) / Math.max(unit, 0.05),
                         letterSpacing: theme ? "0.065em" : "0.01em",
                       }}
                     >
@@ -1668,7 +1874,15 @@ export function Constellation({
                           <tspan x="0">
                             {labelText(n.title, compact ? 20 : 30)}
                           </tspan>
-                          <tspan x="0" dy="1.3em" className="dashboard-tag">
+                          <tspan
+                            x="0"
+                            dy="1.3em"
+                            className="dashboard-tag"
+                            // 11px on screen at least: a short capitalised tag.
+                            style={{
+                              fontSize: (11 * textScale) / Math.max(unit, 0.05),
+                            }}
+                          >
                             DASHBOARD
                           </tspan>
                         </>
@@ -1689,19 +1903,19 @@ export function Constellation({
         <div className="graph-empty" role="status">
           <h3>
             {loading
-              ? "Loading knowledge"
+              ? "Loading the sky"
               : emptyMessage
-                ? (emptyTitle ?? "Knowledge unavailable")
-                : "No matching constellations"}
+                ? (emptyTitle ?? "Sky unavailable")
+                : "No stars match your search"}
           </h3>
           <p>
             {loading
-              ? "Retrieving authorized graph records…"
+              ? "Finding the stars you can view…"
               : (emptyMessage ?? "Try another search or clear your filters.")}
           </p>
         </div>
       )}
-      <div className="graph-controls">
+      <div className="graph-controls" ref={controls}>
         <button aria-label="Zoom out" onClick={() => adjust(0.8)}>
           <Minus size={15} />
         </button>

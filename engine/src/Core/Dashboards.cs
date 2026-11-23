@@ -19,9 +19,12 @@ public sealed partial record DashboardFeed(string Name, string Kind, string Star
     public string? Problem(int i)
     {
         if (Name is null || !FeedName().IsMatch(Name)) return $"feeds[{i}].name is a letter then up to 39 letters, digits or underscores";
-        if (Kind is not ("data" or "contents" or "links" or "log" or "memories")) return $"feeds[{i}].kind must be data, contents, links, log or memories";
+        if (Kind is not ("data" or "contents" or "links" or "log" or "memories" or "projects")) return $"feeds[{i}].kind must be data, contents, links, log, memories or projects";
         // A memories feed reads memories by filter (MemoryMatch), not a star: where (none is every memory its reader
         // reads) and limit, how many of the newest it gives.
+        if (Kind == "projects")
+            return Star is null && Days is null && By is null && Metrics is null && Limit is null && Log is null
+                && Subject is null && Where is null && FullText is null ? null : $"feeds[{i}]: a projects feed takes only name and kind";
         if (Kind == "memories")
         {
             if (Star is not null || Days is not null || By is not null || Metrics is not null || Log is not null || Subject is not null)
@@ -416,7 +419,7 @@ public sealed record DashboardDraft(string Title, string Description, string Htm
     // with memory.scopes on, whose scopes it lands in; unless a feed reads memories (kind memories), which reads by filter
     // for each reader as that reader reads them, and needs no star to say what the dashboard is about. Null when it holds.
     public static string? Unanchored(IReadOnlyList<DashboardFeed> feeds, IReadOnlyCollection<string> named) =>
-        named.Count > 0 || feeds.Any(f => f.Kind == "memories") ? null
+        named.Count > 0 || feeds.Any(f => f.Kind is "memories" or "projects") ? null
             : "At least one feed or write names a star; add a feed for a star the dashboard is about";
     public static string? WritesProblem(IReadOnlyList<DashboardWrite>? writes)
     {

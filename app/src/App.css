@@ -35,69 +35,89 @@
 .topbar {
   height: 88px;
   margin: 0 44px;
-  border-bottom: 1px solid #9db4c013;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--ui-divider) 60%, transparent);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: var(--ui-space-6);
 }
 .brand {
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: var(--ui-space-3);
+  min-height: var(--ui-target);
+  border-radius: var(--ui-radius-control);
+  min-width: 0;
   text-decoration: none;
-  font:
-    600 11px/1.7 "Manrope Variable",
-    sans-serif;
-  letter-spacing: 3px;
+  color: var(--ui-ink);
+  font: 650 var(--ui-text-title) / 1.3 var(--ui-display);
+  letter-spacing: -0.01em;
 }
 .brand-mark {
-  width: 41px;
-  height: 41px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
-  border: 1px solid #a7c9dc42;
+  border: 1px solid var(--ui-edge);
   border-radius: 50%;
-  color: #aac9d6;
+  color: var(--ui-soft);
   position: relative;
+  transition: border-color var(--ui-fast) var(--ui-ease);
 }
 .brand-mark:after {
   content: "";
   position: absolute;
   inset: 5px;
-  border: 1px solid #86b9cf16;
+  border: 1px solid color-mix(in srgb, var(--ui-edge) 40%, transparent);
   border-radius: 50%;
 }
+.brand:hover .brand-mark {
+  border-color: var(--ui-edge-strong);
+}
+/* The install's name as it was written, on one line; a name too long for a
+   phone's header ends in an ellipsis, and the link still says it whole. */
+.brand-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .top-status {
+  flex: none;
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: var(--ui-space-6);
 }
 .demo-badge {
   display: flex;
   align-items: center;
-  gap: 7px;
-  letter-spacing: 1.4px;
-  font-size: 8px;
-  color: #bdc5aa;
+  gap: var(--ui-space-1);
+  padding: 2px var(--ui-space-2);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-chip);
+  font: 600 11px / 1.4 var(--ui-font);
+  letter-spacing: 0.08em;
+  color: var(--ui-soft);
 }
 .demo-badge span {
   width: 4px;
   height: 4px;
-  background: #c3c69a;
+  background: var(--ui-amber);
   border-radius: 50%;
 }
 .top-status time {
-  font-family: "Manrope Variable";
-  font-size: 15px;
+  font: 600 var(--ui-text-title) / 1.2 var(--ui-display);
+  color: var(--ui-ink);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .top-status time span {
   display: block;
   text-align: right;
-  font-size: 7px;
-  letter-spacing: 1.8px;
-  color: #879ba5;
+  font: 500 11px / 1.2 var(--ui-font);
+  letter-spacing: 0.08em;
+  color: var(--ui-faint);
   margin-top: 2px;
 }
 .icon-button {
@@ -106,19 +126,32 @@
   display: inline-grid;
   place-items: center;
   border-radius: 50%;
-  color: #9daeb7;
+  color: var(--ui-soft);
+  transition:
+    background-color var(--ui-fast) var(--ui-ease),
+    color var(--ui-fast) var(--ui-ease);
 }
 .icon-button:hover {
-  background: #a3bfd015;
+  color: var(--ui-ink);
+  background: color-mix(in srgb, var(--ui-ink) 9%, transparent);
+}
+/* A finger's room wherever a touch screen is the pointer. */
+@media (any-pointer: coarse) {
+  .icon-button {
+    min-width: var(--ui-target);
+    min-height: var(--ui-target);
+  }
 }
 .source-strip {
   display: flex;
   align-items: center;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 2px var(--ui-space-4);
   margin: 13px 44px;
-  font-size: 9px;
-  letter-spacing: 0.3px;
-  color: #83949d;
+  font-size: var(--ui-text-meta);
+  line-height: 1.4;
+  color: var(--ui-faint);
+  font-variant-numeric: tabular-nums;
 }
 .source-strip > span,
 .source-strip button {
@@ -126,59 +159,136 @@
   align-items: center;
   gap: 6px;
 }
+.source-strip > button {
+  position: relative;
+  /* Above main, which starts just under the strip, so its target is whole. */
+  z-index: 2;
+  color: var(--ui-soft);
+  border-radius: var(--ui-radius-chip);
+  transition: color var(--ui-fast) var(--ui-ease);
+}
+/* The strip stays one quiet line; its way into Sources & settings still
+   takes a full finger: 44 px tall, from just under the brand's name down. */
+.source-strip > button::after {
+  content: "";
+  position: absolute;
+  inset: -15px -8px -12px;
+}
+/* On a phone only 28 px lie between the brand and the first preview, so the
+   target stops at the preview's edge there (36 px): a tap on a preview is
+   always the preview's. */
+@media (max-width: 760px) {
+  .source-strip > button::after {
+    inset: -15px -8px -4px;
+  }
+}
+.source-strip > button:hover {
+  color: var(--ui-ink);
+}
+.source-strip > button svg {
+  color: var(--ui-mint);
+}
 .source-strip i {
-  height: 4px;
-  width: 4px;
+  height: 6px;
+  width: 6px;
   border-radius: 50%;
-  background: #7daca2;
+  background: var(--ui-mint);
 }
 .source-strip .sample-date {
   margin-left: auto;
-  font-size: 8px;
-  letter-spacing: 1.3px;
+  font-size: var(--ui-text-meta);
+}
+/* Narrow phones: the header stays one line. Its round buttons draw 28 px
+   and still take a 44 px finger, the mark and the gaps tighten, the demo
+   label drops its box, and under 340 px the name steps down a size. (More
+   specific than the phone layout's own header rules, which come later.) */
+@media (max-width: 400px) {
+  header.topbar {
+    gap: 6px;
+  }
+  .topbar .brand {
+    gap: 6px;
+  }
+  .topbar .brand-mark {
+    width: 28px;
+    height: 28px;
+  }
+  .topbar .top-status {
+    gap: 2px;
+  }
+  .top-status .icon-button {
+    margin-inline: -8px;
+  }
+  .demo-badge {
+    padding: 0;
+    border: 0;
+  }
+}
+@media (max-width: 340px) {
+  .topbar .brand {
+    font-size: var(--ui-text-small);
+  }
 }
 .eyebrow {
-  font-size: 9px;
-  letter-spacing: 2px;
-  font-weight: 500;
-  color: #91a2ab;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--ui-faint);
 }
 .tile-button {
   text-align: left;
-  padding: 22px 0 18px;
+  padding: 0 0 var(--ui-space-4);
   width: 100%;
-  border-top: 1px solid #90b9c523;
-  transition: border-color 0.4s;
+  border-top: 1px solid var(--ui-divider);
+  transition: border-color var(--ui-calm) var(--ui-ease);
 }
 .tile-button:hover {
-  border-color: #98b9c66a;
+  border-color: var(--ui-edge-strong);
 }
+.tile-button:focus-visible {
+  outline: var(--ui-focus-ring);
+  outline-offset: var(--ui-focus-offset);
+}
+/* A part's cell clips what is drawn outside it; its ring sits inside. */
+.native-part .tile-button:focus-visible {
+  outline-offset: -3px;
+}
+/* A tile's head: the same glyph, name and opening arrow as a dashboard
+   card's (DashboardCard.css), on the tile's own rule instead of a box. */
 .section-label {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 9px;
-  letter-spacing: 1.8px;
-  color: #90a5ae;
+  gap: var(--ui-space-2);
+  min-height: var(--tile-head, 54px);
+  font: 650 var(--ui-text-title) / 1.28 var(--ui-display);
+  letter-spacing: -0.015em;
+  color: var(--ui-ink);
 }
 .section-label > span:first-child {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--ui-space-2);
+  min-width: 0;
+}
+.section-label svg {
+  flex: none;
+  color: var(--ui-mint);
 }
 .section-label > svg {
-  color: #6c828e;
+  color: var(--ui-mint);
 }
 .glucose-value {
-  font-family: "Manrope Variable";
+  font-family: var(--ui-display);
   font-size: 68px;
-  line-height: 1.2;
-  font-weight: 300;
-  letter-spacing: -4px;
-  margin: 16px 0 7px;
+  line-height: 1.1;
+  font-weight: 350;
+  letter-spacing: -0.055em;
+  color: var(--ui-ink);
+  margin: var(--ui-space-1) 0 var(--ui-space-2);
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: var(--ui-space-4);
 }
 .glucose-value > span {
   display: flex;
@@ -189,8 +299,8 @@
   letter-spacing: 0;
 }
 .glucose-value small {
-  font-size: 11px;
-  color: #98a8b1;
+  font: 500 var(--ui-text-lead) / 1.1 var(--ui-font);
+  color: var(--ui-soft);
 }
 /* Small, slim Medtronic chevrons beside the reading. */
 .glucose-value .trend-arrows {
@@ -201,9 +311,11 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 7px;
-  font-size: 10px;
-  color: #9bc7b9;
+  gap: 4px var(--ui-space-2);
+  font-size: var(--ui-text-small);
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-soft);
 }
 .metric-caption i {
   width: 4px;
@@ -220,7 +332,7 @@
   margin: 6px -2px 0;
 }
 .spark-guide {
-  stroke: #93b4c31f;
+  stroke: var(--ui-divider);
   stroke-width: 1;
   stroke-dasharray: 2 5;
 }
@@ -236,40 +348,54 @@
 .spark-axis {
   display: flex;
   justify-content: space-between;
-  font-size: 8px;
-  color: #718993;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-faint);
 }
+/* A tile's freshness line, as a dashboard card's footer: 12 px, soft, tabular,
+   under a quiet rule; the way in sits at its end in mint. */
 .tile-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  margin-top: 19px;
-  font-size: 7px;
-  letter-spacing: 1px;
-  color: #82959e;
+  gap: var(--ui-space-3);
+  margin-top: var(--ui-space-4);
+  padding-top: var(--ui-space-3);
+  border-top: 1px solid var(--ui-divider);
+  font-size: var(--ui-text-meta);
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-soft);
 }
 .tile-footer > span:last-child {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex: none;
+  color: var(--ui-mint);
 }
 .sleep-value {
-  font-family: "Manrope Variable";
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--ui-space-3);
+  font-family: var(--ui-display);
   font-size: 36px;
   font-weight: 350;
-  letter-spacing: -1.6px;
-  margin: 21px 0 20px;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
+  margin: var(--ui-space-1) 0 var(--ui-space-4);
 }
 .sleep-value small {
-  font-size: 17px;
-  color: #9aa6b8;
+  font-size: var(--ui-text-lead);
+  color: var(--ui-soft);
 }
 .sleep-value > span {
-  font: 10px "DM Sans Variable";
-  letter-spacing: 0.4px;
-  color: #8c9aa9;
-  margin-left: 12px;
+  font: var(--ui-text-meta) / 1.4 var(--ui-font);
+  letter-spacing: 0;
+  color: var(--ui-faint);
+  margin-left: 0;
 }
 .sleep-bars {
   height: 28px;
@@ -285,9 +411,10 @@
 }
 .recovery-pair {
   display: flex;
-  gap: 25px;
-  font-size: 9px;
-  color: #8396a0;
+  flex-wrap: wrap;
+  gap: var(--ui-space-3) 25px;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-soft);
 }
 .recovery-pair > span {
   position: relative;
@@ -300,48 +427,49 @@
 }
 .recovery-pair b {
   display: block;
-  font-size: 20px;
-  font-weight: 400;
-  color: #dce3e8;
-  margin-top: 8px;
+  font: 400 22px / 1.2 var(--ui-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
+  margin-top: var(--ui-space-1);
 }
 .recovery-pair small {
-  font-size: 10px;
-  color: #8396a0;
+  font-size: var(--ui-text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-faint);
 }
 .quiet-copy {
-  color: #879ca5;
-  font-size: 10px;
-  margin-top: 13px;
+  color: var(--ui-soft);
+  font-size: var(--ui-text-small);
+  line-height: 1.5;
+  margin-top: var(--ui-space-3);
 }
 /* The main slot with neither a dashboard nor a glucose source: one quiet line
    saying a dashboard can live here, never a tile that looks broken. */
 .main-hint {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  max-width: 270px;
-  padding-top: 18px;
+  gap: var(--ui-space-3);
+  max-width: 280px;
+  padding-top: var(--ui-space-4);
 }
 .main-hint svg {
   flex: none;
-  color: #7f9aa6;
-  opacity: 0.7;
+  color: var(--ui-mint);
 }
 .main-hint p {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--ui-text-small);
   line-height: 1.6;
-  color: #7d949e;
+  color: var(--ui-soft);
 }
 .main-hint button {
   padding: 0;
   border: 0;
   background: none;
   font: inherit;
-  color: #a9c3cd;
+  color: var(--ui-mint);
   text-decoration: underline;
-  text-decoration-color: #a9c3cd55;
+  text-decoration-color: color-mix(in srgb, var(--ui-mint) 45%, transparent);
   text-underline-offset: 3px;
   cursor: pointer;
 }
@@ -362,12 +490,14 @@
   z-index: 1;
 }
 .graph-heading .eyebrow {
-  font-size: 7px;
-  color: #8c9daa;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ui-faint);
 }
 .graph-heading > span:last-child {
-  font-size: 8px;
-  color: #617d8c;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-faint);
+  font-variant-numeric: tabular-nums;
 }
 .graph-svg:active {
   cursor: grabbing;
@@ -378,28 +508,30 @@
 }
 :is(.graph-node, .graph-label) circle:not(.node-hit) {
   transition:
-    stroke 0.2s,
-    fill 0.2s;
+    stroke var(--ui-calm) var(--ui-ease),
+    fill var(--ui-calm) var(--ui-ease);
 }
 :is(.graph-node, .graph-label):hover text,
 :is(.graph-node, .graph-label):focus text {
-  fill: white;
+  fill: var(--ui-ink);
   opacity: 1;
 }
 :is(.graph-node, .graph-label):hover .node-hit {
-  fill: #a9d4e50a;
-  stroke: #aacbd240;
+  fill: color-mix(in srgb, var(--ui-ink) 4%, transparent);
+  stroke: color-mix(in srgb, var(--ui-focus) 30%, transparent);
 }
 :is(.graph-node, .graph-label):focus {
   outline: none;
 }
+/* The keyboard's ring round a star's 44px target, 2px on screen at every zoom. */
 :is(.graph-node, .graph-label):focus-visible .node-hit {
-  stroke: #bedee8;
-  stroke-width: 1.5px;
+  stroke: var(--ui-focus);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
 }
 .orbital {
   position: absolute;
-  border: 1px solid #8aacbf0c;
+  border: 1px solid color-mix(in srgb, var(--ui-soft) 5%, transparent);
   border-radius: 50%;
   width: 75%;
   aspect-ratio: 1;
@@ -425,8 +557,8 @@
   transform: translateX(-50%);
   z-index: 2;
   padding: 3px 7px;
-  background: #111a2177;
-  border: 1px solid #7496ad1c;
+  background: color-mix(in srgb, var(--ui-night) 47%, transparent);
+  border: 1px solid var(--ui-divider);
   border-radius: 25px;
 }
 .graph-controls button {
@@ -434,35 +566,38 @@
   place-items: center;
   width: 28px;
   height: 28px;
-  color: #829aa8;
+  color: var(--ui-soft);
 }
 .graph-controls span {
-  font-size: 8px;
-  color: #718591;
-  width: 31px;
+  font-size: var(--ui-text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-faint);
+  width: 40px;
   text-align: center;
 }
 .workout-title {
-  font-size: 13px;
-  color: #c3d0d4;
-  margin: 20px 0 9px;
+  font-size: var(--ui-text-body);
+  color: var(--ui-soft);
+  margin: var(--ui-space-1) 0 var(--ui-space-1);
 }
 .run-value {
-  font-family: "Manrope Variable";
+  font-family: var(--ui-display);
   font-size: 36px;
   font-weight: 350;
-  letter-spacing: -1px;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
 }
 .run-value > small {
-  font-size: 15px;
-  color: #91a5ae;
+  font-size: var(--ui-text-lead);
+  color: var(--ui-soft);
 }
 .run-value > span {
   display: block;
-  font: 10px "DM Sans Variable";
-  letter-spacing: 0.2px;
-  color: #8aa0ab;
-  margin-top: 7px;
+  font: var(--ui-text-meta) / 1.4 var(--ui-font);
+  letter-spacing: 0;
+  color: var(--ui-faint);
+  margin-top: var(--ui-space-1);
 }
 .week-activity {
   height: 59px;
@@ -491,15 +626,16 @@
   background: linear-gradient(#759c9c, #436969);
 }
 .week-activity small {
-  font-size: 8px;
-  line-height: 10px;
-  color: #768e99;
+  font-size: 11px;
+  line-height: 12px;
+  color: var(--ui-faint);
 }
 /* The changed corner's record, at Home and in a dashboard's part
    (parts/parts.css). */
 :is(.context-zone, .part-changed) h2 {
-  font: 350 23px/1.45 "Manrope Variable";
-  letter-spacing: -0.7px;
+  font: 400 23px/1.35 var(--ui-display);
+  letter-spacing: -0.025em;
+  color: var(--ui-ink);
   max-width: 220px;
   margin: 24px 0 14px;
   /* Record titles can be long excerpts; keep the tile to three lines. */
@@ -511,75 +647,107 @@
   overflow: hidden;
 }
 :is(.context-zone, .part-changed) p {
-  font-size: 11px;
-  line-height: 1.9;
-  color: #8da1ac;
-  max-width: 230px;
+  font-size: var(--ui-text-small);
+  line-height: 1.6;
+  color: var(--ui-soft);
+  max-width: 260px;
 }
 .tiny-orbit {
   width: 13px;
   height: 13px;
-  border: 1px solid #a9c5c057;
+  border: 1px solid color-mix(in srgb, var(--ui-soft) 34%, transparent);
   border-radius: 50%;
 }
 .context-link {
-  margin-top: 25px;
+  margin-top: var(--ui-space-4);
+  min-height: var(--ui-target);
   display: flex;
-  gap: 10px;
+  gap: var(--ui-space-2);
   align-items: center;
-  font-size: 10px;
-  color: #b1c1cd;
+  font-size: var(--ui-text-small);
+  color: var(--ui-mint);
+  transition: color var(--ui-fast) var(--ui-ease);
+}
+.context-link:hover {
+  color: var(--ui-ink);
 }
 .mini-nodes {
   font-size: 18px;
   letter-spacing: -2px;
-  color: #b2a4cb;
+  color: var(--ui-lilac);
   margin-right: 5px;
 }
 .context-foot {
   display: block;
-  color: #647c8a;
-  font-size: 7px;
-  letter-spacing: 1.4px;
-  margin-top: 23px;
+  color: var(--ui-faint);
+  font-size: var(--ui-text-meta);
+  font-variant-numeric: tabular-nums;
+  margin-top: var(--ui-space-2);
 }
 .search-field {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #172229;
-  border: 1px solid #7898ac2b;
-  border-radius: 8px;
-  padding: 0 14px;
-  color: #8ca5b2;
+  gap: var(--ui-space-2);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  padding: 0 var(--ui-space-3);
+  color: var(--ui-faint);
+  transition: border-color var(--ui-fast) var(--ui-ease);
 }
 .search-field input {
   width: 100%;
   min-width: 0;
   background: none;
   border: 0;
-  padding: 13px 0;
-  color: #e3eff2;
-  font-size: 12px;
+  padding: 12px 0;
+  color: var(--ui-ink);
+  font-size: var(--ui-text-small);
   outline: none;
 }
 .search-field input::placeholder {
-  color: #738997;
+  color: var(--ui-faint);
+}
+/* The field draws the ring for the input inside it. */
+.search-field:focus-within {
+  border-color: var(--ui-line-strong);
+  outline: var(--ui-focus-ring);
+  outline-offset: 2px;
 }
 select {
-  background: #172229;
-  border: 1px solid #7898ac2b;
-  border-radius: 7px;
-  padding: 12px;
-  color: #b6cbd5;
-  font-size: 11px;
+  min-height: var(--ui-target);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  padding: 0 var(--ui-space-3);
+  color: var(--ui-ink);
+  font-size: var(--ui-text-small);
   max-width: 100%;
+  transition: border-color var(--ui-fast) var(--ui-ease);
+}
+select:hover:not(:disabled) {
+  border-color: var(--ui-line-strong);
 }
 .text-button {
-  font-size: 10px;
-  color: #99b9c8;
-  padding: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-1);
+  min-height: 36px;
+  font-size: var(--ui-text-small);
+  color: var(--ui-mint);
+  padding: var(--ui-space-2) var(--ui-space-3);
+  border-radius: var(--ui-radius-control);
+  transition: background-color var(--ui-fast) var(--ui-ease);
+}
+.text-button:hover {
+  color: var(--ui-mint);
+  background: color-mix(in srgb, var(--ui-mint) 10%, transparent);
+}
+@media (any-pointer: coarse) {
+  .text-button {
+    min-height: var(--ui-target);
+  }
 }
 .detail-top {
   display: flex;
@@ -588,28 +756,30 @@ select {
   gap: 20px;
 }
 .origin {
-  border-top: 1px solid #85afbd24;
+  border-top: 1px solid var(--ui-divider);
   padding-top: 22px;
   margin-top: 27px;
-  color: #93aab5;
+  color: var(--ui-soft);
 }
 .origin p {
-  font-size: 10px;
-  line-height: 1.8;
+  font-size: var(--ui-text-meta);
+  line-height: 1.6;
   margin: 8px 0;
 }
 .origin small {
-  font-size: 9px;
-  color: #7e97a5;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-faint);
   line-height: 1.6;
 }
 .tag {
-  font-size: 7px;
-  letter-spacing: 1.2px;
-  padding: 4px 6px;
-  border: 1px solid #afc8b52e;
-  border-radius: 4px;
-  color: #b3bf9e;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  padding: 2px var(--ui-space-2);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-chip);
+  color: var(--ui-soft);
 }
 .detail-title {
   display: flex;
@@ -619,14 +789,16 @@ select {
   gap: 20px;
 }
 .detail-title h2 {
-  font: 350 36px/1.3 "Manrope Variable";
-  letter-spacing: -1.2px;
-  margin: 10px 0;
+  font: 400 36px/1.25 var(--ui-display);
+  letter-spacing: -0.03em;
+  color: var(--ui-ink);
+  margin: var(--ui-space-2) 0;
 }
 .detail-title p:not(.eyebrow) {
-  color: #91aab7;
-  font-size: 12px;
-  line-height: 1.8;
+  color: var(--ui-soft);
+  font-size: var(--ui-text-small);
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
 }
 .detail-title > svg {
   color: #8ec4ba;
@@ -642,28 +814,30 @@ select {
   justify-content: space-between;
   gap: 25px;
   padding: 21px 0 25px;
-  border-top: 1px solid #93b4c321;
-  border-bottom: 1px solid #93b4c321;
+  border-top: 1px solid var(--ui-divider);
+  border-bottom: 1px solid var(--ui-divider);
 }
 .detail-summary strong {
   display: flex;
   align-items: center;
   gap: 9px;
-  font: 350 35px "Manrope Variable";
-  letter-spacing: -1px;
+  font: 350 35px var(--ui-display);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
 }
 .detail-summary strong svg {
   color: #87c9b0;
 }
 .detail-summary strong small {
   font-size: 17px;
-  color: #a0b8c2;
+  color: var(--ui-soft);
 }
 .detail-summary span {
   display: block;
-  font-size: 10px;
-  color: #8ca7b4;
-  margin-top: 9px;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-faint);
+  margin-top: var(--ui-space-2);
 }
 .chart-toolbar {
   display: flex;
@@ -674,19 +848,31 @@ select {
 }
 .segmented {
   display: flex;
-  border: 1px solid #91b0c323;
+  gap: 2px;
+  border: 1px solid var(--ui-line);
   border-radius: 20px;
   padding: 3px;
 }
 .segmented button {
-  font-size: 9px;
-  color: #8fa9b7;
-  padding: 7px 13px;
+  min-height: 34px;
+  font-size: var(--ui-text-small);
+  color: var(--ui-soft);
+  padding: 6px 14px;
+  border: 1px solid transparent;
   border-radius: 20px;
+  transition:
+    background-color var(--ui-fast) var(--ui-ease),
+    border-color var(--ui-fast) var(--ui-ease),
+    color var(--ui-fast) var(--ui-ease);
 }
+.segmented button:hover {
+  background: var(--ui-raised);
+}
+/* The chosen one is filled and bordered: it reads without colour. */
 .segmented button[aria-pressed="true"] {
-  background: #344b5866;
-  color: #d7e5e9;
+  background: var(--ui-mint-fill);
+  border-color: var(--ui-mint-edge);
+  color: var(--ui-ink);
 }
 .health-chart {
   height: 250px;
@@ -707,10 +893,11 @@ select {
 }
 .range-legend {
   display: flex;
-  gap: 22px;
+  flex-wrap: wrap;
+  gap: var(--ui-space-2) 22px;
   margin-top: 12px;
-  font-size: 9px;
-  color: #9db6c0;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-soft);
 }
 .range-legend span {
   display: flex;
@@ -727,9 +914,9 @@ select {
   background: #c1a66d;
 }
 .chart-note {
-  font-size: 10px;
-  line-height: 1.8;
-  color: #8b9fab;
+  font-size: var(--ui-text-meta);
+  line-height: 1.6;
+  color: var(--ui-faint);
   margin: 14px 0;
 }
 .linked-record {
@@ -738,27 +925,31 @@ select {
   justify-content: space-between;
   align-items: center;
   gap: 20px;
-  border: 1px solid #95b9c222;
-  background: #61879709;
-  border-radius: 10px;
-  padding: 17px 20px;
+  border: 1px solid var(--ui-line);
+  background: color-mix(in srgb, var(--ui-raised) 55%, transparent);
+  border-radius: var(--ui-radius-panel);
+  padding: var(--ui-space-4) 20px;
   margin-top: 25px;
   text-align: left;
+  transition: border-color var(--ui-fast) var(--ui-ease);
+}
+.linked-record:hover {
+  border-color: var(--ui-edge-strong);
 }
 .linked-record b {
   display: block;
-  font-size: 11px;
-  font-weight: 500;
-  color: #bfced5;
+  font-size: var(--ui-text-body);
+  font-weight: 550;
+  color: var(--ui-ink);
 }
 .linked-record small {
   display: block;
-  font-size: 10px;
-  color: #89a5b3;
-  margin-top: 7px;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-faint);
+  margin-top: var(--ui-space-1);
 }
 .linked-record svg {
-  color: #94b4c2;
+  color: var(--ui-mint);
 }
 .recovery-details {
   display: flex;
@@ -767,9 +958,9 @@ select {
 }
 .recovery-details > div {
   flex: 1;
-  border: 1px solid #91b0c323;
+  border: 1px solid var(--ui-line);
   padding: 22px;
-  border-radius: 12px;
+  border-radius: var(--ui-radius-panel);
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -779,21 +970,23 @@ select {
   color: #b9accf;
 }
 .recovery-details span {
-  font-size: 11px;
-  color: #a4b9c4;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-soft);
 }
 .recovery-details b {
   width: 100%;
-  font: 350 32px "Manrope Variable";
+  font: 350 32px var(--ui-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
 }
 .recovery-details small {
   font-size: 14px;
-  color: #8ea5b4;
+  color: var(--ui-soft);
 }
 .detail-prose {
-  font-size: 12px;
-  line-height: 1.9;
-  color: #91aab7;
+  font-size: var(--ui-text-body);
+  line-height: 1.7;
+  color: var(--ui-soft);
   margin: 25px 0;
 }
 .workout-list > div,
@@ -821,65 +1014,210 @@ select {
 .workout-list > div > span:last-child {
   text-align: right;
   font-size: 14px;
-  color: #9dbabf;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-soft);
 }
 .workout-list > div > span:last-child b {
-  font-size: 10px;
-  color: #7e9aa8;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-faint);
   margin-top: 6px;
 }
+/* A workout's row on the panel's own levels (the list's rule is shared with
+   Sources & settings above). */
+.workout-list > div {
+  border-bottom-color: var(--ui-divider);
+}
+.workout-list > div > span:first-child b {
+  font-size: var(--ui-text-body);
+  color: var(--ui-ink);
+}
+.workout-list small {
+  font-size: var(--ui-text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-faint);
+}
 .source-status {
-  font-size: 7px;
-  color: #a8b897;
-  letter-spacing: 0.7px;
+  flex: none;
+  max-width: 45%;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: right;
+  color: var(--ui-soft);
+  letter-spacing: 0.08em;
+}
+/* Sources & settings rows: a source's name in ink, its times in faint, its
+   state at the right. (The row's frame is shared with the workout list.) */
+.sources-list > div {
+  gap: var(--ui-space-4);
+  padding: var(--ui-space-4) 0;
+  border-bottom-color: var(--ui-divider);
+}
+.sources-list b {
+  font: 600 var(--ui-text-title) / 1.35 var(--ui-display);
+  color: var(--ui-ink);
+}
+.sources-list small {
+  font-size: var(--ui-text-meta);
+  line-height: 1.5;
+  color: var(--ui-faint);
+  margin-top: var(--ui-space-1);
+  font-variant-numeric: tabular-nums;
+}
+.sources-list code {
+  color: var(--ui-soft);
+}
+/* A row that opens something, as a dashboard's card does: its name, and the
+   mint opening arrow at the right. */
+.sources-list > button,
+.settings-dashboards .settings-actions button {
+  --open-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 7h10v10'/%3E%3Cpath d='M7 17 17 7'/%3E%3C/svg%3E");
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ui-space-3);
+  width: 100%;
+  min-height: var(--ui-target);
+  padding: var(--ui-space-3) 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--ui-divider);
+  border-radius: 0;
+  text-align: left;
+  font: 600 var(--ui-text-title) / 1.35 var(--ui-display);
+  color: var(--ui-ink);
+  outline-offset: 2px;
+}
+.sources-list > button::after,
+.settings-dashboards .settings-actions button::after {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: var(--ui-mint);
+  -webkit-mask: var(--open-arrow) center / contain no-repeat;
+  mask: var(--open-arrow) center / contain no-repeat;
+  transition: transform var(--ui-fast) var(--ui-ease);
+}
+.sources-list > button:hover::after,
+.settings-dashboards .settings-actions button:hover::after {
+  transform: translate(1px, -1px);
+}
+.settings-dashboards {
+  margin-top: var(--ui-space-6);
+  padding-top: var(--ui-space-4);
+  border-top: 1px solid var(--ui-divider);
+}
+.settings-dashboards h3 {
+  font: 600 var(--ui-text-lead) / 1.3 var(--ui-display);
+  color: var(--ui-ink);
+}
+.settings-dashboards .settings-actions {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 0;
+  margin-top: var(--ui-space-2);
 }
 .state-picker {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  font-size: 12px;
-  color: #b3c8d2;
-  margin-top: 25px;
+  gap: var(--ui-space-4);
+  font-size: var(--ui-text-body);
+  color: var(--ui-soft);
+  margin-top: var(--ui-space-6);
 }
 .settings-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 25px;
+  gap: var(--ui-space-2);
+  margin-top: var(--ui-space-6);
 }
 .settings-actions button {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  gap: 9px;
-  border: 1px solid #95b8c333;
-  border-radius: 8px;
-  padding: 13px 15px;
-  font-size: 11px;
-  color: #c0d4db;
+  gap: var(--ui-space-2);
+  min-height: var(--ui-target);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  padding: 0 var(--ui-space-4);
+  font-size: var(--ui-text-small);
+  text-align: left;
+  color: var(--ui-ink);
+  transition:
+    background-color var(--ui-fast) var(--ui-ease),
+    border-color var(--ui-fast) var(--ui-ease);
+}
+.settings-actions button:hover:not(:disabled) {
+  background: var(--ui-raised);
+  border-color: var(--ui-line-strong);
+}
+.settings-dashboards .settings-actions button:hover:not(:disabled) {
+  background: none;
+}
+.settings-actions button svg {
+  color: var(--ui-soft);
+}
+/* A setting that is on says so in its words, and its mark turns mint. */
+.settings-actions button[aria-pressed="true"] svg {
+  color: var(--ui-mint);
 }
 .install-message {
-  font-size: 12px;
-  line-height: 1.8;
-  margin-top: 20px;
-  color: #a3c8c0;
+  font-size: var(--ui-text-body);
+  line-height: 1.6;
+  margin-top: var(--ui-space-4);
+  color: var(--ui-soft);
 }
 .state-notice {
-  padding: 18px 22px;
+  padding: var(--ui-space-4) var(--ui-space-6);
   display: flex;
   align-items: center;
-  gap: 20px;
-  border: 1px solid #b9a56b55;
-  border-radius: 10px;
-  background: #81744412;
-  margin-top: 20px;
-  font-size: 12px;
+  gap: var(--ui-space-4);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-surface);
+  margin-top: var(--ui-space-4);
+  font-size: var(--ui-text-body);
+  color: var(--ui-ink);
+}
+/* Stale: amber beside the words that say so. A failure: the alert colour. */
+.state-notice.stale {
+  border-color: color-mix(in srgb, var(--ui-amber) 45%, var(--ui-surface));
+}
+.state-notice.stale b::before,
+.state-notice.error b::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 var(--ui-space-2) 1px 0;
+  border-radius: 50%;
+  background: var(--ui-amber);
+}
+.state-notice.error {
+  border-color: color-mix(in srgb, var(--ui-alert) 45%, var(--ui-surface));
+}
+.state-notice.error b::before {
+  background: var(--ui-alert);
+}
+.state-notice b {
+  font-weight: 600;
 }
 .state-notice span {
   flex: 1;
-  color: #a2b1b7;
-  font-size: 11px;
+  color: var(--ui-soft);
+  font-size: var(--ui-text-small);
+}
+.state-notice span + button {
+  min-height: var(--ui-target);
+  padding: 0 var(--ui-space-4);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-raised);
+  font-size: var(--ui-text-small);
+  color: var(--ui-ink);
 }
 .state-notice button,
 .empty-detail button {
@@ -889,7 +1227,7 @@ select {
   font-size: 11px;
 }
 .caution {
-  color: #d7bd83;
+  color: var(--ui-amber);
 }
 .graph-empty {
   position: absolute;
@@ -901,11 +1239,12 @@ select {
   gap: 14px;
 }
 .graph-empty h3 {
-  font-size: 17px;
+  font: 600 var(--ui-text-section) / 1.3 var(--ui-display);
+  color: var(--ui-ink);
 }
 .graph-empty p {
-  font-size: 11px;
-  color: #8fa7b5;
+  font-size: var(--ui-text-body);
+  color: var(--ui-soft);
 }
 .empty-detail {
   padding: 70px 20px;
@@ -913,13 +1252,15 @@ select {
 }
 .empty-detail h3 {
   margin-bottom: 20px;
-  color: #a5bcc7;
+  font: 650 var(--ui-text-lead) / 1.3 var(--ui-display);
+  color: var(--ui-ink);
 }
 .empty-detail p {
   max-width: 40ch;
   margin: 0 auto 20px;
+  font-size: var(--ui-text-body);
   line-height: 1.6;
-  color: #879ca5;
+  color: var(--ui-soft);
 }
 .boot {
   min-height: 100vh;
@@ -927,31 +1268,54 @@ select {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 25px;
-  color: #b6ced8;
+  gap: var(--ui-space-4);
+  padding: var(--ui-space-6);
+  text-align: center;
+  color: var(--ui-soft);
+}
+.boot svg {
+  color: var(--ui-mint);
 }
 .boot h1 {
-  font-size: 25px;
+  margin-top: var(--ui-space-2);
+  font: 600 var(--ui-text-page) / 1.3 var(--ui-display);
+  letter-spacing: -0.01em;
+  color: var(--ui-ink);
 }
 .boot p {
-  font-size: 12px;
+  max-width: 40ch;
+  font-size: var(--ui-text-body);
+  line-height: 1.6;
 }
 .boot button {
-  padding: 12px;
-  border: 1px solid #90b9c555;
-  border-radius: 8px;
+  min-height: var(--ui-target);
+  margin-top: var(--ui-space-2);
+  padding: 0 var(--ui-space-6);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-size: var(--ui-text-small);
+  transition:
+    background-color var(--ui-fast) var(--ui-ease),
+    border-color var(--ui-fast) var(--ui-ease);
+}
+.boot button:hover {
+  background: var(--ui-raised);
+  border-color: var(--ui-line-strong);
 }
 .motion-paused * {
   animation-play-state: paused !important;
 }
 .chart-readings {
   margin: 16px 0;
-  color: #a8bfcc;
-  font-size: 12px;
+  color: var(--ui-soft);
+  font-size: var(--ui-text-meta);
 }
 .chart-readings summary {
   cursor: pointer;
-  padding: 12px 0;
+  padding: 13px 0;
+  color: var(--ui-mint);
 }
 .chart-readings p {
   margin: 8px 0;
@@ -960,14 +1324,15 @@ select {
 .chart-readings table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
+  font-size: var(--ui-text-meta);
+  font-variant-numeric: tabular-nums;
 }
 .chart-readings th,
 .chart-readings td {
   text-align: left;
   font-weight: 400;
   padding: 8px;
-  border-bottom: 1px solid #789bad25;
+  border-bottom: 1px solid var(--ui-divider);
 }
 .chart-readings caption {
   padding: 12px;
@@ -1002,34 +1367,53 @@ select {
 }
 .source-times {
   display: flex;
-  gap: 15px;
+  flex-wrap: wrap;
+  gap: var(--ui-space-1) var(--ui-space-4);
   margin-left: auto;
 }
 .source-times button {
   display: flex;
-  gap: 5px;
+  gap: var(--ui-space-1);
   align-items: center;
-  font-size: 8px;
-  color: #8fa3ae;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-soft);
 }
 .source-times time {
-  color: #6f8894;
+  color: var(--ui-faint);
 }
 .source-times button span {
-  font-size: 6px;
-  color: #a5ae94;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ui-faint);
 }
 .detail-panel .detail-top {
   position: sticky;
   top: -1px;
   z-index: 3;
-  background: #15222bf5;
+  background: color-mix(in srgb, var(--ui-surface) 96%, transparent);
   border-radius: 8px;
   padding: 5px 0;
 }
-@media (max-width: 1250px) {
+@media (max-width: 899px) {
   .source-times {
     display: none;
+  }
+}
+/* Wide enough to show each source's time (an upright iPad too): the way in
+   and the caption keep the first line, and the times wrap between them, each
+   source whole with its time and state, when there are many. */
+@media (min-width: 900px) {
+  .source-strip {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .source-times {
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+  .source-strip .sample-date {
+    margin-left: 0;
   }
 }
 .graph-empty {
@@ -1048,16 +1432,16 @@ select {
   filter: brightness(1.5) drop-shadow(0 0 8px #9fe3d6aa);
 }
 .graph-controls button {
-  min-width: 34px;
-  min-height: 34px;
+  min-width: var(--ui-target);
+  min-height: var(--ui-target);
 }
 .graph-hint {
   position: absolute;
   bottom: -28px;
   width: 100%;
   text-align: center;
-  font-size: 10px;
-  color: #7f98a6;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-faint);
 }
 :is(.graph-node, .graph-label) {
   cursor: grab;
@@ -1091,20 +1475,19 @@ select {
   letter-spacing: -1px;
 }
 .capability-note {
-  border-top: 1px solid #91b3c322;
-  margin-top: 24px;
-  padding-top: 20px;
+  border-top: 1px solid var(--ui-divider);
+  margin-top: var(--ui-space-6);
+  padding-top: var(--ui-space-4);
 }
 .capability-note h3 {
-  font-size: 14px;
-  color: #c2d1da;
-  font-weight: 500;
+  font: 600 var(--ui-text-lead) / 1.3 var(--ui-display);
+  color: var(--ui-ink);
 }
 .capability-note p {
-  color: #91a7b4;
-  font-size: 12px;
-  line-height: 1.7;
-  margin-top: 10px;
+  color: var(--ui-soft);
+  font-size: var(--ui-text-small);
+  line-height: 1.6;
+  margin-top: var(--ui-space-2);
 }
 /* Sources & settings, Models: a state stays one word beside a long note. */
 .model-status .source-status {
@@ -1135,13 +1518,13 @@ select {
 .glucose-history {
   margin: 24px 0;
   padding: 22px 0;
-  border-top: 1px solid #91b3c326;
-  border-bottom: 1px solid #91b3c326;
+  border-top: 1px solid var(--ui-divider);
+  border-bottom: 1px solid var(--ui-divider);
 }
 .history-period {
-  font-size: 10px;
-  color: #93acae;
-  letter-spacing: 0.5px;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-faint);
+  letter-spacing: 0;
   margin: 0 0 16px;
 }
 .history-period.next-window {
@@ -1158,23 +1541,25 @@ select {
   gap: 6px;
 }
 .history-metrics > div > span {
-  color: #b3c6cb;
-  font-size: 12px;
+  color: var(--ui-soft);
+  font-size: var(--ui-text-meta);
 }
 .history-metrics strong {
-  color: #d7eee5;
+  color: var(--ui-ink);
+  font-family: var(--ui-display);
   font-size: 32px;
   font-weight: 400;
-  letter-spacing: -1px;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
 }
 .history-metrics small {
-  color: #91a7b1;
-  font-size: 10px;
+  color: var(--ui-faint);
+  font-size: var(--ui-text-meta);
   letter-spacing: 0;
 }
 .history-coverage {
-  color: #8fa6af;
-  font-size: 11px;
+  color: var(--ui-faint);
+  font-size: var(--ui-text-meta);
   margin-top: 16px;
   line-height: 1.6;
 }
@@ -1200,19 +1585,19 @@ select {
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px;
-  color: #a8bec7;
-  font-size: 11px;
+  color: var(--ui-soft);
+  font-size: var(--ui-text-meta);
 }
 .history-method {
-  color: #90a8b3;
-  font-size: 11px;
+  color: var(--ui-faint);
+  font-size: var(--ui-text-meta);
   line-height: 1.7;
   margin-top: 16px;
 }
 .history-method summary {
   cursor: pointer;
-  padding: 6px 0;
-  color: #b8ccd6;
+  padding: 13px 0;
+  color: var(--ui-mint);
 }
 .history-method p {
   margin-top: 10px;
@@ -1227,7 +1612,7 @@ select {
   border-bottom: 0;
 }
 .compact .history-period {
-  font-size: 8px;
+  font-size: var(--ui-text-meta);
   margin-bottom: 12px;
 }
 .compact .history-metrics {
@@ -1235,16 +1620,16 @@ select {
   gap: 16px;
 }
 .compact .history-metrics > div > span {
-  font-size: 10px;
+  font-size: var(--ui-text-meta);
 }
 .compact .history-metrics strong {
   font-size: 26px;
 }
 .compact .history-metrics small {
-  font-size: 8px;
+  font-size: var(--ui-text-meta);
 }
 .compact .history-coverage {
-  font-size: 9px;
+  font-size: var(--ui-text-meta);
   margin-top: 12px;
 }
 @media (max-width: 760px) {
@@ -1262,89 +1647,134 @@ select {
     grid-column: auto;
   }
   .compact .history-period {
-    font-size: 9px;
+    font-size: var(--ui-text-meta);
   }
   .compact .history-metrics > div > span {
-    font-size: 11px;
+    font-size: var(--ui-text-meta);
   }
   .compact .history-metrics small {
-    font-size: 9px;
+    font-size: var(--ui-text-meta);
   }
 }
 
 /* More names at rest; all names remain available through zoom, selection or the label control.
-   Constellation sets label size and outline width in screen pixels. */
+   Constellation sets label size and outline width in screen pixels. Three
+   levels: topics and the selection in ink, structure (folders, projects,
+   dashboards, hubs) in soft, every other record in faint. */
 :is(.graph-node, .graph-label) text {
   paint-order: stroke fill;
-  stroke: #0e171e;
+  stroke: var(--ui-sky);
   stroke-linejoin: round;
-  transition: opacity 0.25s;
+  fill: var(--ui-faint);
+  font-family: var(--ui-display);
+  font-weight: 500;
+  transition:
+    opacity var(--ui-calm) var(--ui-ease),
+    fill var(--ui-calm) var(--ui-ease);
 }
-/* The ambient sky names folders and memories linked to two or more records
-   at rest; the rest appear on hover, selection, zoom or the label control. */
+/* Which stars the ambient sky names at rest is Constellation's choice
+   (graph.ts namedAtRest): landmarks, dashboards, pinned stars and memories
+   that tie records together everywhere, and each cluster's hub on a sky wider
+   than a phone's. The rest appear on hover, focus, selection, zoom or the
+   label control. */
 .constellation:not(.is-interactive):not(.show-labels)
-  :is(.graph-node, .graph-label):not(.theme-node):not(.folder-node):not(
-    .project-star
-  ):not(.memory-hub):not(.related-node):not(.dashboard-star):not(.pinned-star)
+  :is(.graph-node, .graph-label):not(.rest-name):not(.related-node):not(
+    .is-emphasis
+  ):not(.is-selected)
   text {
   opacity: 0;
 }
-/* A pinned star is always named, brighter, with a soft ring around it. */
+/* A pinned star is named first after the selection, brighter, with a soft ring around it. */
 .constellation :is(.graph-node, .graph-label).pinned-star text {
   opacity: 1;
-  fill: #e4eef0;
-  font-weight: 500;
+  fill: var(--ui-ink);
+  font-weight: 600;
 }
 .constellation .pinned-star .pin-ring {
   opacity: 0.55;
 }
-/* A dashboard is always named, with a small tag saying what it is. */
+/* A dashboard is named where it fits, with a small tag saying what it is. */
 .constellation :is(.graph-node, .graph-label).dashboard-star text {
-  fill: #d3e1e7;
-  font-weight: 500;
+  fill: var(--ui-soft);
+  font-weight: 600;
 }
 .constellation .dashboard-star .dashboard-tag {
-  font-size: 0.66em;
   font-weight: 600;
-  letter-spacing: 0.16em;
-  fill: #8fd3c0;
+  letter-spacing: 0.08em;
+  fill: var(--ui-mint);
 }
 /* Folder names read as structure: brighter and a touch heavier. */
 .constellation
   :is(.graph-node, .graph-label):is(.folder-node, .project-star)
   text {
-  fill: #c6d6dd;
-  font-weight: 500;
+  fill: var(--ui-soft);
+  font-weight: 600;
 }
 /* Hubs read first; their runners-up next; unlinked records recede. */
 .constellation :is(.graph-node, .graph-label).label-primary text {
-  fill: #d3e1e7;
+  fill: var(--ui-soft);
 }
 .constellation :is(.graph-node, .graph-label).label-secondary text {
-  fill: #b3c5ce;
+  fill: var(--ui-faint);
 }
 /* A dashboard with no links sits on that ring too, named as dashboards are. */
 .constellation
-  :is(.graph-node, .graph-label).loose-node:not(.dashboard-star)
+  :is(.graph-node, .graph-label).loose-node:not(.dashboard-star):not(
+    .is-selected
+  ):not(.is-emphasis)
   text {
-  fill: #7f939f;
+  fill: var(--ui-faint);
 }
 .constellation :is(.graph-node, .graph-label):hover text,
 .constellation :is(.graph-node, .graph-label):focus-visible text {
   opacity: 1;
 }
+/* Topics are the sky's landmarks: the brightest names at rest. */
+.constellation :is(.graph-node, .graph-label).theme-node text {
+  fill: var(--ui-ink);
+  font-weight: 600;
+}
+/* A star a pointer or the keyboard rests on: its name in ink, shown where it
+   fits. A lighter version of the selection's. */
+.constellation :is(.graph-node, .graph-label).is-emphasis text {
+  opacity: 1;
+  fill: var(--ui-ink);
+  font-weight: 600;
+}
+/* The selected star's name comes forward: ink, heavier and a size up
+   (Constellation), and never hidden by a collision. */
+.constellation :is(.graph-node, .graph-label).is-selected text {
+  opacity: 1;
+  fill: var(--ui-ink);
+  font-weight: 750;
+}
+/* And its star: a solid outline close round it and a ring of round dots in
+   its own colour, so the selection reads by shape as well as colour. */
+.graph-node .selection-outline {
+  stroke: var(--ui-ink);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.9;
+}
+.graph-node .selection-ring {
+  stroke-width: 1.5;
+  stroke-dasharray: 0.1 4.6;
+  stroke-linecap: round;
+  opacity: 1;
+}
 .graph-controls button[aria-pressed="true"] {
-  color: #c9ede1;
-  background: #29413c;
+  color: var(--ui-mint);
+  background: var(--ui-mint-fill);
   border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--ui-mint);
 }
 /* Folder names: faint, spaced capitals above each group; never tappable. */
 .graph-groups text {
-  fill: #7d97a4;
-  letter-spacing: 0.14em;
+  fill: var(--ui-faint);
+  letter-spacing: 0.08em;
   font-weight: 500;
   paint-order: stroke fill;
-  stroke: #0e171e;
+  stroke: var(--ui-sky);
   stroke-linejoin: round;
   pointer-events: none;
   transition: opacity 0.4s;
@@ -1406,7 +1836,7 @@ select {
     font-size: 28px;
   }
   .detail-title p:not(.eyebrow) {
-    font-size: 10px;
+    font-size: var(--ui-text-meta);
   }
   .detail-title > svg {
     width: 25px;
@@ -1419,7 +1849,7 @@ select {
     font-size: 29px;
   }
   .detail-summary span {
-    font-size: 8px;
+    font-size: var(--ui-text-meta);
   }
   .detail-summary > div:last-child:nth-child(3) {
     display: none;
@@ -1434,52 +1864,53 @@ select {
     justify-content: space-between;
   }
   .segmented button {
+    min-height: var(--ui-target);
     padding: 8px 14px;
-    font-size: 10px;
+    font-size: var(--ui-text-small);
   }
   .health-chart {
     height: 235px;
   }
   .range-legend {
-    font-size: 8px;
-    gap: 12px;
+    font-size: var(--ui-text-meta);
+    gap: 8px 12px;
   }
   .chart-note {
-    font-size: 9px;
+    font-size: var(--ui-text-meta);
   }
   .linked-record {
     padding: 15px;
   }
   .linked-record b {
-    font-size: 10px;
+    font-size: var(--ui-text-small);
   }
   .linked-record small {
-    font-size: 9px;
+    font-size: var(--ui-text-meta);
   }
   .sources-list > div {
-    gap: 10px;
+    gap: var(--ui-space-3);
   }
   .sources-list b {
-    font-size: 11px;
+    font-size: var(--ui-text-title);
   }
   .sources-list small {
-    font-size: 8px;
+    font-size: var(--ui-text-meta);
   }
   .source-status {
-    font-size: 6px;
-    white-space: nowrap;
+    font-size: 11px;
+    white-space: normal;
   }
   .settings-actions {
     flex-direction: column;
   }
   .state-picker {
-    font-size: 11px;
-    gap: 12px;
+    font-size: var(--ui-text-body);
+    gap: var(--ui-space-3);
   }
   .state-notice {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: var(--ui-space-3);
   }
   .state-notice button {
     align-self: flex-end;
@@ -1491,19 +1922,19 @@ select {
     padding: 16px;
   }
   .recovery-details span {
-    font-size: 9px;
+    font-size: var(--ui-text-meta);
   }
   .recovery-details b {
     font-size: 28px;
   }
   .detail-prose {
-    font-size: 11px;
+    font-size: var(--ui-text-small);
   }
   .workout-list b {
-    font-size: 11px;
+    font-size: var(--ui-text-small);
   }
   .workout-list small {
-    font-size: 9px;
+    font-size: var(--ui-text-meta);
   }
 }
 
@@ -1514,9 +1945,11 @@ select {
    --------------------------------------------------------------------------- */
 .app {
   --gutter: clamp(16px, 2.3vw, 56px);
-  --tile: clamp(228px, 15.5vw, 320px);
+  --tile: clamp(248px, 17vw, 340px);
   --gap: clamp(18px, 2.4vw, 60px);
   --top: 66px;
+  /* A tile's head, as tall as a dashboard card's header (5.2 of the brief). */
+  --tile-head: 54px;
   /* Very large screens scale the tiles and header so they fill, not float. */
   --z: 1;
   /* The header's drawn height, which grows with --z. */
@@ -1536,7 +1969,7 @@ select {
   zoom: var(--z);
 }
 .top-status {
-  gap: 16px;
+  gap: var(--ui-space-4);
 }
 .source-strip {
   flex: none;
@@ -1553,20 +1986,30 @@ select {
 }
 .source-times > span {
   display: flex;
-  gap: 5px;
-  align-items: center;
-  font-size: 8px;
-  color: #8fa3ae;
+  gap: var(--ui-space-1);
+  align-items: baseline;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-soft);
+  white-space: nowrap;
 }
 .source-times > span > span {
-  font-size: 6px;
-  color: #a5ae94;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ui-faint);
 }
 main {
   flex: 1 1 0;
   min-height: 0;
   position: relative;
+  display: flex;
+  flex-direction: column;
   padding: clamp(8px, 1.6vh, 24px) var(--gutter) clamp(12px, 2.4vh, 32px);
+}
+/* The demo's preview notice sits at the foot of the scene, in view; Home
+   gives it the room it takes. */
+main > .state-notice {
+  flex: none;
+  margin-top: var(--ui-space-2);
 }
 .observatory {
   position: relative;
@@ -1627,23 +2070,31 @@ main {
 }
 .context-zone {
   grid-area: context;
-  padding-top: 20px;
-  border-top: 1px solid #90b9c523;
+  padding-top: 0;
+  border-top: 1px solid var(--ui-divider);
+}
+/* A dashboard's card in the corner draws its own edge. */
+.context-zone.dashboard-zone {
+  border-top: 0;
 }
 /* How a place sits in Home's grid is the place's own: a tile moved to another
-   place (App.tsx zoneOf) sits as that place does, whatever it is. */
+   place (App.tsx zoneOf) sits as that place does, whatever it is. Places that
+   share a row start at its top, so a tile's head and a card's header beside
+   it share a line. */
 [data-place="main"] {
   align-self: start;
 }
 [data-place="recovery"] {
   align-self: start;
-  margin-top: clamp(0px, 7vh, 90px);
+  margin-top: 0;
 }
 :is([data-place="training"], [data-place="changed"]) {
-  align-self: end;
+  align-self: start;
 }
 .graph-zone {
   grid-area: 1 / 2 / 3 / 3;
+  /* Its own height decides what of its heading and hint fit (below). */
+  container: sky / size;
   position: relative;
   min-width: 0;
   min-height: 0;
@@ -1701,11 +2152,29 @@ main {
   outline: none;
 }
 .graph-svg:focus-visible {
+  outline: var(--ui-focus-ring);
   outline-offset: -3px;
   border-radius: 24px;
 }
 .constellation:has(> .graph-svg:focus-visible) .orbital {
-  border-color: #9fd0dc3d;
+  border-color: color-mix(in srgb, var(--ui-focus) 24%, transparent);
+}
+/* Home's sky fades out at its edges (the mask above), which would fade its
+   ring too: there the ring is drawn on the sky's frame instead. */
+:is(.graph-zone, .part-map)
+  .constellation:has(> .graph-svg:focus-visible)::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: 2;
+  border: var(--ui-focus-ring);
+  border-radius: 23px;
+  pointer-events: none;
+}
+/* A connection takes focus as a strip along its line. */
+.graph-edge-hit:focus-visible {
+  outline: none;
+  stroke: color-mix(in srgb, var(--ui-focus) 45%, transparent);
 }
 .constellation,
 .explorer,
@@ -1729,19 +2198,26 @@ main {
   pointer-events: none;
 }
 .graph-caption p[role="status"] {
-  font-size: 10px;
-  color: #708d9c;
-  background: #0e171e99;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-faint);
+  background: color-mix(in srgb, var(--ui-sky) 60%, transparent);
   border-radius: 14px;
-  padding: 3px 8px;
+  padding: 4px 8px;
 }
 .sky-hint {
-  font-size: 9px;
-  letter-spacing: 0.22em;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8aa4b1;
+  color: var(--ui-faint);
   opacity: 0;
   animation: sky-hint 10s ease 1.5s both;
+}
+/* A sky too short for its heading and its hint drops the hint, so the two
+   never print over each other. */
+@container sky (max-height: 88px) {
+  .sky-hint {
+    display: none;
+  }
 }
 @keyframes sky-hint {
   12%,
@@ -1762,17 +2238,20 @@ main {
   display: flex;
   gap: 12px;
   align-items: center;
-  border: 1px solid #779eb540;
+  border: 1px solid var(--ui-line);
   border-radius: 24px;
+  min-height: var(--ui-target);
   padding: 10px 18px;
-  background: #0f1920e6;
-  color: #c6d8df;
-  font-size: 11px;
+  background: color-mix(in srgb, var(--ui-night) 90%, transparent);
+  color: var(--ui-ink);
+  font-size: var(--ui-text-small);
   opacity: 0;
 }
 .sky-entry:focus-visible {
   opacity: 1;
   pointer-events: auto;
+  outline: var(--ui-focus-ring);
+  outline-offset: var(--ui-focus-offset);
 }
 
 /* Exploring: the tiles and strip give way and the sky comes forward. */
@@ -1834,15 +2313,19 @@ main {
   overflow-x: hidden;
   overscroll-behavior: contain;
   overflow-wrap: anywhere;
-  background: linear-gradient(160deg, #15222be8, #0f1820f2);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--ui-surface) 92%, transparent),
+    color-mix(in srgb, var(--ui-night) 96%, transparent)
+  );
   backdrop-filter: blur(18px);
-  border: 1px solid #789eaf2e;
-  border-radius: 22px;
+  border: 1px solid var(--ui-edge);
+  border-radius: var(--ui-radius-card);
   box-shadow: 0 30px 120px #0006;
   padding: 0 36px 32px;
   outline: none;
   scrollbar-width: thin;
-  scrollbar-color: #465b68 transparent;
+  scrollbar-color: var(--ui-line) transparent;
 }
 .detail-sources .detail-panel {
   width: min(470px, 100%);
@@ -1872,50 +2355,87 @@ main {
 .dashboard-panel-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 10px 16px;
+  gap: var(--ui-space-3) var(--ui-space-4);
 }
 .dashboard-panel-head h2 {
   margin: 0;
-  font-size: clamp(20px, 2vw, 26px);
-  font-weight: 500;
-  color: #e4eef0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font: 650 var(--ui-text-page) / 1.25 var(--ui-display);
+  letter-spacing: -0.015em;
+  color: var(--ui-ink);
 }
 .dashboard-full {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  min-height: 30px;
-  padding: 0 12px;
-  color: #c4d4da;
-  border: 1px solid #93b4c329;
-  border-radius: 15px;
-  font-size: 11px;
+  gap: var(--ui-space-2);
+  min-height: 36px;
+  padding: 0 var(--ui-space-3);
+  color: var(--ui-ink);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  font-size: var(--ui-text-small);
   white-space: nowrap;
+  transition: border-color var(--ui-fast) var(--ui-ease);
+}
+.dashboard-full svg {
+  color: var(--ui-mint);
 }
 .dashboard-full:hover {
-  border-color: #93b4c35c;
+  border-color: var(--ui-edge-strong);
 }
 /* Beside the title where there is room, else under it. */
 .dashboard-panel-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--ui-space-2);
   margin-left: auto;
 }
 span.dashboard-full {
-  color: #8fa5b2;
+  color: var(--ui-soft);
+  background: transparent;
   border-color: transparent;
+}
+@media (max-width: 760px), (max-height: 500px), (any-pointer: coarse) {
+  .dashboard-full {
+    min-height: 44px;
+  }
+}
+/* A narrow phone: the panel's actions keep to their icons, in one row, so the dashboard keeps its
+   room; the words stay for screen readers, as the explorer's reader bar does on a phone. "This
+   screen's Home" is a state, not an action, and keeps its words. */
+@media (max-width: 360px) {
+  button.dashboard-full {
+    justify-content: center;
+    min-width: var(--ui-target);
+    padding: 0;
+  }
+  button.dashboard-full .dashboard-full-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-full {
+    transition: none;
+  }
 }
 .detail-panel .detail-top {
   position: sticky;
   top: 0;
   z-index: 3;
-  margin: 0 -36px;
+  margin: 0 -36px var(--ui-space-2);
   padding: 18px 36px 10px;
-  background: linear-gradient(#15222bf7 70%, #15222b00);
+  background: var(--ui-surface);
+  border-bottom: 1px solid var(--ui-divider);
   border-radius: 0;
 }
 
@@ -1925,16 +2445,17 @@ span.dashboard-full {
     --top: 58px;
   }
   .tile-button {
-    padding: 14px 0 10px;
+    padding: 0 0 10px;
   }
   .glucose-value {
     font-size: 52px;
-    margin: 8px 0 4px;
+    margin: 0 0 4px;
   }
   .sparkline {
     height: 46px;
   }
-  .glucose-zone :is(.quiet-copy, .spark-axis),
+  /* Glucose keeps its trend in words; its line's axis waits in the panel. */
+  .glucose-zone .spark-axis,
   .training-zone .quiet-copy,
   .compact .history-coverage {
     display: none;
@@ -1951,10 +2472,10 @@ span.dashboard-full {
   }
   .sleep-value {
     font-size: 30px;
-    margin: 12px 0;
+    margin: 0 0 var(--ui-space-3);
   }
   .workout-title {
-    margin: 12px 0 6px;
+    margin: 0 0 var(--ui-space-1);
   }
   .run-value {
     font-size: 30px;
@@ -1965,19 +2486,20 @@ span.dashboard-full {
   }
   .tile-footer {
     margin-top: 10px;
+    padding-top: var(--ui-space-2);
   }
   .context-zone {
-    padding-top: 14px;
+    padding-top: 0;
   }
   .context-zone h2 {
     font-size: 19px;
-    margin: 12px 0 8px;
+    margin: var(--ui-space-1) 0 var(--ui-space-2);
     -webkit-line-clamp: 2;
     line-clamp: 2;
   }
   .context-link,
   .context-foot {
-    margin-top: 12px;
+    margin-top: var(--ui-space-1);
   }
 }
 @media (max-height: 720px) and (min-width: 761px) {
@@ -1996,10 +2518,31 @@ span.dashboard-full {
   .app {
     --z: 1.2;
   }
+  /* Wall displays: a tile's name and its freshness line keep pace with the
+     sky, as a dashboard card's title and footer do (DashboardCard.css). */
+  .observatory :is(.health-zone, .native-part:not(.part-map)) .section-label {
+    font-size: var(--ui-text-page);
+  }
+  .observatory
+    :is(.health-zone, .native-part:not(.part-map))
+    :is(.tile-footer, .freshness-note) {
+    font-size: var(--ui-text-section);
+  }
 }
 @media (min-width: 3000px) {
   .app {
     --z: 1.45;
+  }
+}
+/* Wall displays: a tile's labels, units, times and freshness step up a size
+   so they read across a room; the readings themselves grow with --z. */
+@media (min-width: 1800px) and (min-height: 960px) {
+  .observatory :is(.health-zone, .native-part:not(.part-map)) {
+    --ui-text-meta: 14px;
+    --ui-text-small: 15px;
+    --ui-text-body: 16px;
+    --ui-text-title: 16px;
+    --ui-text-lead: 18px;
   }
 }
 
@@ -2020,11 +2563,15 @@ span.dashboard-full {
   .recovery-zone {
     margin-top: 0;
   }
+  /* The two readings under the sky start on one line, heads level. */
+  .observatory > :is(.training-zone, .context-zone) {
+    align-self: start;
+  }
   .context-zone p {
     display: none;
   }
   .main-zone.dashboard-zone.tall {
-    height: clamp(320px, 36vh, 480px);
+    height: clamp(352px, 40vh, 512px);
   }
 }
 @media (min-width: 761px) and (max-width: 1099px) and (orientation: landscape) {
@@ -2036,12 +2583,15 @@ span.dashboard-full {
 /* Phones and upright tablets: compact tiles, so the sky keeps its room. */
 @media (max-width: 760px) and (min-height: 501px),
   (min-width: 761px) and (max-width: 1099px) and (orientation: portrait) {
+  .app {
+    --tile-head: 44px;
+  }
   .tile-button {
-    padding: 10px 0 4px;
+    padding: 0 0 4px;
   }
   .health-zone .section-label {
-    font-size: 8px;
-    letter-spacing: 1.3px;
+    font-size: var(--ui-text-title);
+    letter-spacing: -0.015em;
   }
   .glucose-zone .tile-button {
     display: grid;
@@ -2050,21 +2600,26 @@ span.dashboard-full {
       "label label"
       "value spark"
       "caption spark"
+      "trend trend"
       "summary summary";
     column-gap: 18px;
   }
   .glucose-zone .section-label {
     grid-area: label;
   }
+  .glucose-zone .quiet-copy {
+    grid-area: trend;
+    margin-top: var(--ui-space-1);
+  }
   .glucose-zone .glucose-value {
     grid-area: value;
     font-size: 50px;
-    margin: 4px 0 0;
+    margin: 0;
     gap: 10px;
   }
   .glucose-zone .metric-caption {
     grid-area: caption;
-    font-size: 10px;
+    font-size: var(--ui-text-meta);
   }
   .glucose-zone .sparkline {
     grid-area: spark;
@@ -2081,7 +2636,7 @@ span.dashboard-full {
     padding-top: 8px;
   }
   .compact .history-period {
-    font-size: 8px;
+    font-size: var(--ui-text-meta);
     margin-bottom: 6px;
   }
   .compact .history-metrics {
@@ -2091,11 +2646,17 @@ span.dashboard-full {
     font-size: 21px;
   }
   .compact .history-metrics small {
-    font-size: 8px;
+    font-size: var(--ui-text-meta);
   }
   .sleep-value {
     font-size: 24px;
-    margin: 6px 0 8px;
+    margin: 0 0 6px;
+  }
+  /* Last night's time stays, on its own line under the sleep. */
+  .app .sleep-value > .sleep-observation {
+    display: block;
+    flex-basis: 100%;
+    margin: 2px 0 0;
   }
   .sleep-value > span,
   .recovery-pair svg,
@@ -2104,26 +2665,26 @@ span.dashboard-full {
     display: none;
   }
   .recovery-pair {
-    gap: 12px;
-    font-size: 8px;
+    gap: 4px 12px;
+    font-size: var(--ui-text-meta);
   }
   .recovery-pair b {
-    font-size: 15px;
-    margin-top: 4px;
+    font-size: 18px;
+    margin-top: 0;
   }
   .recovery-pair small {
-    font-size: 8px;
+    font-size: var(--ui-text-meta);
   }
   .workout-title {
-    font-size: 10px;
-    margin: 6px 0 2px;
+    font-size: var(--ui-text-small);
+    margin: 0;
   }
   .run-value {
     font-size: 24px;
   }
   .run-value > span {
-    font-size: 8px;
-    margin-top: 3px;
+    font-size: var(--ui-text-meta);
+    margin-top: 2px;
   }
 }
 
@@ -2135,36 +2696,35 @@ span.dashboard-full {
     --gutter: 16px;
   }
   .topbar {
-    gap: 10px;
+    gap: var(--ui-space-2);
   }
   .brand {
-    font-size: 10px;
-    letter-spacing: 2.4px;
-    gap: 10px;
+    font-size: var(--ui-text-body);
+    gap: var(--ui-space-2);
   }
   .brand-mark {
     width: 32px;
     height: 32px;
   }
   .top-status {
-    gap: 6px;
+    gap: var(--ui-space-1);
   }
   .top-status time {
-    font-size: 13px;
+    font-size: var(--ui-text-small);
   }
   .icon-button {
-    min-width: 40px;
-    min-height: 40px;
+    min-width: var(--ui-target);
+    min-height: var(--ui-target);
   }
   .source-strip {
     margin-top: 2px;
-    font-size: 9px;
+    font-size: var(--ui-text-meta);
   }
   .source-strip .sample-date {
     display: none;
   }
   main {
-    padding: 6px var(--gutter) calc(10px + env(safe-area-inset-bottom));
+    padding: 4px var(--gutter) calc(8px + env(safe-area-inset-bottom));
   }
   .observatory {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -2174,7 +2734,7 @@ span.dashboard-full {
       "sky sky"
       "recovery training";
     column-gap: 18px;
-    row-gap: 6px;
+    row-gap: 4px;
   }
   .observatory:where([data-empty~="training"]) {
     grid-template-areas:
@@ -2191,11 +2751,10 @@ span.dashboard-full {
   /* A tall card keeps a sensible height above the sky; a compact one stays
      short below it, so the sky keeps its room. */
   .main-zone.dashboard-zone.tall {
-    height: clamp(240px, 36dvh, 360px);
+    height: clamp(240px, 39dvh, 392px);
   }
   .dashboard-zone:not(.main-zone) .dashboard-card {
     min-height: 0;
-    gap: 6px;
   }
   .dashboard-zone:not(.main-zone) .dashboard-card-frame {
     flex: none;
@@ -2210,16 +2769,25 @@ span.dashboard-full {
     margin-top: 0;
     align-self: end;
   }
+  /* Half a phone's width holds the two signals, not each one's time: the
+     night's time is under the sleep, and every time is in the panel. */
+  .recovery-pair > span > small {
+    display: none;
+  }
+  /* The two readings under the sky start on one line, heads level. */
+  .observatory > :is(.recovery-zone, .training-zone) {
+    align-self: start;
+  }
   .context-zone {
     display: none;
   }
   .graph-heading > span:last-child {
-    font-size: 7px;
+    font-size: var(--ui-text-meta);
   }
   .detail-backdrop,
   .detail-backdrop:is(.detail-recovery, .detail-sources) {
     padding: env(safe-area-inset-top) 0 0;
-    background: #070c11cc;
+    background: color-mix(in srgb, var(--ui-sky) 85%, transparent);
   }
   .detail-panel,
   .detail-sources .detail-panel {
@@ -2235,10 +2803,10 @@ span.dashboard-full {
     padding: 12px 20px 8px;
   }
   .sources-list small {
-    font-size: 9px;
+    font-size: var(--ui-text-meta);
   }
   .source-status {
-    font-size: 7px;
+    font-size: 11px;
   }
   .view-explore .topbar {
     visibility: hidden;
@@ -2250,6 +2818,7 @@ span.dashboard-full {
   .app {
     --top: 46px;
     --gutter: 18px;
+    --tile-head: 34px;
   }
   .source-strip {
     display: none;
@@ -2258,7 +2827,7 @@ span.dashboard-full {
     padding: 0 var(--gutter) 8px;
   }
   .observatory {
-    grid-template-columns: minmax(200px, 0.8fr) minmax(0, 1.7fr);
+    grid-template-columns: minmax(220px, 1fr) minmax(0, 1.6fr);
     grid-template-rows: auto auto minmax(0, 1fr);
     grid-template-areas:
       "main sky"
@@ -2266,6 +2835,11 @@ span.dashboard-full {
       "training sky";
     column-gap: 18px;
     row-gap: 2px;
+  }
+  /* A dashboard in the main slot takes the column's free height; the
+     readings under it keep theirs. */
+  .observatory:has(> .main-zone.dashboard-zone) {
+    grid-template-rows: minmax(0, 1fr) auto auto;
   }
   .observatory:where([data-empty~="recovery"][data-empty~="training"]) {
     grid-template-areas:
@@ -2280,14 +2854,13 @@ span.dashboard-full {
      corner's stays short, so neither runs into the next. */
   .dashboard-zone .dashboard-card {
     min-height: 0;
-    gap: 6px;
   }
   .dashboard-zone .dashboard-card-frame {
     min-height: 0;
   }
   .dashboard-zone:not(.main-zone) .dashboard-card-frame {
     flex: none;
-    height: 92px;
+    height: 72px;
   }
   .recovery-zone,
   .training-zone {
@@ -2299,11 +2872,34 @@ span.dashboard-full {
     display: none;
   }
   .tile-button {
-    padding: 6px 0 4px;
+    padding: 0 0 4px;
+  }
+  /* The reading beside its line, its time under both. */
+  .glucose-zone .tile-button {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "label label"
+      "value spark"
+      "caption caption";
+    column-gap: 18px;
+  }
+  .glucose-zone .section-label {
+    grid-area: label;
+  }
+  .glucose-zone .glucose-value {
+    grid-area: value;
+  }
+  .glucose-zone .metric-caption {
+    grid-area: caption;
+  }
+  .glucose-zone .sparkline {
+    grid-area: spark;
+    align-self: center;
   }
   .glucose-value {
     font-size: 40px;
-    margin: 2px 0 0;
+    margin: 0;
   }
   .sparkline {
     height: 34px;
@@ -2312,6 +2908,7 @@ span.dashboard-full {
   .glucose-history.compact,
   .sleep-value > span,
   .recovery-pair svg,
+  .recovery-pair > span > small,
   .recovery-zone :is(.quiet-copy, .tile-footer),
   .training-zone
     :is(.week-activity, .quiet-copy, .tile-footer, .workout-title) {
@@ -2319,29 +2916,30 @@ span.dashboard-full {
   }
   .sleep-value {
     font-size: 22px;
-    margin: 4px 0;
+    margin: 0 0 2px;
   }
   .recovery-pair {
     gap: 14px;
-    font-size: 8px;
+    font-size: var(--ui-text-meta);
   }
   .recovery-pair b {
-    font-size: 14px;
-    margin-top: 2px;
+    font-size: 15px;
+    margin-top: 0;
   }
   .run-value {
     font-size: 22px;
   }
+  /* The activity's time waits in its panel, so the column holds the day's
+     insight under it. */
   .run-value > span {
-    display: inline;
-    margin-left: 8px;
-    font-size: 8px;
+    display: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .sky-hint {
     animation: none;
-    opacity: 0.6;
+    /* The animation's resting level: faint on the sky stays above 4.5:1. */
+    opacity: 0.75;
   }
 }
 
@@ -2366,8 +2964,14 @@ span.dashboard-full {
   .app :is(.recovery-zone, .training-zone)[data-look="row"] .tile-button,
   .app .context-zone[data-look="row"] {
     height: 100%;
-    padding: 16px 0 0;
-    border-top: 1px solid #90b9c533;
+    padding: 0;
+    border-top: 1px solid var(--ui-divider);
+  }
+  /* A button centres what it holds; a row's tiles start at their rule, so
+     their heads share a line with the corner beside them. */
+  .app :is(.recovery-zone, .training-zone)[data-look="row"] .tile-button {
+    display: flex;
+    flex-direction: column;
   }
   .app
     :is(.recovery-zone, .training-zone)[data-look="row"]
@@ -2382,12 +2986,12 @@ span.dashboard-full {
     :where(.observatory:not([data-grid]))
     .sleep-value {
     font-size: 36px;
-    margin: 12px 0 10px;
+    margin: var(--ui-space-1) 0 10px;
   }
   .app:is([data-layout="band"], [data-layout="hero"])
     :where(.observatory:not([data-grid]))
     .workout-title {
-    margin: 10px 0 4px;
+    margin: 0 0 4px;
   }
   .app:is([data-layout="band"], [data-layout="hero"])
     :where(.observatory:not([data-grid]))
@@ -2404,10 +3008,10 @@ span.dashboard-full {
      its height and the sky above keeps its room. */
   .app:is([data-layout="band"], [data-layout="hero"]) .context-zone h2 {
     font-size: 21px;
-    margin: 12px 0 6px;
+    margin: var(--ui-space-1) 0 6px;
     -webkit-line-clamp: 2;
     line-clamp: 2;
-    min-height: 2.9em;
+    min-height: 2.7em;
   }
   .app:is([data-layout="band"], [data-layout="hero"]) .context-zone p {
     display: -webkit-box;
@@ -2415,7 +3019,7 @@ span.dashboard-full {
     -webkit-line-clamp: 2;
     line-clamp: 2;
     overflow: hidden;
-    min-height: 3.8em;
+    min-height: 3.2em;
   }
   .app:is([data-layout="band"], [data-layout="hero"])
     :where(.observatory:not([data-grid]))
@@ -2456,17 +3060,22 @@ span.dashboard-full {
      bottom row): the reading beside its line. */
   .app .glucose-zone[data-look="row"] .tile-button {
     height: 100%;
-    padding: 16px 0 0;
-    border-top: 1px solid #90b9c533;
+    padding: 0;
+    border-top: 1px solid var(--ui-divider);
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-areas:
       "label label"
       "value spark"
       "caption spark"
+      "trend trend"
       "summary summary";
     column-gap: 28px;
     align-content: start;
+  }
+  .app .glucose-zone[data-look="row"] .quiet-copy {
+    grid-area: trend;
+    margin-top: var(--ui-space-1);
   }
   .app .glucose-zone[data-look="row"] .section-label {
     grid-area: label;
@@ -2474,7 +3083,7 @@ span.dashboard-full {
   .app .glucose-zone[data-look="row"] .glucose-value {
     grid-area: value;
     font-size: 58px;
-    margin: 8px 0 0;
+    margin: 0;
   }
   .app .glucose-zone[data-look="row"] .metric-caption {
     grid-area: caption;
@@ -2486,13 +3095,7 @@ span.dashboard-full {
   }
   .app
     .glucose-zone[data-look="row"]
-    :is(
-      .spark-axis,
-      .quiet-copy,
-      .tile-footer,
-      .history-coverage,
-      .history-period
-    ) {
+    :is(.spark-axis, .tile-footer, .history-coverage, .history-period) {
     display: none;
   }
   .app [data-look="row"] .glucose-history.compact {
@@ -2553,13 +3156,13 @@ span.dashboard-full {
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 18px 0 0;
+    padding: 0;
   }
   /* The reading sits centered in the column's free space, with a modest
      three-hour line under it; the ring and 90-day GMI settle at the foot. */
   .app .glucose-zone[data-look="tall"] .glucose-value {
     font-size: clamp(80px, 6.4vw, 120px);
-    letter-spacing: -4px;
+    letter-spacing: -0.05em;
     margin: auto 0 6px;
     padding-top: 16px;
   }
@@ -2567,7 +3170,7 @@ span.dashboard-full {
     height: 26px;
   }
   .app .glucose-zone[data-look="tall"] .metric-caption {
-    font-size: 12px;
+    font-size: var(--ui-text-body);
   }
   .app .glucose-zone[data-look="tall"] .sparkline {
     flex: none;
@@ -2575,17 +3178,17 @@ span.dashboard-full {
     margin: 26px -2px 6px;
   }
   .app .glucose-zone[data-look="tall"] .spark-axis {
-    font-size: 10px;
+    font-size: var(--ui-text-meta);
   }
   .app .glucose-zone[data-look="tall"] .quiet-copy {
-    font-size: 12px;
+    font-size: var(--ui-text-body);
   }
   .app .glucose-zone[data-look="tall"] .glucose-history.compact {
     margin-top: auto;
     padding-top: 20px;
   }
   .app [data-look="tall"] .compact .history-period {
-    font-size: 10px;
+    font-size: var(--ui-text-meta);
     margin-bottom: 16px;
   }
   .app .glucose-zone[data-look="tall"] .glance {
@@ -2635,96 +3238,161 @@ span.dashboard-full {
     display: none;
   }
 }
+/* Corners at desktop heights: each side column holds two whole readings, so
+   the glucose line's axis, its footer (the caption above it carries the same
+   time) and its summary's period, and the training steps line, wait in the
+   panels; the glucose trend in words stays. */
+@media (min-width: 1100px) and (min-height: 501px) and (max-height: 1050px) {
+  .app[data-layout="corners"]
+    :where(.observatory:not([data-grid]))
+    :is(
+      .glucose-zone :is(.spark-axis, .tile-footer, .history-period),
+      .training-zone .quiet-copy
+    ) {
+    display: none;
+  }
+}
+/* Upright tablets: the glucose trend in words shows under the reading, and
+   a tile's head is as tall as a dashboard card's header beside it. */
+@media (min-width: 761px) and (max-width: 1099px) and (orientation: portrait) {
+  .app {
+    --tile-head: 54px;
+  }
+  .glucose-zone .quiet-copy {
+    display: block;
+  }
+}
 /* Phones, upright tablets and sideways phones keep their own layouts in every
    setting: they already lead with the main slot and have no room for a tall column. */
 .layout-choice {
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid #91b3c322;
+  margin-top: var(--ui-space-6);
+  padding-top: var(--ui-space-4);
+  border-top: 1px solid var(--ui-divider);
 }
 .layout-choice h3 {
-  font-size: 14px;
-  font-weight: 500;
-  color: #c2d1da;
-  margin-bottom: 12px;
+  font: 600 var(--ui-text-lead) / 1.3 var(--ui-display);
+  color: var(--ui-ink);
+  margin-bottom: var(--ui-space-3);
 }
+/* The layouts as separate choices, the active one filled and bordered. */
 .layout-choice .segmented {
   display: flex;
   flex-wrap: wrap;
+  gap: var(--ui-space-2);
+  padding: 0;
+  border: 0;
+}
+.layout-choice .segmented button {
+  min-height: var(--ui-target);
+  padding: 0 var(--ui-space-4);
+  border-color: var(--ui-line);
+  border-radius: var(--ui-radius-control);
+}
+.layout-choice .segmented button[aria-pressed="true"] {
+  border-color: var(--ui-mint-edge);
+}
+.layout-choice .chart-note {
+  margin-top: var(--ui-space-2);
+  font-size: var(--ui-text-meta);
+  line-height: 1.5;
+  color: var(--ui-faint);
 }
 /* Corner cards: one row a corner, its name and what it shows. */
 .corner-cards {
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid #91b3c322;
+  margin-top: var(--ui-space-6);
+  padding-top: var(--ui-space-4);
+  border-top: 1px solid var(--ui-divider);
   display: grid;
-  gap: 10px;
+  /* A long option never widens the panel: the pickers shrink instead. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ui-space-3);
 }
 .corner-cards h3 {
-  font-size: 14px;
-  font-weight: 500;
-  color: #c2d1da;
+  font: 600 var(--ui-text-lead) / 1.3 var(--ui-display);
+  color: var(--ui-ink);
   margin: 0;
 }
 .corner-cards .chart-note {
   margin: 0;
+  font-size: var(--ui-text-meta);
+  line-height: 1.5;
+  color: var(--ui-faint);
 }
 .corner-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  font-size: 12px;
-  color: #b3c8d2;
+  gap: var(--ui-space-4);
+  font-size: var(--ui-text-body);
+  color: var(--ui-soft);
 }
 .corner-card select {
   min-width: 0;
-  flex: 0 1 60%;
-  padding: 9px 12px;
+  flex: 0 1 68%;
+  padding: 0 var(--ui-space-3);
 }
 /* This screen's Home, beside the layout it keeps. */
 .home-choice {
-  margin-top: 18px;
+  margin-top: var(--ui-space-6);
   display: grid;
   justify-items: start;
-  gap: 8px;
+  gap: var(--ui-space-2);
 }
 .home-choice h3 {
-  font-size: 14px;
-  font-weight: 500;
-  color: #c2d1da;
+  font: 600 var(--ui-text-lead) / 1.3 var(--ui-display);
+  color: var(--ui-ink);
   margin: 0;
 }
 .home-choice .chart-note {
   margin: 0;
+  font-size: var(--ui-text-meta);
+  line-height: 1.5;
+  color: var(--ui-faint);
 }
 /* This screen's name, under the layout it keeps. */
 .screen-name {
-  margin-top: 18px;
+  margin-top: var(--ui-space-6);
   display: grid;
-  gap: 8px;
+  gap: var(--ui-space-2);
 }
 .screen-name label {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  font-size: 12px;
-  color: #b3c8d2;
+  gap: var(--ui-space-4);
+  font-size: var(--ui-text-body);
+  color: var(--ui-soft);
 }
 /* Drawn like the corner pickers beside it. */
 .screen-name input {
   min-width: 0;
   flex: 0 1 60%;
-  padding: 9px 12px;
-  background: #172229;
-  border: 1px solid #7898ac2b;
-  border-radius: 7px;
-  color: #b6cbd5;
-  font-size: 11px;
+  min-height: var(--ui-target);
+  padding: 0 var(--ui-space-3);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-ink);
+  font-size: var(--ui-text-small);
+  transition: border-color var(--ui-fast) var(--ui-ease);
+}
+.screen-name input:hover {
+  border-color: var(--ui-line-strong);
 }
 .screen-name .chart-note {
   margin: 0;
+  font-size: var(--ui-text-meta);
+  line-height: 1.5;
+  color: var(--ui-faint);
+}
+/* No zoom when a phone's field takes focus: under 16 px a phone's browser
+   zooms the page. */
+@media (max-width: 760px), (max-height: 500px) {
+  .screen-name input,
+  .corner-card select,
+  .state-picker select {
+    font-size: 16px;
+  }
 }
 /* A corner showing a dashboard's card keeps the corner's own place and size;
    the main slot's tall card fills its column. */
@@ -2736,19 +3404,26 @@ span.dashboard-full {
 .dashboard-zone[data-place="main"] {
   align-self: stretch;
 }
+/* Short phones: the tall card's frame takes its header and freshness line out
+   of the page's room, not out of the sky's or the corner's below it. */
+@media (max-width: 760px) and (min-height: 501px) and (max-height: 700px) {
+  .main-zone.dashboard-zone.tall {
+    height: 216px;
+  }
+}
 /* What changed lately: one record at a time, a dot for each. */
 .changed-dots {
   display: flex;
   gap: 5px;
 }
 .changed-dots i {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #9fb6c233;
+  background: color-mix(in srgb, var(--ui-faint) 35%, transparent);
 }
 .changed-dots i.on {
-  background: #a6dccd;
+  background: var(--ui-mint);
 }
 .changed-title {
   animation: changed-in 0.8s ease both;
@@ -2768,31 +3443,77 @@ span.dashboard-full {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin-top: 12px;
-  font-size: 10px;
-  color: #d6c38f;
+  margin-top: var(--ui-space-1);
+  min-height: var(--ui-target);
+  font-size: var(--ui-text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-amber);
   text-align: left;
 }
 /* Short phones (an iPhone SE with its browser bars): the glucose summary and
    status line step aside so the sky keeps room; both remain in the panels. */
 @media (max-width: 760px) and (min-height: 501px) and (max-height: 700px) {
+  .app {
+    --tile-head: 32px;
+  }
   .source-strip,
   .glucose-history.compact {
     display: none;
   }
+  /* The sky keeps a few hundred pixels' worth of room: the regions around
+     it sit closer, and every reading keeps its name, value and unit. */
+  main {
+    padding: 4px var(--gutter) calc(6px + env(safe-area-inset-bottom));
+  }
+  .observatory {
+    row-gap: 4px;
+  }
   .glucose-zone .glucose-value {
-    font-size: 42px;
+    font-size: 40px;
   }
   .glucose-zone .sparkline {
-    height: 42px;
+    height: 38px;
   }
   .sleep-value,
   .run-value {
     font-size: 20px;
-    margin: 4px 0;
+    line-height: 1.15;
+    margin: 0;
+  }
+  /* Each signal on one line: its name, then its value. */
+  .recovery-pair {
+    gap: 2px 12px;
+    line-height: 1.25;
+  }
+  .recovery-pair > span {
+    white-space: nowrap;
   }
   .recovery-pair b {
-    font-size: 13px;
+    display: inline;
+    margin-left: 4px;
+    font-size: 15px;
+  }
+  /* The night's and the activity's times wait in their panels, so the
+     readings stay one glance tall. */
+  .app .sleep-value > .sleep-observation,
+  .run-value > span {
+    display: none;
+  }
+  /* A dashboard's page comes before the sky: the main slot's page keeps at
+     least 120 px and a corner's 72 px; the sky takes what is left. */
+  .main-zone.dashboard-zone.tall {
+    height: auto;
+  }
+  .main-zone.dashboard-zone .dashboard-card {
+    min-height: 0;
+  }
+  .main-zone.dashboard-zone .dashboard-card-frame {
+    flex: none;
+    height: 120px;
+    min-height: 0;
+  }
+  .dashboard-zone:not(.main-zone) .dashboard-card-frame {
+    height: 72px;
   }
 }
 
@@ -2810,37 +3531,55 @@ span.dashboard-full {
   width: max-content;
   max-width: min(520px, calc(100% - 32px));
   margin: 0;
-  padding: 7px 7px 7px 16px;
-  color: #d6e6ec;
-  font-size: 12px;
+  padding: 6px 6px 6px var(--ui-space-4);
+  color: var(--ui-ink);
+  font-size: var(--ui-text-small);
   line-height: 1.45;
-  background: #0f1920eb;
+  background: color-mix(in srgb, var(--ui-night) 92%, transparent);
   backdrop-filter: blur(16px);
-  border: 1px solid #9fbfd524;
-  border-radius: 18px;
+  border: 1px solid var(--ui-edge);
+  border-radius: 22px;
   box-shadow: 0 10px 40px #0005;
   animation: screen-note 10s ease both;
 }
 .screen-note b {
   font-weight: 600;
-  color: #a6dccd;
+  color: var(--ui-soft);
 }
 .screen-note button {
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  min-height: 28px;
-  padding: 4px 12px;
-  border-radius: 14px;
-  color: #e3f3f5;
-  background: #accde41c;
+  gap: var(--ui-space-1);
+  min-height: 34px;
+  padding: 0 var(--ui-space-3);
+  border-radius: 17px;
+  color: var(--ui-ink);
+  background: var(--ui-raised);
+  transition: background-color var(--ui-fast) var(--ui-ease);
+}
+.screen-note button:hover {
+  background: color-mix(in srgb, var(--ui-raised) 70%, var(--ui-edge));
 }
 .screen-note button[aria-label="Dismiss"] {
-  min-width: 28px;
-  padding: 4px;
-  color: #9daeb7;
+  min-width: 34px;
+  padding: 0;
+  justify-content: center;
+  color: var(--ui-soft);
   background: none;
+}
+.screen-note button[aria-label="Dismiss"]:hover {
+  color: var(--ui-ink);
+  background: var(--ui-raised);
+}
+@media (any-pointer: coarse) {
+  .screen-note button {
+    min-height: var(--ui-target);
+    border-radius: 22px;
+  }
+  .screen-note button[aria-label="Dismiss"] {
+    min-width: var(--ui-target);
+  }
 }
 @keyframes screen-note {
   0% {
@@ -2873,7 +3612,7 @@ span.dashboard-full {
     calc(env(safe-area-inset-right) + 12px)
     calc(env(safe-area-inset-bottom) + 12px)
     calc(env(safe-area-inset-left) + 12px);
-  background: #0b1015;
+  background: var(--ui-sky);
   outline: none;
 }
 .full-screen .dashboard-view {
@@ -2905,15 +3644,16 @@ span.dashboard-full {
   z-index: 2;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--ui-space-3);
   max-width: calc(100% - 24px);
-  padding: 5px 5px 5px 14px;
-  color: #d6e6ec;
-  font-size: 12px;
-  background: #0f1920eb;
+  padding: var(--ui-space-1) var(--ui-space-1) var(--ui-space-1)
+    var(--ui-space-4);
+  color: var(--ui-ink);
+  font: 650 var(--ui-text-small) / 1.3 var(--ui-display);
+  background: color-mix(in srgb, var(--ui-surface) 92%, transparent);
   backdrop-filter: blur(16px);
-  border: 1px solid #9fbfd524;
-  border-radius: 20px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-panel);
   box-shadow: 0 10px 40px #0005;
   opacity: 0;
   pointer-events: none;
@@ -2934,13 +3674,18 @@ span.dashboard-full {
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 32px;
-  padding: 4px 13px;
-  border-radius: 16px;
-  color: #e3f3f5;
-  background: #accde41c;
+  gap: var(--ui-space-2);
+  min-height: 36px;
+  padding: 0 var(--ui-space-3);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-ink);
+  background: var(--ui-raised);
+  font: 400 var(--ui-text-small) / 1.3 var(--ui-font);
   white-space: nowrap;
+}
+.full-screen-bar button svg {
+  color: var(--ui-mint);
 }
 /* A sealed frame cannot forward touches to its parent. Give touchscreens a
    dedicated exit row so the first tap always reaches the dashboard itself. */
@@ -2985,8 +3730,19 @@ span.dashboard-full {
   }
   .full-screen-bar button {
     min-height: 44px;
-    padding: 4px 16px;
-    border-radius: 22px;
+    padding: 0 var(--ui-space-4);
+  }
+  /* With a mouse the control floats over the page. On a narrow screen, while it shows, it takes a
+     row of its own above the freshness line instead of covering it, 8 px clear of it. */
+  @media not all and (any-pointer: coarse) {
+    .full-screen.awake .full-screen-bar,
+    .full-screen-bar:focus-within {
+      position: static;
+      order: -1;
+      flex: none;
+      align-self: flex-end;
+      margin: 8px 8px 8px 0;
+    }
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -3000,19 +3756,33 @@ span.dashboard-full {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: var(--ui-space-2);
   white-space: nowrap;
+}
+.sync-now .sync-action .source-status {
+  max-width: none;
 }
 .sync-now .sync-action button {
   display: flex;
   align-items: center;
   gap: 6px;
-  min-height: 36px;
-  border: 1px solid #95b8c333;
-  border-radius: 8px;
-  padding: 8px 11px;
-  font-size: 11px;
-  color: #c0d4db;
+  min-height: var(--ui-target);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  padding: 0 var(--ui-space-3);
+  font-size: var(--ui-text-small);
+  color: var(--ui-ink);
+  transition:
+    background-color var(--ui-fast) var(--ui-ease),
+    border-color var(--ui-fast) var(--ui-ease);
+}
+.sync-now .sync-action button:hover:not(:disabled) {
+  background: var(--ui-raised);
+  border-color: var(--ui-line-strong);
+}
+.sync-now .sync-action button svg {
+  color: var(--ui-mint);
 }
 .sync-now .sync-action button:disabled {
   opacity: 0.45;

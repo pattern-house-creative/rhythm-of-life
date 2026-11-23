@@ -31,7 +31,7 @@ it("cannot resurrect a hidden page with an old in-flight response", async () => 
     ),
   );
   expect(
-    screen.queryByRole("button", { name: /GLUCOSE 112/ }),
+    screen.queryByRole("button", { name: /Glucose 112/ }),
   ).not.toBeInTheDocument();
   expect(screen.getByText("Opening Rhythm of Life")).toBeInTheDocument();
 });
@@ -39,7 +39,7 @@ it("cannot resurrect a hidden page with an old in-flight response", async () => 
 it("clears a restored session when Vercel returns its HTML login page", async () => {
   withSampleHealth();
   render(<App />);
-  await screen.findByRole("button", { name: /GLUCOSE 112/ });
+  await screen.findByRole("button", { name: /Glucose 112/ });
   act(() => window.dispatchEvent(new Event("pagehide")));
   vi.mocked(fetch).mockResolvedValue(
     new Response("Sign in", { headers: { "content-type": "text/html" } }),
@@ -47,7 +47,7 @@ it("clears a restored session when Vercel returns its HTML login page", async ()
   act(() => window.dispatchEvent(new Event("pageshow")));
   await screen.findByText(/Access or source unavailable/);
   expect(
-    screen.queryByRole("button", { name: /GLUCOSE 112/ }),
+    screen.queryByRole("button", { name: /Glucose 112/ }),
   ).not.toBeInTheDocument();
   // Its way back reaches the front door, which can ask to sign in again.
   act(() => screen.getByRole("button", { name: "Try again" }).click());
@@ -57,7 +57,7 @@ it("clears a restored session when Vercel returns its HTML login page", async ()
 it("takes a front door sending reads to its sign-in as access lost", async () => {
   withSampleHealth();
   render(<App />);
-  await screen.findByRole("button", { name: /GLUCOSE 112/ });
+  await screen.findByRole("button", { name: /Glucose 112/ });
   act(() => window.dispatchEvent(new Event("pagehide")));
   // What a redirect looks like to a read that doesn't follow it (an access
   // proxy whose session ended).

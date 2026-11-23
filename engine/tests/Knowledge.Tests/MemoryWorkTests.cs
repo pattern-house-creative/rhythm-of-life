@@ -29,12 +29,12 @@ public sealed class MemoryWorkToolTests
         Assert.True(MemorySettings.WorkOn(All));
         Assert.Equal(Made(Before).Concat(MemoryTools.WorkTools).Order(), Made(All).Order());
         Assert.Throws<ConfigException>(() => MemorySettings.From(MemoryToolSettings.With("work: yes")));
-        // It changes seven descriptions and no other: history names its events, get its answer's member, remember says
+        // Append and update explain ticket summaries. History names work events, get its answer's member, remember says
         // which tool project work goes to, the map's read what a star's work says, link its depends_on (080), and the
         // dashboard tools a memories feed's work filters and fields (docs/dev/screens.md 10.12).
         var all = HarnessTools.Create(All, []).ToDictionary(t => t.ProtocolTool.Name, t => t.ProtocolTool);
         foreach (var tool in HarnessTools.Create(Before, []).Select(t => t.ProtocolTool))
-            if (tool.Name is "history" or "get" or "remember" or "get_relationship_graph" or "link" or "save_dashboard" or "dashboard_data")
+            if (tool.Name is "history" or "get" or "append" or "update" or "remember" or "get_relationship_graph" or "link" or "save_dashboard" or "dashboard_data")
                 Assert.StartsWith(tool.Description!, all[tool.Name].Description);
             else Assert.Equal(tool.Description, all[tool.Name].Description);
         Assert.Contains("workType", all["save_dashboard"].Description);
@@ -150,6 +150,84 @@ public sealed class MemoryWorkDatabaseTests(DatabaseFixture fixture) : IClassFix
         """, ("id", id));
     Task<object?> Events(Guid id) => MemoryLogins.Scalar(fixture.Source,
         "SELECT string_agg(revision||':'||event,',' ORDER BY id) FROM memory_events WHERE memory_id=@id", ("id", id));
+
+    [PostgresFact] public async Task Oversized_agent_append_preserves_the_ticket_until_a_summary_is_saved()
+    {
+        var s = fixture.Source;
+        await Scoped.Mode(s, "off");
+        var who = await MemoryLogins.Make(s, "work-summary");
+        await using var agent = await As(who.Alex);
+        const string title = "DEMO: verify the gate.";
+        var id = Id(await agent.Ok("create_work", new { project = "work-summary", work_type = "task", content = title, priority = 2 }));
+        await agent.Ok("claim_work", new { id, label = "Gate worker" });
+        var revision = (int)(await agent.Ok("get", new { id }))["memory"]!["revision"]!;
+        // The date prefix takes 23 bytes and the final accented letter takes two.
+        var exact = new string('.', 32768 - title.Length - 23 - 2) + "é";
+        var before = await Events(id);
+        Assert.Equal("work_summary_required", (string)(await agent.Refused("append", new { id, addition = exact + ".", expected_revision = revision }))["code"]!);
+        Assert.Equal(before, await Events(id));
+        var request = new { id, addition = exact, expected_revision = revision, idempotency_key = "at-the-byte-boundary" };
+        var accepted = await agent.Ok("append", request);
+        Assert.Null(accepted["held"]);
+        Assert.True((bool)(await agent.Ok("append", request))["replayed"]!);
+
+        var current = (await agent.Ok("get", new { id }))["memory"]!;
+        Assert.Equal(32768, System.Text.Encoding.UTF8.GetByteCount((string)current["content"]!));
+        var at = (int)current["revision"]!;
+        Assert.Equal("work_summary_required", (string)(await agent.Refused("append", new { id, addition = "DEMO: gate tested.", expected_revision = at }))["code"]!);
+        Assert.Equal("work_summary_required", (string)(await agent.Refused("update", new { id, content = (string)current["content"]! + "é", expected_revision = at }))["code"]!);
+        const string summary = "DEMO: verify the gate. The gate test passed.";
+        Assert.Equal("conflict", (string)(await agent.Refused("update", new { id, content = summary, expected_revision = revision }))["code"]!);
+        var saved = await agent.Ok("update", new { id, content = summary, expected_revision = at });
+        Assert.Equal(at + 1, (int)saved["revision"]!);
+        var after = (await agent.Ok("get", new { id }))["memory"]!;
+        Assert.Null(after["held"]);
+        Assert.Equal(summary, (string)after["content"]!);
+        Assert.True(JsonNode.DeepEquals(current["work"], after["work"]));
+        Assert.Equal("Gate worker", (string)after["work"]!["claim"]!["label"]!);
+        Assert.Equal((string)current["content"]!, (string)(await agent.Ok("get", new { id, version = at }))["version"]!["content"]!);
+    }
+
+    [PostgresFact] public async Task Concurrent_appends_without_a_revision_cannot_push_a_ticket_over_the_limit()
+    {
+        var s = fixture.Source;
+        await Scoped.Mode(s, "off");
+        var who = await MemoryLogins.Make(s, "work-summary-race");
+        var store = new MemoryStore(s);
+        var seed = "DEMO" + new string('.', 32768 - 4 - 32);
+        var work = await store.CreateWork(who.Alex, new(seed, Project: "work-summary-race"), "task", null, null, null, Mcp, default);
+        async Task<string> Append(string text)
+        {
+            try { await store.Append(who.Alex, work.Write.Id, text, null, Mcp, default); return "saved"; }
+            catch (MemoryRefused e) { return e.Code; }
+        }
+        var outcomes = await Task.WhenAll(Append("result A"), Append("result B"));
+        Assert.Equal(new[] { "saved", "work_summary_required" }, outcomes.Order());
+        await using var agent = await As(who.Alex);
+        var current = (await agent.Ok("get", new { id = work.Write.Id }))["memory"]!;
+        Assert.Null(current["held"]);
+        Assert.Equal(2, (int)current["revision"]!);
+    }
+
+    [PostgresFact] public async Task Released_legacy_ticket_can_be_summarized_and_other_memories_keep_normal_screening()
+    {
+        var s = fixture.Source;
+        await Scoped.Mode(s, "off");
+        var who = await MemoryLogins.Make(s, "work-legacy-summary");
+        await using var agent = await As(who.Alex);
+        var store = new MemoryStore(s);
+        var id = Id(await agent.Ok("create_work", new { project = "work-legacy-summary", work_type = "task", content = "DEMO: first check." }));
+        var longText = new string('.', 32768);
+        var app = new MemoryCall("app", "DEMO app");
+        var legacy = await store.Append(who.App, id, longText, 1, app, default);
+        Assert.Equal("held", (string)(await agent.Refused("append", new { id, addition = "DEMO: new check." }))["code"]!);
+        var released = await store.Release(who.App, id, legacy.Revision, app, default);
+        Assert.Equal("work_summary_required", (string)(await agent.Refused("append", new { id, addition = "DEMO: new check." }))["code"]!);
+        await agent.Ok("update", new { id, content = "DEMO: first and new checks passed.", expected_revision = released.Revision });
+        Assert.Null((await agent.Ok("get", new { id }))["memory"]!["held"]);
+        var note = Id(await agent.Ok("remember", new { content = "DEMO: ordinary note." }));
+        Assert.Equal("too_long", (string)(await agent.Ok("append", new { id = note, addition = longText }))["held"]!["reason"]!);
+    }
 
     // A new work item is a memory with work properties, written in one call; the list reads them back under exact
     // filters, by priority and then oldest first, a page at a time, with its whole length and each state's count.
@@ -936,6 +1014,112 @@ public sealed class MemoryWorkClaimTests(DatabaseFixture fixture) : IClassFixtur
         Assert.Null((await alex.Ok("update_work", new { id, clear = new[] { "assignee" } }))["work"]!["assignee"]);
         Assert.Equal("invalid", (string)(await alex.Refused("update_work", new { id, assignee = "sam", clear = new[] { "assignee" } }))["code"]!);
     }
+
+    // A check an install adds beside the work tables, as a household's T3 pickup guard does (a trigger on
+    // memory_work_claims that refuses a claim on an item still assigned, and one on memory_events that refuses moving
+    // reopened work without a fresh claim), raises bare (P0001). The client is told refused, in the guard's own words, and
+    // the call changed nothing; once it does what the words say, the claim goes through.
+    [PostgresFact] public async Task A_guard_the_install_adds_refuses_in_its_own_words_and_changes_nothing()
+    {
+        var s = fixture.Source;
+        await Scoped.Mode(s, "off");
+        var who = await MemoryLogins.Make(s, "work-guard");
+        await using var agent = await As(who.Alex, "DEMO pickup worker");
+        var id = Id(await agent.Ok("create_work", new { work_type = "bug", content = "DEMO: the Pellow gate latch sticks.", project = "work-guard-gate",
+            state = "ready", assignee = "Gate latch - claude-code" }));
+        const string pickup = "DEMO: Pickup changed, was withdrawn, or is blocked. Refresh the queue";
+        const string reopened = "DEMO: Reopened work needs a fresh worker claim. Return your own assignment to Ready and claim again.";
+        await MemoryRows.Run(s, $$"""
+            CREATE FUNCTION demo_pickup_claim() RETURNS trigger LANGUAGE plpgsql AS $$
+            BEGIN
+              IF EXISTS(SELECT 1 FROM memory_work w WHERE w.memory_id=NEW.memory_id
+                  AND (w.assignee_person IS NOT NULL OR w.assignee_label IS NOT NULL)) THEN
+                RAISE EXCEPTION '{{pickup}}'; END IF;
+              RETURN NEW;
+            END $$;
+            CREATE TRIGGER demo_pickup_claim AFTER INSERT OR UPDATE OF claim_id ON memory_work_claims
+              FOR EACH ROW WHEN (NEW.label LIKE 'DEMO pickup/%') EXECUTE FUNCTION demo_pickup_claim();
+            CREATE FUNCTION demo_reopened() RETURNS trigger LANGUAGE plpgsql AS $$
+            BEGIN RAISE EXCEPTION '{{reopened}}'; END $$;
+            CREATE TRIGGER demo_reopened AFTER INSERT ON memory_events
+              FOR EACH ROW WHEN (NEW.event='work_changed' AND NEW.detail->>'action'='update' AND NEW.detail#>>'{to,state}'='review')
+              EXECUTE FUNCTION demo_reopened();
+            """);
+        try
+        {
+            var label = "DEMO pickup/" + Guid.NewGuid().ToString("D") + "/Gate latch - claude-code";
+            var revision = (int)(await agent.Ok("get", new { id }))["memory"]!["revision"]!;
+            var before = await Events(id);
+
+            // Still assigned: the guard refuses, in its words, and the whole call rolls back (no claim, still ready).
+            var refused = await agent.Refused("claim_work", new { id, label, expected_revision = revision });
+            Assert.Equal(("refused", pickup), ((string)refused["code"]!, (string)refused["error"]!));
+            Assert.Equal("ready", await State(id));
+            Assert.Equal(0L, await MemoryLogins.Scalar(s, "SELECT count(*) FROM memory_work_claims WHERE memory_id=@id", ("id", id)));
+            Assert.Equal(before, await Events(id));
+
+            // Doing what it says: clear its own assignment, then claim again.
+            var cleared = await agent.Ok("update_work", new { id, clear = new[] { "assignee" }, expected_revision = revision });
+            var claimed = await agent.Ok("claim_work", new { id, label, expected_revision = (int)cleared["revision"]! });
+            Assert.Equal((label, "active"), ((string)claimed["claim"]!["label"]!, (string)claimed["work"]!["state"]!));
+            var claimId = (string)claimed["claim"]!["id"]!;
+
+            // A guard on another tool's write answers alike: refused, its words, nothing moved.
+            var moved = await agent.Refused("update_work", new { id, state = "review", claim_id = claimId });
+            Assert.Equal(("refused", reopened), ((string)moved["code"]!, (string)moved["error"]!));
+            Assert.Equal("active", await State(id));
+        }
+        finally
+        {
+            await MemoryRows.Run(s, """
+                DROP TRIGGER IF EXISTS demo_pickup_claim ON memory_work_claims; DROP FUNCTION IF EXISTS demo_pickup_claim();
+                DROP TRIGGER IF EXISTS demo_reopened ON memory_events; DROP FUNCTION IF EXISTS demo_reopened();
+                """);
+        }
+    }
+
+    Task<object?> Events(Guid id) => MemoryLogins.Scalar(fixture.Source,
+        "SELECT string_agg(revision||':'||event,',' ORDER BY id) FROM memory_events WHERE memory_id=@id", ("id", id));
+}
+
+// What the store makes of a database refusal it does not raise itself (MemoryStore.Refusal): a bare RAISE EXCEPTION
+// (P0001) is a check the install added, refused in its own words; a database that does not answer, or one going away,
+// is no refusal, and a work tool answers it unavailable.
+public sealed class MemoryWorkGuardTests
+{
+    static readonly RhythmConfig All = MemoryToolSettings.With("tools: on, work: on");
+    static MemoryRefused? Refused(string state, string message = "DEMO") =>
+        MemoryStore.Refusal(new Npgsql.PostgresException(message, "ERROR", "ERROR", state));
+
+    [Fact] public void A_bare_raise_is_refused_in_its_own_words_and_an_outage_is_not()
+    {
+        var guard = Refused(Npgsql.PostgresErrorCodes.RaiseException, "DEMO: Pickup changed, was withdrawn, or is blocked. Refresh the queue")!;
+        Assert.Equal(("refused", "DEMO: Pickup changed, was withdrawn, or is blocked. Refresh the queue"), (guard.Code, guard.Message));
+        // No words of its own: the engine's. Too many for the app's reason: cut, never splitting a character.
+        Assert.Equal(MemoryStore.GuardedNone, Refused("P0001", "  ")!.Message);
+        var cut = Refused("P0001", new string('a', MemoryStore.GuardedMax - 2) + "😀" + new string('b', 20))!.Message;
+        Assert.Equal(new string('a', MemoryStore.GuardedMax - 2) + "…", cut);
+        Assert.Equal(MemoryStore.GuardedMax, Refused("P0001", new string('c', 900))!.Message.Length);
+        Assert.Equal("DEMO line one\nline two", Refused("P0001", "DEMO line one\nline two\u0007")!.Message);
+        // Connection failures, a server shutting down or out of connections, and a query cancelled are the store not answering.
+        foreach (var outage in new[] { "08006", "08001", "57P01", "57P03", "53300", "57014", "XX000" }) Assert.Null(Refused(outage));
+    }
+
+    [Fact] public async Task A_work_tool_answers_unavailable_when_the_database_does_not_answer()
+    {
+        TestSettings.Use();
+        await using var nowhere = NpgsqlDataSourceNowhere();
+        var services = new ServiceCollection().AddSingleton<IHttpContextAccessor>(new HarnessLogin(Guid.NewGuid()))
+            .AddSingleton(new Database(nowhere)).AddSingleton(All).BuildServiceProvider();
+        await using var agent = await MemoryToolClient.Start(services, All, "DEMO pickup worker");
+        foreach (var (tool, args) in new (string, object)[] {
+            ("claim_work", new { id = Guid.NewGuid(), label = "DEMO pickup/" + Guid.NewGuid().ToString("D") + "/Gate latch - claude-code" }),
+            ("update_work", new { id = Guid.NewGuid(), state = "review" }) })
+            Assert.Equal("unavailable", (string)(await agent.Refused(tool, args))["code"]!);
+    }
+
+    static Npgsql.NpgsqlDataSource NpgsqlDataSourceNowhere() =>
+        Npgsql.NpgsqlDataSource.Create("Host=127.0.0.1;Port=1;Username=nobody;Password=none;Database=nowhere;Timeout=2");
 }
 
 // An export and import round trip keeps a work item: rhythm export writes its properties and its states on the memory's

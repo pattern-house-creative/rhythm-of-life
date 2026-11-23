@@ -21,6 +21,7 @@ import type {
   DashboardWriteAnswer,
 } from "../src/dashboards";
 import { createDemoDashboards } from "../src/demoDashboards";
+import { dashboardCache } from "../src/dashboardCache";
 import { createApiSession } from "../src/apiClient";
 import DashboardView from "../src/DashboardView";
 import DashboardCard from "../src/DashboardCard";
@@ -254,7 +255,7 @@ it("asks before a page writes, applies its declared write, and shows the change 
   // Edits off: the page hears why, and nothing is sent.
   const allow = screen.getByRole("switch", { name: "Allow edits" });
   expect(allow).toHaveAttribute("aria-checked", "false");
-  expect(screen.getByText(/When on, it can change the training log for Alex\./)).toBeInTheDocument();
+  expect(screen.getByText(/When on, it can add to the training log for Alex\./)).toBeInTheDocument();
   await act(async () => p.say({ type: "write", id: 1, name: "effort", change: { metric: "rpe", value: 7, unit: "score" } }));
   expect(await p.answer(1)).toEqual({ ok: false, reason: expect.stringMatching(/^Edits are off/) });
   expect(session.dashboardWrite).not.toHaveBeenCalled();
@@ -285,6 +286,44 @@ it("asks before a page writes, applies its declared write, and shows the change 
     ok: false,
     reason: "The change may have been made: no answer came back. Check before trying again.",
   });
+});
+
+it("names what each declared write may do before edits are turned on, a file once", async () => {
+  const sheet = "fixture:sheet",
+    doc = "fixture:doc";
+  const dashboard: Dashboard = {
+    ...boards.get(id)!,
+    editsAllowed: false,
+    stars: [
+      ...boards.get(id)!.stars,
+      { graphId: sheet, title: "Sample budget" },
+      { graphId: doc, title: "Sample plan" },
+    ],
+    writes: [
+      { name: "effort", kind: "log", log: "training", subject: "alex" },
+      { name: "budget", kind: "sheet", star: sheet, range: "'Bob''s budget'!B2:D40", appendTo: "Receipts" },
+      { name: "week", kind: "doc", star: doc, section: "This week" },
+      { name: "table", kind: "doc", star: doc, table: 0 },
+      { name: "diary", kind: "doc", star: doc, append: true },
+    ],
+  };
+  const session = {
+    dashboard: vi.fn(async () => dashboard),
+    dashboardData: vi.fn(async () => boards.data(id)!),
+    dashboardAllowEdits: vi.fn(async (_i: string, _v: number, on: boolean) => on),
+  };
+  // Drawn from this declaration, not the version an earlier test kept.
+  dashboardCache.clear();
+  render(<DashboardView id={id} session={session} onOpenStar={() => {}} />);
+  const allow = await screen.findByRole("switch", { name: "Allow edits" });
+  expect(allow).toHaveAccessibleDescription(
+    "When on, it can add to the training log for Alex; set cells B2:D40 on the Bob's budget tab and add rows to the Receipts tab of Sample budget; replace the text under “This week” or in a cell of table 1 in Sample plan, and add to its end.",
+  );
+  await act(async () => fireEvent.click(allow));
+  await waitFor(() => expect(allow).toHaveAttribute("aria-checked", "true"));
+  expect(allow).toHaveAccessibleDescription(
+    /^It can add to the training log for Alex; .* Changes are kept in its history; the latest made here has Undo\.$/,
+  );
 });
 
 it("draws a corner's card in card mode with no writes, and opens the dashboard when tapped", async () => {

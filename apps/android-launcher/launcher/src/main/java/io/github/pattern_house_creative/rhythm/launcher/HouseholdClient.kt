@@ -100,7 +100,7 @@ class HouseholdClient(
         val builtins = if (ready && marker?.optJSONArray("builtins")?.let { a -> (0 until a.length()).any { a.optString(it) == "glucose" } } == true)
             listOf(RhythmItem(BUILTIN_GLUCOSE, "Glucose", true)) else emptyList()
         val dashboardItems = items(boards?.optJSONArray("dashboards"), true)
-        val warning = if (boards == null) "Dashboard previews unavailable. Try reconnecting." else if (!ready) "Household companion update or access required." else ""
+        val warning = if (boards == null) "Dashboard previews unavailable" else if (!ready) "Household companion update or access required." else ""
         // A slow/unavailable graph must not withhold dashboards already read.
         if (generation != accessGeneration) throw kotlinx.coroutines.CancellationException("Household changed")
         if (boards != null) onDashboards(Household(dashboardItems, emptyList(), emptyList(), "Loading the household sky.", ready, warning, builtins))

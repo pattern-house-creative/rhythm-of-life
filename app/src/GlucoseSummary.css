@@ -118,17 +118,18 @@
 }
 .glance-ring .range-ring-center strong {
   font:
-    300 26px/1 "Manrope Variable",
-    sans-serif;
-  letter-spacing: -1px;
-  color: #e4eef0;
+    350 26px/1 var(--ui-display);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
 }
 .glance-ring .range-ring-center span {
   margin-top: 5px;
-  font-size: 8px;
-  letter-spacing: 1.4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8fa9b7;
+  color: var(--ui-soft);
 }
 .glance .history-metrics {
   flex: 1;

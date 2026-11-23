@@ -15,32 +15,109 @@
   src: url("@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2")
     format("woff2-variations");
 }
+/* The app's design tokens: one palette, type scale, spacing and motion for
+   everything the app itself draws (docs/dev/design-system.md). A dashboard's
+   page is its author's: it keeps its own --rhythm-* names (dashboardFrame.ts),
+   which are a separate contract and are not these. */
 :root {
-  font-family: "DM Sans Variable", sans-serif;
-  color: #e4ecec;
-  background: #0b1015;
+  /* Surfaces, darkest first. */
+  --ui-sky: #0b1015; /* the page and the living sky */
+  --ui-night: #101a22; /* a full view drawn over the sky */
+  --ui-surface: #17252e; /* cards, bars and sheets */
+  --ui-raised: #20303b; /* a control or row lifted off a surface */
+  --ui-card: linear-gradient(126deg, #1c3037 0%, #17252e 54%, #14212b 100%);
+  --ui-edge: #435a64; /* a card's own edge */
+  --ui-edge-strong: #8eafa9; /* that edge under a pointer */
+  --ui-line: #415560; /* a rule between regions, and around a labelled control */
+  --ui-line-strong: #678490; /* a boundary that alone marks a control: 3:1 */
+  --ui-divider: rgb(89 118 126 / 0.31); /* a quiet rule inside a surface */
+
+  /* Text. Nothing a person must read is fainter than --ui-faint. */
+  --ui-ink: #eef4f3; /* names and values */
+  --ui-soft: #b8c8cc; /* labels and reading text */
+  --ui-faint: #9cafb5; /* times, counts and other metadata */
+
+  /* Accents. Each has one job. */
+  --ui-mint: #a4daca; /* opens something, or is on */
+  --ui-mint-fill: #244039; /* behind a chosen control */
+  --ui-mint-edge: #6a9589; /* round a chosen control */
+  --ui-focus: #b5e7da; /* the keyboard focus ring */
+  --ui-lilac: #cbb6ed; /* discovery: an insight, something found */
+  --ui-lilac-fill: #292737;
+  --ui-amber: #e6c487; /* stale, always beside words that say so */
+  --ui-alert: #e08a97; /* real attention only */
+
+  /* Type: Manrope for names and key values, DM Sans for everything read. */
+  --ui-font: "DM Sans Variable", system-ui, sans-serif;
+  --ui-display: "Manrope Variable", "DM Sans Variable", system-ui, sans-serif;
+  --ui-text-eyebrow: 11px; /* a short uppercase eyebrow or column head, nothing else */
+  --ui-text-meta: 12px; /* the smallest running text */
+  --ui-text-small: 13px;
+  --ui-text-body: 14px;
+  --ui-text-title: 15px; /* a card's or row's name */
+  --ui-text-lead: 16px;
+  --ui-text-section: 18px;
+  --ui-text-page: 21px;
+
+  /* Space, on a 4 px grid. */
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-space-4: 16px;
+  --ui-space-6: 24px;
+  --ui-space-8: 32px;
+
+  /* Corners. */
+  --ui-radius-chip: 6px;
+  --ui-radius-control: 8px;
+  --ui-radius-panel: 10px;
+  --ui-radius-card: 14px;
+
+  /* Focus, touch and motion. A colour or border change stays under 180 ms. */
+  --ui-focus-ring: 2px solid var(--ui-focus);
+  --ui-focus-offset: 3px;
+  --ui-target: 44px; /* the least a touch target measures, each way */
+  --ui-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ui-fast: 120ms;
+  --ui-calm: 180ms;
+}
+/* The browser's own elements, wired to the tokens: a view starts from the
+   system and only says what is its own. */
+:root {
+  font-family: var(--ui-font);
+  color: var(--ui-ink);
+  background: var(--ui-sky);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color-scheme: dark;
+  /* Checkboxes, radios and ranges; inherited by every view. */
+  accent-color: var(--ui-mint);
+  /* Quiet scrollbars everywhere the app scrolls; inherited. */
+  scrollbar-color: var(--ui-line) transparent;
 }
 * {
   box-sizing: border-box;
+  scrollbar-width: thin;
 }
 body {
   margin: 0;
   min-width: 320px;
+  background: var(--ui-sky);
 }
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 button,
 a,
 input,
-select {
+select,
+textarea,
+summary {
   -webkit-tap-highlight-color: transparent;
 }
 button {
@@ -56,19 +133,27 @@ button:disabled {
 a {
   color: inherit;
 }
+::placeholder {
+  color: var(--ui-faint);
+  opacity: 1;
+}
+/* Every keyboard target shows the ring; a view may move it, never remove it
+   without a replacement. */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid #95d2d9;
-  outline-offset: 5px;
+  outline: var(--ui-focus-ring);
+  outline-offset: var(--ui-focus-offset);
 }
 button {
   touch-action: manipulation;
 }
 button:hover {
-  color: #fff;
+  color: var(--ui-ink);
 }
 button svg {
   flex-shrink: 0;
@@ -80,6 +165,6 @@ h3 {
   margin: 0;
 }
 ::selection {
-  background: #35696e;
-  color: white;
+  background: color-mix(in srgb, var(--ui-mint) 36%, var(--ui-sky));
+  color: var(--ui-ink);
 }

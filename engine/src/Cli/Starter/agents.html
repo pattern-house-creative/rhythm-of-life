@@ -19,6 +19,7 @@
       document.querySelector("nav"),
       [
         ["overview", "Overview"],
+        ["team", "T3 team"],
         ["activity", "Activity"],
         ["handoffs", "Handoffs"],
       ],
@@ -29,6 +30,12 @@
       },
     );
     board.replaceChildren();
+    if (view === "team") {
+      const team = el("section");
+      board.append(team);
+      window.renderRhythmTeam(team, feeds);
+      return;
+    }
     if (view === "overview") {
       feedNotice(board, feeds.work);
       const work = records(feeds.work),

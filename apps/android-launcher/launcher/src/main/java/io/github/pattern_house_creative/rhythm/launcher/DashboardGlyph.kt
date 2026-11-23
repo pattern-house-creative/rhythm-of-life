@@ -30,7 +30,7 @@ internal fun dashboardSymbol(title: String, id: String): String {
 }
 @Composable internal fun DashboardGlyph(title: String, id: String, modifier: Modifier=Modifier) {
     val symbol=dashboardSymbol(title,id)
-    val colors=listOf(Color(0xffa0d7bf),Color(0xffb5c9e0),Color(0xffd2c7a0),Color(0xffc5b5d6))
+    val colors=SKY_INKS.map { Color(it) }
     val color=colors[(id.hashCode() and Int.MAX_VALUE)%colors.size]
     Box(modifier.size(46.dp).background(color.copy(alpha=.09f),RoundedCornerShape(15.dp)),contentAlignment=Alignment.Center) {
         if(symbol=="initials") Text(title.split(Regex("\\s+")).filter{it.isNotBlank()}.take(2).joinToString(""){it.take(1).uppercase()},

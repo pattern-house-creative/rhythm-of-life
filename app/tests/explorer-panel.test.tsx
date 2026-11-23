@@ -500,7 +500,7 @@ it("keeps a live install's sky after the app went offline and came back", () => 
     />,
   );
   expect(screen.queryByText("Sample unavailable")).not.toBeInTheDocument();
-  expect(screen.getByText(/5 items · tap a star/)).toBeInTheDocument();
+  expect(screen.getByText(/5 stars · select one/)).toBeInTheDocument();
   view.unmount();
   // The demo's own "Source error" preview still empties its sky.
   render(

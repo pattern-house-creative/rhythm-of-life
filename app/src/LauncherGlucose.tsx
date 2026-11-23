@@ -2,6 +2,7 @@ import { Activity } from "lucide-react";
 import { hasMeasurement, healthStatus } from "./health";
 import type { ObservatoryData } from "./model";
 import { launcherGlucoseHistory } from "./launcherGlucoseHistory";
+import { usePreviewFit } from "./usePreviewFit";
 
 // A compact surface of the built-in tile, using its actual health/provenance
 // contract. It deliberately does not squeeze the full health panel into a card.
@@ -14,6 +15,7 @@ export function LauncherGlucose({
   now: number;
   blocked: boolean;
 }) {
+  const fitted = usePreviewFit<HTMLElement>(["chart", "coverage", "age", "tir"]);
   const history = launcherGlucoseHistory(
     blocked ? null : data.glucoseHistory,
     now,
@@ -50,6 +52,7 @@ export function LauncherGlucose({
             : "Latest reading";
   return (
     <article
+      ref={fitted}
       className={`launcher-summary launcher-glucose ${status}`}
       data-preview-ready="true"
       data-builtin="glucose"
@@ -99,12 +102,18 @@ export function LauncherGlucose({
           "Coverage is classified cadence slots / expected slots over the trailing 24 hours."
         }
       >
+        {/* With no history at all its reason says so alone ("History unavailable"), not after
+            "No history"; a coverage figure comes before its reason or range. */}
         {history.expectedSlots
-          ? `${Math.floor(history.coverage)}% coverage`
-          : "No history"}
-        {history.reason
-          ? ` · ${history.reason === "Needs 70% coverage" ? "need 70%" : history.reason}`
-          : ` · ${history.archive ? "Archive · " : ""}${history.range.map((v) => new Intl.NumberFormat(undefined, { maximumFractionDigits: history.unit === "mmol/L" ? 2 : 0 }).format(v)).join("–")}`}
+          ? `${Math.floor(history.coverage)}% coverage · `
+          : ""}
+        <span className="glucose-preview-why">
+          {history.reason
+            ? history.reason === "Needs 70% coverage"
+              ? "need 70%"
+              : history.reason
+            : `${history.archive ? "Archive · " : ""}${history.range.map((v) => new Intl.NumberFormat(undefined, { maximumFractionDigits: history.unit === "mmol/L" ? 2 : 0 }).format(v)).join("–")}`}
+        </span>
       </footer>
     </article>
   );

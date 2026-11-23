@@ -28,6 +28,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -83,11 +87,11 @@ internal fun SkyExplorer(data: Household?, graph: SkyGraph, reduced: Boolean, ac
     }
     BackHandler(selection!=null && active) { selection=null }
     val chosen=rendered.points.firstOrNull { it.item.id==selection }
-    val palette=listOf(Color(0xffb2ffdf),Color(0xffb7e5dc),Color(0xffc1eadb),Color(0xffc9e7ca))
+    val palette=SkyArt.groups
     val glowRadius=with(density) { 18.dp.toPx() }
     val glows=remember(density) { palette.map { color -> Brush.radialGradient(listOf(color.copy(alpha=.27f),color.copy(alpha=.08f),Color.Transparent),center=Offset.Zero,radius=glowRadius) } }
     Column(Modifier.fillMaxSize()) {
-        BoxWithConstraints(Modifier.fillMaxWidth().weight(1f).clipToBounds().testTag("sky-map").semantics { stateDescription="${rendered.points.size} loaded; zoom ${camera.zoom}" }) {
+        BoxWithConstraints(Modifier.fillMaxWidth().weight(1f).clipToBounds().testTag("sky-map").semantics { stateDescription="${starsShown(rendered.points.size)}; zoom ${camera.zoom}" }) {
             val w=with(density){maxWidth.toPx()};val h=with(density){maxHeight.toPx()}
             val viewport=remember(w,h,extent) { SkyViewport(w,h,extent.width,extent.height) }
             fun screen(p: SkyPoint,time:Float=0f): Offset {
@@ -103,7 +107,11 @@ internal fun SkyExplorer(data: Household?, graph: SkyGraph, reduced: Boolean, ac
                 .mapNotNull { p ->
                     if(camera.zoom<1.4f && p.degree==0 && !p.item.dashboard && selection!=p.item.id) return@mapNotNull null
                     if(camera.zoom<2.5f && labelBoxes.size>=(if(camera.zoom<1.4f) 7 else 14) && selection!=p.item.id) return@mapNotNull null
-                    val text=measurer.measure(p.item.title,TextStyle(color=Color(0xffd8eee4),fontSize=11.sp,fontFamily=ObservatoryBody,letterSpacing=.5.sp),maxLines=1,overflow=TextOverflow.Ellipsis,
+                    // A name at rest is soft; the selected star's name comes forward in ink and a heavier weight.
+                    val chosenLabel=selection==p.item.id
+                    val text=measurer.measure(p.item.title,TextStyle(color=if(chosenLabel) Ui.ink else Ui.soft,fontSize=Ui.textMeta,
+                        fontFamily=ObservatoryBody,fontWeight=if(chosenLabel) FontWeight.SemiBold else FontWeight.Normal,
+                        shadow=Shadow(Ui.sky.copy(alpha=.9f),Offset(0f,1f),6f)),maxLines=1,overflow=TextOverflow.Ellipsis,
                         constraints=Constraints(maxWidth=with(density){110.dp.roundToPx()}))
                     val at=screen(p)+Offset(7*density.density,5*density.density)
                     val box=Rect(at.x,at.y,at.x+text.size.width,at.y+text.size.height)
@@ -161,7 +169,7 @@ internal fun SkyExplorer(data: Household?, graph: SkyGraph, reduced: Boolean, ac
                     val pa=points[a];val pb=points[b]
                     if(maxOf(pa.x,pb.x)>=0 && minOf(pa.x,pb.x)<=w && maxOf(pa.y,pb.y)>=0 && minOf(pa.y,pb.y)<=h) {
                         val automatic=dashed[edgeIndex]
-                        drawLine(Color(0xff7bcab7).copy(alpha=if(focused) .8f else if(selection!=null) .05f else .20f),pa,pb,
+                        drawLine(SkyArt.explorerLink.copy(alpha=if(focused) .8f else if(selection!=null) .05f else .20f),pa,pb,
                             if(focused) 1.dp.toPx() else .55.dp.toPx(),
                             pathEffect=if(automatic) dashPattern else null)
                     }
@@ -170,15 +178,15 @@ internal fun SkyExplorer(data: Household?, graph: SkyGraph, reduced: Boolean, ac
                     val at=screen(p,t);val selected=p.item.id==selection
                     val phase=(p.item.id.hashCode() and 255)*.03f
                     val breath=if(reduced) .5f else (sin(t*2f*PI.toFloat()/3f+phase)+1)/2
-                    val color=if(p.group<0) Color(0xff98b4bb) else palette[p.group%palette.size]
+                    val color=if(p.group<0) SkyArt.ungrouped else palette[p.group%palette.size]
                     val prominent=rendered.points.size<=60 || p.item.dashboard || p.degree>2 || selected
                     val core=(if(p.item.dashboard) 2.8f else if(prominent) 2.3f else 1.25f).dp.toPx()
                     if(prominent) withTransform({ translate(at.x,at.y);scale(.8f+breath*.2f,.8f+breath*.2f,Offset.Zero) }) {
                         drawCircle(glows[if(p.group<0)0 else p.group%glows.size],glowRadius,Offset.Zero,alpha=if(selected)1f else .65f+breath*.35f)
                     }
                     drawCircle(color.copy(alpha=.12f+breath*.08f),core*2f,at)
-                    drawCircle(if(prominent) Color(0xffe1fff3) else color.copy(alpha=.72f),core,at)
-                    if(selected) drawCircle(Color(0xffd8fff0),core+5.dp.toPx(),at,style=Stroke(1.dp.toPx()))
+                    drawCircle(if(prominent) SkyArt.brightStar else color.copy(alpha=.72f),core,at)
+                    if(selected) drawCircle(SkyArt.selectedRing,core+5.dp.toPx(),at,style=Stroke(1.5.dp.toPx()))
                 }
                 labels.forEach { (p,text,_) -> drawText(text,topLeft=screen(p,t)+Offset(7.dp.toPx(),5.dp.toPx())) }
             }
@@ -193,30 +201,40 @@ internal fun SkyExplorer(data: Household?, graph: SkyGraph, reduced: Boolean, ac
                         customActions=listOf(CustomAccessibilityAction("Open ${p.item.title}") { openPoint(p);true }) })
             }
             if(rendered.points.isEmpty()) Text(if((data != null && (data.dashboards.isNotEmpty() || data.stars.isNotEmpty()) && graph.points.isEmpty())) "Finding the constellation…" else if(data==null) "Connect your household to explore its stars" else "No readable stars in this discovery view",
-                color=Color(0xff9bb6b7),fontSize=12.sp,modifier=Modifier.align(Alignment.Center).padding(24.dp))
+                color=Ui.soft,fontSize=Ui.textMeta,textAlign=TextAlign.Center,modifier=Modifier.align(Alignment.Center).padding(Ui.space6))
         }
         Row(Modifier.fillMaxWidth().height(48.dp).testTag("sky-controls"),verticalAlignment=Alignment.CenterVertically) {
             if(chosen!=null) {
-                Text(chosen.item.title,maxLines=1,overflow=TextOverflow.Ellipsis,fontSize=12.sp,color=Color(0xffc5dedb),modifier=Modifier.weight(1f))
+                Text(chosen.item.title,maxLines=1,overflow=TextOverflow.Ellipsis,fontSize=Ui.textTitle,fontFamily=ObservatoryTitle,fontWeight=TitleWeight,
+                    color=Ui.ink,modifier=Modifier.padding(start=Ui.space1).weight(1f))
                 TextButton(onClick={openPoint(chosen)},modifier=Modifier.testTag("open-sky-selection")) { Text("Open") }
             } else {
-                TextButton(onClick={coverage=true},contentPadding=PaddingValues(2.dp),modifier=Modifier.weight(1f)) { Text("${rendered.points.size} loaded · discovery",fontSize=10.sp,maxLines=1) }
-                TextButton(onClick={catalogue=true},contentPadding=PaddingValues(4.dp)) { Text("Stars",fontSize=11.sp,color=Color(0xffa4ead7)) }
+                // The count is of the stars drawn in this sky, not of the household's records; the button explains which.
+                TextButton(onClick={coverage=true},contentPadding=PaddingValues(2.dp),
+                    modifier=Modifier.weight(1f).semantics { onClick(label=ABOUT_STARS,action=null) }) {
+                    Text(starsShown(rendered.points.size),fontSize=Ui.textMeta,color=Ui.soft,maxLines=1,overflow=TextOverflow.Ellipsis)
+                }
+                TextButton(onClick={catalogue=true},contentPadding=PaddingValues(4.dp)) { Text("Stars",fontSize=Ui.textSmall,color=Ui.mint) }
             }
             IconButton(onClick={moveCamera(camera.copy(zoom=(camera.zoom/1.5f).coerceAtLeast(.75f)))},modifier=Modifier.size(48.dp).semantics { contentDescription="Zoom out sky" }) { Canvas(Modifier.size(16.dp)) {
-                drawLine(Color(0xffa4ead7),center-Offset(5.dp.toPx(),0f),center+Offset(5.dp.toPx(),0f),1.4.dp.toPx())
+                drawLine(Ui.mint,center-Offset(5.dp.toPx(),0f),center+Offset(5.dp.toPx(),0f),1.4.dp.toPx())
             } }
             IconButton(onClick={moveCamera(camera.copy(zoom=(camera.zoom*1.5f).coerceAtMost(8f)))},modifier=Modifier.size(48.dp).semantics { contentDescription="Zoom in sky" }) { Canvas(Modifier.size(16.dp)) {
-                drawLine(Color(0xffa4ead7),center-Offset(5.dp.toPx(),0f),center+Offset(5.dp.toPx(),0f),1.4.dp.toPx())
-                drawLine(Color(0xffa4ead7),center-Offset(0f,5.dp.toPx()),center+Offset(0f,5.dp.toPx()),1.4.dp.toPx())
+                drawLine(Ui.mint,center-Offset(5.dp.toPx(),0f),center+Offset(5.dp.toPx(),0f),1.4.dp.toPx())
+                drawLine(Ui.mint,center-Offset(0f,5.dp.toPx()),center+Offset(0f,5.dp.toPx()),1.4.dp.toPx())
             } }
-            TextButton(onClick={selection=null;moveCamera(fitCamera);followingFit=true},contentPadding=PaddingValues(2.dp),modifier=Modifier.semantics { contentDescription="Fit sky" }) { Text("Fit",fontSize=11.sp) }
+            TextButton(onClick={selection=null;moveCamera(fitCamera);followingFit=true},contentPadding=PaddingValues(2.dp),modifier=Modifier.semantics { contentDescription="Fit sky" }) { Text("Fit",fontSize=Ui.textSmall) }
         }
     }
-    if(catalogue) AlertDialog(onDismissRequest={catalogue=false},title={Text("Loaded stars")},text={
+    if(catalogue) AlertDialog(onDismissRequest={catalogue=false},shape=RoundedCornerShape(Ui.radiusCard),containerColor=Ui.surface,title={Text("Loaded stars")},text={
         LazyColumn(Modifier.heightIn(max=400.dp).testTag("sky-catalogue")) { items(rendered.points,key={it.item.id}) { p ->
             TextButton(onClick={catalogue=false;select(p)},modifier=Modifier.fillMaxWidth()) { Text(p.item.title) }
         } }
     },confirmButton={TextButton(onClick={catalogue=false}) { Text("Close") }})
-    if(coverage) AlertDialog(onDismissRequest={coverage=false},title={Text("Discovery view")},text={Text((data?.coverage ?: "Connect your household to load its readable discovery view. This is not a count of all household records.")+"\n\nOverview lines are simplified. Select a star to see all its loaded connections. Visual neighborhoods are not source categories.")},confirmButton={TextButton(onClick={coverage=false}){Text("Close")}})
+    if(coverage) AlertDialog(onDismissRequest={coverage=false},shape=RoundedCornerShape(Ui.radiusCard),containerColor=Ui.surface,title={Text(ABOUT_STARS)},text={Text(color=Ui.soft,fontSize=Ui.textBody,lineHeight=21.sp,text=(data?.coverage ?: "Connect your household to load its readable discovery view. This is not a count of all household records.")+"\n\nOverview lines are simplified. Select a star to see all its loaded connections. Visual neighborhoods are not source categories.")},confirmButton={TextButton(onClick={coverage=false}){Text("Close")}})
 }
+
+/** How many stars this sky draws, said on the button that explains them and in the sky's spoken state. */
+internal fun starsShown(count:Int)=if(count==1)"1 star shown" else "$count stars shown"
+/** What that button opens, and what TalkBack says activating it does. */
+internal const val ABOUT_STARS="About these stars"

@@ -246,7 +246,7 @@ export function MemoryList({
           failed,
         ),
         left
-          ? `${left === 1 ? "1 left its project behind, so it is" : `${left} left their projects behind, so they are`} in no project now.`
+          ? `${left === 1 ? "1 left its collection behind, so it is" : `${left} left their collections behind, so they are`} in no collection now.`
           : "",
       ]
         .filter(Boolean)
@@ -303,7 +303,7 @@ export function MemoryList({
           find();
         }}
       >
-        <label htmlFor="memory-find">Words in it</label>
+        <label htmlFor="memory-find">Search memory text</label>
         <input
           id="memory-find"
           type="search"
@@ -387,7 +387,7 @@ export function MemoryList({
           </select>
         </label>
         <label className="memory-status-pick">
-          <span>Project</span>
+          <span>Collection</span>
           <select
             value={
               filters.project
@@ -545,12 +545,15 @@ export function MemoryList({
                 {item.held ? "Held for review" : (item.content ?? "")}
                 {item.truncated ? "…" : ""}
               </span>
+              {/* The row's time on its own, so every row's time shares the list's right edge. */}
+              <time className="memory-when" dateTime={item.updatedAt}>
+                {when(item.updatedAt)}
+              </time>
               <span className="memory-meta">
                 {item.work
                   ? `${[workWords(item.work), workWho(item.work)].filter(Boolean).join(" · ")} · `
                   : ""}
-                {statusNames[item.status]} · {scopeName(item)} ·{" "}
-                {when(item.updatedAt)}
+                {statusNames[item.status]} · {scopeName(item)}
                 {item.held ? " · held" : ""}
                 {stateNames[item.state] &&
                   ` · ${stateNames[item.state]!.toLowerCase()}`}
@@ -569,7 +572,7 @@ export function MemoryList({
       {list && !list.items.length && (
         <p className="memory-empty">
           {filters.query
-            ? `No memory you read holds “${filters.query}”${filtered && Object.keys(filterArgs(filters)).length > 1 ? " with these filters" : ""}.`
+            ? `No memories match “${filters.query}”${filtered && Object.keys(filterArgs(filters)).length > 1 ? " with these filters" : ""}.`
             : filtered
               ? "No memories match these filters."
               : "No memories yet."}

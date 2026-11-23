@@ -20,12 +20,12 @@ export class FeatureBoundary extends Component<
       <section className="detail-backdrop">
         <div className="detail-panel" role="alert">
           <h2>This view could not be opened</h2>
+          {/* Any render error lands here, live or demo: say only what helps. */}
           <p className="detail-prose">
-            A first visit needs a connection to load this part of the demo. Your
-            source data has not changed.
+            Reload to try again, or return to Home.
           </p>
           <div className="settings-actions">
-            <button onClick={this.props.close}>Return to ambient</button>
+            <button onClick={this.props.close}>Back to Home</button>
             <button onClick={() => void reloadFromNetwork()}>
               Reload and try again
             </button>

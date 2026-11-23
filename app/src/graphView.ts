@@ -18,7 +18,7 @@ export const sourceNames: Record<string, string> = {
   garmin: "Garmin",
   nightscout: "Nightscout",
   calendar: "Calendar",
-  demo: "Demo",
+  demo: "Sample data",
 };
 export function sourceName(id: SourceId) {
   if (Object.hasOwn(sourceNames, id)) return sourceNames[id];

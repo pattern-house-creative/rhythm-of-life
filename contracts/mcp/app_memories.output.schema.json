@@ -3371,9 +3371,10 @@
             "protected",
             "limit",
             "not_due",
-            "claimed"
+            "claimed",
+            "refused"
           ],
-          "description": "unknown: no such memory the caller reads (one in the trash, of another scope or never made answer alike); forbidden: not this login's to change (the author lock); conflict: changed since expected (revision is the current one); pruned: revision is the oldest still kept; unknown_project: known lists the slugs the caller reads; scopes_off, held and no_author: a share's (with memory.share on), refused while memory scopes are off, for a memory held for review, and for taking back one no current person wrote; unavailable: the map did not answer just now (a dismissal op while the engine is starting), which is not the memory tools going off. retracted: still true's, for a memory marked wrong (deprecated), which is not confirmed as true. too_many_candidates: capsule_status, over 200 canonical memories in a capsule's slots. needs_person: only a person does this; never answered here, since the app is a person's channel, and the words an AI client's call gets. not_offered: the two are not queued as a possible contradiction, or one of them no longer stands. settled: a person settled the pair already. protected: a replacement its rules refuse, with why. limit: past the 50 standing instructions of a scope. not_due: a digest asked for before its time."
+          "description": "unknown: no such memory the caller reads (one in the trash, of another scope or never made answer alike); forbidden: not this login's to change (the author lock); conflict: changed since expected (revision is the current one); pruned: revision is the oldest still kept; unknown_project: known lists the slugs the caller reads; scopes_off, held and no_author: a share's (with memory.share on), refused while memory scopes are off, for a memory held for review, and for taking back one no current person wrote; unavailable: the map did not answer just now (a dismissal op while the engine is starting), which is not the memory tools going off. retracted: still true's, for a memory marked wrong (deprecated), which is not confirmed as true. too_many_candidates: capsule_status, over 200 canonical memories in a capsule's slots. needs_person: only a person does this; never answered here, since the app is a person's channel, and the words an AI client's call gets. not_offered: the two are not queued as a possible contradiction, or one of them no longer stands. settled: a person settled the pair already. protected: a replacement its rules refuse, with why. limit: past the 50 standing instructions of a scope. not_due: a digest asked for before its time. claimed: a work item another session's claim holds. refused: a check the install added to the database refused the change on purpose, in its own words; nothing was changed, and it is no outage."
         },
         "reason": {
           "type": "string",
@@ -4275,6 +4276,7 @@
         "owner": {
           "$ref": "#/$defs/owner"
         },
+        "showInProjects": { "type": "boolean" },
         "aliases": {
           "type": "array",
           "items": {

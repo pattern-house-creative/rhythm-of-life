@@ -186,7 +186,7 @@ it("counts the stars it found when no title matches, and leaves with another wor
   ).not.toBeInTheDocument();
   expect(
     within(panel()).getByRole("heading", {
-      name: "No matching constellations",
+      name: "No stars match your search",
     }),
   ).toBeInTheDocument();
   expect(lit(container)).toEqual([]);

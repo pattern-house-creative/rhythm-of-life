@@ -1,14 +1,17 @@
 /* The Memories view (MemoryView.tsx, SB-P3-13): where the reader opens, beside the panel on a wide screen and over the
-   sky on a phone (the reader's own rules in Explorer.css place it). */
+   sky on a phone (the reader's own rules in Explorer.css place it). It is drawn on the app's design tokens
+   (docs/dev/design-system.md) and reads in three levels: the section in view, its filters and labels in soft, each
+   result's words in ink and its metadata in faint. */
 .memory-view .reader-bar {
   grid-template-columns: auto minmax(0, 1fr) auto;
 }
+/* The sections: one strip, the chosen one filled and bordered as the app's other choices are, so it reads without colour. */
 .memory-tabs {
   display: inline-flex;
   gap: 2px;
   padding: 3px;
-  border: 1px solid #93b4c326;
-  border-radius: 18px;
+  border: 1px solid var(--ui-line);
+  border-radius: 20px;
   /* The sections take their own row under the title, and scroll across on a phone rather than wrap. */
   grid-column: 1 / -1;
   justify-self: start;
@@ -16,88 +19,146 @@
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
+  /* The section scrolled to stays clear of a fading end. */
+  scroll-padding-inline: 24px;
+}
+/* More sections past an end (MemoryView.tsx marks which): that end fades over 16 px, so the strip shows it goes on. */
+.memory-tabs[data-more="end"] {
+  mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+}
+.memory-tabs[data-more="start"] {
+  mask-image: linear-gradient(to left, #000 calc(100% - 16px), transparent);
+}
+.memory-tabs[data-more="both"] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 16px,
+    #000 calc(100% - 16px),
+    transparent
+  );
 }
 .memory-tabs button {
   display: inline-flex;
   flex: none;
   align-items: center;
-  gap: 5px;
-  min-height: 32px;
+  gap: 6px;
+  min-height: 34px;
   padding: 0 12px;
-  border-radius: 15px;
-  font-size: 12px;
-  color: #a8bfca;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  font-size: var(--ui-text-small);
+  color: var(--ui-soft);
+}
+.memory-tabs button:hover {
+  color: var(--ui-ink);
+  background: var(--ui-raised);
 }
 .memory-tabs button[aria-pressed="true"] {
-  color: #e3f3f5;
-  background: #accde41f;
+  color: var(--ui-ink);
+  background: var(--ui-mint-fill);
+  border-color: var(--ui-mint-edge);
 }
 /* How many wait in a review queue, beside its name on the strip. */
 .memory-waits {
-  min-width: 16px;
-  padding: 0 4px;
-  border-radius: 8px;
-  font-size: 11px;
-  line-height: 16px;
+  min-width: 20px;
+  padding: 0 6px;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  font-size: var(--ui-text-meta);
+  font-weight: 600;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
   text-align: center;
-  color: #e3f3f5;
-  background: #accde433;
+  color: var(--ui-ink);
+  background: var(--ui-raised);
 }
-/* The brief's lists (MemoryPlans.tsx): a list's filter under the section's strip, a part's heading with its count, and calibration. */
+/* The brief's lists (MemoryPlans.tsx): a list's filter under the section's strip, a part's heading with its count at the
+   list's right edge, and calibration. */
 .memory-plan-strip {
   flex: none;
   align-self: flex-start;
 }
+/* A list's own strip is as wide as its choices, at the reading column's left edge. */
+.memory-body > .memory-plan-strip {
+  width: fit-content;
+  margin-left: max(0px, calc((100% - 48rem) / 2));
+  margin-right: 0;
+}
 .memory-plan-part {
-  margin: 0 0 6px;
-  font-size: 12px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+  margin: var(--ui-space-2) 0 var(--ui-space-2);
+  padding: 0 var(--ui-space-1) var(--ui-space-1);
+  border-bottom: 1px solid var(--ui-divider);
+  font-size: var(--ui-text-small);
   font-weight: 500;
-  color: #a8bfca;
+  color: var(--ui-soft);
 }
 .memory-plan-part span {
-  color: #e3f3f5;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
 }
 .memory-plan-late {
-  color: #c1a66d;
+  color: var(--ui-amber);
 }
 .memory-plan-calibration {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  padding-top: 10px;
-  border-top: 1px solid #93b4c31f;
+  align-items: stretch;
+  gap: var(--ui-space-2);
+  padding-top: var(--ui-space-3);
+  border-top: 1px solid var(--ui-divider);
 }
 .memory-plan-bands {
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 12px;
+  font-size: var(--ui-text-meta);
   line-height: 1.6;
-  color: #a8bfca;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-soft);
 }
 .memory-body {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding-bottom: 24px;
+  gap: var(--ui-space-4);
+  padding-bottom: var(--ui-space-6);
 }
+/* One reading column for everything in the body: in rem, so a line in smaller type keeps the same edges as the rest. */
 .memory-body > * {
   width: 100%;
-  max-width: 70ch;
+  max-width: 48rem;
   margin-inline: auto;
 }
 .memory-capture,
 .memory-edit {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--ui-space-2);
 }
+/* A field's name: a label, in soft. */
 .memory-capture label,
 .memory-edit label {
-  font-size: 11px;
-  letter-spacing: 0.4px;
-  color: #9fb4bf;
+  font-size: var(--ui-text-small);
+  font-weight: 500;
+  color: var(--ui-soft);
+}
+/* A choice in a form (Show in Projects): its box beside its words, which read as the thing chosen. */
+.memory-edit label:has(> input[type="checkbox"]) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-height: 36px;
+  color: var(--ui-ink);
+}
+.memory-edit label > input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
 }
 .memory-capture textarea,
 .memory-edit textarea {
@@ -106,65 +167,110 @@
   padding: 10px 12px;
   resize: vertical;
   font: inherit;
-  font-size: 15px;
+  font-size: var(--ui-text-title);
   line-height: 1.6;
-  color: #e1ecef;
-  background: #0a1217cc;
-  border: 1px solid #93b4c333;
-  border-radius: 12px;
+  color: var(--ui-ink);
+  background: color-mix(in srgb, var(--ui-sky) 80%, transparent);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-panel);
 }
 .memory-capture textarea:focus-visible,
 .memory-edit textarea:focus-visible {
-  outline: 2px solid #a6dccd88;
+  outline: var(--ui-focus-ring);
   outline-offset: 1px;
 }
 .memory-row {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 10px;
+  gap: var(--ui-space-3);
   flex-wrap: wrap;
 }
 .memory-row .memory-hint {
   margin-right: auto;
 }
 .memory-row button:not(.primary-action) {
-  min-height: 38px;
-  padding: 0 12px;
-  border-radius: 19px;
-  color: #a8cddc;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  font-size: var(--ui-text-small);
+  color: var(--ui-ink);
+  background: var(--ui-raised);
 }
+/* A line that explains is reading text, in soft; a row's metadata is faint. */
 .memory-hint,
 .memory-meta {
   margin: 0;
   overflow-wrap: anywhere;
-  font-size: 12px;
+  font-size: var(--ui-text-small);
   line-height: 1.5;
-  color: #8fa5b2;
+  color: var(--ui-soft);
+}
+.memory-meta {
+  font-size: var(--ui-text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-faint);
 }
 .memory-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--ui-space-2);
   margin: 0 auto;
   padding: 0;
   list-style: none;
 }
+/* A result: its words grow as long as they need (up to three lines), its time on the right edge every row shares, and its
+   metadata under both. */
 .memory-list > li > button,
 .memory-trashed,
-.memory-held-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.memory-held-item,
+.memory-project-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: var(--ui-space-3);
+  row-gap: var(--ui-space-1);
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 14px;
   text-align: left;
-  border: 1px solid #93b4c31f;
-  border-radius: 12px;
-  background: #93b4c30a;
+  border: 1px solid var(--ui-divider);
+  border-radius: var(--ui-radius-panel);
+  background: color-mix(in srgb, var(--ui-surface) 55%, transparent);
 }
-.memory-list > li > button:hover {
-  background: #93b4c317;
+.memory-list > li > button > *,
+.memory-trashed > *,
+.memory-held-item > *,
+.memory-project-head > * {
+  grid-column: 1 / -1;
+}
+/* Words beside a time keep to the first column; without one they take the row. */
+.memory-list > li > button > .memory-preview:has(+ .memory-when),
+.memory-held-item > .memory-preview:has(+ .memory-when),
+.memory-project-head > .memory-preview:has(+ .memory-when) {
+  grid-column: 1;
+}
+.memory-list > li > button:hover,
+.memory-project-head:hover {
+  border-color: var(--ui-edge);
+  background: var(--ui-surface);
+}
+/* A row's time: faint, in tabular digits, at the right edge every row shares. */
+.memory-list > li > button > .memory-when,
+.memory-held-item > .memory-when,
+.memory-project-head > .memory-when {
+  grid-column: 2;
+  grid-row: 1;
+}
+.memory-when {
+  justify-self: end;
+  padding-top: 2px;
+  white-space: nowrap;
+  font-size: var(--ui-text-meta);
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--ui-faint);
 }
 .memory-preview {
   display: -webkit-box;
@@ -173,72 +279,90 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   overflow-wrap: anywhere;
-  font-size: 14px;
-  line-height: 1.55;
-  color: #d2dee3;
+  font-size: var(--ui-text-body);
+  line-height: 1.5;
+  color: var(--ui-ink);
   white-space: pre-line;
+}
+/* A collection's name is a name: it reads as one. */
+.memory-project-head > .memory-preview {
+  font: 600 var(--ui-text-title) / 1.4 var(--ui-display);
 }
 .memory-actions,
 .memory-confirm {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: var(--ui-space-2);
 }
+.memory-held-item > .memory-actions,
+.memory-held-item > .memory-confirm,
+.memory-trashed > .memory-actions,
+.memory-trashed > .memory-confirm {
+  margin-top: var(--ui-space-1);
+}
+/* Each row's and each question's buttons: a control lifted off the row, its label in ink. */
 .memory-actions button,
 .memory-confirm button,
 .memory-held button,
 .memory-more {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   min-height: 36px;
-  padding: 0 12px;
-  border-radius: 18px;
-  font-size: 12px;
-  color: #c9e2ea;
-  background: #accde414;
+  padding: 0 14px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  font-size: var(--ui-text-small);
+  color: var(--ui-ink);
+  background: var(--ui-raised);
 }
 .memory-actions button:hover,
 .memory-confirm button:hover,
 .memory-held button:hover {
-  background: #accde426;
+  border-color: var(--ui-line-strong);
 }
 .memory-confirm > span {
   flex-basis: 100%;
-  font-size: 13px;
-  color: #e6d6c8;
+  font-size: var(--ui-text-body);
+  line-height: 1.5;
+  color: var(--ui-ink);
 }
+/* What cannot be taken back: the one control in alert, its words saying what it does. */
 .memory-confirm .memory-danger {
-  color: #1a0f0b;
-  background: #e8b48f;
+  color: var(--ui-sky);
+  background: var(--ui-alert);
+  border-color: var(--ui-alert);
 }
 .memory-confirm .memory-danger:hover {
-  background: #f1c8a8;
+  color: var(--ui-sky);
+  background: color-mix(in srgb, var(--ui-alert) 82%, var(--ui-ink));
 }
+/* A pick: its name in soft and its choice in ink, inside one bordered control. */
 .memory-status-pick {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   min-height: 36px;
-  padding: 0 4px 0 12px;
-  border-radius: 18px;
-  font-size: 12px;
-  color: #9fb4bf;
-  background: #accde414;
+  padding: 0 3px 0 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  font-size: var(--ui-text-small);
+  color: var(--ui-soft);
 }
 .memory-status-pick select {
-  min-height: 30px;
+  min-height: 28px;
   padding: 0 6px;
-  border-radius: 14px;
-  color: #e1ecef;
-  background: #0a1217;
-  border: 1px solid #93b4c333;
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius-chip);
+  font-size: var(--ui-text-small);
+  color: var(--ui-ink);
+  background: var(--ui-raised);
 }
 .memory-open {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--ui-space-3);
 }
 .memory-view .memory-text.source-content {
   margin: 0;
@@ -246,17 +370,18 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+/* A memory held for review: real attention, said in words, with a quiet alert edge beside them. */
 .memory-held {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid #e0a07a55;
-  border-radius: 12px;
-  background: #e0a07a14;
-  color: #f0dccd;
-  font-size: 13px;
+  gap: var(--ui-space-2);
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--ui-alert) 45%, transparent);
+  border-radius: var(--ui-radius-panel);
+  background: color-mix(in srgb, var(--ui-alert) 7%, transparent);
+  color: var(--ui-ink);
+  font-size: var(--ui-text-small);
   line-height: 1.55;
 }
 .memory-held p {
@@ -267,18 +392,19 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid #93b4c340;
-  border-radius: 12px;
-  background: #93b4c30d;
-  color: #d6e4ea;
-  font-size: 13px;
-  line-height: 1.45;
+  gap: var(--ui-space-2);
+  padding: 12px 14px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-size: var(--ui-text-small);
+  line-height: 1.5;
 }
+/* Flagged for a check: amber beside the words that say so. */
 .memory-truth.memory-flagged {
-  border-color: #e0c47a55;
-  background: #e0c47a12;
+  border-color: color-mix(in srgb, var(--ui-amber) 50%, transparent);
+  background: color-mix(in srgb, var(--ui-amber) 6%, var(--ui-surface));
 }
 .memory-truth p {
   margin: 0;
@@ -286,40 +412,45 @@
 .memory-truth button {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   min-height: 36px;
-  padding: 0 12px;
-  border-radius: 18px;
-  font-size: 12px;
-  color: #c9e2ea;
-  background: #accde414;
+  padding: 0 14px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  font-size: var(--ui-text-small);
+  color: var(--ui-ink);
+  background: var(--ui-raised);
 }
 .memory-truth button:hover {
-  background: #accde426;
+  border-color: var(--ui-line-strong);
 }
 .memory-version {
-  padding: 10px 12px;
-  border: 1px solid #93b4c326;
-  border-radius: 12px;
-  background: #93b4c30d;
+  padding: 12px 14px;
+  border: 1px solid var(--ui-divider);
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-surface);
 }
 .memory-version .memory-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--ui-space-2);
 }
 .memory-version .memory-meta button {
   display: inline-grid;
   place-items: center;
-  min-width: 32px;
-  min-height: 32px;
-  border-radius: 16px;
-  color: #9daeb7;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-soft);
+}
+.memory-version .memory-meta button:hover {
+  background: var(--ui-raised);
 }
 .memory-history {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--ui-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -327,14 +458,16 @@
 .memory-history > li {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ui-space-1);
   padding: 8px 0 8px 12px;
-  border-left: 2px solid #93b4c333;
+  border-left: 2px solid var(--ui-line);
 }
+/* Nothing to show: the words say so, in soft, where the list would be. */
 .memory-empty {
-  margin: 12px auto;
-  font-size: 13px;
-  color: #8fa5b2;
+  margin: var(--ui-space-3) auto;
+  font-size: var(--ui-text-body);
+  line-height: 1.5;
+  color: var(--ui-soft);
 }
 .memory-more {
   align-self: center;
@@ -356,26 +489,28 @@
   overflow-y: auto;
   transform: none;
 }
+/* The way into Memories on the Explorer's dock, chosen as the dock's other modes are. */
 .dock-memories[aria-pressed="true"] {
-  color: #e3f3f5;
-  background: #accde41f;
+  color: var(--ui-ink);
+  background: var(--ui-mint-fill);
+  box-shadow: inset 0 0 0 1px var(--ui-mint);
 }
 /* The review queue (SB-P3-22): a held memory read here shows its words whole, and only then can be chosen. */
-.memory-held-item {
-  border-color: #e0b25c33;
-}
 .memory-held-item .memory-text.source-content {
   margin: 4px 0 0;
   max-height: min(16em, 40vh);
   max-height: min(16em, 40svh);
   overflow: auto;
+  font-size: var(--ui-text-body);
+  line-height: 1.6;
+  color: var(--ui-ink);
 }
 .memory-choose {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #d2dee3;
+  gap: var(--ui-space-2);
+  font-size: var(--ui-text-small);
+  color: var(--ui-soft);
 }
 .memory-choose input {
   width: 18px;
@@ -390,23 +525,33 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: var(--ui-space-2);
 }
 .memory-filters select {
   max-width: 11em;
 }
+/* A filter that narrows the list is filled and bordered as a chosen control, so what is in force reads at a glance. */
+.memory-filters .memory-status-pick:has(option:checked:not([value=""])) {
+  color: var(--ui-ink);
+  background: var(--ui-mint-fill);
+  border-color: var(--ui-mint-edge);
+}
 .memory-filter-clear {
   min-height: 36px;
   padding: 0 12px;
-  border-radius: 18px;
-  font-size: 12px;
-  color: #a8cddc;
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius-control);
+  font-size: var(--ui-text-small);
+  color: var(--ui-mint);
+}
+.memory-filter-clear:hover {
+  background: var(--ui-raised);
 }
 .memory-list > .memory-listed {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
+  gap: var(--ui-space-2);
 }
 .memory-pick {
   width: 18px;
@@ -414,7 +559,7 @@
   margin: 0 2px;
 }
 .memory-listed-held > button {
-  border-color: #e0b25c33;
+  border-color: color-mix(in srgb, var(--ui-alert) 35%, transparent);
 }
 .memory-bulk {
   position: sticky;
@@ -423,15 +568,17 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid #93b4c340;
-  border-radius: 12px;
-  background: #0d171ef2;
+  gap: var(--ui-space-2);
+  padding: 12px 14px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-panel);
+  background: color-mix(in srgb, var(--ui-night) 96%, transparent);
 }
 .memory-bulk-count {
-  font-size: 13px;
-  color: #d2dee3;
+  font-size: var(--ui-text-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink);
 }
 .memory-bulk .memory-hint {
   flex-basis: 100%;
@@ -441,14 +588,14 @@
   min-height: 40px;
   padding: 8px 12px;
   font: inherit;
-  font-size: 15px;
-  color: #e1ecef;
-  background: #0a1217cc;
-  border: 1px solid #93b4c333;
-  border-radius: 12px;
+  font-size: var(--ui-text-title);
+  color: var(--ui-ink);
+  background: color-mix(in srgb, var(--ui-sky) 80%, transparent);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
 }
 .memory-input:focus-visible {
-  outline: 2px solid #a6dccd88;
+  outline: var(--ui-focus-ring);
   outline-offset: 1px;
 }
 /* Projects: a row that opens in place, with its capsule's status under it. */
@@ -456,45 +603,37 @@
 .memory-list > .memory-change-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--ui-space-2);
 }
-.memory-project-head {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 100%;
-  padding: 10px 12px;
-  text-align: left;
-  border: 1px solid #93b4c31f;
-  border-radius: 12px;
-  background: #93b4c30a;
-}
-.memory-project-head:hover {
-  background: #93b4c317;
+.memory-project-head[aria-expanded="true"] {
+  border-color: var(--ui-edge);
+  background: var(--ui-surface);
 }
 .memory-project-open {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 0 4px 6px 12px;
-  border-left: 2px solid #93b4c333;
+  gap: var(--ui-space-3);
+  padding: 4px 4px 8px 14px;
+  border-left: 2px solid var(--ui-line);
 }
+/* A group's heading inside a section (Archived): an eyebrow, short and upper-cased. */
 .memory-subhead {
-  margin: 6px auto 0;
-  font-size: 12px;
-  font-weight: 400;
+  margin: var(--ui-space-2) auto 0;
+  font-size: 11px;
+  font-weight: 600;
   line-height: 1.4;
-  letter-spacing: 0.4px;
-  color: #9fb4bf;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ui-faint);
 }
 .memory-capsule {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px 12px;
-  border: 1px solid #93b4c326;
-  border-radius: 12px;
-  background: #93b4c30d;
+  gap: var(--ui-space-2);
+  padding: 12px 14px;
+  border: 1px solid var(--ui-divider);
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-surface);
 }
 .memory-capsule p {
   margin: 0;
@@ -502,7 +641,7 @@
 .memory-capsule-slots {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--ui-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -510,25 +649,27 @@
 .memory-capsule-slots > li {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ui-space-1);
 }
-.memory-capsule-slots strong {
-  font-weight: 500;
-  color: #d2dee3;
+.memory-capsule-slots strong,
+.memory-capsule .memory-meta strong {
+  font-weight: 600;
+  color: var(--ui-ink);
 }
 .memory-waiting {
   padding-left: 10px;
 }
 /* AI changes: each burst a card, its memories one line each. */
 .memory-change-group {
-  padding: 10px 12px;
-  border: 1px solid #93b4c31f;
-  border-radius: 12px;
-  background: #93b4c30a;
+  padding: 12px 14px;
+  border: 1px solid var(--ui-divider);
+  border-radius: var(--ui-radius-panel);
+  background: color-mix(in srgb, var(--ui-surface) 55%, transparent);
 }
 .memory-change-what {
-  font-size: 13px;
-  color: #d6e4ea;
+  font-size: var(--ui-text-body);
+  font-weight: 500;
+  color: var(--ui-ink);
 }
 .memory-change-items {
   display: flex;
@@ -543,50 +684,52 @@
   flex-direction: column;
   gap: 2px;
   width: 100%;
-  padding: 6px 8px;
+  padding: 8px 10px;
   text-align: left;
-  border-radius: 8px;
+  border-radius: var(--ui-radius-control);
 }
 .memory-change-items button:hover {
-  background: #93b4c317;
+  background: var(--ui-raised);
 }
 .memory-change-items .memory-preview {
   -webkit-line-clamp: 2;
   line-clamp: 2;
-  font-size: 13px;
+  font-size: var(--ui-text-small);
+  color: var(--ui-soft);
 }
 /* A memory's history as a timeline: the day above the first change it holds, an AI client's changes marked apart. */
 .memory-day {
-  font-size: 11px;
-  letter-spacing: 0.4px;
-  color: #9fb4bf;
+  font-size: var(--ui-text-meta);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-soft);
 }
 .memory-history > .memory-by-ai {
-  border-left-color: #e0c47a66;
+  border-left-color: var(--ui-line-strong);
 }
 .memory-settings {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--ui-space-3);
   margin: 0;
 }
 .memory-setting dt {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  font-size: 14px;
-  color: #d2dee3;
+  gap: var(--ui-space-3);
+  font-size: var(--ui-text-body);
+  color: var(--ui-ink);
 }
 /* A person's review queues: two memories side by side, stacked on a phone, and a person's words beside a step. */
 .memory-pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: var(--ui-space-2);
 }
 .memory-copies {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--ui-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -595,83 +738,113 @@
 .memory-copy {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ui-space-1);
   min-width: 0;
 }
 .memory-side {
-  padding: 8px 10px;
-  border: 1px solid #93b4c31f;
-  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--ui-divider);
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-surface);
 }
 .memory-note {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--ui-space-1);
 }
 .memory-note input {
   min-height: 36px;
   padding: 0 10px;
-  font-size: 14px;
-  color: #d2dee3;
-  border: 1px solid #93b4c326;
-  border-radius: 10px;
-  background: #93b4c30a;
+  font-size: var(--ui-text-body);
+  color: var(--ui-ink);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  background: color-mix(in srgb, var(--ui-sky) 80%, transparent);
 }
 /* The list's words to look for (run 22): the box and its Find on one line, under its label. */
 .memory-find {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: var(--ui-space-2);
 }
 .memory-find label {
   flex-basis: 100%;
-  font-size: 12px;
-  color: #9fb4bf;
+  font-size: var(--ui-text-small);
+  font-weight: 500;
+  color: var(--ui-soft);
 }
 .memory-find .memory-input {
   flex: 1 1 12em;
   width: auto;
 }
 .memory-find button {
-  min-height: 36px;
-  padding: 0 14px;
-  border-radius: 18px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-ink);
+  background: var(--ui-raised);
 }
 /* A pick in a question (run 22: the insight a pair became), in the note's style. */
 .memory-note select {
   min-height: 36px;
   max-width: 100%;
   padding: 0 10px;
-  font-size: 14px;
-  color: #d2dee3;
-  border: 1px solid #93b4c326;
-  border-radius: 10px;
-  background: #0a1217;
+  font-size: var(--ui-text-body);
+  color: var(--ui-ink);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-raised);
 }
 .memory-filters button[aria-pressed="true"] {
-  color: #e3f3f5;
-  background: #accde41f;
+  color: var(--ui-ink);
+  background: var(--ui-mint-fill);
+  border-color: var(--ui-mint-edge);
 }
+/* A setting that is on says so in its words; mint marks it as on. */
 .memory-setting-value {
   flex: none;
-  color: #a6dccd;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-mint);
 }
 .memory-setting dd {
   margin: 2px 0 0;
-  font-size: 12px;
+  font-size: var(--ui-text-small);
   line-height: 1.5;
-  color: #8fa5b2;
+  color: var(--ui-soft);
 }
-/* A focus ring that shows whole: the view's lists and strips scroll, which cuts off what stands outside them. */
+/* Colour and border changes, quick and eased; none for a person who asks for less motion. */
+.memory-tabs button,
+.memory-list > li > button,
+.memory-project-head,
+.memory-actions button,
+.memory-confirm button,
+.memory-held button,
+.memory-truth button,
+.memory-filter-clear,
+.memory-change-items button {
+  transition:
+    background-color var(--ui-fast) var(--ui-ease),
+    border-color var(--ui-fast) var(--ui-ease),
+    color var(--ui-fast) var(--ui-ease);
+}
+/* A focus ring that shows whole: the view's lists and strips scroll, which cuts off what stands outside them. The list of
+   elements weighs nothing (:where), so the insets below for what sits inside a scrolling list or strip take effect. */
 .memory-view
-  :is(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 2px solid #95d2d9;
+  :where(
+    button,
+    a,
+    input,
+    select,
+    textarea,
+    summary,
+    [tabindex]
+  ):focus-visible {
+  outline: var(--ui-focus-ring);
   outline-offset: 1px;
 }
 .memory-tabs button:focus-visible,
-.memory-list > li > button:focus-visible,
-.memory-project-head:focus-visible,
 .memory-change-items button:focus-visible,
 .memory-view .memory-notice button:focus-visible,
 .memory-view textarea:focus-visible,
@@ -680,6 +853,12 @@
 .memory-note select:focus-visible,
 .memory-edit select:focus-visible {
   outline-offset: -2px;
+}
+/* A row that opens is a card: its ring is 3 px, inset 4 px, inside the list that scrolls. */
+.memory-list > li > button:focus-visible,
+.memory-project-head:focus-visible {
+  outline-width: 3px;
+  outline-offset: -4px;
 }
 @media (max-width: 1000px) {
   .explorer-dock.searching .dock-memories {
@@ -691,8 +870,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
-/* A finger's room and no zoom on any phone, upright or sideways: 40px for whatever is tapped, as the rest of the app gives, and 16px in a
-   field, under which a phone's browser zooms the page when it takes focus. */
+/* A finger's room and no zoom on any phone, upright or sideways: the app's least touch target for whatever is tapped, and 16px in
+   a field, under which a phone's browser zooms the page when it takes focus. */
 @media (max-width: 760px), (max-height: 500px) {
   .memory-tabs button,
   .memory-view .reader-bar .back-link,
@@ -713,11 +892,11 @@
   .memory-find button,
   .memory-edit select,
   .memory-view .upload-status button {
-    min-height: 40px;
+    min-height: var(--ui-target);
   }
   .memory-version .memory-meta button,
   .memory-view .upload-status button[aria-label="Dismiss"] {
-    min-width: 40px;
+    min-width: var(--ui-target);
   }
   .memory-capture textarea,
   .memory-edit textarea,
@@ -728,14 +907,65 @@
   .memory-note select {
     font-size: 16px;
   }
+  .memory-input {
+    min-height: var(--ui-target);
+  }
   .memory-pick,
-  .memory-choose input {
+  .memory-choose input,
+  .memory-edit label > input[type="checkbox"] {
     width: 24px;
     height: 24px;
+  }
+  .memory-edit label:has(> input[type="checkbox"]) {
+    min-height: var(--ui-target);
+  }
+  /* The list's filters line up in even columns, two where they fit, each pick's choice filling its width. */
+  .memory-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr));
+  }
+  .memory-filters .memory-status-pick select {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+  }
+  /* On a phone a row's time sits on its metadata's line, at the right edge, so its words keep the row's width. */
+  .memory-list > li > button > .memory-preview:has(+ .memory-when),
+  .memory-held-item > .memory-preview:has(+ .memory-when),
+  .memory-project-head > .memory-preview:has(+ .memory-when) {
+    grid-column: 1 / -1;
+  }
+  .memory-list > li > button > .memory-when + .memory-meta,
+  .memory-held-item > .memory-when + .memory-meta,
+  .memory-project-head > .memory-when + .memory-meta {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .memory-list > li > button > .memory-when,
+  .memory-held-item > .memory-when,
+  .memory-project-head > .memory-when {
+    grid-row: 2;
+  }
+  .memory-list > li > button,
+  .memory-trashed,
+  .memory-held-item,
+  .memory-project-head {
+    padding: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .memory-view {
     animation: none;
+  }
+  .memory-tabs button,
+  .memory-list > li > button,
+  .memory-project-head,
+  .memory-actions button,
+  .memory-confirm button,
+  .memory-held button,
+  .memory-truth button,
+  .memory-filter-clear,
+  .memory-change-items button {
+    transition: none;
   }
 }

@@ -15,7 +15,7 @@ it("fills the demo's home screen with its dashboards, and no glucose or Garmin t
   const corner = await screen.findByTitle("Sample training week card");
   expect(corner.getAttribute("srcdoc")).toContain('data-shape=\\"compact\\"');
   expect(corner.closest(".recovery-zone")).not.toBeNull();
-  for (const name of [/^GLUCOSE/, /^RECOVERY/, /^TRAINING/])
+  for (const name of [/^Glucose/, /^Recovery/, /^Training/])
     expect(screen.queryByRole("button", { name })).toBeNull();
   expect(screen.queryByText(/A dashboard can live here/)).toBeNull();
   // Only the training corner is empty, and gives its room away.
@@ -39,6 +39,13 @@ it("offers every dashboard for every corner, the tall slot included", async () =
   const sources = await screen.findByRole("dialog", {
     name: "Sources & settings",
   });
+  // Named for Home's places, not corners, which several layouts don't have.
+  expect(
+    within(sources).getByRole("heading", { name: "Home previews" }),
+  ).toBeInTheDocument();
+  expect(sources).toHaveTextContent(
+    "Choose what appears in each Home position. A dashboard preview opens the full dashboard.",
+  );
   for (const corner of ["Main", "Recovery", "Training", "Focus"]) {
     const select = within(sources).getByRole("combobox", {
       name: `${corner} corner`,

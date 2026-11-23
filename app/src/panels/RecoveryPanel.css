@@ -79,17 +79,17 @@
 .sleep-ring-centre strong {
   font: 300 62px/1 "Manrope Variable";
   letter-spacing: -3px;
-  color: #e3eef0;
+  color: var(--ui-ink);
 }
 .sleep-ring-centre strong.duration {
   font-size: 38px;
   letter-spacing: -1.4px;
 }
 .sleep-ring-centre small {
-  font-size: 9px;
-  letter-spacing: 1.6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #718993;
+  color: var(--ui-faint);
   margin-top: 4px;
 }
 .sleep-side {
@@ -102,13 +102,13 @@
   display: block;
   font: 300 44px/1 "Manrope Variable";
   letter-spacing: -1.8px;
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .sleep-duration span {
   display: block;
   margin-top: 8px;
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .stage-list {
   display: grid;
@@ -122,8 +122,8 @@
   grid-template-columns: 10px 56px 62px 34px minmax(0, 1fr);
   align-items: center;
   gap: 8px;
-  font-size: 11px;
-  color: #a4b9c4;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .stage-list i {
   width: 8px;
@@ -133,12 +133,12 @@
 }
 .stage-list b {
   font: 400 13px "Manrope Variable";
-  color: #d7e5e9;
+  color: var(--ui-ink);
   text-align: right;
 }
 .stage-list small {
-  font-size: 10px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
   text-align: right;
 }
 .stage-share {
@@ -169,7 +169,7 @@
 .stage-empty {
   font-size: 12px;
   line-height: 1.7;
-  color: #8fa9b7;
+  color: var(--ui-faint);
 }
 
 /* The morning after: Body Battery recharged and at wake. */
@@ -194,8 +194,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 
 /* Glucose while asleep. */
@@ -206,7 +206,7 @@
   border: 1px solid #93b4c317;
 }
 .night-glucose .eyebrow {
-  font-size: 8px;
+  font-size: 12px;
   color: #88bba9;
   margin-bottom: 10px;
 }
@@ -214,9 +214,9 @@
   display: flex;
   justify-content: space-between;
   margin-top: 6px;
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.6px;
-  color: #718993;
+  color: var(--ui-faint);
 }
 .night-glucose-words {
   display: flex;
@@ -224,12 +224,12 @@
   align-items: baseline;
   gap: 4px 10px;
   margin-top: 10px;
-  font-size: 11px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .night-glucose-words b {
   font: 400 15px "Manrope Variable";
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 .night-glucose-words i {
   width: 3px;
@@ -266,9 +266,9 @@
   position: absolute;
   right: 0;
   top: -6px;
-  font-size: 8px;
+  font-size: 12px;
   line-height: 1;
-  color: #718993;
+  color: var(--ui-faint);
 }
 .night {
   display: grid;
@@ -285,8 +285,8 @@
   cursor: default;
 }
 .night-score {
-  font-size: 9px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
   transition: color 0.3s;
 }
 .night-track {
@@ -327,8 +327,8 @@
   background: var(--awake);
 }
 .night small {
-  font-size: 9px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .night:not(:disabled):hover .night-bar {
   opacity: 0.85;
@@ -339,7 +339,7 @@
 }
 .night[aria-pressed="true"] .night-score,
 .night[aria-pressed="true"] small {
-  color: #e3eef0;
+  color: var(--ui-ink);
 }
 .night:focus-visible {
   outline: 1px solid #b6a6cc80;
@@ -347,7 +347,7 @@
 }
 .back-to-latest {
   margin-top: 14px;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.4px;
   color: #d0b6e7;
   border: 1px solid #d0b6e733;
@@ -392,7 +392,7 @@
 .readiness-centre strong {
   font: 300 46px/1 "Manrope Variable";
   letter-spacing: -2px;
-  color: #e3eef0;
+  color: var(--ui-ink);
 }
 .battery {
   margin-top: auto;
@@ -400,8 +400,8 @@
 .battery-when {
   display: block;
   margin-bottom: 10px;
-  font-size: 10px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .battery-track {
   position: relative;
@@ -434,8 +434,8 @@
   justify-content: space-between;
   align-items: baseline;
   margin-top: 12px;
-  font-size: 10px;
-  color: #8fa9b7;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .battery-words span {
   display: flex;
@@ -445,12 +445,12 @@
 .battery-nights small {
   display: block;
   margin-top: 4px;
-  font-size: 10px;
-  color: #718993;
+  font-size: 12px;
+  color: var(--ui-faint);
 }
 .battery-words b {
   font: 400 14px "Manrope Variable";
-  color: #d7e5e9;
+  color: var(--ui-ink);
 }
 
 @container body-panel (max-width: 560px) {
@@ -480,7 +480,7 @@
     padding-right: 18px;
   }
   .night-score {
-    font-size: 8px;
+    font-size: 12px;
   }
 }
 

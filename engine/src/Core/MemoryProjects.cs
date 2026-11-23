@@ -77,15 +77,15 @@ public static partial class MemoryProjectInput
 // never changed after. Scope: null (the writer's own: private with scopes on, the household's with them off), private or
 // shared, or upstream's personal and company, or Family (D-044), as a memory lands.
 public sealed record MemoryProjectDraft(string Name, string? Slug = null, string? Description = null, IReadOnlyList<string>? Aliases = null,
-    string? Scope = null);
+    string? Scope = null, bool ShowInProjects = false, Guid? SourceIdea = null, int? ExpectedIdea = null);
 
 // A change to a project: only what it names. Aliases replace the aliases; Status is active or archived.
-public sealed record MemoryProjectChange(string? Name = null, string? Description = null, IReadOnlyList<string>? Aliases = null, string? Status = null);
+public sealed record MemoryProjectChange(string? Name = null, string? Description = null, IReadOnlyList<string>? Aliases = null, string? Status = null, bool? ShowInProjects = null);
 
 // A project as the registry holds it. Subject is its scope's owner (a person, or household for Family); Author the
 // person who made it, or none (a login with no person, or a memory write's project made by one).
 public sealed record MemoryProject(Guid Id, string Subject, string Scope, string Slug, string Name, string Description,
-    IReadOnlyList<string> Aliases, string Status, string? Author, int Revision, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt);
+    IReadOnlyList<string> Aliases, string Status, string? Author, int Revision, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, bool ShowInProjects = false);
 
 // What a project write answers. Scopes "off": the project is visible to everyone in the household (D-048). Changed: the
 // fields a change changed; Unchanged: nothing needed writing.
@@ -96,7 +96,7 @@ public sealed record MemoryProjectDeleted(Guid Id, string Slug, string Subject, 
 
 // A list's filters, each narrowing what the caller reads: a scope (never widening, memory.md section 2), archived ones
 // too, and a name (a slug or an alias), which every scope the caller reads may hold once.
-public sealed record MemoryProjectFilter(string? Scope = null, bool IncludeArchived = false, string? Name = null);
+public sealed record MemoryProjectFilter(string? Scope = null, bool IncludeArchived = false, string? Name = null, bool PortfolioOnly = false);
 
 public sealed partial class MemoryStore
 {
@@ -126,6 +126,8 @@ public sealed partial class MemoryStore
             ["description"] = MemoryProjectInput.Description(draft.Description),
             ["aliases"] = new JsonArray([.. MemoryProjectInput.Aliases(draft.Aliases, slug).Select(a => (JsonNode?)a)]),
             ["scope"] = draft.Scope,
+            ["show_in_projects"] = draft.ShowInProjects,
+            ["source_idea"] = draft.SourceIdea, ["expected_idea"] = draft.ExpectedIdea,
         };
         using var doc = await ProjectWrite("SELECT create_memory_project(@principal,@project::jsonb,@channel,@client)::text", principal, call, ct,
             ("project", NpgsqlDbType.Jsonb, project.ToJsonString()));
@@ -138,6 +140,7 @@ public sealed partial class MemoryStore
     {
         NoKey(call);
         var body = new JsonObject();
+        if (change.ShowInProjects is { } show) body["show_in_projects"] = show;
         if (change.Name is not null) body["name"] = MemoryProjectInput.Name(change.Name);
         if (change.Description is not null) body["description"] = MemoryProjectInput.Description(change.Description);
         if (change.Status is not null)
@@ -180,14 +183,15 @@ public sealed partial class MemoryStore
             catch (ArgumentException e) { throw new MemoryRefused("invalid", e.Message); }
             if (scope is not null) { where.Add("CASE WHEN p.subject_id='household' THEN 'shared' ELSE 'private' END=@scope"); args.Add(("scope", scope)); }
         }
+        if (filter.PortfolioOnly) where.Add("p.show_in_projects");
         if (!filter.IncludeArchived) where.Add("p.status='active'");
         if (MemoryInput.Project(filter.Name) is { } name) { where.Add(ProjectNamed); args.Add(("name", name)); }
         await using var c = await source.OpenConnectionAsync(ct);
         await using var cmd = Database.Command(c, null, $"""
             SELECT p.id,p.subject_id,p.slug,p.name,p.description,
               ARRAY(SELECT a.alias FROM memory_project_aliases a WHERE a.project_id=p.id ORDER BY a.alias),p.status,p.author_id,p.revision,
-              p.created_at,p.updated_at
-            FROM memory_projects p WHERE {string.Join(" AND ", where)} ORDER BY lower(p.name),p.slug,p.subject_id LIMIT 500
+              p.created_at,p.updated_at,p.show_in_projects
+            FROM memory_projects p WHERE {string.Join(" AND ", where)} ORDER BY lower(p.name),p.slug,p.subject_id {(filter.PortfolioOnly ? "" : "LIMIT 500")}
             """, [.. args]);
         await using var reader = await cmd.ExecuteReaderAsync(ct);
         var projects = new List<MemoryProject>();
@@ -195,7 +199,7 @@ public sealed partial class MemoryStore
             projects.Add(new(reader.GetGuid(0), reader.GetString(1), reader.GetString(1) == RhythmConfig.Household ? "shared" : "private",
                 reader.GetString(2), reader.GetString(3), reader.GetString(4), reader.GetFieldValue<string[]>(5), reader.GetString(6),
                 reader.IsDBNull(7) ? null : reader.GetString(7), reader.GetInt32(8), reader.GetFieldValue<DateTimeOffset>(9),
-                reader.GetFieldValue<DateTimeOffset>(10)));
+                reader.GetFieldValue<DateTimeOffset>(10), reader.GetBoolean(11)));
         return projects;
     }
 
@@ -240,7 +244,7 @@ public sealed partial class MemoryStore
         o.GetProperty("scope").GetString()!, o.GetProperty("slug").GetString()!, o.GetProperty("name").GetString()!,
         o.GetProperty("description").GetString()!, [.. o.GetProperty("aliases").EnumerateArray().Select(a => a.GetString()!)],
         o.GetProperty("status").GetString()!, o.GetProperty("author").ValueKind == JsonValueKind.String ? o.GetProperty("author").GetString() : null,
-        o.GetProperty("revision").GetInt32(), o.GetProperty("created_at").GetDateTimeOffset(), o.GetProperty("updated_at").GetDateTimeOffset());
+        o.GetProperty("revision").GetInt32(), o.GetProperty("created_at").GetDateTimeOffset(), o.GetProperty("updated_at").GetDateTimeOffset(), o.GetProperty("show_in_projects").GetBoolean());
 
     async Task<JsonDocument> ProjectWrite(string sql, Guid principal, MemoryCall call, CancellationToken ct,
         params (string Name, NpgsqlDbType Type, object? Value)[] args)

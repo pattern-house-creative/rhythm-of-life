@@ -326,10 +326,12 @@ above stays as it is, except where this section says otherwise.
   returns to what is under it: the Home dashboard when it replaced that, else the view or the sky beneath. Undo brings
   back both. `open_star`, `open_dashboard`, `search` and `home` replace
   it; `layout`, `move_tile` and a `corner_card` that changed the card end it so the change shows; `set_home` leaves a
-  full screen of another dashboard alone. Full-screen dashboards and corner cards show their last feed read,
-  the latest observation time or source day for measurement feeds, and any failed refresh. Native health
+  full screen of another dashboard alone. Full-screen dashboards and corner cards show when their data was last
+  read, when measurement feeds were recorded (or their source day), and any failed refresh, saying whether the
+  last data read is still shown; the reader's status line names each feed's recorded time. Native health
   tiles show the observation alongside the value at narrow widths too. Sources & settings opens Changed
-  lately on phones, including the stale-source warning. On touchscreens the exit button has its own row above the dashboard.
+  lately on phones, including the stale-source warning. On touchscreens the exit button has its own row above the dashboard,
+  and on a narrow screen with a mouse it takes that row while it shows, so it never covers the freshness line.
   The first tap goes directly to the page or card, even after the screen has been idle. On pointer-only screens
   the page's frame stays sealed. While the exit control is hidden, a clear layer takes the first movement or scroll
   and shows the control. A click into the page counts too, and while the page keeps focus the control stays, the layer away, for a
@@ -481,7 +483,7 @@ checks the cell sizes. Home has its own smallest sizes and never folds (10.5).
 | `changed` or `insights`, with nothing yet | its label and "Nothing yet", with the last run when there was one |
 | `map`, when its focus matches nothing | an empty sky and "Nothing on the map matches this focus", naming the focus |
 | `map`, while the map can't be read | an empty sky and the line Home's sky shows ("Knowledge graph unavailable") |
-| `card` of a dashboard deleted since, or one this viewer can't read (10.11) | "That dashboard is unavailable", with no title: the dashboard list doesn't tell the two apart, so neither names anything |
+| `card` of a dashboard deleted since, or one this viewer can't read (10.11) | "Dashboard unavailable", with no title and no opening arrow: the dashboard list doesn't tell the two apart, so neither names anything |
 | `page` | its states as today, its fallback included: when the newest version's page fails to draw, the whole dashboard falls back to the version before it, that version's layout included, and says so; nothing is arranged until the newest version draws |
 | a part of a kind this app doesn't know (a later piece's) | nothing: its cell stays empty, and the app doesn't arrange that dashboard (10.9) |
 | any part, while access is lost | nothing, as Home shows nothing |
@@ -1099,7 +1101,7 @@ on as well. It is what a project board is built on.
     offers it one tap away, as a star's panel offers the dashboards that read it.
   - **A star of its own.** With none of them on the map (a board over every project, like a Projects board, or one
     whose projects have no star now), it is a star with no links, labelled with its title and drawn as dashboards
-    are (the panel glyph, the DASHBOARD tag, always named). The sky places it as it places every star with no links
+    are (the panel glyph, the DASHBOARD tag, named at rest wherever it fits). The sky places it as it places every star with no links
     and no cluster mates (`createGraph`): on the quieter outer ring, its place there ordered by a hash of its id
     among the ring's other stars, so it stays put while they do and never crowds the clusters; only its colour and
     name are a dashboard's, not the ring's grey. It waits for the map to have a star, so it never shows alone while the sky loads.

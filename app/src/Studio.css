@@ -1,3 +1,6 @@
+/* Studio, on the app's design tokens (docs/dev/design-system.md): the draft is the focus, framed as a dashboard is; the
+   bars around it are quiet, validation sits beside the actions it decides, and Save is the strongest control once it may
+   be used. */
 .studio-shell {
   position: fixed;
   inset: 0;
@@ -9,11 +12,11 @@
   border: 0;
   padding: 0;
   z-index: 900;
-  background: #0b141c;
-  color: #e4eef0;
+  background: var(--ui-night);
+  color: var(--ui-ink);
   display: flex;
   flex-direction: column;
-  font: 14px var(--font-body, system-ui);
+  font: var(--ui-text-body) / 1.45 var(--ui-font);
   isolation: isolate;
 }
 .studio-shell header,
@@ -21,59 +24,126 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 12px 20px;
-  border-bottom: 1px solid #8fa9b72e;
+  gap: var(--ui-space-3) var(--ui-space-4);
+  padding: 10px var(--ui-space-4) 10px var(--ui-space-6);
+  border-bottom: 1px solid var(--ui-divider);
+  background: var(--ui-surface);
   flex-wrap: wrap;
 }
-.studio-shell header > div {
+.studio-title {
   display: flex;
-  gap: 18px;
+  gap: var(--ui-space-3);
+  align-items: baseline;
+  min-width: 0;
+}
+.studio-title strong {
+  font: 650 var(--ui-text-title) / 1.3 var(--ui-display);
+  color: var(--ui-ink);
+}
+.studio-title span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ui-soft);
+}
+.studio-actions {
+  display: flex;
   align-items: center;
+  justify-content: flex-end;
+  gap: var(--ui-space-2) var(--ui-space-4);
+  flex-wrap: wrap;
+  margin-left: auto;
 }
 .studio-shell nav {
   display: flex;
-  gap: 8px;
+  gap: var(--ui-space-2);
+  flex-wrap: wrap;
 }
 .studio-shell button,
-.studio-shell input,
-.dashboard-controls button,
-.dashboard-controls select,
-.dashboard-controls input {
-  border: 1px solid #8fa9b744;
-  background: #14232b;
-  color: inherit;
-  padding: 7px 12px;
-  border-radius: 7px;
+.studio-shell input {
+  min-height: 36px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-raised);
+  color: var(--ui-ink);
+  padding: 7px 14px;
+  border-radius: var(--ui-radius-control);
   font: inherit;
+  font-size: var(--ui-text-small);
+}
+.studio-shell button {
+  white-space: nowrap;
+  transition:
+    background-color var(--ui-fast) var(--ui-ease),
+    border-color var(--ui-fast) var(--ui-ease),
+    color var(--ui-fast) var(--ui-ease);
+}
+.studio-shell button:hover:not(:disabled) {
+  border-color: var(--ui-line-strong);
+}
+/* Watch code on: filled and bordered, so it reads as chosen without colour. */
+.studio-shell button[aria-pressed="true"] {
+  background: var(--ui-mint-fill);
+  border-color: var(--ui-mint-edge);
+}
+/* Save, once it may be used, is the one filled control. */
+.studio-shell .studio-save:not(:disabled) {
+  border-color: var(--ui-mint);
+  background: var(--ui-mint);
+  color: var(--ui-sky);
+  font-weight: 600;
+}
+.studio-shell .studio-save:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--ui-mint) 80%, var(--ui-ink));
+  background: color-mix(in srgb, var(--ui-mint) 80%, var(--ui-ink));
+  color: var(--ui-sky);
 }
 .studio-shell button:disabled {
-  opacity: 0.4;
+  cursor: default;
+  opacity: 1;
+  color: var(--ui-faint);
+  background: transparent;
+  border-color: var(--ui-divider);
 }
 .studio-shell button:focus-visible,
 .studio-shell input:focus-visible {
-  outline: 2px solid #75d8b9;
-  outline-offset: 3px;
+  outline: var(--ui-focus-ring);
+  outline-offset: var(--ui-focus-offset);
 }
 .studio-progress {
-  padding: 8px 20px;
-  color: #8fa9b7;
+  font-size: var(--ui-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-soft);
+}
+/* Disconnected: amber beside the words that say the preview is kept, not refreshed. */
+.studio-progress.studio-offline {
+  color: var(--ui-amber);
 }
 .studio-error {
-  padding: 8px 20px;
-  color: #e08a97;
+  padding: 8px var(--ui-space-6);
   margin: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ui-alert) 40%, transparent);
+  background: color-mix(in srgb, var(--ui-alert) 8%, var(--ui-night));
+  color: var(--ui-alert);
+  font-size: var(--ui-text-small);
+  overflow-wrap: anywhere;
 }
 .studio-shell main {
   display: flex;
   flex: 1;
   min-height: 0;
+  gap: var(--ui-space-4);
+  padding: var(--ui-space-4);
 }
+/* The draft, framed as a dashboard is: an edge and a card's corners around the author's page, untouched inside. */
 .studio-preview {
   flex: 1;
   min-width: 0;
   position: relative;
   overflow: auto;
+  border: 1px solid var(--ui-edge);
+  border-radius: var(--ui-radius-card);
+  background: var(--ui-sky);
 }
 .studio-layer {
   position: absolute;
@@ -94,44 +164,87 @@
   display: grid;
   place-items: center;
   height: 100%;
-  color: #8fa9b7;
+  padding: var(--ui-space-6);
+  text-align: center;
+  color: var(--ui-soft);
 }
 .studio-code {
   width: 38%;
   min-width: 280px;
-  padding: 16px;
-  border-left: 1px solid #8fa9b72e;
+  padding: var(--ui-space-4);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-card);
   overflow: auto;
-  background: #0e1a22;
+  background: var(--ui-surface);
 }
 .studio-code h2 {
-  font-size: 14px;
+  margin: 0 0 var(--ui-space-1);
+  font: 650 var(--ui-text-title) / 1.3 var(--ui-display);
+  color: var(--ui-ink);
 }
 .studio-code p,
 .studio-code ol {
-  color: #8fa9b7;
-  font-size: 12px;
+  color: var(--ui-faint);
+  font-size: var(--ui-text-meta);
+  font-variant-numeric: tabular-nums;
 }
 .studio-code pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font-size: 12px;
+  font-size: var(--ui-text-meta);
+  color: var(--ui-soft);
 }
 .studio-shell footer {
-  border-top: 1px solid #8fa9b72e;
+  border-top: 1px solid var(--ui-divider);
   border-bottom: 0;
 }
+/* The freshness of what the preview read, as every dashboard's footer says it, and which preview is showing. */
+.studio-freshness {
+  font-size: var(--ui-text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-soft);
+}
+.studio-shown {
+  font-size: var(--ui-text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-faint);
+}
+/* The way to steer takes its own line when the bar has no room for it beside the freshness line. */
 .studio-shell form {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: var(--ui-space-2) var(--ui-space-3);
   align-items: center;
-  flex: 1;
+  flex: 1 1 26rem;
   justify-content: flex-end;
+}
+.studio-shell form label {
+  white-space: nowrap;
+  font-size: var(--ui-text-small);
+  font-weight: 500;
+  color: var(--ui-soft);
 }
 .studio-shell input {
   min-width: 120px;
   flex: 1;
   max-width: 480px;
+  background: color-mix(in srgb, var(--ui-sky) 80%, transparent);
+}
+/* When feedback is read: after the button where the bar has room, else under the field. */
+.studio-feedback-help {
+  font-size: var(--ui-text-meta);
+  line-height: 1.4;
+  color: var(--ui-soft);
+}
+.dashboard-controls button,
+.dashboard-controls select,
+.dashboard-controls input {
+  border: 1px solid #8fa9b744;
+  background: #14232b;
+  color: inherit;
+  padding: 7px 12px;
+  border-radius: 7px;
+  font: inherit;
 }
 .dashboard-controls {
   display: flex;
@@ -155,25 +268,64 @@
 @media (max-width: 700px) {
   .studio-shell main {
     flex-direction: column;
+    padding: var(--ui-space-2);
+    gap: var(--ui-space-2);
   }
   .studio-code {
     width: 100%;
     min-width: 0;
     max-height: 40%;
-    border-left: 0;
-    border-top: 1px solid #8fa9b72e;
   }
   .studio-shell form {
     flex-wrap: wrap;
   }
+  .studio-shell form label {
+    flex-basis: 100%;
+  }
+  .studio-feedback-help {
+    flex-basis: 100%;
+  }
   .studio-shell header,
   .studio-shell footer {
-    padding: 10px;
+    padding: 8px var(--ui-space-3);
   }
-  .studio-shell header > div {
-    gap: 10px;
+  .studio-actions {
+    justify-content: flex-start;
+    margin-left: 0;
   }
-  .studio-shell nav {
-    gap: 5px;
+  .studio-progress {
+    flex-basis: 100%;
+  }
+  /* A finger's room, and 16px in the field so a phone does not zoom. */
+  .studio-shell button,
+  .studio-shell input {
+    min-height: var(--ui-target);
+  }
+  .studio-shell input {
+    font-size: 16px;
+  }
+}
+/* A short screen (a phone on its side, a page zoomed in) gives the draft what height there is. */
+@media (max-height: 500px) {
+  .studio-shell main {
+    padding: var(--ui-space-2);
+    gap: var(--ui-space-2);
+  }
+  .studio-shell header,
+  .studio-shell footer {
+    padding-block: 6px;
+  }
+  /* A phone on its side is still a phone: a finger's room, and no zoom in the field. */
+  .studio-shell button,
+  .studio-shell input {
+    min-height: var(--ui-target);
+  }
+  .studio-shell input {
+    font-size: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-shell button {
+    transition: none;
   }
 }

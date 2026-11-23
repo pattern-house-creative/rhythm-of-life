@@ -21,15 +21,17 @@ journey("projects, capsules and settings", () => {
   it("makes a project with its slug's preview, finds its memories, archives and brings it back", async () => {
     const name = `Coppice Way ${run}`;
     const { user, region } = await memoriesView();
-    await section(user, region, "Projects");
+    await section(user, region, "Collections");
     await user.click(
-      await within(region).findByRole("button", { name: "New project…" }),
+      await within(region).findByRole("button", { name: "New collection…" }),
     );
     await user.type(within(region).getByLabelText("Name"), name);
     await user.click(
-      within(region).getByRole("button", { name: "Make the project" }),
+      within(region).getByRole("button", { name: "Make the collection" }),
     );
-    const list = await within(region).findByRole("list", { name: "Projects" });
+    const list = await within(region).findByRole("list", {
+      name: "Collections",
+    });
     await within(list).findByText(new RegExp(name));
     const project = (await memories({ op: "projects" })).projects.find(
       (p: any) => p.name === name,
@@ -59,7 +61,7 @@ journey("projects, capsules and settings", () => {
       ).toBe("archived"),
     );
     const archived = await within(region).findByRole("list", {
-      name: "Archived projects",
+      name: "Archived collections",
     });
     await user.click(
       within(rowWith(archived, new RegExp(name))).getByRole("button", {

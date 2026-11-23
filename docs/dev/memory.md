@@ -1038,7 +1038,13 @@ upstream's author lock (ledger SEC-04), with its gaps closed (below).
   no undo touches it; each one made and ended writes a `memory_events` row (`work_claimed`, `work_released`, with its
   label and cause) that history lists. It is not exported: a claim is this install's and short-lived. The app shows
   an item's assignee and claim on its row and opened memory, with a Release claim button (`app_memories` op
-  `release_claim`).
+  `release_claim`). A trigger an install adds beside these tables, such as a household's T3 pickup guard on
+  `memory_work_claims`, refuses with a bare `RAISE EXCEPTION` (SQLSTATE `P0001`), which the engine's own run-time
+  functions never raise (each names its SQLSTATE; only a migration's one-off checks raise bare). `MemoryStore.Refusal`
+  answers it `refused`, in the trigger's words (cut at 500 characters for the app's reason), so the client reads the
+  guard's next step instead of an outage; any other failure, a database that does not answer included, is still
+  `unavailable`. A pickup guard of that kind refuses a claim on an item that still names an assignee, the claiming
+  session's own included: it clears that assignment and claims again.
 - **Today** (migration 069, SB-P5-08; story 12; D-214): the brief (`Core/MemoryBrief.cs`), what needs the person now, reached
   through the memory tool `brief` and the app's `app_memories` op `brief`, only with `memory.tools` on. It
   defines nothing and writes nothing: each section is the head of a list another tool walks, read by that list's own statement,

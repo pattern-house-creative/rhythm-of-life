@@ -70,7 +70,9 @@ it("reopens a dashboard from what was read last, while it is read again", async 
       timeout: 1000,
     }),
   ).toBeInTheDocument();
-  expect(screen.getByText(/Read from the engine/)).toBeInTheDocument();
+  expect(
+    screen.getByText(/Data read .+ feeds\. Read again/),
+  ).toBeInTheDocument();
   expect(session.dashboardData).toHaveBeenCalled();
   finish(data);
 });

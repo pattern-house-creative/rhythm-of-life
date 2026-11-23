@@ -2,6 +2,7 @@
   "title": "Projects",
   "description": "Work, milestones and the ideas inbox.",
   "feeds": [
+    { "name": "portfolio", "kind": "projects" },
     {
       "name": "work",
       "kind": "memories",
@@ -15,7 +16,7 @@
       "name": "projectGuides",
       "kind": "memories",
       "where": {
-        "tag": "project-guide",
+        "tag": ["project-overview", "portfolio-project"],
         "work": false
       },
       "limit": 200

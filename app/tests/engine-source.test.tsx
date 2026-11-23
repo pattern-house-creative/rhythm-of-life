@@ -80,7 +80,7 @@ it("reads the Rhythm engine connected from its stars under the catalog provider 
   );
   const row = await engineRow();
   expect(row).not.toHaveTextContent("NOT CONNECTED");
-  expect(row).toHaveTextContent("AVAILABLE · AUTHORIZED");
+  expect(row).toHaveTextContent("AVAILABLE · ACCESS AUTHORIZED");
   expect(row).not.toHaveTextContent("Observation time unavailable");
 });
 
@@ -90,7 +90,9 @@ it("reads the Rhythm engine connected once it answered the map, when none of the
   live([engineStar("rhythm", "2026-11-08T09:00:00Z")]);
   render(<App />);
   const row = await engineRow();
-  await waitFor(() => expect(row).toHaveTextContent("AVAILABLE · AUTHORIZED"));
+  await waitFor(() =>
+    expect(row).toHaveTextContent("AVAILABLE · ACCESS AUTHORIZED"),
+  );
   expect(row).not.toHaveTextContent("NOT CONNECTED");
   expect(row).toHaveTextContent(/Retrieved: /);
 });

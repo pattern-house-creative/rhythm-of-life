@@ -1,7 +1,12 @@
 import { instanceTimeZone } from "../instance";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { Activity, ArrowUpRight } from "lucide-react";
-import { hasMeasurement, healthCaption, healthStatus } from "../health";
+import {
+  hasMeasurement,
+  healthCaption,
+  healthStatus,
+  observationLabel,
+} from "../health";
 import type { DemoState, GlucoseHistory, ObservatoryData } from "../model";
 import { RangeRing } from "../GlucoseSummary";
 import {
@@ -58,6 +63,8 @@ export function GlucosePanel({
   const demo = data.current.provenance.demo;
   const currentReady =
     hasMeasurement(data.current) && data.current.value !== null;
+  // A known older reading: still shown, never as a current one.
+  const stale = currentReady && healthStatus(data.current) === "stale";
   const trend = useMemo(() => currentTrend(data), [data]);
   const { window, reason, gmi14 } = useMemo(
     () =>
@@ -89,26 +96,33 @@ export function GlucosePanel({
         <Activity size={32} strokeWidth={1} />
       </div>
 
-      <section className="glucose-now" aria-label="Current glucose">
+      <section
+        className="glucose-now"
+        aria-label={stale ? "Last recorded glucose" : "Current glucose"}
+      >
         <div className="now-reading">
           <strong>{currentReady ? data.current.value : "—"}</strong>
           <TrendArrows trend={trend} size={38} />
           <span>{data.current.unit}</span>
         </div>
         <div className="now-words">
-          <b>
-            {currentReady
-              ? (trendWords(trend) ?? "Trend unavailable")
-              : "No current reading"}
+          {/* A stale reading says so beside its value, with when it was
+              recorded; amber goes with the words, never instead of them. */}
+          <b className={stale ? "now-stale" : undefined}>
+            {stale
+              ? `Stale reading · ${observationLabel(data.current.provenance)}`
+              : currentReady
+                ? (trendWords(trend) ?? "Trend unavailable")
+                : "No current reading"}
           </b>
-          <span>
+          <span className={stale ? "now-older" : undefined}>
             {trend
               ? trendChange(trend, data.current.unit)
               : !currentReady
                 ? healthCaption(data.current)
                 : healthStatus(data.current) === "available"
                   ? "No reading about 20 minutes before this one"
-                  : "A stale reading gets no arrow"}
+                  : "Trend unavailable for this older reading"}
           </span>
           <small>Arrows show the 20-minute rate of change</small>
         </div>

@@ -219,7 +219,7 @@ it("adds mock source records through the UI and retains them in ambient view", a
   const user = userEvent.setup();
   render(<App />);
   await user.click(
-    await screen.findByRole("button", { name: "Enter constellation" }),
+    await screen.findByRole("button", { name: "Open Explorer" }),
   );
   const explorer = await screen.findByRole("region", {
     name: "Knowledge explorer",
@@ -236,7 +236,7 @@ it("adds mock source records through the UI and retains them in ambient view", a
     ).toBeInTheDocument(),
   );
   await user.click(
-    within(explorer).getByRole("button", { name: "Return to ambient" }),
+    within(explorer).getByRole("button", { name: "Back to Home" }),
   );
   expect(
     screen.getByRole("button", {

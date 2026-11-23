@@ -60,6 +60,11 @@ same setting): releasing a hold, several at once from the review queue, putting 
   is refused and told who holds it until when. Every session of a household uses one login, so the id, not the
   label, is what tells sessions apart. `release_work` lets a claim go; finishing the item ends it; a person can
   release any claim from the app.
+  An install may add checks of its own to these writes, such as a household trigger that guards which session may
+  pick up a ticket. A check that refuses answers `refused` in its own words, and nothing is changed: the client
+  should do what it says instead of retrying, since only `unavailable` means the store did not answer. A pickup
+  guard of this kind refuses a claim on an item that still names an assignee, the claiming session's own included:
+  clear it with `update_work` (`clear: ["assignee"]` and the revision read), then claim again.
 
 ## The instructions
 
@@ -204,6 +209,9 @@ You have a memory in Rhythm of Life, reached through its MCP tools. Use it like 
     claim_work(id: ..., label: "<session title> - <agent>") and keep the claim_id it answers: pass it to update_work as
     you move the item, renew it with claim_work(id: ..., claim_id: ...) while you work, and if you stop before it is done,
     release_work(id: ..., claim_id: ...). An item another session holds (claimed) is not yours to move: pick another.
+    A refusal coded refused is a check the install added, in its own words: do what it says instead of retrying, since
+    only unavailable means the store did not answer. One may refuse a claim on an item that still names an assignee,
+    yours included: clear it with update_work(id: ..., clear: ["assignee"], expected_revision: ...), then claim again.
     A step of a project's roadmap that takes several pieces is a milestone: a work item of its own (a feature) that
     depends_on each piece, so it stays blocked until every piece is done or cancelled, and list_work's dependencies
     say how many pieces are done. When you finish its last piece, move the milestone to review for the person.
